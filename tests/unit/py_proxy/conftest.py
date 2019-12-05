@@ -35,4 +35,8 @@ def pyramid_request(pyramid_settings):
 
 @pytest.fixture
 def pyramid_settings():
-    return {}
+    return {
+        "client_embed_url": "http://hypothes.is/embed.js",
+        "nginx_server": "http://via3.hypothes.is",
+        "legacy_via_url": "http://via.hypothes.is",
+    }
