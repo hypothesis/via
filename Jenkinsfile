@@ -1,21 +1,35 @@
-#!groovy
+/**
+ * This app's Jenkins Pipeline.
+ *
+ * This is written in Jenkins Scripted Pipeline language.
+ * For docs see:
+ * https://jenkins.io/doc/book/pipeline/syntax/#scripted-pipeline
+*/
 
-@Library('pipeline-library') _
+// Import the Hypothesis shared pipeline library, which is defined in this
+// repo: https://github.com/hypothesis/pipeline-library
+@Library("pipeline-library") _
 
+// The the built hypothesis/py-proxy Docker image.
 def img
 
 node {
-    stage('build') {
-        checkout(scm)
-        img = buildApp(name: 'hypothesis/py_proxy')
+    // The args that we'll pass to Docker run each time we run the Docker
+    // image.
+    runArgs = "-u root -e SITE_PACKAGES=true"
+
+    stage("Build") {
+        // Checkout the commit that triggered this pipeline run.
+        checkout scm
+        // Build the Docker image.
+        img = buildApp(name: "hypothesis/py-proxy")
     }
 
     // Run each of the stages in parallel.
     parallel failFast: true,
-
-    "lint": {
-        stage("lint") {
-            testApp(image: img, runArgs: "${runArgs} -e ACCESS_CONTROL_ALLOW_ORIGIN=http://localhost:9083") {
+    "Lint": {
+        stage("Lint") {
+            testApp(image: img, runArgs: runArgs) {
                 installDeps()
                 run("make checkformatting")
                 run("make checkdocstrings")
@@ -23,16 +37,17 @@ node {
             }
         }
     },
-    "tests": {
-        stage("tests") {
-            testApp(image: img, runArgs: "${runArgs} -e ACCESS_CONTROL_ALLOW_ORIGIN=http://localhost:9083") {
+    "Tests": {
+        stage("Tests") {
+            testApp(image: img, runArgs: "${runArgs}") {
                 installDeps()
                 run("make test coverage")
             }
         }
-    },
+    }
+
     onlyOnMaster {
-        stage('release') {
+        stage("release") {
             releaseApp(image: img)
         }
     }
@@ -40,15 +55,15 @@ node {
 
 onlyOnMaster {
     milestone()
-    stage('qa deploy') {
-        deployApp(image: img, app: 'py_proxy', env: 'qa')
+    stage("qa deploy") {
+        deployApp(image: img, app: "py-proxy", env: "qa")
     }
 
     milestone()
-    stage('prod deploy') {
+    stage("prod deploy") {
         input(message: "Deploy to prod?")
         milestone()
-        deployApp(image: img, app: 'py_proxy', env: 'prod')
+        deployApp(image: img, app: "py-proxy", env: "prod")
     }
 }
 
@@ -59,6 +74,11 @@ onlyOnMaster {
  * (tests, lint, ...) but that aren't installed in the production Docker image.
  */
 def installDeps() {
-    sh "apk add build-base python3-dev"
     sh "pip3 install -q tox>=3.8.0"
+}
+
+/** Run the given command. */
+def run(command) {
+    sh "apk add build-base"
+    sh "cd /var/lib/hypothesis && ${command}"
 }

@@ -24,7 +24,7 @@ COPY ./conf/supervisord.conf ./conf/supervisord.conf
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx_envsubst.conf.template /var/lib/hypothesis/nginx_envsubst.conf.template
-COPY ./py_proxy ./py_proxy
+COPY . .
 
 USER hypothesis
 
