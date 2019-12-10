@@ -1,3 +1,5 @@
+from unittest import mock
+
 from py_proxy import views
 
 
@@ -14,3 +16,15 @@ class TestStatusRoute:
 
         assert result.status == "200 OK"
         assert result.status_int == 200
+
+
+class TestIncludeMe:
+    config = mock.MagicMock()
+
+    views.includeme(config)
+
+    assert config.add_route.call_args_list == [
+        mock.call("index", "/"),
+        mock.call("status", "/_status"),
+    ]
+    config.scan.assert_called_once_with("py_proxy.views")

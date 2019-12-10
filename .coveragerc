@@ -8,4 +8,4 @@ source =
 [report]
 show_missing = True
 precision = 2
-fail_under = 50.00
+fail_under = 100
