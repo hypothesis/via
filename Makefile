@@ -19,57 +19,57 @@ help:
 
 .PHONY: dev
 dev: python
-	tox -q -e py36-dev
+	@tox -qe dev
 
 .PHONY: services
 services: args?=up -d
 services: python
-	@tox -q -e docker-compose -- $(args)
+	@tox -qe docker-compose -- $(args)
 
 .PHONY: lint
 lint: python
-	tox -q -e py36-lint
+	@tox -qe lint
 
 .PHONY: format
 format: python
-	tox -e py36-format
+	@tox -qe format
 
 .PHONY: checkformatting
 checkformatting: python
-	tox -e py36-checkformatting
+	@tox -qe checkformatting
 
 .PHONY: test
 test: python
-	tox -q -e py36-tests
+	@tox -q
 
 .PHONY: coverage
 coverage: python
-	tox -q -e py36-coverage
+	@tox -qe coverage
 
 .PHONY: docstrings
 docstrings: python
-	tox -q -e py36-docstrings
+	@tox -qe docstrings
 
 .PHONY: checkdocstrings
 checkdocstrings: python
-	tox -q -e py36-checkdocstrings
+	@tox -qe checkdocstrings
 
 .PHONY: pip-compile
 pip-compile: python
-	tox -q -e py36-pip-compile
+	@tox -qe pip-compile
 
 .PHONY: upgrade-package
 upgrade-package: python
-	@tox -qe py36-pip-compile -- --upgrade-package $(name)
+	@tox -qe pip-compile -- --upgrade-package $(name)
 
 .PHONY: docker
 docker:
-	git archive --format=tar.gz HEAD | docker build -t hypothesis/py_proxy:$(DOCKER_TAG) -
+	@git archive --format=tar.gz HEAD | docker build -t hypothesis/py_proxy:$(DOCKER_TAG) -
 
 .PHONY: clean
 clean:
-	find . -type f -name "*.py[co]" -delete
-	find . -type d -name "__pycache__" -delete
+	@find . -type f -name "*.py[co]" -delete
+	@find . -type d -name "__pycache__" -delete
 
 .PHONY: python
 python:
