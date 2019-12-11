@@ -3,16 +3,14 @@ from pyramid import response, view
 
 
 @view.view_config(renderer="py_proxy:templates/index.html.jinja2", route_name="index")
-def index(request):
+def index(_request):
     """Index endpoint."""
-    # pylint: disable=unused-argument
     return {}
 
 
 @view.view_config(route_name="status")
-def status(request):
+def status(_request):
     """Status endpoint."""
-    # pylint: disable=unused-argument
     return response.Response(status_int=200, status="200 OK", content_type="text/plain")
 
 
