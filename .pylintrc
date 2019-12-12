@@ -1,0 +1,20 @@
+[MASTER]
+jobs=0  # Speed up PyLint by using one process per CPU core.
+load-plugins=pylint.extensions.bad_builtin,
+             pylint.extensions.broad_try_clause,
+             pylint.extensions.check_elif,
+             pylint.extensions.comparetozero,
+             pylint.extensions.docparams,
+             pylint.extensions.emptystring,
+             pylint.extensions.mccabe,
+             pylint.extensions.overlapping_exceptions,
+             pylint.extensions.redefined_variable_type,
+
+[MESSAGES CONTROL]
+disable=bad-continuation,
+        missing-type-doc,
+        missing-return-type-doc,
+
+[REPORTS]
+output-format=colorized
+score=no

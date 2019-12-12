@@ -1,0 +1,11 @@
+[run]
+branch = True
+parallel = True
+source =
+    py_proxy
+    tests/unit
+
+[report]
+show_missing = True
+precision = 2
+fail_under = 100
