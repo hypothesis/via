@@ -38,7 +38,8 @@ def favicon(request):
 def pdf(request):
     """HTML page with client and the PDF embedded."""
     nginx_server = request.registry.settings["nginx_server"]
-    pdf_url = request.matchdict["pdf_url"]
+    pdf_url = _drop_from_url_begining("/pdf/", request.path_qs)
+
     return {
         "pdf_url": f"{nginx_server}/proxy/static/{pdf_url}",
         "client_embed_url": request.registry.settings["client_embed_url"],
@@ -50,12 +51,19 @@ def pdf(request):
 @view.view_config(route_name="content_type")
 def content_type(request):
     """Routes the request according to the Content-Type header."""
-    url = request.matchdict["url"]
-    with requests.get(url, stream=True) as rsp:
+    url = _drop_from_url_begining("/", request.path_qs)
+
+    with requests.get(url, stream=True, allow_redirects=True) as rsp:
         if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf",):
             return exc.HTTPFound(request.route_url("pdf", pdf_url=url))
     via_url = request.registry.settings["legacy_via_url"]
     return exc.HTTPFound(f"{via_url}/{url}")
+
+
+def _drop_from_url_begining(drop_chars, url):
+    """Drop drop_chars from begining of url."""
+    drop_before = len(drop_chars)
+    return url[drop_before:]
 
 
 def includeme(config):

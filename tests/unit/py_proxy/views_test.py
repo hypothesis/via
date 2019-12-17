@@ -111,6 +111,16 @@ class TestPdfRoute:
 
         assert result["pdf_url"] == f"{nginx_server}/proxy/static/{pdf_url}"
 
+    def test_pdf_passes_thirdparty_url_with_query_params_to_renderer(
+        self, pyramid_request
+    ):
+        pdf_url = "http://thirdparty.url/foo.pdf?param1=abc&param2=123"
+        pyramid_request.path_qs = f"/pdf/{pdf_url}"
+        nginx_server = pyramid_request.registry.settings.get("nginx_server")
+        result = views.pdf(pyramid_request)
+
+        assert result["pdf_url"] == f"{nginx_server}/proxy/static/{pdf_url}"
+
     def test_pdf_passes_client_embed_url_to_renderer(self, pyramid_request):
         result = views.pdf(pyramid_request)
 
@@ -151,22 +161,22 @@ class TestPdfRoute:
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, pdf_url):
-        pyramid_request.matchdict = {"pdf_url": pdf_url}
+        pyramid_request.path_qs = f"/pdf/{pdf_url}"
         return pyramid_request
 
 
 class TestContentTypeRoute:
     @pytest.mark.parametrize(
-        "content_type,redirect_location",
+        "content_type,redirect_path",
         [
-            ("application/pdf", "/pdf/http://thirdparty.url"),
-            ("application/x-pdf", "/pdf/http://thirdparty.url"),
-            ("text/html", "http://via.hypothes.is/http://thirdparty.url"),
+            ("application/pdf", "/pdf/"),
+            ("application/x-pdf", "/pdf/"),
+            ("text/html", "http://via.hypothes.is/"),
         ],
     )
     @httpretty.activate
     def test_redirects_based_on_content_type_header(
-        self, pyramid_request, content_type, redirect_location
+        self, pyramid_request, url, content_type, redirect_path
     ):
         httpretty.register_uri(
             httpretty.GET,
@@ -177,11 +187,18 @@ class TestContentTypeRoute:
 
         result = views.content_type(pyramid_request)
 
+        redirect_location = redirect_path + url
         assert result.location == redirect_location
 
+    @pytest.fixture(
+        params=["http://thirdparty.url", "http://thirdparty.url?param1=abc&param2=123",]
+    )
+    def url(self, request):
+        return request.param
+
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.matchdict = {"url": "http://thirdparty.url"}
+    def pyramid_request(self, pyramid_request, url):
+        pyramid_request.path_qs = f"/{url}"
 
         def route_url(path, pdf_url):
             return f"/{path}/{pdf_url}"
