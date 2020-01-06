@@ -55,7 +55,11 @@ def content_type(request):
 
     with requests.get(url, stream=True, allow_redirects=True) as rsp:
         if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf",):
-            return exc.HTTPFound(request.route_url("pdf", pdf_url=url))
+            return exc.HTTPFound(
+                request.route_url(
+                    "pdf", pdf_url=request.matchdict["url"], _query=request.params
+                )
+            )
     via_url = request.registry.settings["legacy_via_url"]
     return exc.HTTPFound(f"{via_url}/{url}")
 
@@ -66,12 +70,17 @@ def _drop_from_url_begining(drop_chars, url):
     return url[drop_before:]
 
 
-def includeme(config):
-    """Pyramid config."""
+def add_routes(config):
+    """Add routes to pyramid config."""
     config.add_route("index", "/")
     config.add_route("status", "/_status")
     config.add_route("favicon", "/favicon.ico")
     config.add_route("robots", "/robots.txt")
     config.add_route("pdf", "/pdf/{pdf_url:.*}")
     config.add_route("content_type", "/{url:.*}")
+
+
+def includeme(config):
+    """Pyramid config."""
+    add_routes(config)
     config.scan(__name__)

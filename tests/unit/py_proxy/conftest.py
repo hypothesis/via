@@ -1,10 +1,14 @@
 # pylint: disable=no-self-use
 """A place to put fixture functions that are useful application-wide."""
 import functools
+import re
 from unittest import mock
 
+import httpretty
 import pytest
 from pyramid import testing
+
+from py_proxy.views import add_routes
 
 
 def autopatcher(request, target, **kwargs):
@@ -23,14 +27,10 @@ def patch(request):
 
 
 @pytest.fixture
-def pyramid_request(pyramid_settings):
-    request = testing.DummyRequest()
-    request.matched_route = mock.Mock()
-    request.registry.settings = pyramid_settings
-    request.params = {}
-    request.GET = request.params
-    request.POST = request.params
-    return request
+def pyramid_config(pyramid_settings):
+    with testing.testConfig(settings=pyramid_settings) as config:
+        add_routes(config)
+        yield config
 
 
 @pytest.fixture
@@ -40,3 +40,36 @@ def pyramid_settings():
         "nginx_server": "http://via3.hypothes.is",
         "legacy_via_url": "http://via.hypothes.is",
     }
+
+
+@pytest.fixture(autouse=True)
+def httpretty_():
+    """Monkey-patch Python's socket core module to mock all HTTP responses.
+
+    We never want real HTTP requests to be sent by the tests so replace them
+    all with mock responses. This handles requests sent using the standard
+    urllib2 library and the third-party httplib2 and requests libraries.
+    """
+    httpretty.enable()
+
+    # Tell httpretty which HTTP requests we want it to mock (all of them).
+    for method in (
+        httpretty.GET,
+        httpretty.PUT,
+        httpretty.POST,
+        httpretty.DELETE,
+        httpretty.HEAD,
+        httpretty.PATCH,
+        httpretty.OPTIONS,
+        httpretty.CONNECT,
+    ):
+        httpretty.register_uri(
+            method=method,
+            uri=re.compile(r"http(s?)://.*"),  # Matches all http:// and https:// URLs.
+            body="",
+        )
+
+    yield
+
+    httpretty.disable()
+    httpretty.reset()
