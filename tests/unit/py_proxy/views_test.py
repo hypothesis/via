@@ -130,6 +130,26 @@ class TestPdfRoute:
 
         assert result["pdf_url"] == f"{nginx_server}/proxy/static/{pdf_url}"
 
+    @pytest.mark.parametrize(
+        "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
+    )
+    @pytest.mark.xfail(raises=AssertionError)
+    @httpretty.activate
+    def test_does_not_include_via_query_params_in_pdf_url(
+        self, pyramid_config, query_param
+    ):
+        url = (
+            "http://thirdparty.url/foo.pdf?param1=abc&param2=123"
+            "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
+        )
+
+        request = Request.blank(f"/pdf/{url}")
+        request.registry = pyramid_config.registry
+
+        result = views.pdf(request)
+
+        assert query_param not in result["pdf_url"]
+
     def test_pdf_passes_client_embed_url_to_renderer(self, pyramid_config):
         request = Request.blank("/pdf/https://thirdparty.url/foo.pdf")
         request.registry = pyramid_config.registry
@@ -198,7 +218,6 @@ class TestContentTypeRoute:
             ),
         ],
     )
-    @httpretty.activate
     def test_redirect_location(self, pyramid_config, requested_path, expected_location):
 
         request = self._create_request(
@@ -220,7 +239,6 @@ class TestContentTypeRoute:
             ("text/html", "http://via.hypothes.is/https://thirdparty.url"),
         ],
     )
-    @httpretty.activate
     def test_redirects_based_on_content_type_header(
         self, pyramid_config, content_type, redirect_url
     ):
@@ -233,11 +251,31 @@ class TestContentTypeRoute:
 
         result = views.content_type(request)
 
-        redirect_location = redirect_url
-        assert result.location == redirect_location
+        assert result.location == redirect_url
 
+    @pytest.mark.parametrize(
+        "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
+    )
+    @pytest.mark.xfail(raises=AssertionError)
+    def test_does_not_pass_via_query_params_to_thirdparty_server(
+        self, pyramid_config, query_param
+    ):
+        request = self._create_request(
+            request_url="/https://thirdparty.url?"
+            "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1",
+            thirdparty_url="https://thirdparty.url",
+            content_type="application/pdf",
+            pyramid_config=pyramid_config,
+        )
+
+        views.content_type(request)
+
+        # pylint: disable-msg=E1101
+        assert query_param not in httpretty.last_request().path
+
+    # pylint: disable-msg=too-many-arguments
     def _create_request(
-        self, request_url, thirdparty_url, content_type, pyramid_config
+        self, request_url, thirdparty_url, content_type, pyramid_config,
     ):
         httpretty.register_uri(
             httpretty.GET,
