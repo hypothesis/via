@@ -4,15 +4,15 @@ import httpretty
 import pytest
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
-from pyramid.request import Request
 
 from py_proxy import views
 
 
 class TestIndexRoute:
-    def test_index_returns_empty_parameters_to_pass_to_template(self, pyramid_config):
-        request = Request.blank("/status")
-        request.registry = pyramid_config.registry
+    def test_index_returns_empty_parameters_to_pass_to_template(
+        self, make_pyramid_request
+    ):
+        request = make_pyramid_request("/status")
 
         result = views.index(request)
 
@@ -34,9 +34,8 @@ class TestIndexRoute:
 
 
 class TestStatusRoute:
-    def test_status_returns_200_response(self, pyramid_config):
-        request = Request.blank("/status")
-        request.registry = pyramid_config.registry
+    def test_status_returns_200_response(self, make_pyramid_request):
+        request = make_pyramid_request("/status")
 
         result = views.status(request)
 
@@ -61,9 +60,8 @@ class TestIncludeMe:
 
 
 class TestFaviconRoute:
-    def test_returns_favicon_icon(self, pyramid_config):
-        request = Request.blank("/favicon.ico")
-        request.registry = pyramid_config.registry
+    def test_returns_favicon_icon(self, make_pyramid_request):
+        request = make_pyramid_request("/favicon.ico")
 
         result = views.favicon(request)
 
@@ -72,9 +70,8 @@ class TestFaviconRoute:
 
 
 class TestRobotsTextRoute:
-    def test_returns_robots_test_file(self, pyramid_config):
-        request = Request.blank("/robots.txt")
-        request.registry = pyramid_config.registry
+    def test_returns_robots_test_file(self, make_pyramid_request):
+        request = make_pyramid_request("/robots.txt")
 
         result = views.robots(request)
 
@@ -121,9 +118,8 @@ class TestPdfRoute:
             "http://thirdparty.url/foo.pdf?param1=abc&param2=123",
         ],
     )
-    def test_pdf_passes_thirdparty_url_to_renderer(self, pyramid_config, pdf_url):
-        request = Request.blank(f"/pdf/{pdf_url}")
-        request.registry = pyramid_config.registry
+    def test_pdf_passes_thirdparty_url_to_renderer(self, make_pyramid_request, pdf_url):
+        request = make_pyramid_request(f"/pdf/{pdf_url}")
         nginx_server = request.registry.settings.get("nginx_server")
 
         result = views.pdf(request)
@@ -136,23 +132,21 @@ class TestPdfRoute:
     @pytest.mark.xfail(raises=AssertionError)
     @httpretty.activate
     def test_does_not_include_via_query_params_in_pdf_url(
-        self, pyramid_config, query_param
+        self, make_pyramid_request, query_param
     ):
         url = (
             "http://thirdparty.url/foo.pdf?param1=abc&param2=123"
             "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
         )
 
-        request = Request.blank(f"/pdf/{url}")
-        request.registry = pyramid_config.registry
+        request = make_pyramid_request(f"/pdf/{url}")
 
         result = views.pdf(request)
 
         assert query_param not in result["pdf_url"]
 
-    def test_pdf_passes_client_embed_url_to_renderer(self, pyramid_config):
-        request = Request.blank("/pdf/https://thirdparty.url/foo.pdf")
-        request.registry = pyramid_config.registry
+    def test_pdf_passes_client_embed_url_to_renderer(self, make_pyramid_request):
+        request = make_pyramid_request("/pdf/https://thirdparty.url/foo.pdf")
 
         result = views.pdf(request)
 
@@ -169,10 +163,9 @@ class TestPdfRoute:
         ],
     )
     def test_pdf_passes_open_sidebar_query_parameter_to_renderer(
-        self, pyramid_config, request_url, expected_h_open_sidebar
+        self, make_pyramid_request, request_url, expected_h_open_sidebar
     ):
-        request = Request.blank(request_url)
-        request.registry = pyramid_config.registry
+        request = make_pyramid_request(request_url)
 
         result = views.pdf(request)
 
@@ -190,10 +183,9 @@ class TestPdfRoute:
         ],
     )
     def test_pdf_passes_request_config_from_frame_query_parameter_to_renderer(
-        self, pyramid_config, request_url, expected_h_request_config
+        self, make_pyramid_request, request_url, expected_h_request_config
     ):
-        request = Request.blank(request_url)
-        request.registry = pyramid_config.registry
+        request = make_pyramid_request(request_url)
 
         result = views.pdf(request)
 
@@ -202,29 +194,39 @@ class TestPdfRoute:
 
 class TestContentTypeRoute:
     @pytest.mark.parametrize(
-        "requested_path,expected_location",
+        "requested_path,expected_location,content_type",
         [
-            # If the requested URL has no query string then it should just
+            # If the requested pdf URL has no query string then it should just
             # redirect to the requested URL, with no query string (but with the
             (
                 "/https://thirdparty.url/foo.pdf",
                 "http://localhost/pdf/https://thirdparty.url/foo.pdf",
+                "application/pdf",
             ),
-            # If the requested URL has a query string then the query string
+            # If the requested pdf URL has a query string then the query string
             # should be preserved in the URL that it redirects to.
             (
                 "/https://thirdparty.url/foo.pdf?bar=baz",
                 "http://localhost/pdf/https://thirdparty.url/foo.pdf?bar=baz",
+                "application/pdf",
+            ),
+            # If the requested html URL has a query string then the query string
+            # should be preserved in the URL that it redirects to.
+            (
+                "/https://thirdparty.url/foo.pdf?bar=baz",
+                "http://via.hypothes.is/https://thirdparty.url/foo.pdf?bar=baz",
+                "text/html",
             ),
         ],
     )
-    def test_redirect_location(self, pyramid_config, requested_path, expected_location):
+    def test_redirect_location(
+        self, make_pyramid_request, requested_path, expected_location, content_type
+    ):
 
-        request = self._create_request(
+        request = make_pyramid_request(
             request_url=requested_path,
             thirdparty_url="https://thirdparty.url/foo.pdf",
-            content_type="application/pdf",
-            pyramid_config=pyramid_config,
+            content_type=content_type,
         )
 
         redirect = views.content_type(request)
@@ -240,13 +242,12 @@ class TestContentTypeRoute:
         ],
     )
     def test_redirects_based_on_content_type_header(
-        self, pyramid_config, content_type, redirect_url
+        self, make_pyramid_request, content_type, redirect_url
     ):
-        request = self._create_request(
+        request = make_pyramid_request(
             request_url="/https://thirdparty.url",
             thirdparty_url="https://thirdparty.url",
             content_type=content_type,
-            pyramid_config=pyramid_config,
         )
 
         result = views.content_type(request)
@@ -258,32 +259,31 @@ class TestContentTypeRoute:
     )
     @pytest.mark.xfail(raises=AssertionError)
     def test_does_not_pass_via_query_params_to_thirdparty_server(
-        self, pyramid_config, query_param
+        self, make_pyramid_request, query_param
     ):
-        request = self._create_request(
+        request = make_pyramid_request(
             request_url="/https://thirdparty.url?"
             "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1",
             thirdparty_url="https://thirdparty.url",
             content_type="application/pdf",
-            pyramid_config=pyramid_config,
         )
 
         views.content_type(request)
 
-        # pylint: disable-msg=E1101
+        # pylint: disable=no-member
         assert query_param not in httpretty.last_request().path
 
-    # pylint: disable-msg=too-many-arguments
-    def _create_request(
-        self, request_url, thirdparty_url, content_type, pyramid_config,
-    ):
-        httpretty.register_uri(
-            httpretty.GET,
-            thirdparty_url,
-            body="{}",
-            adding_headers={"Content-Type": content_type},
-        )
-        request = Request.blank(request_url)
-        request.registry = pyramid_config.registry
-        request.matchdict = {"url": thirdparty_url}
-        return request
+    @pytest.fixture
+    def make_pyramid_request(self, make_pyramid_request):
+        def _make_pyramid_request(request_url, thirdparty_url, content_type):
+            httpretty.register_uri(
+                httpretty.GET,
+                thirdparty_url,
+                body="{}",
+                adding_headers={"Content-Type": content_type},
+            )
+            request = make_pyramid_request(request_url)
+            request.matchdict = {"url": thirdparty_url}
+            return request
+
+        return _make_pyramid_request

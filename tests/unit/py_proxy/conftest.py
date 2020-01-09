@@ -6,6 +6,7 @@ from unittest import mock
 import httpretty
 import pytest
 from pyramid import testing
+from pyramid.request import Request
 
 from py_proxy.views import add_routes
 
@@ -39,6 +40,16 @@ def pyramid_settings():
         "nginx_server": "http://via3.hypothes.is",
         "legacy_via_url": "http://via.hypothes.is",
     }
+
+
+@pytest.fixture
+def make_pyramid_request(pyramid_config):
+    def _make_pyramid_request(path):
+        pyramid_request = Request.blank(path)
+        pyramid_request.registry = pyramid_config.registry
+        return pyramid_request
+
+    return _make_pyramid_request
 
 
 @pytest.fixture(autouse=True)
