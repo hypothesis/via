@@ -9,14 +9,16 @@ from py_proxy import views
 
 
 class TestIndexRoute:
-    def test_index_returns_empty_parameters_to_pass_to_template(self, pyramid_request):
-        result = views.index(pyramid_request)
+    def test_index_returns_empty_parameters_to_pass_to_template(
+        self, make_pyramid_request
+    ):
+        request = make_pyramid_request("/status")
+
+        result = views.index(request)
 
         assert result == {}
 
-    def test_index_renders_input_for_entering_a_document_to_annotate(
-        self, pyramid_request
-    ):
+    def test_index_renders_input_for_entering_a_document_to_annotate(self,):
         env = Environment(loader=FileSystemLoader("."))
 
         template = env.get_template("py_proxy/templates/index.html.jinja2")
@@ -32,8 +34,10 @@ class TestIndexRoute:
 
 
 class TestStatusRoute:
-    def test_status_returns_200_response(self, pyramid_request):
-        result = views.status(pyramid_request)
+    def test_status_returns_200_response(self, make_pyramid_request):
+        request = make_pyramid_request("/status")
+
+        result = views.status(request)
 
         assert result.status == "200 OK"
         assert result.status_int == 200
@@ -56,16 +60,20 @@ class TestIncludeMe:
 
 
 class TestFaviconRoute:
-    def test_returns_favicon_icon(self, pyramid_request):
-        result = views.favicon(pyramid_request)
+    def test_returns_favicon_icon(self, make_pyramid_request):
+        request = make_pyramid_request("/favicon.ico")
+
+        result = views.favicon(request)
 
         assert result.content_type == "image/x-icon"
         assert result.status_int == 200
 
 
 class TestRobotsTextRoute:
-    def test_returns_robots_test_file(self, pyramid_request):
-        result = views.robots(pyramid_request)
+    def test_returns_robots_test_file(self, make_pyramid_request):
+        request = make_pyramid_request("/robots.txt")
+
+        result = views.robots(request)
 
         assert result.content_type == "text/plain"
         assert result.status_int == 200
@@ -87,9 +95,7 @@ class TestPdfRoute:
             "configures open_sidebar client setting",
         ],
     )
-    def test_pdf_renders_parameters_in_pdf_template(
-        self, pyramid_request, template_content
-    ):
+    def test_pdf_renders_parameters_in_pdf_template(self, template_content):
         env = Environment(loader=FileSystemLoader("."))
 
         template = env.get_template("py_proxy/templates/pdfjs_viewer.html.jinja2")
@@ -105,86 +111,179 @@ class TestPdfRoute:
 
         assert template_content in str(tree.head)
 
-    def test_pdf_passes_thirdparty_url_to_renderer(self, pyramid_request, pdf_url):
-        nginx_server = pyramid_request.registry.settings.get("nginx_server")
-        result = views.pdf(pyramid_request)
+    @pytest.mark.parametrize(
+        "pdf_url",
+        [
+            "http://thirdparty.url/foo.pdf",
+            "http://thirdparty.url/foo.pdf?param1=abc&param2=123",
+        ],
+    )
+    def test_pdf_passes_thirdparty_url_to_renderer(self, make_pyramid_request, pdf_url):
+        request = make_pyramid_request(f"/pdf/{pdf_url}")
+        nginx_server = request.registry.settings.get("nginx_server")
+
+        result = views.pdf(request)
 
         assert result["pdf_url"] == f"{nginx_server}/proxy/static/{pdf_url}"
 
-    def test_pdf_passes_client_embed_url_to_renderer(self, pyramid_request):
-        result = views.pdf(pyramid_request)
+    @pytest.mark.parametrize(
+        "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
+    )
+    @pytest.mark.xfail(raises=AssertionError)
+    @httpretty.activate
+    def test_does_not_include_via_query_params_in_pdf_url(
+        self, make_pyramid_request, query_param
+    ):
+        url = (
+            "http://thirdparty.url/foo.pdf?param1=abc&param2=123"
+            "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
+        )
+
+        request = make_pyramid_request(f"/pdf/{url}")
+
+        result = views.pdf(request)
+
+        assert query_param not in result["pdf_url"]
+
+    def test_pdf_passes_client_embed_url_to_renderer(self, make_pyramid_request):
+        request = make_pyramid_request("/pdf/https://thirdparty.url/foo.pdf")
+
+        result = views.pdf(request)
 
         assert (
-            result["client_embed_url"]
-            == pyramid_request.registry.settings["client_embed_url"]
+            result["client_embed_url"] == request.registry.settings["client_embed_url"]
         )
 
     @pytest.mark.parametrize(
-        "h_open_sidebar,expected_h_open_sidebar", [("1", 1), ("0", 0), (None, 0)]
+        "request_url,expected_h_open_sidebar",
+        [
+            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=1", 1),
+            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=0", 0),
+            ("/pdf/https://thirdparty.url/foo.pdf", 0),
+        ],
     )
     def test_pdf_passes_open_sidebar_query_parameter_to_renderer(
-        self, pyramid_request, h_open_sidebar, expected_h_open_sidebar
+        self, make_pyramid_request, request_url, expected_h_open_sidebar
     ):
-        if h_open_sidebar is not None:
-            pyramid_request.params["via.open_sidebar"] = h_open_sidebar
-        result = views.pdf(pyramid_request)
+        request = make_pyramid_request(request_url)
+
+        result = views.pdf(request)
 
         assert result["h_open_sidebar"] == expected_h_open_sidebar
 
     @pytest.mark.parametrize(
-        "h_request_config,expected_h_request_config",
-        [("http://lms.hypothes.is", "http://lms.hypothes.is"), (None, None)],
+        "request_url,expected_h_request_config",
+        [
+            (
+                "/pdf/http://thirdparty.url/foo.pdf?"
+                "via.request_config_from_frame=http://lms.hypothes.is",
+                "http://lms.hypothes.is",
+            ),
+            ("/pdf/http://thirdparty.url/foo.pdf", None),
+        ],
     )
     def test_pdf_passes_request_config_from_frame_query_parameter_to_renderer(
-        self, pyramid_request, h_request_config, expected_h_request_config
+        self, make_pyramid_request, request_url, expected_h_request_config
     ):
-        if h_request_config is not None:
-            pyramid_request.params["via.request_config_from_frame"] = h_request_config
+        request = make_pyramid_request(request_url)
 
-        result = views.pdf(pyramid_request)
+        result = views.pdf(request)
 
         assert result["h_request_config"] == expected_h_request_config
-
-    @pytest.fixture
-    def pdf_url(self):
-        return "http://thirdparty.url/foo.pdf"
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request, pdf_url):
-        pyramid_request.matchdict = {"pdf_url": pdf_url}
-        return pyramid_request
 
 
 class TestContentTypeRoute:
     @pytest.mark.parametrize(
-        "content_type,redirect_location",
+        "requested_path,expected_location,content_type",
         [
-            ("application/pdf", "/pdf/http://thirdparty.url"),
-            ("application/x-pdf", "/pdf/http://thirdparty.url"),
-            ("text/html", "http://via.hypothes.is/http://thirdparty.url"),
+            # If the requested pdf URL has no query string then it should just
+            # redirect to the requested URL, with no query string (but with the
+            (
+                "/https://thirdparty.url/foo.pdf",
+                "http://localhost/pdf/https://thirdparty.url/foo.pdf",
+                "application/pdf",
+            ),
+            # If the requested pdf URL has a query string then the query string
+            # should be preserved in the URL that it redirects to.
+            (
+                "/https://thirdparty.url/foo.pdf?bar=baz",
+                "http://localhost/pdf/https://thirdparty.url/foo.pdf?bar=baz",
+                "application/pdf",
+            ),
+            # If the requested html URL has a query string then the query string
+            # should be preserved in the URL that it redirects to.
+            (
+                "/https://thirdparty.url/foo.pdf?bar=baz",
+                "http://via.hypothes.is/https://thirdparty.url/foo.pdf?bar=baz",
+                "text/html",
+            ),
         ],
     )
-    @httpretty.activate
-    def test_redirects_based_on_content_type_header(
-        self, pyramid_request, content_type, redirect_location
+    def test_redirect_location(
+        self, make_pyramid_request, requested_path, expected_location, content_type
     ):
-        httpretty.register_uri(
-            httpretty.GET,
-            "http://thirdparty.url",
-            body="{}",
-            adding_headers={"Content-Type": content_type},
+
+        request = make_pyramid_request(
+            request_url=requested_path,
+            thirdparty_url="https://thirdparty.url/foo.pdf",
+            content_type=content_type,
         )
 
-        result = views.content_type(pyramid_request)
+        redirect = views.content_type(request)
 
-        assert result.location == redirect_location
+        assert redirect.location == expected_location
+
+    @pytest.mark.parametrize(
+        "content_type,redirect_url",
+        [
+            ("application/pdf", "http://localhost/pdf/https://thirdparty.url"),
+            ("application/x-pdf", "http://localhost/pdf/https://thirdparty.url"),
+            ("text/html", "http://via.hypothes.is/https://thirdparty.url"),
+        ],
+    )
+    def test_redirects_based_on_content_type_header(
+        self, make_pyramid_request, content_type, redirect_url
+    ):
+        request = make_pyramid_request(
+            request_url="/https://thirdparty.url",
+            thirdparty_url="https://thirdparty.url",
+            content_type=content_type,
+        )
+
+        result = views.content_type(request)
+
+        assert result.location == redirect_url
+
+    @pytest.mark.parametrize(
+        "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
+    )
+    @pytest.mark.xfail(raises=AssertionError)
+    def test_does_not_pass_via_query_params_to_thirdparty_server(
+        self, make_pyramid_request, query_param
+    ):
+        request = make_pyramid_request(
+            request_url="/https://thirdparty.url?"
+            "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1",
+            thirdparty_url="https://thirdparty.url",
+            content_type="application/pdf",
+        )
+
+        views.content_type(request)
+
+        # pylint: disable=no-member
+        assert query_param not in httpretty.last_request().path
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.matchdict = {"url": "http://thirdparty.url"}
+    def make_pyramid_request(self, make_pyramid_request):
+        def _make_pyramid_request(request_url, thirdparty_url, content_type):
+            httpretty.register_uri(
+                httpretty.GET,
+                thirdparty_url,
+                body="{}",
+                adding_headers={"Content-Type": content_type},
+            )
+            request = make_pyramid_request(request_url)
+            request.matchdict = {"url": thirdparty_url}
+            return request
 
-        def route_url(path, pdf_url):
-            return f"/{path}/{pdf_url}"
-
-        pyramid_request.route_url = route_url
-        return pyramid_request
+        return _make_pyramid_request
