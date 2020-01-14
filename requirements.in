@@ -2,3 +2,4 @@ gunicorn
 pyramid
 pyramid-jinja2
 requests
+newrelic 
