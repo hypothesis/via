@@ -3,3 +3,4 @@ pyramid
 pyramid-jinja2
 requests
 newrelic 
+h_pyramid_sentry
