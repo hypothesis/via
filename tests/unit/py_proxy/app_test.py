@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 from py_proxy.app import app, settings
+from py_proxy.sentry_filters import SENTRY_FILTERS
 
 
 def test_settings_raise_value_error_if_environment_variable_is_not_set():
@@ -11,11 +12,16 @@ def test_settings_raise_value_error_if_environment_variable_is_not_set():
 
 
 def test_settings_are_configured_from_environment_variables(os_env):
-    assert settings() == {
+    expected_settings = {
         "client_embed_url": "https://hypothes.is/embed.js",
         "nginx_server": "https://via3.hypothes.is",
         "legacy_via_url": "https://via.hypothes.is",
     }
+
+    pyramid_settings = settings()
+
+    for key, value in expected_settings.items():
+        assert pyramid_settings[key] == value
 
 
 def test_app(configurator, pyramid, os_env):
@@ -26,11 +32,13 @@ def test_app(configurator, pyramid, os_env):
             "client_embed_url": "https://hypothes.is/embed.js",
             "nginx_server": "https://via3.hypothes.is",
             "legacy_via_url": "https://via.hypothes.is",
+            "h_pyramid_sentry.filters": SENTRY_FILTERS,
         }
     )
     assert configurator.include.call_args_list == [
         mock.call("pyramid_jinja2"),
         mock.call("py_proxy.views"),
+        mock.call("h_pyramid_sentry"),
     ]
     configurator.make_wsgi_app.assert_called_once_with()
 

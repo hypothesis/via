@@ -3,6 +3,8 @@ import os
 
 import pyramid.config
 
+from py_proxy.sentry_filters import SENTRY_FILTERS
+
 
 def settings():
     """Return the app's configuration settings as a dict.
@@ -23,6 +25,12 @@ def settings():
     for param in result:
         if result[param] is None:
             raise ValueError(f"Param {param} must be provided.")
+
+    # Configure sentry
+    result.update(
+        {"h_pyramid_sentry.filters": SENTRY_FILTERS,}
+    )
+
     return result
 
 
@@ -32,4 +40,5 @@ def app():
     config.add_static_view(name="static", path="static")
     config.include("pyramid_jinja2")
     config.include("py_proxy.views")
+    config.include("h_pyramid_sentry")
     return config.make_wsgi_app()
