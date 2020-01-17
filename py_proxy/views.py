@@ -2,6 +2,7 @@
 import pyramid.httpexceptions as exc
 import requests
 from pyramid import response, view
+from pyramid.settings import asbool
 
 
 @view.view_config(renderer="py_proxy:templates/index.html.jinja2", route_name="index")
@@ -43,7 +44,7 @@ def pdf(request):
     return {
         "pdf_url": f"{nginx_server}/proxy/static/{pdf_url}",
         "client_embed_url": request.registry.settings["client_embed_url"],
-        "h_open_sidebar": int(request.params.get("via.open_sidebar", "0")),
+        "h_open_sidebar": asbool(request.params.get("via.open_sidebar", False)),
         "h_request_config": request.params.get("via.request_config_from_frame", None),
     }
 
