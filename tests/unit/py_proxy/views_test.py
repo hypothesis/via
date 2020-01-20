@@ -103,7 +103,7 @@ class TestPdfRoute:
             {
                 "pdf_url": "https://via3.hypothes.is/proxy/static/http://thirdparty.url",
                 "client_embed_url": "https://hypothes.is/embed.js",
-                "h_open_sidebar": 1,
+                "h_open_sidebar": True,
                 "h_request_config": "https://lms.hypothes.is",
             }
         )
@@ -157,9 +157,10 @@ class TestPdfRoute:
     @pytest.mark.parametrize(
         "request_url,expected_h_open_sidebar",
         [
-            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=1", 1),
-            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=0", 0),
-            ("/pdf/https://thirdparty.url/foo.pdf", 0),
+            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=1", True),
+            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=foo", False),
+            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=0", False),
+            ("/pdf/https://thirdparty.url/foo.pdf", False),
         ],
     )
     def test_pdf_passes_open_sidebar_query_parameter_to_renderer(
