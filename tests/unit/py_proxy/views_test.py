@@ -119,7 +119,9 @@ class TestPdfRoute:
         ],
     )
     def test_pdf_passes_thirdparty_url_to_renderer(self, make_pyramid_request, pdf_url):
-        request = make_pyramid_request(f"/pdf/{pdf_url}")
+        request = make_pyramid_request(
+            f"/pdf/{pdf_url}", "http://thirdparty.url/foo.pdf"
+        )
         nginx_server = request.registry.settings.get("nginx_server")
 
         result = views.pdf(request)
@@ -129,24 +131,23 @@ class TestPdfRoute:
     @pytest.mark.parametrize(
         "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
     )
-    @pytest.mark.xfail(raises=AssertionError)
-    @httpretty.activate
     def test_does_not_include_via_query_params_in_pdf_url(
         self, make_pyramid_request, query_param
     ):
         url = (
             "http://thirdparty.url/foo.pdf?param1=abc&param2=123"
-            "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
+            "&via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
         )
 
-        request = make_pyramid_request(f"/pdf/{url}")
+        request = make_pyramid_request(f"/pdf/{url}", "http://thirdparty.url/foo.pdf")
 
         result = views.pdf(request)
 
         assert query_param not in result["pdf_url"]
 
     def test_pdf_passes_client_embed_url_to_renderer(self, make_pyramid_request):
-        request = make_pyramid_request("/pdf/https://thirdparty.url/foo.pdf")
+        pdf_url = "https://thirdparty.url/foo.pdf"
+        request = make_pyramid_request(f"/pdf/{pdf_url}", pdf_url)
 
         result = views.pdf(request)
 
@@ -166,7 +167,7 @@ class TestPdfRoute:
     def test_pdf_passes_open_sidebar_query_parameter_to_renderer(
         self, make_pyramid_request, request_url, expected_h_open_sidebar
     ):
-        request = make_pyramid_request(request_url)
+        request = make_pyramid_request(request_url, "http://thirdparty.url/foo.pdf")
 
         result = views.pdf(request)
 
@@ -186,11 +187,20 @@ class TestPdfRoute:
     def test_pdf_passes_request_config_from_frame_query_parameter_to_renderer(
         self, make_pyramid_request, request_url, expected_h_request_config
     ):
-        request = make_pyramid_request(request_url)
+        request = make_pyramid_request(request_url, "http://thirdparty.url/foo.pdf")
 
         result = views.pdf(request)
 
         assert result["h_request_config"] == expected_h_request_config
+
+    @pytest.fixture
+    def make_pyramid_request(self, make_pyramid_request):
+        def _make_pyramid_request(request_url, thirdparty_url):
+            request = make_pyramid_request(request_url)
+            request.matchdict = {"pdf_url": thirdparty_url}
+            return request
+
+        return _make_pyramid_request
 
 
 class TestContentTypeRoute:
@@ -200,22 +210,29 @@ class TestContentTypeRoute:
             # If the requested pdf URL has no query string then it should just
             # redirect to the requested URL, with no query string (but with the
             (
-                "/https://thirdparty.url/foo.pdf",
-                "http://localhost/pdf/https://thirdparty.url/foo.pdf",
+                "/https://thirdparty.url/foo",
+                "http://localhost/pdf/https://thirdparty.url/foo",
                 "application/pdf",
             ),
             # If the requested pdf URL has a query string then the query string
             # should be preserved in the URL that it redirects to.
             (
-                "/https://thirdparty.url/foo.pdf?bar=baz",
-                "http://localhost/pdf/https://thirdparty.url/foo.pdf?bar=baz",
+                "/https://thirdparty.url/foo?bar=baz",
+                "http://localhost/pdf/https://thirdparty.url/foo?bar=baz",
                 "application/pdf",
             ),
             # If the requested html URL has a query string then the query string
             # should be preserved in the URL that it redirects to.
             (
-                "/https://thirdparty.url/foo.pdf?bar=baz",
-                "http://via.hypothes.is/https://thirdparty.url/foo.pdf?bar=baz",
+                "/https://thirdparty.url/foo?bar=baz",
+                "http://via.hypothes.is/https://thirdparty.url/foo?bar=baz",
+                "text/html",
+            ),
+            # If the requested html URL has a client query params then the query params
+            # should be preserved in the URL that it redirects to.
+            (
+                "/https://thirdparty.url/foo?via.open_sidebar=1",
+                "http://via.hypothes.is/https://thirdparty.url/foo?via.open_sidebar=1",
                 "text/html",
             ),
         ],
@@ -226,7 +243,7 @@ class TestContentTypeRoute:
 
         request = make_pyramid_request(
             request_url=requested_path,
-            thirdparty_url="https://thirdparty.url/foo.pdf",
+            thirdparty_url="https://thirdparty.url/foo",
             content_type=content_type,
         )
 
@@ -258,7 +275,6 @@ class TestContentTypeRoute:
     @pytest.mark.parametrize(
         "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
     )
-    @pytest.mark.xfail(raises=AssertionError)
     def test_does_not_pass_via_query_params_to_thirdparty_server(
         self, make_pyramid_request, query_param
     ):
