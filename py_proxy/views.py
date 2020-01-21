@@ -5,6 +5,7 @@ import pyramid.httpexceptions as exc
 import requests
 from pyramid import response, view
 from pyramid.settings import asbool
+from webob.cachecontrol import CacheControl, serialize_cache_control
 
 # Client configuration query parameters.
 OPEN_SIDEBAR = "via.open_sidebar"
@@ -40,7 +41,9 @@ def favicon(request):
 
 
 @view.view_config(
-    renderer="py_proxy:templates/pdfjs_viewer.html.jinja2", route_name="pdf"
+    renderer="py_proxy:templates/pdfjs_viewer.html.jinja2",
+    route_name="pdf",
+    http_cache=(3600, {"public": True, "stale-while-revalidate": 86400}),
 )
 def pdf(request):
     """HTML page with client and the PDF embedded."""
@@ -69,11 +72,19 @@ def content_type(request):
             return exc.HTTPFound(
                 request.route_url(
                     "pdf", pdf_url=request.matchdict["url"], _query=request.params
-                )
+                ),
+                headers=_caching_headers(),
             )
+
     via_url = request.registry.settings["legacy_via_url"]
     url = _drop_from_url_begining("/", request.path_qs)
-    return exc.HTTPFound(f"{via_url}/{url}")
+    return exc.HTTPFound(f"{via_url}/{url}", headers=_caching_headers())
+
+
+def _caching_headers(expires=60, stale_while_revalidate=86400):
+    return {
+        "Cache-Control": f"public max-age={expires} stale-while-revalidate={stale_while_revalidate}"
+    }
 
 
 def _drop_from_url_begining(drop_chars, url):

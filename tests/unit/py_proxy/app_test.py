@@ -2,13 +2,13 @@ from unittest import mock
 
 import pytest
 
-from py_proxy.app import app, settings
+from py_proxy.app import app, load_settings
 from py_proxy.sentry_filters import SENTRY_FILTERS
 
 
 def test_settings_raise_value_error_if_environment_variable_is_not_set():
     with pytest.raises(ValueError):
-        settings()
+        load_settings({})
 
 
 def test_settings_are_configured_from_environment_variables(os_env):
@@ -18,7 +18,7 @@ def test_settings_are_configured_from_environment_variables(os_env):
         "legacy_via_url": "https://via.hypothes.is",
     }
 
-    pyramid_settings = settings()
+    pyramid_settings = load_settings({})
 
     for key, value in expected_settings.items():
         assert pyramid_settings[key] == value
