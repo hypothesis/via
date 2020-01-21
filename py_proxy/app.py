@@ -16,6 +16,7 @@ def load_settings(settings):
 
     :param settings: Settings dict
     :raise ValueError: If a required parameter is not filled
+    :return: A dict of settings
     """
     for param in REQUIRED_PARAMS:
         value = settings[param] = settings.get(param, os.environ.get(param.upper()))
