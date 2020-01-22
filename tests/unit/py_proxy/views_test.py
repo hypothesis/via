@@ -119,9 +119,7 @@ class TestPdfRoute:
         ],
     )
     def test_pdf_passes_thirdparty_url_to_renderer(self, make_pyramid_request, pdf_url):
-        request = make_pyramid_request(
-            f"/pdf/{pdf_url}", "http://example.com/foo.pdf"
-        )
+        request = make_pyramid_request(f"/pdf/{pdf_url}", "http://example.com/foo.pdf")
         nginx_server = request.registry.settings.get("nginx_server")
 
         result = views.pdf(request)
