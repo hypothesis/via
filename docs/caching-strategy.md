@@ -68,7 +68,7 @@ effectively invalidate others.
 
 * `max-age`: PDF: 5m, HTML 60s
 * PDFs should be relatively static, and take a while to update and change
-* HTML could be served from a Wiki or other volatile source
+* HTML could be served from a wiki or other volatile source
 
 #### `pdf()`  view
 
