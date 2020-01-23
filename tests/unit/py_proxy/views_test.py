@@ -4,6 +4,7 @@ import httpretty
 import pytest
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
+from pkg_resources import resource_filename
 
 from py_proxy import views
 
@@ -18,10 +19,10 @@ class TestIndexRoute:
 
         assert result == {}
 
-    def test_index_renders_input_for_entering_a_document_to_annotate(self,):
-        env = Environment(loader=FileSystemLoader("."))
-
-        template = env.get_template("py_proxy/templates/index.html.jinja2")
+    def test_index_renders_input_for_entering_a_document_to_annotate(
+        self, template_env
+    ):
+        template = template_env.get_template("index.html.jinja2")
         html = template.render({})
         tree = BeautifulSoup(html, features="html.parser")
 
@@ -95,10 +96,10 @@ class TestPdfRoute:
             "configures open_sidebar client setting",
         ],
     )
-    def test_pdf_renders_parameters_in_pdf_template(self, template_content):
-        env = Environment(loader=FileSystemLoader("."))
-
-        template = env.get_template("py_proxy/templates/pdfjs_viewer.html.jinja2")
+    def test_pdf_renders_parameters_in_pdf_template(
+        self, template_content, template_env
+    ):
+        template = template_env.get_template("pdfjs_viewer.html.jinja2")
         html = template.render(
             {
                 "pdf_url": "https://via3.hypothes.is/proxy/static/http://thirdparty.url",
@@ -304,3 +305,10 @@ class TestContentTypeRoute:
             return request
 
         return _make_pyramid_request
+
+
+@pytest.fixture
+def template_env():
+    return Environment(
+        loader=FileSystemLoader(resource_filename("py_proxy", "templates"))
+    )

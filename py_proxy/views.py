@@ -3,6 +3,7 @@ import urllib
 
 import pyramid.httpexceptions as exc
 import requests
+from pkg_resources import resource_filename
 from pyramid import response, view
 from pyramid.settings import asbool
 
@@ -27,7 +28,9 @@ def status(_request):
 def robots(request):
     """Serve robots.txt file."""
     return response.FileResponse(
-        "py_proxy/static/robots.txt", request=request, content_type="text/plain"
+        resource_filename("py_proxy", "static/robots.txt"),
+        request=request,
+        content_type="text/plain",
     )
 
 
@@ -35,7 +38,9 @@ def robots(request):
 def favicon(request):
     """Serve favicon.ico file."""
     return response.FileResponse(
-        "py_proxy/static/favicon.ico", request=request, content_type="image/x-icon"
+        resource_filename("py_proxy", "static/favicon.ico"),
+        request=request,
+        content_type="image/x-icon",
     )
 
 
@@ -71,6 +76,7 @@ def content_type(request):
                     "pdf", pdf_url=request.matchdict["url"], _query=request.params
                 )
             )
+
     via_url = request.registry.settings["legacy_via_url"]
     url = _drop_from_url_begining("/", request.path_qs)
     return exc.HTTPFound(f"{via_url}/{url}")
