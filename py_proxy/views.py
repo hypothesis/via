@@ -45,7 +45,11 @@ def favicon(request):
 
 
 @view.view_config(
-    renderer="py_proxy:templates/pdfjs_viewer.html.jinja2", route_name="pdf"
+    renderer="py_proxy:templates/pdfjs_viewer.html.jinja2",
+    route_name="pdf",
+    # We can use a relatively long expiry here, as we only ever hit this after
+    # the content_type call, which has a shorter check
+    http_cache=(86400, {"public": True, "stale_while_revalidate": 86400}),
 )
 def pdf(request):
     """HTML page with client and the PDF embedded."""
@@ -70,22 +74,43 @@ def content_type(request):
     )
 
     with requests.get(url, stream=True, allow_redirects=True) as rsp:
-        if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf",):
+        if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf"):
+            # Unless we have some very baroque error messages they shouldn't
+            # really be returning PDFs
             return exc.HTTPFound(
                 request.route_url(
-                    "pdf", pdf_url=request.matchdict["url"], _query=request.params
-                )
+                    "pdf", pdf_url=request.matchdict["url"], _query=request.params,
+                ),
+                headers=_caching_headers(max_age=300),
             )
 
+    if rsp.status_code == 404:
+        # 404 - A rare case we may want to handle differently, as unusually
+        # for a 4xx error, trying again can help if it becomes available
+        headers = _caching_headers(max_age=60)
+
+    elif rsp.status_code < 500:
+        # 2xx - OK
+        # 3xx - we follow it, so this shouldn't happen
+        # 4xx - no point in trying again quickly
+        headers = _caching_headers(max_age=60)
+
+    else:
+        # 5xx - Errors should not be cached
+        headers = {"Cache-Control": "no-cache"}
+
     via_url = request.registry.settings["legacy_via_url"]
-    url = _drop_from_url_begining("/", request.path_qs)
-    return exc.HTTPFound(f"{via_url}/{url}")
+    url = request.path_qs.lstrip("/")
+
+    return exc.HTTPFound(f"{via_url}/{url}", headers=headers)
 
 
-def _drop_from_url_begining(drop_chars, url):
-    """Drop drop_chars from begining of url."""
-    drop_before = len(drop_chars)
-    return url[drop_before:]
+def _caching_headers(max_age, stale_while_revalidate=86400):
+    # I tried using webob.CacheControl for this but it's total rubbish
+    header = (
+        f"public, max-age={max_age}, stale-while-revalidate={stale_while_revalidate}"
+    )
+    return {"Cache-Control": header}
 
 
 def _generate_url_without_client_query_params(base_url, query_params):

@@ -3,10 +3,29 @@ from unittest import mock
 import httpretty
 import pytest
 from bs4 import BeautifulSoup
+from h_matchers import Any
 from jinja2 import Environment, FileSystemLoader
 from pkg_resources import resource_filename
+from requests import Response
+from webtest import TestApp as WebTestApp  # No pytest, this isn't a test class
 
 from py_proxy import views
+from py_proxy.app import app
+
+# pylint: disable=no-value-for-parameter
+# Pylint doesn't seem to understand h_matchers here for some reason
+
+
+def assert_cache_control(headers, max_age, stale_while_revalidate):
+
+    assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
+
+    header = headers["Cache-Control"]
+    parts = sorted(header.split(", "))
+
+    assert "public" in parts
+    assert f"max-age={max_age}" in parts
+    assert f"stale-while-revalidate={stale_while_revalidate}" in parts
 
 
 class TestIndexRoute:
@@ -187,10 +206,20 @@ class TestPdfRoute:
         self, make_pyramid_request, request_url, expected_h_request_config
     ):
         request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
-
         result = views.pdf(request)
 
         assert result["h_request_config"] == expected_h_request_config
+
+    def test_pdf_adds_caching_headers(self, test_app):
+        response = test_app.get("/pdf/http://example.com/foo.pdf")
+
+        assert_cache_control(
+            response.headers, max_age=86400, stale_while_revalidate=86400
+        )
+
+    @pytest.fixture
+    def test_app(self, pyramid_settings):
+        return WebTestApp(app(None, **pyramid_settings))
 
     @pytest.fixture
     def make_pyramid_request(self, make_pyramid_request):
@@ -288,6 +317,57 @@ class TestContentTypeRoute:
 
         # pylint: disable=no-member
         assert query_param not in httpretty.last_request().path
+
+    @pytest.mark.parametrize(
+        "content_type,max_age", [("application/pdf", 300), ("text/html", 60)],
+    )
+    def test_sets_correct_cache_control(
+        self, content_type, max_age, make_pyramid_request
+    ):
+        request = make_pyramid_request(
+            request_url="/http://example.com",
+            thirdparty_url="http://example.com",
+            content_type=content_type,
+        )
+
+        result = views.content_type(request)
+
+        assert_cache_control(
+            result.headers, max_age=max_age, stale_while_revalidate=86400
+        )
+
+    @pytest.mark.parametrize(
+        "status_code,cache",
+        (
+            (200, Any.string.containing("max-age=60")),
+            (401, Any.string.containing("max-age=60")),
+            (404, Any.string.containing("max-age=60")),
+            (500, "no-cache"),
+            (501, "no-cache"),
+        ),
+    )
+    def test_cache_http_response_codes_appropriately(
+        self, status_code, cache, make_pyramid_request, requests
+    ):
+        response = Response()
+        response.status_code = status_code
+        response.raw = mock.Mock()
+
+        requests.get.return_value = response
+
+        result = views.content_type(
+            make_pyramid_request(
+                request_url="/http://example.com",
+                thirdparty_url="http://example.com",
+                content_type="text/html",
+            )
+        )
+
+        assert dict(result.headers) == Any.dict.containing({"Cache-Control": cache})
+
+    @pytest.fixture
+    def requests(self, patch):
+        return patch("py_proxy.views.requests")
 
     @pytest.fixture
     def make_pyramid_request(self, make_pyramid_request):
