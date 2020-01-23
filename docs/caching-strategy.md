@@ -2,7 +2,7 @@
 
 ## Short `max-age`, long `stale-while-revalidate`
 
-One strategy we are using for caching the python calls is to provide both a
+One strategy we are using for caching the Python calls is to provide both a
 `max-age` and `stale-while-revalidate` value.
 
 Setting a `max-age` informs the consumer to not come back at all during the
