@@ -84,7 +84,7 @@ class TestPdfRoute:
     @pytest.mark.parametrize(
         "template_content",
         [
-            'window.PDF_URL = "https://via3.hypothes.is/proxy/static/http://thirdparty.url";',
+            'window.PDF_URL = "https://via3.hypothes.is/proxy/static/http://example.com";',
             'window.CLIENT_EMBED_URL = "https://hypothes.is/embed.js";',
             "openSidebar: true",
             "requestConfigFromFrame: 'https://lms.hypothes.is'",
@@ -102,7 +102,7 @@ class TestPdfRoute:
         template = template_env.get_template("pdfjs_viewer.html.jinja2")
         html = template.render(
             {
-                "pdf_url": "https://via3.hypothes.is/proxy/static/http://thirdparty.url",
+                "pdf_url": "https://via3.hypothes.is/proxy/static/http://example.com",
                 "client_embed_url": "https://hypothes.is/embed.js",
                 "h_open_sidebar": True,
                 "h_request_config": "https://lms.hypothes.is",
@@ -115,14 +115,12 @@ class TestPdfRoute:
     @pytest.mark.parametrize(
         "pdf_url",
         [
-            "http://thirdparty.url/foo.pdf",
-            "http://thirdparty.url/foo.pdf?param1=abc&param2=123",
+            "http://example.com/foo.pdf",
+            "http://example.com/foo.pdf?param1=abc&param2=123",
         ],
     )
     def test_pdf_passes_thirdparty_url_to_renderer(self, make_pyramid_request, pdf_url):
-        request = make_pyramid_request(
-            f"/pdf/{pdf_url}", "http://thirdparty.url/foo.pdf"
-        )
+        request = make_pyramid_request(f"/pdf/{pdf_url}", "http://example.com/foo.pdf")
         nginx_server = request.registry.settings.get("nginx_server")
 
         result = views.pdf(request)
@@ -136,18 +134,18 @@ class TestPdfRoute:
         self, make_pyramid_request, query_param
     ):
         url = (
-            "http://thirdparty.url/foo.pdf?param1=abc&param2=123"
+            "http://example.com/foo.pdf?param1=abc&param2=123"
             "&via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
         )
 
-        request = make_pyramid_request(f"/pdf/{url}", "http://thirdparty.url/foo.pdf")
+        request = make_pyramid_request(f"/pdf/{url}", "http://example.com/foo.pdf")
 
         result = views.pdf(request)
 
         assert query_param not in result["pdf_url"]
 
     def test_pdf_passes_client_embed_url_to_renderer(self, make_pyramid_request):
-        pdf_url = "https://thirdparty.url/foo.pdf"
+        pdf_url = "https://example.com/foo.pdf"
         request = make_pyramid_request(f"/pdf/{pdf_url}", pdf_url)
 
         result = views.pdf(request)
@@ -159,16 +157,16 @@ class TestPdfRoute:
     @pytest.mark.parametrize(
         "request_url,expected_h_open_sidebar",
         [
-            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=1", True),
-            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=foo", False),
-            ("/pdf/https://thirdparty.url/foo.pdf?via.open_sidebar=0", False),
-            ("/pdf/https://thirdparty.url/foo.pdf", False),
+            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=1", True),
+            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=foo", False),
+            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=0", False),
+            ("/pdf/https://example.com/foo.pdf", False),
         ],
     )
     def test_pdf_passes_open_sidebar_query_parameter_to_renderer(
         self, make_pyramid_request, request_url, expected_h_open_sidebar
     ):
-        request = make_pyramid_request(request_url, "http://thirdparty.url/foo.pdf")
+        request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
 
         result = views.pdf(request)
 
@@ -178,17 +176,17 @@ class TestPdfRoute:
         "request_url,expected_h_request_config",
         [
             (
-                "/pdf/http://thirdparty.url/foo.pdf?"
+                "/pdf/http://example.com/foo.pdf?"
                 "via.request_config_from_frame=http://lms.hypothes.is",
                 "http://lms.hypothes.is",
             ),
-            ("/pdf/http://thirdparty.url/foo.pdf", None),
+            ("/pdf/http://example.com/foo.pdf", None),
         ],
     )
     def test_pdf_passes_request_config_from_frame_query_parameter_to_renderer(
         self, make_pyramid_request, request_url, expected_h_request_config
     ):
-        request = make_pyramid_request(request_url, "http://thirdparty.url/foo.pdf")
+        request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
 
         result = views.pdf(request)
 
@@ -211,29 +209,29 @@ class TestContentTypeRoute:
             # If the requested pdf URL has no query string then it should just
             # redirect to the requested URL, with no query string (but with the
             (
-                "/https://thirdparty.url/foo",
-                "http://localhost/pdf/https://thirdparty.url/foo",
+                "/https://example.com/foo",
+                "http://localhost/pdf/https://example.com/foo",
                 "application/pdf",
             ),
             # If the requested pdf URL has a query string then the query string
             # should be preserved in the URL that it redirects to.
             (
-                "/https://thirdparty.url/foo?bar=baz",
-                "http://localhost/pdf/https://thirdparty.url/foo?bar=baz",
+                "/https://example.com/foo?bar=baz",
+                "http://localhost/pdf/https://example.com/foo?bar=baz",
                 "application/pdf",
             ),
             # If the requested html URL has a query string then the query string
             # should be preserved in the URL that it redirects to.
             (
-                "/https://thirdparty.url/foo?bar=baz",
-                "http://via.hypothes.is/https://thirdparty.url/foo?bar=baz",
+                "/https://example.com/foo?bar=baz",
+                "http://via.hypothes.is/https://example.com/foo?bar=baz",
                 "text/html",
             ),
             # If the requested html URL has a client query params then the query params
             # should be preserved in the URL that it redirects to.
             (
-                "/https://thirdparty.url/foo?via.open_sidebar=1",
-                "http://via.hypothes.is/https://thirdparty.url/foo?via.open_sidebar=1",
+                "/https://example.com/foo?via.open_sidebar=1",
+                "http://via.hypothes.is/https://example.com/foo?via.open_sidebar=1",
                 "text/html",
             ),
         ],
@@ -244,7 +242,7 @@ class TestContentTypeRoute:
 
         request = make_pyramid_request(
             request_url=requested_path,
-            thirdparty_url="https://thirdparty.url/foo",
+            thirdparty_url="https://example.com/foo",
             content_type=content_type,
         )
 
@@ -255,17 +253,17 @@ class TestContentTypeRoute:
     @pytest.mark.parametrize(
         "content_type,redirect_url",
         [
-            ("application/pdf", "http://localhost/pdf/https://thirdparty.url"),
-            ("application/x-pdf", "http://localhost/pdf/https://thirdparty.url"),
-            ("text/html", "http://via.hypothes.is/https://thirdparty.url"),
+            ("application/pdf", "http://localhost/pdf/https://example.com"),
+            ("application/x-pdf", "http://localhost/pdf/https://example.com"),
+            ("text/html", "http://via.hypothes.is/https://example.com"),
         ],
     )
     def test_redirects_based_on_content_type_header(
         self, make_pyramid_request, content_type, redirect_url
     ):
         request = make_pyramid_request(
-            request_url="/https://thirdparty.url",
-            thirdparty_url="https://thirdparty.url",
+            request_url="/https://example.com",
+            thirdparty_url="https://example.com",
             content_type=content_type,
         )
 
@@ -280,9 +278,9 @@ class TestContentTypeRoute:
         self, make_pyramid_request, query_param
     ):
         request = make_pyramid_request(
-            request_url="/https://thirdparty.url?"
+            request_url="/https://example.com?"
             "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1",
-            thirdparty_url="https://thirdparty.url",
+            thirdparty_url="https://example.com",
             content_type="application/pdf",
         )
 
