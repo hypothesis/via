@@ -6,15 +6,18 @@ from bs4 import BeautifulSoup
 from h_matchers import Any
 from jinja2 import Environment, FileSystemLoader
 from pkg_resources import resource_filename
+from requests import Response
 from webtest import TestApp as WebTestApp  # No pytest, this isn't a test class
 
 from py_proxy import views
 from py_proxy.app import app
 
+# pylint: disable=no-value-for-parameter
+# Pylint doesn't seem to understand h_matchers here for some reason
+
 
 def assert_cache_control(headers, max_age, stale_while_revalidate):
-    # pylint: disable=no-value-for-parameter
-    # Pylint doesn't seem to understand h_matchers here for some reason
+
     assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
 
     header = headers["Cache-Control"]
@@ -332,6 +335,39 @@ class TestContentTypeRoute:
         assert_cache_control(
             result.headers, max_age=max_age, stale_while_revalidate=86400
         )
+
+    @pytest.mark.parametrize(
+        "status_code,cache",
+        (
+            (200, Any.string.containing("max-age=60")),
+            (401, Any.string.containing("max-age=60")),
+            (404, Any.string.containing("max-age=60")),
+            (500, "no-cache"),
+            (501, "no-cache"),
+        ),
+    )
+    def test_cache_http_response_codes_appropriately(
+        self, status_code, cache, make_pyramid_request, requests
+    ):
+        response = Response()
+        response.status_code = status_code
+        response.raw = mock.Mock()
+
+        requests.get.return_value = response
+
+        result = views.content_type(
+            make_pyramid_request(
+                request_url="/http://example.com",
+                thirdparty_url="http://example.com",
+                content_type="text/html",
+            )
+        )
+
+        assert dict(result.headers) == Any.dict.containing({"Cache-Control": cache})
+
+    @pytest.fixture
+    def requests(self, patch):
+        return patch("py_proxy.views.requests")
 
     @pytest.fixture
     def make_pyramid_request(self, make_pyramid_request):

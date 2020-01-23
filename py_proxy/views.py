@@ -75,6 +75,8 @@ def content_type(request):
 
     with requests.get(url, stream=True, allow_redirects=True) as rsp:
         if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf"):
+            # Unless we have some very baroque error messages they shouldn't
+            # really be returning PDFs
             return exc.HTTPFound(
                 request.route_url(
                     "pdf", pdf_url=request.matchdict["url"], _query=request.params,
@@ -82,10 +84,25 @@ def content_type(request):
                 headers=_caching_headers(max_age=300),
             )
 
+    if rsp.status_code == 404:
+        # 404 - A rare case we may want to handle differently, as unusually
+        # for a 4xx error, trying again can help if it becomes available
+        headers = _caching_headers(max_age=60)
+
+    elif rsp.status_code < 500:
+        # 2xx - OK
+        # 3xx - we follow it, so this shouldn't happen
+        # 4xx - no point in trying again quickly
+        headers = _caching_headers(max_age=60)
+
+    else:
+        # 5xx - Errors should not be cached
+        headers = {"Cache-Control": "no-cache"}
+
     via_url = request.registry.settings["legacy_via_url"]
     url = request.path_qs.lstrip("/")
 
-    return exc.HTTPFound(f"{via_url}/{url}", headers=_caching_headers(max_age=60))
+    return exc.HTTPFound(f"{via_url}/{url}", headers=headers)
 
 
 def _caching_headers(max_age, stale_while_revalidate=86400):
