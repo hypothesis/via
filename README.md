@@ -16,6 +16,11 @@ Installing Via 3 in a development environment
   * https://h.readthedocs.io/en/latest/developing/install/
   * https://h.readthedocs.io/projects/client/en/latest/developers/developing/
 
+* For now, Via 3 also redirects to legacy Via to proxy HTML pages, so you'll
+  need to set up a legacy Via development environment too:
+
+  * https://github.com/hypothesis/via
+
 * [Git](https://git-scm.com/)
 
 * [pyenv](https://github.com/pyenv/pyenv)
