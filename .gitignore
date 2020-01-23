@@ -2,3 +2,5 @@
 .tox
 *.pyc
 *.egg-info/
+py_proxy/static/**/*.gz
+py_proxy/static/**/*.br
