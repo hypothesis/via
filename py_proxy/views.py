@@ -18,7 +18,7 @@ def status(_request):
 
 
 @view.view_config(
-    renderer="py_proxy:templates/pdfjs_viewer.html.jinja2",
+    renderer="py_proxy:templates/pdf_viewer.html.jinja2",
     route_name="pdf",
     # We can use a relatively long expiry here, as we only ever hit this after
     # the content_type call, which has a shorter check
