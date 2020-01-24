@@ -6,6 +6,15 @@ import requests
 from pkg_resources import resource_filename
 from pyramid import response, view
 from pyramid.settings import asbool
+from requests import RequestException
+
+from py_proxy.exceptions import (
+    REQUESTS_BAD_URL,
+    REQUESTS_UPSTREAM_SERVICE,
+    BadURL,
+    UnhandledException,
+    UpstreamServiceError,
+)
 
 # Client configuration query parameters.
 OPEN_SIDEBAR = "via.open_sidebar"
@@ -66,6 +75,21 @@ def pdf(request):
     }
 
 
+def _get_url_details(url):
+    try:
+        with requests.get(url, stream=True, allow_redirects=True) as rsp:
+            return rsp.headers.get("Content-Type"), rsp.status_code
+
+    except REQUESTS_BAD_URL as err:
+        raise BadURL(err.args[0]) from None
+
+    except REQUESTS_UPSTREAM_SERVICE as err:
+        raise UpstreamServiceError(err.args[0])
+
+    except RequestException as err:
+        raise UnhandledException(err.args[0])
+
+
 @view.view_config(route_name="content_type")
 def content_type(request):
     """Routes the request according to the Content-Type header."""
@@ -73,23 +97,25 @@ def content_type(request):
         request.matchdict["url"], request.params
     )
 
-    with requests.get(url, stream=True, allow_redirects=True) as rsp:
-        if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf"):
-            # Unless we have some very baroque error messages they shouldn't
-            # really be returning PDFs
-            return exc.HTTPFound(
-                request.route_url(
-                    "pdf", pdf_url=request.matchdict["url"], _query=request.params,
-                ),
-                headers=_caching_headers(max_age=300),
-            )
+    mime_type, status_code = _get_url_details(url)
 
-    if rsp.status_code == 404:
+    # Can PDF mime types get extra info on the end like "encoding=?"
+    if mime_type in ("application/x-pdf", "application/pdf"):
+        # Unless we have some very baroque error messages they shouldn't
+        # really be returning PDFs
+        return exc.HTTPFound(
+            request.route_url(
+                "pdf", pdf_url=request.matchdict["url"], _query=request.params,
+            ),
+            headers=_caching_headers(max_age=300),
+        )
+
+    if status_code == 404:
         # 404 - A rare case we may want to handle differently, as unusually
         # for a 4xx error, trying again can help if it becomes available
         headers = _caching_headers(max_age=60)
 
-    elif rsp.status_code < 500:
+    elif status_code < 500:
         # 2xx - OK
         # 3xx - we follow it, so this shouldn't happen
         # 4xx - no point in trying again quickly
