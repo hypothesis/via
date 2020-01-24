@@ -68,7 +68,7 @@ class TestPdfRoute:
     def test_pdf_renders_parameters_in_pdf_template(
         self, template_content, template_env
     ):
-        template = template_env.get_template("pdf_viewer.html.jinja2")
+        template = template_env.get_template("pdfjs_viewer.html.jinja2")
         html = template.render(
             {
                 "pdf_url": "https://via3.hypothes.is/proxy/static/http://example.com",
