@@ -10,7 +10,6 @@ help:
 	@echo "make coverage          Print the unit test coverage report"
 	@echo "make docstrings        View all the docstrings locally as HTML"
 	@echo "make checkdocstrings   Crash if building the docstrings fails"
-	@echo "make update-pdfjs      Update our copy of PDF-js"
 	@echo "make pip-compile       Compile requirements.in to requirements.txt"
 	@echo "make upgrade-package   Upgrade the version of a package in requirements.txt."
 	@echo '                       Usage: `make upgrade-package name=some-package`.'
@@ -42,10 +41,6 @@ checkformatting: python
 .PHONY: test
 test: python
 	@tox -q
-
-.PHONY: update-pdfjs
-update-pdfjs: python
-	@tox -qe update-pdfjs
 
 .PHONY: coverage
 coverage: python

@@ -5,11 +5,9 @@ from unittest import mock
 
 import httpretty
 import pytest
-import webtest
 from pyramid import testing
 from pyramid.request import Request
 
-from py_proxy.app import create_app
 from py_proxy.views import add_routes
 
 
@@ -52,11 +50,6 @@ def make_pyramid_request(pyramid_config):
         return pyramid_request
 
     return _make_pyramid_request
-
-
-@pytest.fixture
-def test_app(pyramid_settings):
-    return webtest.TestApp(create_app(None, **pyramid_settings))
 
 
 @pytest.fixture(autouse=True)
