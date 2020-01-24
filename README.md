@@ -86,7 +86,7 @@ Via 3 is composed of four separable components:
 
    This component is implemented in Python / Pyramid.
 
-   The Pyramid app sends an HTTP GET request to the third-party URL but only
+   The Pyramid app sends a GET request to the third-party URL but only
    downloads the response headers not the body. It looks at the Content-Type
    header to determine whether the body is a PDF file or not.
 
