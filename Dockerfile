@@ -26,8 +26,6 @@ COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/nginx_envsubst.conf.template /var/lib/hypothesis/nginx_envsubst.conf.template
 COPY . .
 
-RUN make build
-
 USER hypothesis
 
 CMD /usr/bin/envsubst '$${ACCESS_CONTROL_ALLOW_ORIGIN}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
