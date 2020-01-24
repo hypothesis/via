@@ -69,7 +69,7 @@ client. To update the PDF viewer, run `tools/update-pdfjs`.
 How Via 3 works
 ---------------
 
-Via 3 allows user to annotate arbitrary web pages or PDF files by proxying the
+Via 3 allows users to annotate arbitrary web pages or PDF files by proxying the
 page or file and injecting the Hypothesis client. Users go to
 <https://via3.hypothes.is/> and paste in a PDF or HTML URL (or visit
 `https://via3.hypothes.is/<SOME_URL>` directly) and Via 3 responds with an
