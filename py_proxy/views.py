@@ -6,7 +6,6 @@ import requests
 from pkg_resources import resource_filename
 from pyramid import response, view
 from pyramid.settings import asbool
-# Client configuration query parameters.
 from requests.exceptions import (
     ConnectionError,
     InvalidSchema,
@@ -16,6 +15,7 @@ from requests.exceptions import (
 
 from py_proxy.exceptions import BadURL, UpstreamServiceError
 
+# Client configuration query parameters.
 OPEN_SIDEBAR = "via.open_sidebar"
 CONFIG_FROM_FRAME = "via.request_config_from_frame"
 
