@@ -3,7 +3,6 @@ import urllib
 
 import pyramid.httpexceptions as exc
 import requests
-from pkg_resources import resource_filename
 from pyramid import response, view
 from pyramid.settings import asbool
 
@@ -12,36 +11,10 @@ OPEN_SIDEBAR = "via.open_sidebar"
 CONFIG_FROM_FRAME = "via.request_config_from_frame"
 
 
-@view.view_config(renderer="py_proxy:templates/index.html.jinja2", route_name="index")
-def index(_request):
-    """Index endpoint."""
-    return {}
-
-
 @view.view_config(route_name="status")
 def status(_request):
     """Status endpoint."""
     return response.Response(status_int=200, status="200 OK", content_type="text/plain")
-
-
-@view.view_config(route_name="robots", http_cache=(86400, {"public": True}))
-def robots(request):
-    """Serve robots.txt file."""
-    return response.FileResponse(
-        resource_filename("py_proxy", "static/robots.txt"),
-        request=request,
-        content_type="text/plain",
-    )
-
-
-@view.view_config(route_name="favicon", http_cache=(86400, {"public": True}))
-def favicon(request):
-    """Serve favicon.ico file."""
-    return response.FileResponse(
-        resource_filename("py_proxy", "static/favicon.ico"),
-        request=request,
-        content_type="image/x-icon",
-    )
 
 
 @view.view_config(
@@ -145,10 +118,7 @@ def _generate_url_without_client_query_params(base_url, query_params):
 
 def add_routes(config):
     """Add routes to pyramid config."""
-    config.add_route("index", "/")
     config.add_route("status", "/_status")
-    config.add_route("favicon", "/favicon.ico")
-    config.add_route("robots", "/robots.txt")
     config.add_route("pdf", "/pdf/{pdf_url:.*}")
     config.add_route("content_type", "/{url:.*}")
 

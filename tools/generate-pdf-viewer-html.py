@@ -30,7 +30,7 @@ FILE_HEADER = """
 #
 HYPOTHESIS_HEADER = """
 <!-- Begin Hypothesis modifications -->
-<base href="/static/pdfjs-2/web/">
+<base href="/vendor/pdfjs-2/web/">
 
 <title>via Hypothesis</title>
 {#
@@ -44,7 +44,7 @@ window.PDF_URL = "{{ pdf_url }}";
 window.CLIENT_EMBED_URL = "{{ client_embed_url }}";
 </script>
 
-<script src="/static/scripts/pdfjs-init.js"></script>
+<script src="/vendor/js/pdfjs-init.js"></script>
 
 {# Configure Hypothesis client. #}
 <script>
