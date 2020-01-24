@@ -7,9 +7,7 @@ import httpretty
 import pytest
 from pyramid import testing
 from pyramid.request import Request
-from webtest import TestApp as WebTestApp  # No pytest, this isn't a test class
 
-from py_proxy.app import create_app
 from py_proxy.views import add_routes
 
 
@@ -52,11 +50,6 @@ def make_pyramid_request(pyramid_config):
         return pyramid_request
 
     return _make_pyramid_request
-
-
-@pytest.fixture
-def test_app(pyramid_settings):
-    return WebTestApp(create_app(None, **pyramid_settings))
 
 
 @pytest.fixture(autouse=True)

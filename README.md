@@ -65,18 +65,6 @@ Via 3 serves PDFs using [PDF.js](https://mozilla.github.io/pdf.js/). PDF.js is
 vendored into the source tree and the viewer HTML is patched to load the Hypothesis
 client. To update the PDF viewer, run `tools/update-pdfjs`.
 
-## How the app is setup
-
-Content is served by two main items:
-
- * NGINX on port 9083 (http://localhost:9083 in dev)
- * A python app on port 9082 (http://localhost:9082 in dev)
-
-The python app consists of two parts:
-
- * A conventional Pyramid app
- * A [Whitenoise](http://whitenoise.evans.io/en/stable/) wrapper that serves static content
-
 ## See also
 
 * [Caching strategy](docs/caching-strategy.md)

@@ -11,12 +11,12 @@ set -eu
 #
 # 1. Create a new branch and run this script.
 # 2. Verify that PDFs work as expected in py-server.
-# 3. Commit the changes to the `vendor/` and `templates/` directories.
+# 3. Commit the changes to the `static/` and `templates/` directories.
 #
 # If you make changes to the PDF.js viewer template generator only and want to
 # regenerate the HTML template, run this script with the `--no-download` flag.
 
-DEST_DIR=static/vendor/pdfjs-2
+DEST_DIR=static/pdfjs-2
 PREFIX=pdf.js-gh-pages
 COMPONENTS="$PREFIX/build $PREFIX/web $PREFIX/LICENSE"
 
