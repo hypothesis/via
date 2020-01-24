@@ -7,10 +7,12 @@ from h_matchers import Any
 from jinja2 import Environment, FileSystemLoader
 from pkg_resources import resource_filename
 from requests import Response
+from requests.exceptions import ConnectionError
 from webtest import TestApp as WebTestApp  # No pytest, this isn't a test class
 
 from py_proxy import views
 from py_proxy.app import app
+from py_proxy.exceptions import BadURL, UpstreamServiceError
 
 # pylint: disable=no-value-for-parameter
 # Pylint doesn't seem to understand h_matchers here for some reason
@@ -335,6 +337,29 @@ class TestContentTypeRoute:
         assert_cache_control(
             result.headers, max_age=max_age, stale_while_revalidate=86400
         )
+
+    @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
+    def test_invalid_urls_raise_BadURL(self, bad_url, make_pyramid_request):
+        request = make_pyramid_request(
+            request_url=f"/{bad_url}", thirdparty_url=bad_url, content_type="text/html",
+        )
+
+        with pytest.raises(BadURL):
+            views.content_type(request)
+
+    def test_connection_errors_raise_UpstreamServiceError(
+        self, requests, make_pyramid_request
+    ):
+        requests.get.side_effect = ConnectionError("Oh noe")
+
+        request = make_pyramid_request(
+            request_url="/http://example.com",
+            thirdparty_url="http://example.com",
+            content_type="text/html",
+        )
+
+        with pytest.raises(UpstreamServiceError):
+            views.content_type(request)
 
     @pytest.mark.parametrize(
         "status_code,cache",

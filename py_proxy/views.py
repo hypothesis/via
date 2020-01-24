@@ -6,8 +6,16 @@ import requests
 from pkg_resources import resource_filename
 from pyramid import response, view
 from pyramid.settings import asbool
-
 # Client configuration query parameters.
+from requests.exceptions import (
+    ConnectionError,
+    InvalidSchema,
+    InvalidURL,
+    MissingSchema,
+)
+
+from py_proxy.exceptions import BadURL, UpstreamServiceError
+
 OPEN_SIDEBAR = "via.open_sidebar"
 CONFIG_FROM_FRAME = "via.request_config_from_frame"
 
@@ -66,6 +74,18 @@ def pdf(request):
     }
 
 
+def _get_url_details(url):
+    try:
+        with requests.get(url, stream=True, allow_redirects=True) as response:
+            return response.headers.get("Content-Type"), response.status_code
+
+    except (MissingSchema, InvalidSchema, InvalidURL) as err:
+        raise BadURL(err.args[0]) from None
+
+    except ConnectionError as err:
+        raise UpstreamServiceError(err.args[0])
+
+
 @view.view_config(route_name="content_type")
 def content_type(request):
     """Routes the request according to the Content-Type header."""
@@ -73,23 +93,24 @@ def content_type(request):
         request.matchdict["url"], request.params
     )
 
-    with requests.get(url, stream=True, allow_redirects=True) as rsp:
-        if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf"):
-            # Unless we have some very baroque error messages they shouldn't
-            # really be returning PDFs
-            return exc.HTTPFound(
-                request.route_url(
-                    "pdf", pdf_url=request.matchdict["url"], _query=request.params,
-                ),
-                headers=_caching_headers(max_age=300),
-            )
+    content_type, status_code = _get_url_details(url)
 
-    if rsp.status_code == 404:
+    if content_type in ("application/x-pdf", "application/pdf"):
+        # Unless we have some very baroque error messages they shouldn't
+        # really be returning PDFs
+        return exc.HTTPFound(
+            request.route_url(
+                "pdf", pdf_url=request.matchdict["url"], _query=request.params,
+            ),
+            headers=_caching_headers(max_age=300),
+        )
+
+    if status_code == 404:
         # 404 - A rare case we may want to handle differently, as unusually
         # for a 4xx error, trying again can help if it becomes available
         headers = _caching_headers(max_age=60)
 
-    elif rsp.status_code < 500:
+    elif status_code < 500:
         # 2xx - OK
         # 3xx - we follow it, so this shouldn't happen
         # 4xx - no point in trying again quickly
