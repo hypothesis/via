@@ -7,12 +7,17 @@ from h_matchers import Any
 from jinja2 import Environment, FileSystemLoader
 from pkg_resources import resource_filename
 from requests import Response
-from requests.exceptions import ConnectionError
+from requests.exceptions import (
+    MissingSchema,
+    ProxyError,
+    SSLError,
+    UnrewindableBodyError,
+)
 from webtest import TestApp as WebTestApp  # No pytest, this isn't a test class
 
 from py_proxy import views
 from py_proxy.app import app
-from py_proxy.exceptions import BadURL, UpstreamServiceError
+from py_proxy.exceptions import BadURL, UnhandledException, UpstreamServiceError
 
 # pylint: disable=no-value-for-parameter
 # Pylint doesn't seem to understand h_matchers here for some reason
@@ -347,10 +352,19 @@ class TestContentTypeRoute:
         with pytest.raises(BadURL):
             views.content_type(request)
 
-    def test_connection_errors_raise_UpstreamServiceError(
-        self, requests, make_pyramid_request
+    @pytest.mark.parametrize(
+        "request_exception,expected_exception",
+        (
+            (MissingSchema, BadURL),
+            (ProxyError, UpstreamServiceError),
+            (SSLError, UpstreamServiceError),
+            (UnrewindableBodyError, UnhandledException),
+        ),
+    )
+    def test_we_catch_requests_exceptions(
+        self, requests, request_exception, expected_exception, make_pyramid_request
     ):
-        requests.get.side_effect = ConnectionError("Oh noe")
+        requests.get.side_effect = request_exception("Oh noe")
 
         request = make_pyramid_request(
             request_url="/http://example.com",
@@ -358,7 +372,7 @@ class TestContentTypeRoute:
             content_type="text/html",
         )
 
-        with pytest.raises(UpstreamServiceError):
+        with pytest.raises(expected_exception):
             views.content_type(request)
 
     @pytest.mark.parametrize(

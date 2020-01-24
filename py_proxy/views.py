@@ -6,14 +6,15 @@ import requests
 from pkg_resources import resource_filename
 from pyramid import response, view
 from pyramid.settings import asbool
-from requests.exceptions import (
-    ConnectionError,
-    InvalidSchema,
-    InvalidURL,
-    MissingSchema,
-)
+from requests import RequestException
 
-from py_proxy.exceptions import BadURL, UpstreamServiceError
+from py_proxy.exceptions import (
+    REQUESTS_BAD_URL,
+    REQUESTS_UPSTREAM_SERVICE,
+    BadURL,
+    UnhandledException,
+    UpstreamServiceError,
+)
 
 # Client configuration query parameters.
 OPEN_SIDEBAR = "via.open_sidebar"
@@ -76,14 +77,17 @@ def pdf(request):
 
 def _get_url_details(url):
     try:
-        with requests.get(url, stream=True, allow_redirects=True) as response:
-            return response.headers.get("Content-Type"), response.status_code
+        with requests.get(url, stream=True, allow_redirects=True) as rsp:
+            return rsp.headers.get("Content-Type"), rsp.status_code
 
-    except (MissingSchema, InvalidSchema, InvalidURL) as err:
+    except REQUESTS_BAD_URL as err:
         raise BadURL(err.args[0]) from None
 
-    except ConnectionError as err:
+    except REQUESTS_UPSTREAM_SERVICE as err:
         raise UpstreamServiceError(err.args[0])
+
+    except RequestException as err:
+        raise UnhandledException(err.args[0])
 
 
 @view.view_config(route_name="content_type")
@@ -93,9 +97,10 @@ def content_type(request):
         request.matchdict["url"], request.params
     )
 
-    content_type, status_code = _get_url_details(url)
+    mime_type, status_code = _get_url_details(url)
 
-    if content_type in ("application/x-pdf", "application/pdf"):
+    # Can PDF mime types get extra info on the end like "encoding=?"
+    if mime_type in ("application/x-pdf", "application/pdf"):
         # Unless we have some very baroque error messages they shouldn't
         # really be returning PDFs
         return exc.HTTPFound(
