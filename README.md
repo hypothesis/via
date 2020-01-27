@@ -66,8 +66,8 @@ Via 3 serves PDFs using [PDF.js](https://mozilla.github.io/pdf.js/). PDF.js is
 vendored into the source tree and the viewer HTML is patched to load the Hypothesis
 client. To update the PDF viewer, run `tools/update-pdfjs`.
 
-How Via 3 works
----------------
+<details>
+  <summary><h2>How Via 3 works</h2></summary>
 
 Via 3 allows users to annotate arbitrary web pages or PDF files by proxying the
 page or file and injecting the Hypothesis client. Users go to
@@ -214,3 +214,5 @@ request is for a static file) or proxies to Pyramid.
 ### See also
 
 * [Caching strategy](docs/caching-strategy.md)
+
+</details>
