@@ -2,6 +2,8 @@
 import os
 
 import pyramid.config
+from pkg_resources import resource_filename
+from whitenoise import WhiteNoise
 
 from py_proxy.sentry_filters import SENTRY_FILTERS
 
@@ -30,13 +32,19 @@ def load_settings(settings):
     return settings
 
 
-def app(_=None, **settings):
+def create_app(_=None, **settings):
     """Configure and return the WSGI app."""
     config = pyramid.config.Configurator(settings=load_settings(settings))
 
-    config.add_static_view(name="static", path="static")
     config.include("pyramid_jinja2")
     config.include("py_proxy.views")
     config.include("h_pyramid_sentry")
 
-    return config.make_wsgi_app()
+    app = WhiteNoise(
+        config.make_wsgi_app(),
+        index_file=True,
+        root=resource_filename("py_proxy", "static"),
+        prefix="/",
+    )
+
+    return app

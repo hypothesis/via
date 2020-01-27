@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from py_proxy.app import app, load_settings
+from py_proxy.app import create_app, load_settings
 from py_proxy.sentry_filters import SENTRY_FILTERS
 
 
@@ -25,7 +25,7 @@ def test_settings_are_configured_from_environment_variables(os_env):
 
 
 def test_app(configurator, pyramid, os_env):
-    app()
+    create_app()
 
     pyramid.config.Configurator.assert_called_once_with(
         settings={
