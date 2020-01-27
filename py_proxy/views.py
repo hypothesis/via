@@ -75,21 +75,6 @@ def pdf(request):
     }
 
 
-def _get_url_details(url):
-    try:
-        with requests.get(url, stream=True, allow_redirects=True) as rsp:
-            return rsp.headers.get("Content-Type"), rsp.status_code
-
-    except REQUESTS_BAD_URL as err:
-        raise BadURL(err.args[0]) from None
-
-    except REQUESTS_UPSTREAM_SERVICE as err:
-        raise UpstreamServiceError(err.args[0])
-
-    except RequestException as err:
-        raise UnhandledException(err.args[0])
-
-
 @view.view_config(route_name="content_type")
 def content_type(request):
     """Routes the request according to the Content-Type header."""
@@ -129,6 +114,21 @@ def content_type(request):
     url = request.path_qs.lstrip("/")
 
     return exc.HTTPFound(f"{via_url}/{url}", headers=headers)
+
+
+def _get_url_details(url):
+    try:
+        with requests.get(url, stream=True, allow_redirects=True) as rsp:
+            return rsp.headers.get("Content-Type"), rsp.status_code
+
+    except REQUESTS_BAD_URL as err:
+        raise BadURL(err.args[0]) from None
+
+    except REQUESTS_UPSTREAM_SERVICE as err:
+        raise UpstreamServiceError(err.args[0]) from None
+
+    except RequestException as err:
+        raise UnhandledException(err.args[0]) from None
 
 
 def _caching_headers(max_age, stale_while_revalidate=86400):
