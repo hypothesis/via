@@ -3,6 +3,7 @@ help:
 	@echo "make help              Show this help message"
 	@echo "make dev               Run the app in the development server"
 	@echo 'make services          Run the services that `make dev` requires'
+	@echo 'make build            Prepare the build files'
 	@echo "make lint              Run the code linter(s) and print any warnings"
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
@@ -21,6 +22,10 @@ help:
 .PHONY: dev
 dev: python
 	@tox -qe dev
+
+.PHONY: build
+build: python
+	@tox -qe build
 
 .PHONY: services
 services: args?=up -d
@@ -68,13 +73,18 @@ upgrade-package: python
 	@tox -qe pip-compile -- --upgrade-package $(name)
 
 .PHONY: docker
-docker:
-	@git archive --format=tar.gz HEAD | docker build -t hypothesis/py_proxy:$(DOCKER_TAG) -
+docker: build
+	@git archive --format=tar HEAD > build.tar
+	@tar --update -f build.tar py_proxy/static
+	@gzip -c build.tar | docker build -t hypothesis/py_proxy:$(DOCKER_TAG) -
+	@rm build.tar
 
 .PHONY: clean
 clean:
 	@find . -type f -name "*.py[co]" -delete
 	@find . -type d -name "__pycache__" -delete
+	@find . -type f -name "*.gz" -delete
+	@find . -type f -name "*.br" -delete
 
 .PHONY: python
 python:
