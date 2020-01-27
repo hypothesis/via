@@ -11,12 +11,12 @@ set -eu
 #
 # 1. Create a new branch and run this script.
 # 2. Verify that PDFs work as expected in py-server.
-# 3. Commit the changes to the `static/` and `templates/` directories.
+# 3. Commit the changes to the `vendor/` and `templates/` directories.
 #
 # If you make changes to the PDF.js viewer template generator only and want to
 # regenerate the HTML template, run this script with the `--no-download` flag.
 
-DEST_DIR=static/pdfjs-2
+DEST_DIR=py_proxy/static/vendor/pdfjs-2
 PREFIX=pdf.js-gh-pages
 COMPONENTS="$PREFIX/build $PREFIX/web $PREFIX/LICENSE"
 
@@ -40,14 +40,5 @@ if [ $download_pdfjs ]; then
   # Remove example content from viewer
   rm $DEST_DIR/web/*.pdf
 
-  # Remove the check that the PDF being loaded is from the same origin as the
-  # viewer.
-  sed -i '' -e 's/HOSTED_VIEWER_ORIGINS.includes(viewerOrigin)/true \/* Hypothesis *\//' $DEST_DIR/web/viewer.js
+    echo $DEST_DIR/web/viewer.js
 fi
-
-# Generate the PDF viewer HTML template.
-BASEDIR=$(dirname $0)
-python \
-  $BASEDIR/generate-pdf-viewer-html.py \
-  $DEST_DIR/web/viewer.html \
-  py_proxy/templates/pdfjs_viewer.html.jinja2
