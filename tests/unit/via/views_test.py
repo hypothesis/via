@@ -2,10 +2,7 @@ from unittest import mock
 
 import httpretty
 import pytest
-from bs4 import BeautifulSoup
 from h_matchers import Any
-from jinja2 import Environment, FileSystemLoader
-from pkg_resources import resource_filename
 from requests import Response
 from requests.exceptions import (
     MissingSchema,
@@ -21,16 +18,11 @@ from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
 # Pylint doesn't seem to understand h_matchers here for some reason
 
 
-def assert_cache_control(headers, max_age, stale_while_revalidate):
-
+def assert_cache_control(headers, cache_parts):
     assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
-
-    header = headers["Cache-Control"]
-    parts = sorted(header.split(", "))
-
-    assert "public" in parts
-    assert f"max-age={max_age}" in parts
-    assert f"stale-while-revalidate={stale_while_revalidate}" in parts
+    assert (
+        headers["Cache-Control"].split(", ") == Any.list.containing(cache_parts).only()
+    )
 
 
 class TestStatusRoute:
@@ -57,37 +49,6 @@ class TestIncludeMe:
 
 
 class TestPdfRoute:
-    @pytest.mark.parametrize(
-        "template_content",
-        [
-            'window.PDF_URL = "https://via3.hypothes.is/proxy/static/http://example.com";',
-            'window.CLIENT_EMBED_URL = "https://hypothes.is/embed.js";',
-            "openSidebar: true",
-            "requestConfigFromFrame: 'https://lms.hypothes.is'",
-        ],
-        ids=[
-            "sets PDF_URL to proxied pdf url",
-            "sets CLIENT_EMBED_URL to client embed url",
-            "configures open_sidebar client setting",
-            "configures open_sidebar client setting",
-        ],
-    )
-    def test_pdf_renders_parameters_in_pdf_template(
-        self, template_content, template_env
-    ):
-        template = template_env.get_template("pdf_viewer.html.jinja2")
-        html = template.render(
-            {
-                "pdf_url": "https://via3.hypothes.is/proxy/static/http://example.com",
-                "client_embed_url": "https://hypothes.is/embed.js",
-                "h_open_sidebar": True,
-                "h_request_config": "https://lms.hypothes.is",
-            }
-        )
-        tree = BeautifulSoup(html, features="html.parser")
-
-        assert template_content in str(tree.head)
-
     @pytest.mark.parametrize(
         "pdf_url",
         [
@@ -167,11 +128,11 @@ class TestPdfRoute:
 
         assert result["h_request_config"] == expected_h_request_config
 
-    def test_pdf_adds_caching_headers(self, test_app):
+    def test_pdf_html_prevents_caching(self, test_app):
         response = test_app.get("/pdf/http://example.com/foo.pdf")
 
         assert_cache_control(
-            response.headers, max_age=86400, stale_while_revalidate=86400
+            response.headers, ["max-age=0", "must-revalidate", "no-cache", "no-store"]
         )
 
     @pytest.fixture
@@ -286,7 +247,8 @@ class TestContentTypeRoute:
         result = views.content_type(request)
 
         assert_cache_control(
-            result.headers, max_age=max_age, stale_while_revalidate=86400
+            result.headers,
+            ["public", f"max-age={max_age}", "stale-while-revalidate=86400"],
         )
 
     @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
@@ -368,8 +330,3 @@ class TestContentTypeRoute:
             return request
 
         return _make_pyramid_request
-
-
-@pytest.fixture
-def template_env():
-    return Environment(loader=FileSystemLoader(resource_filename("via", "templates")))
