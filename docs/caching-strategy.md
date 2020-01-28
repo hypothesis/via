@@ -64,14 +64,22 @@ means the Python call is made after the NGINX call.
 The different calls have different time-outs as we can rely on some checks to
 effectively invalidate others.
 
-#### `content_type()` view
+#### Static content (css/img/js/html)
+
+ * When served under `/` the timeout is 60s
+ * When served under `/static/<salt>` marked as immutable
+ * This means whatever serves links to immutable assets:
+    * Must use `request.static_url()` to generate URLs for them
+    * Must change for new assets to be picked up
+
+#### `content_type()` view (redirect)
 
 * `max-age`: PDF: 5m, HTML 60s
 * PDFs should be relatively static, and take a while to update and change
 * HTML could be served from a wiki or other volatile source
 
-#### `pdf()`  view
+#### `pdf()`  view (html)
 
-* `max-age`: 1d
-* The PDF view only bakes in the URL for a PDF, and is basically unchanging
-* If the underlying content is no longer a PDF, then the `content_type()` timeouts should catch that
+* `max-age`: 0
+* This is the jumping off point from where we link to static assets
+* As these assets are marked immutable, this must change to pick them up
