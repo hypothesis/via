@@ -372,6 +372,4 @@ class TestContentTypeRoute:
 
 @pytest.fixture
 def template_env():
-    return Environment(
-        loader=FileSystemLoader(resource_filename("via", "templates"))
-    )
+    return Environment(loader=FileSystemLoader(resource_filename("via", "templates")))
