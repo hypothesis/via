@@ -5,7 +5,7 @@ import pyramid.config
 from pkg_resources import resource_filename
 from whitenoise import WhiteNoise
 
-from py_proxy.sentry_filters import SENTRY_FILTERS
+from via.sentry_filters import SENTRY_FILTERS
 
 REQUIRED_PARAMS = ["client_embed_url", "nginx_server", "legacy_via_url"]
 
@@ -37,13 +37,13 @@ def create_app(_=None, **settings):
     config = pyramid.config.Configurator(settings=load_settings(settings))
 
     config.include("pyramid_jinja2")
-    config.include("py_proxy.views")
+    config.include("via.views")
     config.include("h_pyramid_sentry")
 
     app = WhiteNoise(
         config.make_wsgi_app(),
         index_file=True,
-        root=resource_filename("py_proxy", "static"),
+        root=resource_filename("via", "static"),
         prefix="/",
     )
 

@@ -75,8 +75,8 @@ upgrade-package: python
 .PHONY: docker
 docker: build
 	@git archive --format=tar HEAD > build.tar
-	@tar --update -f build.tar py_proxy/static
-	@gzip -c build.tar | docker build -t hypothesis/py_proxy:$(DOCKER_TAG) -
+	@tar --update -f build.tar via/static
+	@gzip -c build.tar | docker build -t hypothesis/via3:$(DOCKER_TAG) -
 	@rm build.tar
 
 .PHONY: clean

@@ -7,7 +7,8 @@ with open(os.path.join(HERE, 'README.md')) as f:
     README = f.read()
 
 setup(
-    name='Via 3',
+    name='via',
+    version='3.0',
     description='Hypothesis Proxy Application',
     long_description=README,
     url='https://github.com/hypothesis/lms',
