@@ -3,19 +3,21 @@ import urllib
 
 import pyramid.httpexceptions as exc
 import requests
-from pkg_resources import resource_filename
 from pyramid import response, view
 from pyramid.settings import asbool
+from requests import RequestException
+
+from py_proxy.exceptions import (
+    REQUESTS_BAD_URL,
+    REQUESTS_UPSTREAM_SERVICE,
+    BadURL,
+    UnhandledException,
+    UpstreamServiceError,
+)
 
 # Client configuration query parameters.
 OPEN_SIDEBAR = "via.open_sidebar"
 CONFIG_FROM_FRAME = "via.request_config_from_frame"
-
-
-@view.view_config(renderer="py_proxy:templates/index.html.jinja2", route_name="index")
-def index(_request):
-    """Index endpoint."""
-    return {}
 
 
 @view.view_config(route_name="status")
@@ -24,28 +26,8 @@ def status(_request):
     return response.Response(status_int=200, status="200 OK", content_type="text/plain")
 
 
-@view.view_config(route_name="robots", http_cache=(86400, {"public": True}))
-def robots(request):
-    """Serve robots.txt file."""
-    return response.FileResponse(
-        resource_filename("py_proxy", "static/robots.txt"),
-        request=request,
-        content_type="text/plain",
-    )
-
-
-@view.view_config(route_name="favicon", http_cache=(86400, {"public": True}))
-def favicon(request):
-    """Serve favicon.ico file."""
-    return response.FileResponse(
-        resource_filename("py_proxy", "static/favicon.ico"),
-        request=request,
-        content_type="image/x-icon",
-    )
-
-
 @view.view_config(
-    renderer="py_proxy:templates/pdfjs_viewer.html.jinja2",
+    renderer="py_proxy:templates/pdf_viewer.html.jinja2",
     route_name="pdf",
     # We can use a relatively long expiry here, as we only ever hit this after
     # the content_type call, which has a shorter check
@@ -73,23 +55,25 @@ def content_type(request):
         request.matchdict["url"], request.params
     )
 
-    with requests.get(url, stream=True, allow_redirects=True) as rsp:
-        if rsp.headers.get("Content-Type") in ("application/x-pdf", "application/pdf"):
-            # Unless we have some very baroque error messages they shouldn't
-            # really be returning PDFs
-            return exc.HTTPFound(
-                request.route_url(
-                    "pdf", pdf_url=request.matchdict["url"], _query=request.params,
-                ),
-                headers=_caching_headers(max_age=300),
-            )
+    mime_type, status_code = _get_url_details(url)
 
-    if rsp.status_code == 404:
+    # Can PDF mime types get extra info on the end like "encoding=?"
+    if mime_type in ("application/x-pdf", "application/pdf"):
+        # Unless we have some very baroque error messages they shouldn't
+        # really be returning PDFs
+        return exc.HTTPFound(
+            request.route_url(
+                "pdf", pdf_url=request.matchdict["url"], _query=request.params,
+            ),
+            headers=_caching_headers(max_age=300),
+        )
+
+    if status_code == 404:
         # 404 - A rare case we may want to handle differently, as unusually
         # for a 4xx error, trying again can help if it becomes available
         headers = _caching_headers(max_age=60)
 
-    elif rsp.status_code < 500:
+    elif status_code < 500:
         # 2xx - OK
         # 3xx - we follow it, so this shouldn't happen
         # 4xx - no point in trying again quickly
@@ -103,6 +87,21 @@ def content_type(request):
     url = request.path_qs.lstrip("/")
 
     return exc.HTTPFound(f"{via_url}/{url}", headers=headers)
+
+
+def _get_url_details(url):
+    try:
+        with requests.get(url, stream=True, allow_redirects=True) as rsp:
+            return rsp.headers.get("Content-Type"), rsp.status_code
+
+    except REQUESTS_BAD_URL as err:
+        raise BadURL(err.args[0]) from None
+
+    except REQUESTS_UPSTREAM_SERVICE as err:
+        raise UpstreamServiceError(err.args[0]) from None
+
+    except RequestException as err:
+        raise UnhandledException(err.args[0]) from None
 
 
 def _caching_headers(max_age, stale_while_revalidate=86400):
@@ -145,10 +144,7 @@ def _generate_url_without_client_query_params(base_url, query_params):
 
 def add_routes(config):
     """Add routes to pyramid config."""
-    config.add_route("index", "/")
     config.add_route("status", "/_status")
-    config.add_route("favicon", "/favicon.ico")
-    config.add_route("robots", "/robots.txt")
     config.add_route("pdf", "/pdf/{pdf_url:.*}")
     config.add_route("content_type", "/{url:.*}")
 

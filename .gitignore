@@ -2,3 +2,5 @@
 .tox
 *.pyc
 *.egg-info/
+py_proxy/static/**/*.gz
+build.tar

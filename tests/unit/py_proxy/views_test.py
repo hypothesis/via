@@ -7,10 +7,15 @@ from h_matchers import Any
 from jinja2 import Environment, FileSystemLoader
 from pkg_resources import resource_filename
 from requests import Response
-from webtest import TestApp as WebTestApp  # No pytest, this isn't a test class
+from requests.exceptions import (
+    MissingSchema,
+    ProxyError,
+    SSLError,
+    UnrewindableBodyError,
+)
 
 from py_proxy import views
-from py_proxy.app import app
+from py_proxy.exceptions import BadURL, UnhandledException, UpstreamServiceError
 
 # pylint: disable=no-value-for-parameter
 # Pylint doesn't seem to understand h_matchers here for some reason
@@ -26,31 +31,6 @@ def assert_cache_control(headers, max_age, stale_while_revalidate):
     assert "public" in parts
     assert f"max-age={max_age}" in parts
     assert f"stale-while-revalidate={stale_while_revalidate}" in parts
-
-
-class TestIndexRoute:
-    def test_index_returns_empty_parameters_to_pass_to_template(
-        self, make_pyramid_request
-    ):
-        request = make_pyramid_request("/status")
-
-        result = views.index(request)
-
-        assert result == {}
-
-    def test_index_renders_input_for_entering_a_document_to_annotate(
-        self, template_env
-    ):
-        template = template_env.get_template("index.html.jinja2")
-        html = template.render({})
-        tree = BeautifulSoup(html, features="html.parser")
-
-        expected = (
-            '<input aria-label="Web or PDF document to annotate" '
-            'autofocus="" class="url-field" id="search" name="search" '
-            'placeholder="Paste a link to annotate" type="url"/>'
-        )
-        assert str(tree.body.form.input) == expected
 
 
 class TestStatusRoute:
@@ -69,34 +49,11 @@ class TestIncludeMe:
     views.includeme(config)
 
     assert config.add_route.call_args_list == [
-        mock.call("index", "/"),
         mock.call("status", "/_status"),
-        mock.call("favicon", "/favicon.ico"),
-        mock.call("robots", "/robots.txt"),
         mock.call("pdf", "/pdf/{pdf_url:.*}"),
         mock.call("content_type", "/{url:.*}"),
     ]
     config.scan.assert_called_once_with("py_proxy.views")
-
-
-class TestFaviconRoute:
-    def test_returns_favicon_icon(self, make_pyramid_request):
-        request = make_pyramid_request("/favicon.ico")
-
-        result = views.favicon(request)
-
-        assert result.content_type == "image/x-icon"
-        assert result.status_int == 200
-
-
-class TestRobotsTextRoute:
-    def test_returns_robots_test_file(self, make_pyramid_request):
-        request = make_pyramid_request("/robots.txt")
-
-        result = views.robots(request)
-
-        assert result.content_type == "text/plain"
-        assert result.status_int == 200
 
 
 class TestPdfRoute:
@@ -118,7 +75,7 @@ class TestPdfRoute:
     def test_pdf_renders_parameters_in_pdf_template(
         self, template_content, template_env
     ):
-        template = template_env.get_template("pdfjs_viewer.html.jinja2")
+        template = template_env.get_template("pdf_viewer.html.jinja2")
         html = template.render(
             {
                 "pdf_url": "https://via3.hypothes.is/proxy/static/http://example.com",
@@ -216,10 +173,6 @@ class TestPdfRoute:
         assert_cache_control(
             response.headers, max_age=86400, stale_while_revalidate=86400
         )
-
-    @pytest.fixture
-    def test_app(self, pyramid_settings):
-        return WebTestApp(app(None, **pyramid_settings))
 
     @pytest.fixture
     def make_pyramid_request(self, make_pyramid_request):
@@ -335,6 +288,38 @@ class TestContentTypeRoute:
         assert_cache_control(
             result.headers, max_age=max_age, stale_while_revalidate=86400
         )
+
+    @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
+    def test_invalid_urls_raise_BadURL(self, bad_url, make_pyramid_request):
+        request = make_pyramid_request(
+            request_url=f"/{bad_url}", thirdparty_url=bad_url, content_type="text/html",
+        )
+
+        with pytest.raises(BadURL):
+            views.content_type(request)
+
+    @pytest.mark.parametrize(
+        "request_exception,expected_exception",
+        (
+            (MissingSchema, BadURL),
+            (ProxyError, UpstreamServiceError),
+            (SSLError, UpstreamServiceError),
+            (UnrewindableBodyError, UnhandledException),
+        ),
+    )
+    def test_we_catch_requests_exceptions(
+        self, requests, request_exception, expected_exception, make_pyramid_request
+    ):
+        requests.get.side_effect = request_exception("Oh noe")
+
+        request = make_pyramid_request(
+            request_url="/http://example.com",
+            thirdparty_url="http://example.com",
+            content_type="text/html",
+        )
+
+        with pytest.raises(expected_exception):
+            views.content_type(request)
 
     @pytest.mark.parametrize(
         "status_code,cache",
