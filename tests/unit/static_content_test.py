@@ -23,7 +23,7 @@ class TestStaticContent:
         response = test_app.get(url)
 
         assert dict(response.headers) == Any.dict.containing(
-            {"Content-Type": Any.string.containing(mime_type), "ETag": Any.string(),}
+            {"Content-Type": Any.string.containing(mime_type), "ETag": Any.string()}
         )
 
         self.cache_assertion(response.headers, ["public", "max-age=60"])
