@@ -52,18 +52,18 @@ def create_app(_=None, **settings):
     app = WhiteNoise(
         config.make_wsgi_app(),
         index_file=True,
-        # Config for serving files at / which are marked as mutable. This must
-        # be first to allow these files to be found
-        root=resource_filename("via", "static"),
-        prefix="/",
-        # The test to see whether files are immutable (i.e. in the second set)
+        # Config for serving files at static/<salt>/path which are marked
+        # as immutable
+        root=static_path,
+        prefix=cache_buster.immutable_path,
         immutable_file_test=cache_buster.get_immutable_file_test(),
     )
 
-    # Config for serving files at immutable/<salt>/path which are marked
-    # as immutable
     app.add_files(
-        root=static_path, prefix=cache_buster.immutable_path,
+        # Config for serving files at / which are marked as mutable. This is
+        # for robots.txt and / -> index.html
+        root=resource_filename("via", "static"),
+        prefix="/",
     )
 
     return app
