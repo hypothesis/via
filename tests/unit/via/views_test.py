@@ -14,8 +14,8 @@ from requests.exceptions import (
     UnrewindableBodyError,
 )
 
-from py_proxy import views
-from py_proxy.exceptions import BadURL, UnhandledException, UpstreamServiceError
+from via import views
+from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
 
 # pylint: disable=no-value-for-parameter
 # Pylint doesn't seem to understand h_matchers here for some reason
@@ -53,7 +53,7 @@ class TestIncludeMe:
         mock.call("pdf", "/pdf/{pdf_url:.*}"),
         mock.call("content_type", "/{url:.*}"),
     ]
-    config.scan.assert_called_once_with("py_proxy.views")
+    config.scan.assert_called_once_with("via.views")
 
 
 class TestPdfRoute:
@@ -352,7 +352,7 @@ class TestContentTypeRoute:
 
     @pytest.fixture
     def requests(self, patch):
-        return patch("py_proxy.views.requests")
+        return patch("via.views.requests")
 
     @pytest.fixture
     def make_pyramid_request(self, make_pyramid_request):
@@ -372,6 +372,4 @@ class TestContentTypeRoute:
 
 @pytest.fixture
 def template_env():
-    return Environment(
-        loader=FileSystemLoader(resource_filename("py_proxy", "templates"))
-    )
+    return Environment(loader=FileSystemLoader(resource_filename("via", "templates")))

@@ -2,8 +2,8 @@
 
 from pkg_resources import resource_filename
 
-SOURCE_FILE = resource_filename("py_proxy", "static/vendor/pdfjs-2/web/viewer.html")
-TARGET_FILE = resource_filename("py_proxy", "templates/pdf_wrapper.html.jinja2")
+SOURCE_FILE = resource_filename("via", "static/vendor/pdfjs-2/web/viewer.html")
+TARGET_FILE = resource_filename("via", "templates/pdf_wrapper.html.jinja2")
 
 
 def _insert(contents, where, pattern, new_content):

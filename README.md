@@ -19,7 +19,7 @@ Installing Via 3 in a development environment
 * For now, Via 3 also redirects to legacy Via to proxy HTML pages, so you'll
   need to set up a legacy Via development environment too:
 
-  * https://github.com/hypothesis/via
+  * https://github.com/hypothesis/via3
 
 * [Git](https://git-scm.com/)
 

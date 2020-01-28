@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 
-from py_proxy.app import create_app, load_settings
-from py_proxy.sentry_filters import SENTRY_FILTERS
+from via.app import create_app, load_settings
+from via.sentry_filters import SENTRY_FILTERS
 
 
 def test_settings_raise_value_error_if_environment_variable_is_not_set():
@@ -37,7 +37,7 @@ def test_app(configurator, pyramid, os_env):
     )
     assert configurator.include.call_args_list == [
         mock.call("pyramid_jinja2"),
-        mock.call("py_proxy.views"),
+        mock.call("via.views"),
         mock.call("h_pyramid_sentry"),
     ]
     configurator.make_wsgi_app.assert_called_once_with()
@@ -50,7 +50,7 @@ def configurator(pyramid):
 
 @pytest.fixture(autouse=True)
 def pyramid(patch):
-    return patch("py_proxy.app.pyramid")
+    return patch("via.app.pyramid")
 
 
 @pytest.fixture
@@ -63,6 +63,6 @@ def os_env(patch):
         }
         return env[env_var]
 
-    os = patch("py_proxy.app.os")
+    os = patch("via.app.os")
     os.environ.get = get
     return os

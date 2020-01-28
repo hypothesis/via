@@ -16,7 +16,7 @@ set -eu
 # If you make changes to the PDF.js viewer template generator only and want to
 # regenerate the HTML template, run this script with the `--no-download` flag.
 
-DEST_DIR=py_proxy/static/vendor/pdfjs-2
+DEST_DIR=via/static/vendor/pdfjs-2
 PREFIX=pdf.js-gh-pages
 COMPONENTS="$PREFIX/build $PREFIX/web $PREFIX/LICENSE"
 

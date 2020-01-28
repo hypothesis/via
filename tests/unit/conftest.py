@@ -9,8 +9,8 @@ import webtest
 from pyramid import testing
 from pyramid.request import Request
 
-from py_proxy.app import create_app
-from py_proxy.views import add_routes
+from via.app import create_app
+from via.views import add_routes
 
 
 def autopatcher(request, target, **kwargs):

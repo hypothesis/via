@@ -7,7 +7,7 @@ from pyramid import response, view
 from pyramid.settings import asbool
 from requests import RequestException
 
-from py_proxy.exceptions import (
+from via.exceptions import (
     REQUESTS_BAD_URL,
     REQUESTS_UPSTREAM_SERVICE,
     BadURL,
@@ -27,7 +27,7 @@ def status(_request):
 
 
 @view.view_config(
-    renderer="py_proxy:templates/pdf_viewer.html.jinja2",
+    renderer="via:templates/pdf_viewer.html.jinja2",
     route_name="pdf",
     # We can use a relatively long expiry here, as we only ever hit this after
     # the content_type call, which has a shorter check
