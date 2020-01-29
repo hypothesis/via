@@ -3,7 +3,7 @@
 from pyramid import view
 from pyramid.settings import asbool
 
-from via.views.query_params import (
+from via.views._query_params import (
     CONFIG_FROM_FRAME,
     OPEN_SIDEBAR,
     strip_client_query_params,

@@ -13,7 +13,7 @@ from requests.exceptions import (
 
 from tests.unit.conftest import assert_cache_control
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
-from via.views.route_by_content_view import route_by_content
+from via.views.route_by_content import route_by_content
 
 
 class TestRouteByContent:
@@ -185,7 +185,7 @@ class TestRouteByContent:
 
     @pytest.fixture
     def requests(self, patch):
-        return patch("via.views.route_by_content_view.requests")
+        return patch("via.views.route_by_content.requests")
 
     @pytest.fixture
     def make_pyramid_request(self, make_pyramid_request):

@@ -1,4 +1,4 @@
-from via.views.monitoring_views import get_status
+from via.views.monitoring import get_status
 
 
 class TestStatusRoute:

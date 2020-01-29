@@ -12,7 +12,7 @@ from via.exceptions import (
     UnhandledException,
     UpstreamServiceError,
 )
-from via.views.query_params import strip_client_query_params
+from via.views._query_params import strip_client_query_params
 
 
 @view.view_config(route_name="route_by_content")

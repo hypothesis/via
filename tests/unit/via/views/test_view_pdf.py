@@ -1,7 +1,7 @@
 import pytest
 
 from tests.unit.conftest import assert_cache_control
-from via.views.view_pdf_view import view_pdf
+from via.views.view_pdf import view_pdf
 
 
 class TestPdfRoute:
