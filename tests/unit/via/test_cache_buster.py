@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from mock import sentinel
 
@@ -7,11 +5,22 @@ from via.cache_buster import PathCacheBuster
 
 
 class TestPathCacheBuster:
-    NEWER = 1500000000
-    OLDER = 1400000000
+    EXPECTED_HASH = "606e8d07c0af18c736c272a592038742"
 
-    def test_salt_is_generated_from_newest_mtime(self, cache_buster):
-        assert int(float(cache_buster.salt)) == self.NEWER
+    def test_salt_is_generated_from_dir_hash(self, cache_buster):
+        assert cache_buster.salt == self.EXPECTED_HASH
+
+    def test_salt_changes_on_new_file(self, static_dir):
+        new_file = static_dir / "new_file.txt"
+        new_file.write_text("NEW")
+
+        assert PathCacheBuster(static_dir).salt != self.EXPECTED_HASH
+
+    def test_salt_changes_on_content_change(self, static_dir):
+        style_file = static_dir / "style.css"
+        style_file.write_text("SOMETHING DIFFERENT")
+
+        assert PathCacheBuster(static_dir).salt != self.EXPECTED_HASH
 
     def test_immutable_test(self, cache_buster):
         test = cache_buster.get_immutable_file_test()
@@ -25,14 +34,16 @@ class TestPathCacheBuster:
         assert response == (f"{cache_buster.salt}/css/style.css", sentinel.kwargs)
 
     @pytest.fixture
-    def cache_buster(self, tmp_path):
-        for name, age, content in (
-            ("style.css", self.NEWER, "CSS"),
-            ("index.html", self.OLDER, "HTML"),
+    def static_dir(self, tmp_path):
+        for name, content in (
+            ("style.css", "CSS"),
+            ("index.html", "HTML"),
         ):
             path = tmp_path / name
             path.write_text(content)
 
-            os.utime(str(path), (age, age))
+        return tmp_path
 
-        return PathCacheBuster(tmp_path)
+    @pytest.fixture
+    def cache_buster(self, static_dir):
+        return PathCacheBuster(static_dir)

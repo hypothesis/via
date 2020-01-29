@@ -1,5 +1,6 @@
 """Pyramid CacheBusters."""
 
+import hashlib
 import os
 
 
@@ -11,8 +12,8 @@ class PathCacheBuster:
     which contains the last modified time.
 
     This allows assets to be statically cached until at least one of them has
-    changed. This is achieved by generating a salt value from the last
-    modified time of the files which is applied to the input URL.
+    changed. This is achieved by generating a salt value from a hash of the
+    files which is applied to the input URL.
 
     :param path: Path to static for generating the salt value
     """
@@ -23,7 +24,7 @@ class PathCacheBuster:
     def __call__(self, request, subpath, kw):  # pylint: disable=invalid-name
         """Prepend the salt to the path.
 
-        Implements the ICacheBuster iterface.
+        Implements the ICacheBuster interface.
         """
         return f"{self.salt}/{subpath}", kw
 
@@ -43,15 +44,18 @@ class PathCacheBuster:
 
     @staticmethod
     def _generate_salt(path):
-        """Generate salt based on the last modified time.
+        """Generate salt based on the last hash of all files.
 
         This ensures we only change salt when at least one file has changed.
         """
-        max_mtime = 0
+        hash = hashlib.md5()
 
-        for base_dir, _, file_names in os.walk(path):
-            for file_name in file_names:
-                path = os.path.join(base_dir, file_name)
-                max_mtime = max(max_mtime, os.stat(path).st_mtime)
+        for base_dir, dirs, file_names in os.walk(path):
+            # Ensure we move through the dirs in the same order every time
+            dirs.sort()
 
-        return str(max_mtime)
+            for file_name in sorted(file_names):
+                with open(os.path.join(base_dir, file_name), "rb") as handle:
+                    hash.update(handle.read())
+
+        return hash.hexdigest()
