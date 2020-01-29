@@ -12,24 +12,24 @@ from via.exceptions import (
     UnhandledException,
     UpstreamServiceError,
 )
-from via.views._query_params import strip_client_query_params
+from via.views._query_params import QueryParams
 
 
 @view.view_config(route_name="route_by_content")
 def route_by_content(request):
     """Routes the request according to the Content-Type header."""
-    url = strip_client_query_params(request.matchdict["url"], request.params)
+    path_url = request.matchdict["url"]
 
-    mime_type, status_code = _get_url_details(url)
+    mime_type, status_code = _get_url_details(
+        url=QueryParams.build_url(path_url, request.params, strip_via_params=True)
+    )
 
     # Can PDF mime types get extra info on the end like "encoding=?"
     if mime_type in ("application/x-pdf", "application/pdf"):
         # Unless we have some very baroque error messages they shouldn't
         # really be returning PDFs
         return exc.HTTPFound(
-            request.route_url(
-                "view_pdf", pdf_url=request.matchdict["url"], _query=request.params,
-            ),
+            request.route_url("view_pdf", pdf_url=path_url, _query=request.params,),
             headers=_caching_headers(max_age=300),
         )
 
@@ -49,9 +49,13 @@ def route_by_content(request):
         headers = {"Cache-Control": "no-cache"}
 
     via_url = request.registry.settings["legacy_via_url"]
-    url = request.path_qs.lstrip("/")
 
-    return exc.HTTPFound(f"{via_url}/{url}", headers=headers)
+    return exc.HTTPFound(
+        QueryParams.build_url(
+            f"{via_url}/{path_url}", request.params, strip_via_params=False
+        ),
+        headers=headers,
+    )
 
 
 def _get_url_details(url):

@@ -13,57 +13,11 @@ from requests.exceptions import (
 
 from tests.unit.conftest import assert_cache_control
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
+from via.views._query_params import QueryParams
 from via.views.route_by_content import route_by_content
 
 
 class TestRouteByContent:
-    @pytest.mark.parametrize(
-        "requested_path,expected_location,content_type",
-        [
-            # If the requested pdf URL has no query string then it should just
-            # redirect to the requested URL, with no query string (but with the
-            (
-                "/https://example.com/foo",
-                "http://localhost/pdf/https://example.com/foo",
-                "application/pdf",
-            ),
-            # If the requested pdf URL has a query string then the query string
-            # should be preserved in the URL that it redirects to.
-            (
-                "/https://example.com/foo?bar=baz",
-                "http://localhost/pdf/https://example.com/foo?bar=baz",
-                "application/pdf",
-            ),
-            # If the requested html URL has a query string then the query string
-            # should be preserved in the URL that it redirects to.
-            (
-                "/https://example.com/foo?bar=baz",
-                "http://via.hypothes.is/https://example.com/foo?bar=baz",
-                "text/html",
-            ),
-            # If the requested html URL has a client query params then the query params
-            # should be preserved in the URL that it redirects to.
-            (
-                "/https://example.com/foo?via.open_sidebar=1",
-                "http://via.hypothes.is/https://example.com/foo?via.open_sidebar=1",
-                "text/html",
-            ),
-        ],
-    )
-    def test_redirect_location(
-        self, make_pyramid_request, requested_path, expected_location, content_type
-    ):
-
-        request = make_pyramid_request(
-            request_url=requested_path,
-            thirdparty_url="https://example.com/foo",
-            content_type=content_type,
-        )
-
-        redirect = route_by_content(request)
-
-        assert redirect.location == expected_location
-
     @pytest.mark.parametrize(
         "content_type,redirect_url",
         [
@@ -85,10 +39,8 @@ class TestRouteByContent:
 
         assert result.location == redirect_url
 
-    @pytest.mark.parametrize(
-        "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
-    )
-    def test_does_not_pass_via_query_params_to_thirdparty_server(
+    @pytest.mark.parametrize("query_param", QueryParams.ALL_PARAMS)
+    def test_does_not_pass_via_query_params_to_third_parties(
         self, make_pyramid_request, query_param
     ):
         request = make_pyramid_request(

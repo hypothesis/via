@@ -3,11 +3,7 @@
 from pyramid import view
 from pyramid.settings import asbool
 
-from via.views._query_params import (
-    CONFIG_FROM_FRAME,
-    OPEN_SIDEBAR,
-    strip_client_query_params,
-)
+from via.views._query_params import QueryParams
 
 
 @view.view_config(
@@ -20,12 +16,14 @@ from via.views._query_params import (
 def view_pdf(request):
     """HTML page with client and the PDF embedded."""
     nginx_server = request.registry.settings["nginx_server"]
-    pdf_url = strip_client_query_params(request.matchdict["pdf_url"], request.params)
+    pdf_url = QueryParams.build_url(
+        request.matchdict["pdf_url"], request.params, strip_via_params=True
+    )
 
     return {
         "pdf_url": f"{nginx_server}/proxy/static/{pdf_url}",
         "client_embed_url": request.registry.settings["client_embed_url"],
-        "h_open_sidebar": asbool(request.params.get(OPEN_SIDEBAR, False)),
-        "h_request_config": request.params.get(CONFIG_FROM_FRAME, None),
+        "h_open_sidebar": asbool(request.params.get(QueryParams.OPEN_SIDEBAR, False)),
+        "h_request_config": request.params.get(QueryParams.CONFIG_FROM_FRAME, None),
         "static_url": request.static_url,
     }

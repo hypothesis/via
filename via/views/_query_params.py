@@ -1,37 +1,35 @@
 """Methods and data relating to query parameters."""
 
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
-# Client configuration query parameters.
-OPEN_SIDEBAR = "via.open_sidebar"
-CONFIG_FROM_FRAME = "via.request_config_from_frame"
+from webob.multidict import MultiDict
 
 
-def strip_client_query_params(base_url, query_params):
-    """Return ``base_url`` with non-Via params from ``query_params`` appended.
+class QueryParams:
+    """Client configuration query parameters and related functions."""
 
-    Return ``base_url`` with all the non-Via query params from ``query_params``
-    appended to it as a query string. Any params in ``query_params`` that are
-    meant for Via (the ``"via.*`` query params) will be ignored and *not*
-    appended to the returned URL.
+    # pylint: disable=too-few-public-methods
 
-    :param base_url: the protocol, domain and path, for example: https://thirdparty.url/foo.pdf
-    :type base_url: str
+    OPEN_SIDEBAR = "via.open_sidebar"
+    CONFIG_FROM_FRAME = "via.request_config_from_frame"
+    ALL_PARAMS = {OPEN_SIDEBAR, CONFIG_FROM_FRAME}
 
-    :param query_params: the query params to be added to base_url
-    :type query_params: dict
+    @classmethod
+    def build_url(cls, url, query, strip_via_params):
+        """Add the query to the url, optionally removing via related params.
 
-    :return: ``base_url`` with the non-Via query params appended
-    :rtype: str
-    """
-    client_params = [OPEN_SIDEBAR, CONFIG_FROM_FRAME]
-    filtered_params = urlencode(
-        {
-            param: value
-            for param, value in query_params.items()
-            if param not in client_params
-        }
-    )
-    if filtered_params:
-        return f"{base_url}?{filtered_params}"
-    return base_url
+        :param url: URL to base the new URL on
+        :param query: Dict of query parameters
+        :param strip_via_params: Enable removal of via params
+        :return: A new URL with the relevant query params added
+        """
+
+        # Coerce any immutable NestedMultiDict's into mutable a MultiDict
+        if strip_via_params:
+            query = MultiDict(query)
+
+            via_keys = [key for key in query.keys() if key in cls.ALL_PARAMS]
+            for key in via_keys:
+                query.pop(key, None)
+
+        return urlparse(url)._replace(query=urlencode(query)).geturl()
