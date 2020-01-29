@@ -64,7 +64,7 @@ means the Python call is made after the NGINX call.
 The different calls have different time-outs as we can rely on some checks to
 effectively invalidate others.
 
-#### Static content (css/img/js/html)
+#### Static content (CSS, images, JavaScript, HTML, ...)
 
  * When served under `/` the timeout is 60s
  * When served under `/static/<salt>` marked as immutable
