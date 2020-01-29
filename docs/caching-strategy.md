@@ -72,13 +72,13 @@ effectively invalidate others.
     * Must use `request.static_url()` to generate URLs for them
     * Must change for new assets to be picked up
 
-#### `content_type()` view (redirect)
+#### `route_by_content()` view (redirect)
 
 * `max-age`: PDF: 5m, HTML 60s
 * PDFs should be relatively static, and take a while to update and change
 * HTML could be served from a wiki or other volatile source
 
-#### `pdf()`  view (html)
+#### `view_pdf()`  view (html)
 
 * `max-age`: 0
 * This is the jumping off point from where we link to static assets

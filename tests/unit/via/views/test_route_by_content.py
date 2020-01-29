@@ -11,141 +11,12 @@ from requests.exceptions import (
     UnrewindableBodyError,
 )
 
-from via import views
+from tests.unit.conftest import assert_cache_control
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
-
-# pylint: disable=no-value-for-parameter
-# Pylint doesn't seem to understand h_matchers here for some reason
+from via.views.route_by_content import route_by_content
 
 
-def assert_cache_control(headers, cache_parts):
-    assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
-    assert (
-        headers["Cache-Control"].split(", ") == Any.list.containing(cache_parts).only()
-    )
-
-
-class TestStatusRoute:
-    def test_status_returns_200_response(self, make_pyramid_request):
-        request = make_pyramid_request("/status")
-
-        result = views.status(request)
-
-        assert result.status == "200 OK"
-        assert result.status_int == 200
-
-
-class TestIncludeMe:
-    config = mock.MagicMock()
-
-    views.includeme(config)
-
-    assert config.add_route.call_args_list == [
-        mock.call("status", "/_status"),
-        mock.call("pdf", "/pdf/{pdf_url:.*}"),
-        mock.call("content_type", "/{url:.*}"),
-    ]
-    config.scan.assert_called_once_with("via.views")
-
-
-class TestPdfRoute:
-    @pytest.mark.parametrize(
-        "pdf_url",
-        [
-            "http://example.com/foo.pdf",
-            "http://example.com/foo.pdf?param1=abc&param2=123",
-        ],
-    )
-    def test_pdf_passes_thirdparty_url_to_renderer(self, make_pyramid_request, pdf_url):
-        request = make_pyramid_request(f"/pdf/{pdf_url}", "http://example.com/foo.pdf")
-        nginx_server = request.registry.settings.get("nginx_server")
-
-        result = views.pdf(request)
-
-        assert result["pdf_url"] == f"{nginx_server}/proxy/static/{pdf_url}"
-
-    @pytest.mark.parametrize(
-        "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
-    )
-    def test_does_not_include_via_query_params_in_pdf_url(
-        self, make_pyramid_request, query_param
-    ):
-        url = (
-            "http://example.com/foo.pdf?param1=abc&param2=123"
-            "&via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
-        )
-
-        request = make_pyramid_request(f"/pdf/{url}", "http://example.com/foo.pdf")
-
-        result = views.pdf(request)
-
-        assert query_param not in result["pdf_url"]
-
-    def test_pdf_passes_client_embed_url_to_renderer(self, make_pyramid_request):
-        pdf_url = "https://example.com/foo.pdf"
-        request = make_pyramid_request(f"/pdf/{pdf_url}", pdf_url)
-
-        result = views.pdf(request)
-
-        assert (
-            result["client_embed_url"] == request.registry.settings["client_embed_url"]
-        )
-
-    @pytest.mark.parametrize(
-        "request_url,expected_h_open_sidebar",
-        [
-            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=1", True),
-            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=foo", False),
-            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=0", False),
-            ("/pdf/https://example.com/foo.pdf", False),
-        ],
-    )
-    def test_pdf_passes_open_sidebar_query_parameter_to_renderer(
-        self, make_pyramid_request, request_url, expected_h_open_sidebar
-    ):
-        request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
-
-        result = views.pdf(request)
-
-        assert result["h_open_sidebar"] == expected_h_open_sidebar
-
-    @pytest.mark.parametrize(
-        "request_url,expected_h_request_config",
-        [
-            (
-                "/pdf/http://example.com/foo.pdf?"
-                "via.request_config_from_frame=http://lms.hypothes.is",
-                "http://lms.hypothes.is",
-            ),
-            ("/pdf/http://example.com/foo.pdf", None),
-        ],
-    )
-    def test_pdf_passes_request_config_from_frame_query_parameter_to_renderer(
-        self, make_pyramid_request, request_url, expected_h_request_config
-    ):
-        request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
-        result = views.pdf(request)
-
-        assert result["h_request_config"] == expected_h_request_config
-
-    def test_pdf_html_prevents_caching(self, test_app):
-        response = test_app.get("/pdf/http://example.com/foo.pdf")
-
-        assert_cache_control(
-            response.headers, ["max-age=0", "must-revalidate", "no-cache", "no-store"]
-        )
-
-    @pytest.fixture
-    def make_pyramid_request(self, make_pyramid_request):
-        def _make_pyramid_request(request_url, thirdparty_url):
-            request = make_pyramid_request(request_url)
-            request.matchdict = {"pdf_url": thirdparty_url}
-            return request
-
-        return _make_pyramid_request
-
-
-class TestContentTypeRoute:
+class TestRouteByContent:
     @pytest.mark.parametrize(
         "requested_path,expected_location,content_type",
         [
@@ -189,7 +60,7 @@ class TestContentTypeRoute:
             content_type=content_type,
         )
 
-        redirect = views.content_type(request)
+        redirect = route_by_content(request)
 
         assert redirect.location == expected_location
 
@@ -210,7 +81,7 @@ class TestContentTypeRoute:
             content_type=content_type,
         )
 
-        result = views.content_type(request)
+        result = route_by_content(request)
 
         assert result.location == redirect_url
 
@@ -227,7 +98,7 @@ class TestContentTypeRoute:
             content_type="application/pdf",
         )
 
-        views.content_type(request)
+        route_by_content(request)
 
         # pylint: disable=no-member
         assert query_param not in httpretty.last_request().path
@@ -244,7 +115,7 @@ class TestContentTypeRoute:
             content_type=content_type,
         )
 
-        result = views.content_type(request)
+        result = route_by_content(request)
 
         assert_cache_control(
             result.headers,
@@ -258,7 +129,7 @@ class TestContentTypeRoute:
         )
 
         with pytest.raises(BadURL):
-            views.content_type(request)
+            route_by_content(request)
 
     @pytest.mark.parametrize(
         "request_exception,expected_exception",
@@ -281,7 +152,7 @@ class TestContentTypeRoute:
         )
 
         with pytest.raises(expected_exception):
-            views.content_type(request)
+            route_by_content(request)
 
     @pytest.mark.parametrize(
         "status_code,cache",
@@ -302,7 +173,7 @@ class TestContentTypeRoute:
 
         requests.get.return_value = response
 
-        result = views.content_type(
+        result = route_by_content(
             make_pyramid_request(
                 request_url="/http://example.com",
                 thirdparty_url="http://example.com",
@@ -314,7 +185,7 @@ class TestContentTypeRoute:
 
     @pytest.fixture
     def requests(self, patch):
-        return patch("via.views.requests")
+        return patch("via.views.route_by_content.requests")
 
     @pytest.fixture
     def make_pyramid_request(self, make_pyramid_request):

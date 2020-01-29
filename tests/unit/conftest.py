@@ -6,6 +6,7 @@ from unittest import mock
 import httpretty
 import pytest
 import webtest
+from h_matchers import Any
 from pyramid import testing
 from pyramid.request import Request
 
@@ -73,3 +74,11 @@ def httpretty_():
 
     httpretty.disable()
     httpretty.reset()
+
+
+def assert_cache_control(headers, cache_parts):
+    """Assert that all parts of the Cache-Control header are present."""
+    assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
+    assert (
+        headers["Cache-Control"].split(", ") == Any.list.containing(cache_parts).only()
+    )
