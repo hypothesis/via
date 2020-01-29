@@ -2,6 +2,7 @@
 
 from urllib.parse import urlencode
 
+# Client configuration query parameters.
 OPEN_SIDEBAR = "via.open_sidebar"
 CONFIG_FROM_FRAME = "via.request_config_from_frame"
 

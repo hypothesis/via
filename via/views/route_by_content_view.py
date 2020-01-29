@@ -12,7 +12,6 @@ from via.exceptions import (
     UnhandledException,
     UpstreamServiceError,
 )
-# Client configuration query parameters.
 from via.views.query_params import strip_client_query_params
 
 
