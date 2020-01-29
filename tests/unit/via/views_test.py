@@ -29,7 +29,7 @@ class TestStatusRoute:
     def test_status_returns_200_response(self, make_pyramid_request):
         request = make_pyramid_request("/status")
 
-        result = views.status(request)
+        result = views.get_status(request)
 
         assert result.status == "200 OK"
         assert result.status_int == 200
@@ -41,9 +41,9 @@ class TestIncludeMe:
     views.includeme(config)
 
     assert config.add_route.call_args_list == [
-        mock.call("status", "/_status"),
-        mock.call("pdf", "/pdf/{pdf_url:.*}"),
-        mock.call("content_type", "/{url:.*}"),
+        mock.call("get_status", "/_status"),
+        mock.call("view_pdf", "/pdf/{pdf_url:.*}"),
+        mock.call("route_by_content", "/{url:.*}"),
     ]
     config.scan.assert_called_once_with("via.views")
 
@@ -60,7 +60,7 @@ class TestPdfRoute:
         request = make_pyramid_request(f"/pdf/{pdf_url}", "http://example.com/foo.pdf")
         nginx_server = request.registry.settings.get("nginx_server")
 
-        result = views.pdf(request)
+        result = views.view_pdf(request)
 
         assert result["pdf_url"] == f"{nginx_server}/proxy/static/{pdf_url}"
 
@@ -77,7 +77,7 @@ class TestPdfRoute:
 
         request = make_pyramid_request(f"/pdf/{url}", "http://example.com/foo.pdf")
 
-        result = views.pdf(request)
+        result = views.view_pdf(request)
 
         assert query_param not in result["pdf_url"]
 
@@ -85,7 +85,7 @@ class TestPdfRoute:
         pdf_url = "https://example.com/foo.pdf"
         request = make_pyramid_request(f"/pdf/{pdf_url}", pdf_url)
 
-        result = views.pdf(request)
+        result = views.view_pdf(request)
 
         assert (
             result["client_embed_url"] == request.registry.settings["client_embed_url"]
@@ -105,7 +105,7 @@ class TestPdfRoute:
     ):
         request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
 
-        result = views.pdf(request)
+        result = views.view_pdf(request)
 
         assert result["h_open_sidebar"] == expected_h_open_sidebar
 
@@ -124,7 +124,7 @@ class TestPdfRoute:
         self, make_pyramid_request, request_url, expected_h_request_config
     ):
         request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
-        result = views.pdf(request)
+        result = views.view_pdf(request)
 
         assert result["h_request_config"] == expected_h_request_config
 
@@ -189,7 +189,7 @@ class TestContentTypeRoute:
             content_type=content_type,
         )
 
-        redirect = views.content_type(request)
+        redirect = views.route_by_content(request)
 
         assert redirect.location == expected_location
 
@@ -210,7 +210,7 @@ class TestContentTypeRoute:
             content_type=content_type,
         )
 
-        result = views.content_type(request)
+        result = views.route_by_content(request)
 
         assert result.location == redirect_url
 
@@ -227,7 +227,7 @@ class TestContentTypeRoute:
             content_type="application/pdf",
         )
 
-        views.content_type(request)
+        views.route_by_content(request)
 
         # pylint: disable=no-member
         assert query_param not in httpretty.last_request().path
@@ -244,7 +244,7 @@ class TestContentTypeRoute:
             content_type=content_type,
         )
 
-        result = views.content_type(request)
+        result = views.route_by_content(request)
 
         assert_cache_control(
             result.headers,
@@ -258,7 +258,7 @@ class TestContentTypeRoute:
         )
 
         with pytest.raises(BadURL):
-            views.content_type(request)
+            views.route_by_content(request)
 
     @pytest.mark.parametrize(
         "request_exception,expected_exception",
@@ -281,7 +281,7 @@ class TestContentTypeRoute:
         )
 
         with pytest.raises(expected_exception):
-            views.content_type(request)
+            views.route_by_content(request)
 
     @pytest.mark.parametrize(
         "status_code,cache",
@@ -302,7 +302,7 @@ class TestContentTypeRoute:
 
         requests.get.return_value = response
 
-        result = views.content_type(
+        result = views.route_by_content(
             make_pyramid_request(
                 request_url="/http://example.com",
                 thirdparty_url="http://example.com",

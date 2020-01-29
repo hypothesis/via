@@ -20,20 +20,20 @@ OPEN_SIDEBAR = "via.open_sidebar"
 CONFIG_FROM_FRAME = "via.request_config_from_frame"
 
 
-@view.view_config(route_name="status")
-def status(_request):
+@view.view_config(route_name="get_status")
+def get_status(_request):
     """Status endpoint."""
     return response.Response(status_int=200, status="200 OK", content_type="text/plain")
 
 
 @view.view_config(
     renderer="via:templates/pdf_viewer.html.jinja2",
-    route_name="pdf",
+    route_name="view_pdf",
     # We have to keep the leash short here for caching so we can pick up new
     # immutable assets when they are deployed
     http_cache=0,
 )
-def pdf(request):
+def view_pdf(request):
     """HTML page with client and the PDF embedded."""
     nginx_server = request.registry.settings["nginx_server"]
     pdf_url = _generate_url_without_client_query_params(
@@ -49,8 +49,8 @@ def pdf(request):
     }
 
 
-@view.view_config(route_name="content_type")
-def content_type(request):
+@view.view_config(route_name="route_by_content")
+def route_by_content(request):
     """Routes the request according to the Content-Type header."""
     url = _generate_url_without_client_query_params(
         request.matchdict["url"], request.params
@@ -64,7 +64,7 @@ def content_type(request):
         # really be returning PDFs
         return exc.HTTPFound(
             request.route_url(
-                "pdf", pdf_url=request.matchdict["url"], _query=request.params,
+                "view_pdf", pdf_url=request.matchdict["url"], _query=request.params,
             ),
             headers=_caching_headers(max_age=300),
         )
@@ -145,9 +145,9 @@ def _generate_url_without_client_query_params(base_url, query_params):
 
 def add_routes(config):
     """Add routes to pyramid config."""
-    config.add_route("status", "/_status")
-    config.add_route("pdf", "/pdf/{pdf_url:.*}")
-    config.add_route("content_type", "/{url:.*}")
+    config.add_route("get_status", "/_status")
+    config.add_route("view_pdf", "/pdf/{pdf_url:.*}")
+    config.add_route("route_by_content", "/{url:.*}")
 
 
 def includeme(config):
