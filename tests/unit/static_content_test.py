@@ -38,6 +38,12 @@ class TestStaticContent:
         )
 
     def get_salt(self, test_app):
+        """Get the salt value being used by the app.
+
+        The most sure fire way to get the exact salt value being used is to
+        actually make a call with immutable assets and then scrape the HTML
+        for the salt value.
+        """
         response = test_app.get(f"/pdf/http://example.com")
         static_match = re.search("/static/([^/]+)/", response.text)
         assert static_match
@@ -45,6 +51,11 @@ class TestStaticContent:
         return static_match.group(1)
 
     def cache_assertion(self, headers, cache_parts):
+        """Assert Cache-Control is on with the specified parts.
+
+        :param headers: Headers to search through
+        :param cache_parts: List of parts which must all be present
+        """
         assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
 
         assert (

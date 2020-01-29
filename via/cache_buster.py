@@ -48,7 +48,7 @@ class PathCacheBuster:
 
         This ensures we only change salt when at least one file has changed.
         """
-        hash = hashlib.md5()
+        hasher = hashlib.md5()
 
         for base_dir, dirs, file_names in os.walk(path):
             # Ensure we move through the dirs in the same order every time
@@ -56,6 +56,6 @@ class PathCacheBuster:
 
             for file_name in sorted(file_names):
                 with open(os.path.join(base_dir, file_name), "rb") as handle:
-                    hash.update(handle.read())
+                    hasher.update(handle.read())
 
-        return hash.hexdigest()
+        return hasher.hexdigest()
