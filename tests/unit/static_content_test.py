@@ -7,6 +7,7 @@ from h_matchers import Any
 
 # pylint: disable=no-value-for-parameter
 # Pylint doesn't seem to understand h_matchers here for some reason
+from tests.unit.conftest import assert_cache_control
 
 
 class TestStaticContent:
@@ -26,14 +27,14 @@ class TestStaticContent:
             {"Content-Type": Any.string.containing(mime_type), "ETag": Any.string()}
         )
 
-        self.cache_assertion(response.headers, ["public", "max-age=60"])
+        assert_cache_control(response.headers, ["public", "max-age=60"])
 
     def test_immutable_contents(self, test_app):
         salt = self.get_salt(test_app)
 
         response = test_app.get(f"/static/{salt}/robots.txt")
 
-        self.cache_assertion(
+        assert_cache_control(
             response.headers, ["max-age=315360000", "public", "immutable"]
         )
 
@@ -49,16 +50,3 @@ class TestStaticContent:
         assert static_match
 
         return static_match.group(1)
-
-    def cache_assertion(self, headers, cache_parts):
-        """Assert Cache-Control is on with the specified parts.
-
-        :param headers: Headers to search through
-        :param cache_parts: List of parts which must all be present
-        """
-        assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
-
-        assert (
-            headers["Cache-Control"].split(", ")
-            == Any.list.containing(cache_parts).only()
-        )
