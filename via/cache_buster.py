@@ -50,8 +50,9 @@ class PathCacheBuster:
         """
         hasher = hashlib.md5()
 
-        for base_dir, dirs, file_names in os.walk(path):
-            # Ensure we move through the dirs in the same order every time
+        for base_dir, dirs, file_names in os.walk(path, topdown=True):
+            # os.walk will respect our order as long as topdown=True. This
+            # ensures the same iteration through the files each time
             dirs.sort()
 
             for file_name in sorted(file_names):
