@@ -5,6 +5,7 @@ import pyramid.config
 from pkg_resources import resource_filename
 from whitenoise import WhiteNoise
 
+from via.cache_buster import PathCacheBuster
 from via.sentry_filters import SENTRY_FILTERS
 
 REQUIRED_PARAMS = ["client_embed_url", "nginx_server", "legacy_via_url"]
@@ -40,9 +41,27 @@ def create_app(_=None, **settings):
     config.include("via.views")
     config.include("h_pyramid_sentry")
 
+    # Configure Pyramid so we can generate static URLs
+    static_path = resource_filename("via", "static")
+    cache_buster = PathCacheBuster(static_path)
+    print(f"Cache buster salt: {cache_buster.salt}")
+
+    config.add_static_view(name="static", path="via:static")
+    config.add_cache_buster("via:static", cachebust=cache_buster)
+
     app = WhiteNoise(
         config.make_wsgi_app(),
         index_file=True,
+        # Config for serving files at static/<salt>/path which are marked
+        # as immutable
+        root=static_path,
+        prefix=cache_buster.immutable_path,
+        immutable_file_test=cache_buster.get_immutable_file_test(),
+    )
+
+    app.add_files(
+        # Config for serving files at / which are marked as mutable. This is
+        # for robots.txt and / -> index.html
         root=resource_filename("via", "static"),
         prefix="/",
     )

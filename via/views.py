@@ -29,9 +29,9 @@ def status(_request):
 @view.view_config(
     renderer="via:templates/pdf_viewer.html.jinja2",
     route_name="pdf",
-    # We can use a relatively long expiry here, as we only ever hit this after
-    # the content_type call, which has a shorter check
-    http_cache=(86400, {"public": True, "stale_while_revalidate": 86400}),
+    # We have to keep the leash short here for caching so we can pick up new
+    # immutable assets when they are deployed
+    http_cache=0,
 )
 def pdf(request):
     """HTML page with client and the PDF embedded."""
@@ -45,6 +45,7 @@ def pdf(request):
         "client_embed_url": request.registry.settings["client_embed_url"],
         "h_open_sidebar": asbool(request.params.get(OPEN_SIDEBAR, False)),
         "h_request_config": request.params.get(CONFIG_FROM_FRAME, None),
+        "static_url": request.static_url,
     }
 
 

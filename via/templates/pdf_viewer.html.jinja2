@@ -1,7 +1,7 @@
 {% extends "pdf_wrapper.html.jinja2" %}
 
 {% block head %}
-    <base href="/vendor/pdfjs-2/web/">
+    <base href="{{ static_url("via:static/vendor/pdfjs-2/web/") }}">
 
     <title>via Hypothesis</title>
     {#
@@ -15,7 +15,8 @@
     window.CLIENT_EMBED_URL = "{{ client_embed_url }}";
     </script>
 
-    <script src="/js/pdfjs-init.js"></script>
+    <link rel="icon" href="{{ static_url("via:static/favicon.ico") }}" type="image/x-icon" />
+    <script src="{{ static_url("via:static/js/pdfjs-init.js") }}"></script>
 
     {# Configure Hypothesis client. #}
     <script>
