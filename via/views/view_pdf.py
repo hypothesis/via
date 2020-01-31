@@ -1,5 +1,6 @@
 """View presenting the PDF viewer."""
 
+from markupsafe import Markup
 from pyramid import view
 from pyramid.settings import asbool
 
@@ -21,8 +22,8 @@ def view_pdf(request):
     )
 
     return {
-        "pdf_url": f"{nginx_server}/proxy/static/{pdf_url}",
-        "client_embed_url": request.registry.settings["client_embed_url"],
+        "pdf_url": Markup(f"{nginx_server}/proxy/static/{pdf_url}"),
+        "client_embed_url": Markup(request.registry.settings["client_embed_url"]),
         "h_open_sidebar": asbool(request.params.get(QueryParams.OPEN_SIDEBAR, False)),
         "h_request_config": request.params.get(QueryParams.CONFIG_FROM_FRAME, None),
         "static_url": request.static_url,
