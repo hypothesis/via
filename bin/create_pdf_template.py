@@ -12,6 +12,7 @@ ITEMS_TO_REMOVE = [
     '<script src="viewer.js"></script>',
 ]
 
+
 def _insert(contents, where, pattern, new_content):
     index = contents.index(pattern)
 
