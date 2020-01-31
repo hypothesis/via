@@ -1,4 +1,5 @@
 import pytest
+from markupsafe import Markup
 
 from tests.unit.conftest import assert_cache_control
 from via.views.view_pdf import view_pdf
@@ -16,9 +17,12 @@ class TestPdfRoute:
         request = make_pyramid_request(f"/pdf/{pdf_url}", "http://example.com/foo.pdf")
         nginx_server = request.registry.settings.get("nginx_server")
 
-        result = view_pdf(request)
+        final_pdf_url = view_pdf(request)["pdf_url"]
 
-        assert result["pdf_url"] == f"{nginx_server}/proxy/static/{pdf_url}"
+        assert final_pdf_url == f"{nginx_server}/proxy/static/{pdf_url}"
+
+        # Check we disable Jinja 2 escaping
+        assert isinstance(final_pdf_url, Markup)
 
     @pytest.mark.parametrize(
         "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
@@ -41,11 +45,12 @@ class TestPdfRoute:
         pdf_url = "https://example.com/foo.pdf"
         request = make_pyramid_request(f"/pdf/{pdf_url}", pdf_url)
 
-        result = view_pdf(request)
+        client_embed_url = view_pdf(request)["client_embed_url"]
 
-        assert (
-            result["client_embed_url"] == request.registry.settings["client_embed_url"]
-        )
+        assert client_embed_url == request.registry.settings["client_embed_url"]
+
+        # Check we disable Jinja 2 escaping
+        assert isinstance(client_embed_url, Markup)
 
     @pytest.mark.parametrize(
         "request_url,expected_h_open_sidebar",
