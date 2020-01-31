@@ -5,6 +5,12 @@ from pkg_resources import resource_filename
 SOURCE_FILE = resource_filename("via", "static/vendor/pdfjs-2/web/viewer.html")
 TARGET_FILE = resource_filename("via", "templates/pdf_wrapper.html.jinja2")
 
+# We want control over where these are so we'll remove them
+ITEMS_TO_REMOVE = [
+    '<link rel="stylesheet" href="viewer.css">',
+    '<script src="../build/pdf.js"></script>',
+    '<script src="viewer.js"></script>',
+]
 
 def _insert(contents, where, pattern, new_content):
     index = contents.index(pattern)
@@ -43,6 +49,12 @@ if __name__ == "__main__":
             "\n\n<!--\nTHIS CONTENT IS AUTO GENERATED. DO NOT EDIT!\n"
             "FROM 'bin/create_pdf_template.pdf'\n-->\n",
         )
+
+    for item in ITEMS_TO_REMOVE:
+        if item not in template:
+            raise ValueError(f"Expected to find '{item}'")
+        print(f"Removing: {item}")
+        template = template.replace(item, f"<!-- {item} -->")
 
     with open(TARGET_FILE, "w") as handle:
         handle.write(template)

@@ -16,6 +16,9 @@
     </script>
 
     <link rel="icon" href="{{ static_url("via:static/favicon.ico") }}" type="image/x-icon" />
+{% endblock %}
+
+{% block footer %}
     <script src="{{ static_url("via:static/js/pdfjs-init.js") }}"></script>
 
     {# Configure Hypothesis client. #}
@@ -35,4 +38,7 @@
         };
       }
     </script>
+    <link rel="stylesheet" href="viewer.css">
+    <script src="../build/pdf.js"></script>
+    <script src="viewer.js"></script>
 {% endblock %}
