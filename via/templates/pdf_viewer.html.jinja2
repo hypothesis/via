@@ -1,4 +1,4 @@
-{% extends "pdf_wrapper.html.jinja2" %}
+{% extends "pdf_wrapper.html.min.jinja2" %}
 
 {% block head %}
     <base href="{{ static_url("via:static/vendor/pdfjs-2/web/") }}">
@@ -22,7 +22,7 @@
         window.CLIENT_EMBED_URL = "{{ client_embed_url }}";
     </script>
 
-    <script src="{{ static_url("via:static/js/pdfjs-init.js") }}"></script>
+    <script src="{{ static_url("via:static/js/pdfjs-init.min.js") }}"></script>
 
     {# Configure Hypothesis client. #}
     <script>
