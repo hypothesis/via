@@ -10,12 +10,22 @@
       the rest of via, however, we serve it with the PDF.js viewer application.
     -#}
     <link rel="canonical" href="{{ url }}"/>
-    <script>
-    window.PDF_URL = "{{ pdf_url }}";
-    window.CLIENT_EMBED_URL = "{{ client_embed_url }}";
-    </script>
+
+    <link rel="preload" as="fetch" href="{{ pdf_url }}" crossorigin>
+    <link rel="preload" as="worker" href="../build/pdf.worker.js">
+    <link rel="preload" as="script" href="{{ client_embed_url }}">
 
     <link rel="icon" href="{{ static_url("via:static/favicon.ico") }}" type="image/x-icon" />
+
+    <link rel="stylesheet" href="viewer.css">
+{% endblock %}
+
+{% block footer %}
+    <script>
+        window.PDF_URL = "{{ pdf_url }}";
+        window.CLIENT_EMBED_URL = "{{ client_embed_url }}";
+    </script>
+
     <script src="{{ static_url("via:static/js/pdfjs-init.js") }}"></script>
 
     {# Configure Hypothesis client. #}
@@ -35,4 +45,7 @@
         };
       }
     </script>
+
+    <script src="../build/pdf.js"></script>
+    <script src="viewer.js"></script>
 {% endblock %}
