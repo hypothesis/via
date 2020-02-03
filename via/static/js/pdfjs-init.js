@@ -61,7 +61,6 @@ document.addEventListener('webviewerloaded', function(event) {
     // Load the Hypothesis client.
     var embedScript = document.createElement('script');
     embedScript.src = clientEmbedUrl;
-    embedScript.crossOrigin = "anonymous";  // Allow the preload to work
     document.body.appendChild(embedScript);
 
     // Load the PDF specified in the URL.
