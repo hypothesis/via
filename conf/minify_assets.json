@@ -1,0 +1,7 @@
+{
+    "via/templates/pdf_wrapper.html.jinja2": {},
+    "via/static/js/*.js": {},
+    "via/static/vendor/**/*": {
+        "in_place": true
+    }
+}
