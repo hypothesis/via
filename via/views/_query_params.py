@@ -1,6 +1,6 @@
 """Methods and data relating to query parameters."""
 
-from urllib.parse import urlencode, urlparse
+from urllib.parse import quote, unquote, urlencode, urlparse
 
 from webob.multidict import MultiDict
 
@@ -32,4 +32,11 @@ class QueryParams:
             for key in via_keys:
                 query.pop(key, None)
 
-        return urlparse(url)._replace(query=urlencode(query)).geturl()
+        url = urlparse(url)
+
+        return url._replace(
+            # Ensure the path is quoted regardless of how we received it
+            path=quote(unquote(url.path)),
+            # Encode the new query parameters
+            query=urlencode(query),
+        ).geturl()
