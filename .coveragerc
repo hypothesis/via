@@ -9,3 +9,4 @@ source =
 show_missing = True
 precision = 2
 fail_under = 100
+skip_covered = True

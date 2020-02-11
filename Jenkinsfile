@@ -31,9 +31,23 @@ node {
         stage("Lint") {
             testApp(image: img, runArgs: runArgs) {
                 installDeps()
-                run("make checkformatting")
-                run("make checkdocstrings")
                 run("make lint")
+            }
+        }
+    },
+    "Format": {
+        stage("Format") {
+            testApp(image: img, runArgs: runArgs) {
+                installDeps()
+                run("make checkformatting")
+            }
+        }
+    },
+    "Docs": {
+        stage("Docs") {
+            testApp(image: img, runArgs: runArgs) {
+                installDeps()
+                run("make checkdocstrings")
             }
         }
     },
@@ -41,7 +55,7 @@ node {
         stage("Tests") {
             testApp(image: img, runArgs: "${runArgs}") {
                 installDeps()
-                run("make test coverage")
+                run("make test")
             }
         }
     }

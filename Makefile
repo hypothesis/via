@@ -3,12 +3,11 @@ help:
 	@echo "make help              Show this help message"
 	@echo "make dev               Run the app in the development server"
 	@echo 'make services          Run the services that `make dev` requires'
-	@echo 'make build            Prepare the build files'
+	@echo 'make build             Prepare the build files'
 	@echo "make lint              Run the code linter(s) and print any warnings"
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
-	@echo "make test              Run the unit tests"
-	@echo "make coverage          Print the unit test coverage report"
+	@echo "make test              Run the unit tests and produce a coverage report"
 	@echo "make docstrings        View all the docstrings locally as HTML"
 	@echo "make checkdocstrings   Crash if building the docstrings fails"
 	@echo "make update-pdfjs      Update our copy of PDF-js"
@@ -51,10 +50,6 @@ test: python
 .PHONY: update-pdfjs
 update-pdfjs: python
 	@tox -qe update-pdfjs
-
-.PHONY: coverage
-coverage: python
-	@tox -qe coverage
 
 .PHONY: docstrings
 docstrings: python
