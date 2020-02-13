@@ -2,7 +2,7 @@ FROM python:3.6.9-alpine3.10
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install nginx & supervisor
-RUN apk add --no-cache nginx gettext supervisor
+RUN apk add --no-cache nginx gettext supervisor nginx-mod-http-set-misc nginx-mod-devel-kit
 
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
@@ -23,7 +23,7 @@ RUN apk add --no-cache --virtual build-deps \
 COPY ./conf/supervisord.conf ./conf/supervisord.conf
 COPY ./conf/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./conf/nginx/via /etc/nginx/via
-COPY ./conf/nginx_envsubst.conf.template /var/lib/hypothesis/nginx_envsubst.conf.template
+COPY ./conf/nginx/envsubst.conf.template /var/lib/hypothesis/nginx_envsubst.conf.template
 COPY . .
 
 USER hypothesis

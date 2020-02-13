@@ -27,7 +27,8 @@ def view_pdf(request):
     pdf_url = request.params['url']
 
     return {
-        "pdf_url": Markup(f"{nginx_server}/proxy/static/{pdf_url}"),
+        # TODO! - This isn't right, we should encode it etc.
+        "pdf_url": Markup(f"{nginx_server}/proxy/static?url={pdf_url}"),
         "client_embed_url": Markup(request.registry.settings["client_embed_url"]),
         "h_open_sidebar": asbool(request.params.get(_QueryParams.OPEN_SIDEBAR, False)),
         "h_request_config": request.params.get(_QueryParams.CONFIG_FROM_FRAME, None),
