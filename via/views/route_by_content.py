@@ -4,6 +4,9 @@ import requests
 from pyramid import httpexceptions as exc
 from pyramid import view
 from requests import RequestException
+from urllib.parse import urlparse, urlencode, parse_qsl
+
+from webob.multidict import MultiDict
 
 from via.exceptions import (
     REQUESTS_BAD_URL,
@@ -12,50 +15,61 @@ from via.exceptions import (
     UnhandledException,
     UpstreamServiceError,
 )
-from via.views._query_params import QueryParams
 
 
 @view.view_config(route_name="route_by_content")
 def route_by_content(request):
     """Routes the request according to the Content-Type header."""
-    path_url = request.matchdict["url"]
+    path_url = request.params['url']
 
-    mime_type, status_code = _get_url_details(
-        url=QueryParams.build_url(path_url, request.params, strip_via_params=True)
-    )
+    mime_type, status_code = _get_url_details(path_url)
 
     # Can PDF mime types get extra info on the end like "encoding=?"
     if mime_type in ("application/x-pdf", "application/pdf"):
         # Unless we have some very baroque error messages they shouldn't
         # really be returning PDFs
-        return exc.HTTPFound(
-            request.route_url("view_pdf", pdf_url=path_url, _query=request.params,),
-            headers=_caching_headers(max_age=300),
-        )
 
+        redirect_url = request.route_url("view_pdf", _query=request.params)
+
+        return exc.HTTPFound(redirect_url, headers=_caching_headers(max_age=300))
+
+    via_url = _get_legacy_via_url(request)
+    headers = _cache_headers_for_http(status_code)
+
+    return exc.HTTPFound(via_url, headers=headers)
+
+
+def _cache_headers_for_http(status_code):
     if status_code == 404:
         # 404 - A rare case we may want to handle differently, as unusually
         # for a 4xx error, trying again can help if it becomes available
-        headers = _caching_headers(max_age=60)
+        return _caching_headers(max_age=60)
 
     elif status_code < 500:
         # 2xx - OK
         # 3xx - we follow it, so this shouldn't happen
         # 4xx - no point in trying again quickly
-        headers = _caching_headers(max_age=60)
+        return _caching_headers(max_age=60)
 
-    else:
-        # 5xx - Errors should not be cached
-        headers = {"Cache-Control": "no-cache"}
+    # 5xx - Errors should not be cached
+    return {"Cache-Control": "no-cache"}
 
+
+def _get_legacy_via_url(request):
+    # Get the query we were called with and remove the url
+    query = MultiDict(request.params)
+    raw_url = urlparse(query.pop('url'))
+
+    # Create a legacy via URL by concatenating the urls
     via_url = request.registry.settings["legacy_via_url"]
+    bare_url = raw_url._replace(query=None).geturl()
+    via_url = urlparse(f"{via_url}/{bare_url}")
 
-    return exc.HTTPFound(
-        QueryParams.build_url(
-            f"{via_url}/{path_url}", request.params, strip_via_params=False
-        ),
-        headers=headers,
-    )
+    # Add the merged query parameters
+    query.update(parse_qsl(raw_url.query))
+    via_url = via_url._replace(query=urlencode(query))
+
+    return via_url.geturl()
 
 
 def _get_url_details(url):

@@ -4,8 +4,8 @@
 def add_routes(config):
     """Add routes to pyramid config."""
     config.add_route("get_status", "/_status")
-    config.add_route("view_pdf", "/pdf/{pdf_url:.*}")
-    config.add_route("route_by_content", "/{url:.*}")
+    config.add_route("view_pdf", "/pdf")
+    config.add_route("route_by_content", "/route")
 
 
 def includeme(config):
