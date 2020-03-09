@@ -26,20 +26,9 @@
 
     {# Configure Hypothesis client. #}
     <script>
-      window.hypothesisConfig = function() {
-        return {
-          showHighlights: true,
-          appType: 'via',
-
-          {% if h_request_config %}
-          requestConfigFromFrame: '{{ h_request_config}}',
-          {% endif %}
-
-          {% if h_open_sidebar %}
-          openSidebar: true,
-          {% endif %}
-        };
-      }
+        window.hypothesisConfig = function() {
+            return {{ hypothesis_config | tojson }};
+        }
     </script>
 
     <script src="../build/pdf.js"></script>

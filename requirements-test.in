@@ -3,4 +3,4 @@ pytest
 factory-boy
 mock
 webtest
-h-matchers
+h-matchers >= 1.2.4

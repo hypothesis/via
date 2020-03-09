@@ -2,6 +2,7 @@
 """A place to put fixture functions that are useful application-wide."""
 import functools
 from unittest import mock
+from urllib.parse import urlencode
 
 import httpretty
 import pytest
@@ -46,13 +47,16 @@ def pyramid_settings():
 
 
 @pytest.fixture
-def make_pyramid_request(pyramid_config):
-    def _make_pyramid_request(path):
+def make_request(pyramid_config):
+    def make_request(path="/irrelevant", params=None):
+        if params:
+            path += "?" + urlencode(params)
+
         pyramid_request = Request.blank(path)
         pyramid_request.registry = pyramid_config.registry
         return pyramid_request
 
-    return _make_pyramid_request
+    return make_request
 
 
 @pytest.fixture

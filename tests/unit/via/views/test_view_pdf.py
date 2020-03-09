@@ -1,106 +1,91 @@
 import pytest
+from h_matchers import Any
 from markupsafe import Markup
 
 from tests.unit.conftest import assert_cache_control
 from via.views.view_pdf import view_pdf
 
 
-class TestPdfRoute:
-    @pytest.mark.parametrize(
-        "pdf_url",
-        [
-            "http://example.com/foo.pdf",
-            "http://example.com/foo.pdf?param1=abc&param2=123",
-        ],
-    )
-    def test_pdf_passes_thirdparty_url_to_renderer(self, make_pyramid_request, pdf_url):
-        request = make_pyramid_request(f"/pdf/{pdf_url}", "http://example.com/foo.pdf")
-        nginx_server = request.registry.settings.get("nginx_server")
+class TestViewPDF:
+    def test_it_passes_through_static_config(self, call_view_pdf, pyramid_settings):
+        response = call_view_pdf()
 
-        final_pdf_url = view_pdf(request)["pdf_url"]
-
-        assert final_pdf_url == f"{nginx_server}/proxy/static/{pdf_url}"
-
-        # Check we disable Jinja 2 escaping
-        assert isinstance(final_pdf_url, Markup)
-
-    @pytest.mark.parametrize(
-        "query_param", ["via.request_config_from_frame", "via.open_sidebar"]
-    )
-    def test_does_not_include_via_query_params_in_pdf_url(
-        self, make_pyramid_request, query_param
-    ):
-        url = (
-            "http://example.com/foo.pdf?param1=abc&param2=123"
-            "&via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1"
+        assert response == Any.dict.containing(
+            {
+                "client_embed_url": pyramid_settings["client_embed_url"],
+                "static_url": Any.function(),
+            }
         )
 
-        request = make_pyramid_request(f"/pdf/{url}", "http://example.com/foo.pdf")
+        # Check we disable Jinja 2 escaping
+        assert isinstance(response["client_embed_url"], Markup)
 
-        result = view_pdf(request)
+    @pytest.mark.parametrize(
+        "pdf_url", ["http://example.com/foo.pdf", "http://example.com/foo.pdf?a=1&a=2"]
+    )
+    def test_we_pass_through_the_url_exactly(
+        self, call_view_pdf, pdf_url, pyramid_settings
+    ):
+        response = call_view_pdf(pdf_url)
 
-        assert query_param not in result["pdf_url"]
-
-    def test_pdf_passes_client_embed_url_to_renderer(self, make_pyramid_request):
-        pdf_url = "https://example.com/foo.pdf"
-        request = make_pyramid_request(f"/pdf/{pdf_url}", pdf_url)
-
-        client_embed_url = view_pdf(request)["client_embed_url"]
-
-        assert client_embed_url == request.registry.settings["client_embed_url"]
+        assert (
+            response["pdf_url"]
+            == f"{pyramid_settings['nginx_server']}/proxy/static/{pdf_url}"
+        )
 
         # Check we disable Jinja 2 escaping
-        assert isinstance(client_embed_url, Markup)
+        assert isinstance(response["pdf_url"], Markup)
 
-    @pytest.mark.parametrize(
-        "request_url,expected_h_open_sidebar",
-        [
-            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=1", True),
-            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=foo", False),
-            ("/pdf/https://example.com/foo.pdf?via.open_sidebar=0", False),
-            ("/pdf/https://example.com/foo.pdf", False),
-        ],
-    )
-    def test_pdf_passes_open_sidebar_query_parameter_to_renderer(
-        self, make_pyramid_request, request_url, expected_h_open_sidebar
-    ):
-        request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
-
-        result = view_pdf(request)
-
-        assert result["h_open_sidebar"] == expected_h_open_sidebar
-
-    @pytest.mark.parametrize(
-        "request_url,expected_h_request_config",
-        [
-            (
-                "/pdf/http://example.com/foo.pdf?"
-                "via.request_config_from_frame=http://lms.hypothes.is",
-                "http://lms.hypothes.is",
-            ),
-            ("/pdf/http://example.com/foo.pdf", None),
-        ],
-    )
-    def test_pdf_passes_request_config_from_frame_query_parameter_to_renderer(
-        self, make_pyramid_request, request_url, expected_h_request_config
-    ):
-        request = make_pyramid_request(request_url, "http://example.com/foo.pdf")
-        result = view_pdf(request)
-
-        assert result["h_request_config"] == expected_h_request_config
-
-    def test_pdf_html_prevents_caching(self, test_app):
-        response = test_app.get("/pdf/http://example.com/foo.pdf")
+    def test_caching_is_disabled(self, test_app):
+        response = test_app.get("/pdf?url=http://example.com/foo.pdf")
 
         assert_cache_control(
             response.headers, ["max-age=0", "must-revalidate", "no-cache", "no-store"]
         )
 
-    @pytest.fixture
-    def make_pyramid_request(self, make_pyramid_request):
-        def _make_pyramid_request(request_url, thirdparty_url):
-            request = make_pyramid_request(request_url)
-            request.matchdict = {"pdf_url": thirdparty_url}
-            return request
 
-        return _make_pyramid_request
+class TestHypothesisConfigConstruction:
+    MISSING = object()
+
+    def test_it_sets_expected_defaults(self, call_view_pdf):
+        response = call_view_pdf()
+
+        assert response["hypothesis_config"] == Any.dict.containing(
+            {"appType": "via", "showHighlights": True}
+        )
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        ((MISSING, False), (None, False), ("0", False), (True, True), ("1", True)),
+    )
+    def test_it_passes_open_sidebar_option(self, call_view_pdf, value, expected):
+        params = {}
+        if value is not self.MISSING:
+            params["via.open_sidebar"] = value
+
+        response = call_view_pdf(params=params)
+
+        if expected:
+            assert response["hypothesis_config"]["openSidebar"] is True
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        ((MISSING, None), (None, "None"), (0, "0"), ("anything", "anything")),
+    )
+    def test_it_passes_config_from_frame_option(self, call_view_pdf, value, expected):
+        params = {}
+        if value is not self.MISSING:
+            params["via.request_config_from_frame"] = value
+
+        response = call_view_pdf(params=params)
+
+        if expected:
+            assert response["hypothesis_config"]["requestConfigFromFrame"] == expected
+
+
+@pytest.fixture
+def call_view_pdf(make_request):
+    def call_view_pdf(url="http://example.com/name.pdf", params=None):
+        return view_pdf(make_request(params=dict(params or {}, url=url)))
+
+    return call_view_pdf

@@ -1,8 +1,9 @@
-from unittest import mock
+from urllib.parse import urlparse
 
-import httpretty
+import mock
 import pytest
 from h_matchers import Any
+from httpretty import httpretty
 from requests import Response
 from requests.exceptions import (
     MissingSchema,
@@ -13,98 +14,71 @@ from requests.exceptions import (
 
 from tests.unit.conftest import assert_cache_control
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
-from via.views._query_params import QueryParams
 from via.views.route_by_content import route_by_content
 
 
 class TestRouteByContent:
     @pytest.mark.parametrize(
-        "content_type,redirect_url",
-        [
-            ("application/pdf", "http://localhost/pdf/https://example.com"),
-            ("application/x-pdf", "http://localhost/pdf/https://example.com"),
-            ("text/html", "http://via.hypothes.is/https://example.com"),
-        ],
+        "content_type,location",
+        (
+            ("application/x-pdf", Any.url.with_path("/pdf")),
+            ("application/pdf", Any.url.with_path("/pdf")),
+            ("text/html", Any.url.with_host("via.hypothes.is")),
+            ("other", Any.url.with_host("via.hypothes.is")),
+        ),
     )
-    def test_redirects_based_on_content_type_header(
-        self, make_pyramid_request, content_type, redirect_url
+    def test_it_routes_by_content_type(
+        self, content_type, location, call_route_by_content
     ):
-        request = make_pyramid_request(
-            request_url="/https://example.com",
-            thirdparty_url="https://example.com",
-            content_type=content_type,
+        result = call_route_by_content(content_type)
+
+        assert result.location == location
+
+    def test_we_call_third_parties_correctly(self, call_route_by_content):
+        call_route_by_content(
+            target_url="http://example.com/path?a=b", params={"other": "value"}
         )
 
-        result = route_by_content(request)
+        # The fact we got this far means we hit the right host as registered
+        # with httpretty, so we just need to check the path. Which is just as
+        # well, as httpretty doesn't appear to store the full URL
 
-        assert result.location == redirect_url
+        assert httpretty.last_request.path == "/path?a=b"  # pylint: disable=no-member
 
-    @pytest.mark.parametrize("query_param", QueryParams.ALL_PARAMS)
-    def test_does_not_pass_via_query_params_to_third_parties(
-        self, make_pyramid_request, query_param
+    def test_redirects_to_pdf_view_for_pdfs_have_the_correct_params(
+        self, call_route_by_content
     ):
-        request = make_pyramid_request(
-            request_url="/https://example.com?"
-            "via.request_config_from_frame=lms.hypothes.is&via.open_sidebar=1",
-            thirdparty_url="https://example.com",
-            content_type="application/pdf",
+        url = "http://example.com/path?a=b"
+        results = call_route_by_content(
+            "application/pdf", url, params={"other": "value"}
         )
 
-        route_by_content(request)
+        assert results.location == Any.url.with_query({"other": "value", "url": url})
 
-        # pylint: disable=no-member
-        assert query_param not in httpretty.last_request().path
+    def test_requests_to_legacy_via_are_formatted_correctly(
+        self, call_route_by_content
+    ):
+        url = "http://example.com/path?a=b"
+        results = call_route_by_content("text/html", url, params={"other": "value"})
+
+        # This is horrible, but the params just get blended together. It's
+        # via's job to separate them on the other side
+        assert results.location == Any.url.with_path(
+            "http://example.com/path"
+        ).with_query({"a": "b", "other": "value"})
 
     @pytest.mark.parametrize(
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)],
     )
     def test_sets_correct_cache_control(
-        self, content_type, max_age, make_pyramid_request
+        self, content_type, max_age, call_route_by_content
     ):
-        request = make_pyramid_request(
-            request_url="/http://example.com",
-            thirdparty_url="http://example.com",
-            content_type=content_type,
-        )
-
-        result = route_by_content(request)
+        result = call_route_by_content(content_type)
 
         assert_cache_control(
             result.headers,
             ["public", f"max-age={max_age}", "stale-while-revalidate=86400"],
         )
-
-    @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
-    def test_invalid_urls_raise_BadURL(self, bad_url, make_pyramid_request):
-        request = make_pyramid_request(
-            request_url=f"/{bad_url}", thirdparty_url=bad_url, content_type="text/html",
-        )
-
-        with pytest.raises(BadURL):
-            route_by_content(request)
-
-    @pytest.mark.parametrize(
-        "request_exception,expected_exception",
-        (
-            (MissingSchema, BadURL),
-            (ProxyError, UpstreamServiceError),
-            (SSLError, UpstreamServiceError),
-            (UnrewindableBodyError, UnhandledException),
-        ),
-    )
-    def test_we_catch_requests_exceptions(
-        self, requests, request_exception, expected_exception, make_pyramid_request
-    ):
-        requests.get.side_effect = request_exception("Oh noe")
-
-        request = make_pyramid_request(
-            request_url="/http://example.com",
-            thirdparty_url="http://example.com",
-            content_type="text/html",
-        )
-
-        with pytest.raises(expected_exception):
-            route_by_content(request)
 
     @pytest.mark.parametrize(
         "status_code,cache",
@@ -117,7 +91,7 @@ class TestRouteByContent:
         ),
     )
     def test_cache_http_response_codes_appropriately(
-        self, status_code, cache, make_pyramid_request, requests
+        self, status_code, cache, call_route_by_content, requests
     ):
         response = Response()
         response.status_code = status_code
@@ -125,31 +99,50 @@ class TestRouteByContent:
 
         requests.get.return_value = response
 
-        result = route_by_content(
-            make_pyramid_request(
-                request_url="/http://example.com",
-                thirdparty_url="http://example.com",
-                content_type="text/html",
-            )
-        )
+        result = call_route_by_content("text/html")
 
-        assert dict(result.headers) == Any.dict.containing({"Cache-Control": cache})
+        assert result.headers == Any.iterable.containing({"Cache-Control": cache})
+
+    @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
+    def test_it_raises_BadURL_for_invalid_urls(self, bad_url, call_route_by_content):
+        with pytest.raises(BadURL):
+            call_route_by_content(target_url=bad_url)
+
+    @pytest.mark.parametrize(
+        "request_exception,expected_exception",
+        (
+            (MissingSchema, BadURL),
+            (ProxyError, UpstreamServiceError),
+            (SSLError, UpstreamServiceError),
+            (UnrewindableBodyError, UnhandledException),
+        ),
+    )
+    def test_it_catches_requests_exceptions(
+        self, requests, request_exception, expected_exception, call_route_by_content
+    ):
+        requests.get.side_effect = request_exception("Oh noe")
+
+        with pytest.raises(expected_exception):
+            call_route_by_content()
 
     @pytest.fixture
     def requests(self, patch):
         return patch("via.views.route_by_content.requests")
 
     @pytest.fixture
-    def make_pyramid_request(self, make_pyramid_request):
-        def _make_pyramid_request(request_url, thirdparty_url, content_type):
+    def call_route_by_content(self, make_request):
+        def call_route_by_content(
+            content_type="text/html", target_url="http://example.com", params=None
+        ):
             httpretty.register_uri(
-                httpretty.GET,
-                thirdparty_url,
-                body="{}",
+                method=httpretty.GET,
+                uri=urlparse(target_url)._replace(query=None, fragment=None).geturl(),
+                body="DUMMY",
                 adding_headers={"Content-Type": content_type},
             )
-            request = make_pyramid_request(request_url)
-            request.matchdict = {"url": thirdparty_url}
-            return request
 
-        return _make_pyramid_request
+            return route_by_content(
+                make_request(params=dict(params or {}, url=target_url))
+            )
+
+        return call_route_by_content
