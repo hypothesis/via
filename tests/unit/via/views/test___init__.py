@@ -4,13 +4,14 @@ from via import views
 
 
 class TestIncludeMe:
-    config = mock.MagicMock()
+    def test_include_me(self):
+        config = mock.MagicMock()
 
-    views.includeme(config)
+        views.includeme(config)
 
-    assert config.add_route.call_args_list == [
-        mock.call("get_status", "/_status"),
-        mock.call("view_pdf", "/pdf/{pdf_url:.*}"),
-        mock.call("route_by_content", "/{url:.*}"),
-    ]
-    config.scan.assert_called_once_with("via.views")
+        assert config.add_route.call_args_list == [
+            mock.call("get_status", "/_status"),
+            mock.call("view_pdf", "/pdf"),
+            mock.call("route_by_content", "/route"),
+        ]
+        config.scan.assert_called_once_with("via.views")
