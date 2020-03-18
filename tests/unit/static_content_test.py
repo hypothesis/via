@@ -45,7 +45,7 @@ class TestStaticContent:
         actually make a call with immutable assets and then scrape the HTML
         for the salt value.
         """
-        response = test_app.get(f"/pdf/http://example.com")
+        response = test_app.get(f"/pdf?url=http://example.com")
         static_match = re.search("/static/([^/]+)/", response.text)
         assert static_match
 
