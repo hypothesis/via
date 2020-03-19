@@ -21,7 +21,12 @@ class TestViewPDF:
         assert isinstance(response["client_embed_url"], Markup)
 
     @pytest.mark.parametrize(
-        "pdf_url", ["http://example.com/foo.pdf", "http://example.com/foo.pdf?a=1&a=2"]
+        "pdf_url",
+        [
+            "http://example.com/foo.pdf",
+            "http://example.com/foo.pdf?a=1&a=2",
+            "http://example.com/foo%2C.pdf?a=1&a=2",
+        ],
     )
     def test_we_pass_through_the_url_exactly(
         self, call_view_pdf, pdf_url, pyramid_settings

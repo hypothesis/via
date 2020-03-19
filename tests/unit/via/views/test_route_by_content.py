@@ -36,19 +36,21 @@ class TestRouteByContent:
 
     def test_we_call_third_parties_correctly(self, call_route_by_content):
         call_route_by_content(
-            target_url="http://example.com/path?a=b", params={"other": "value"}
+            target_url="http://example.com/path%2C?a=b", params={"other": "value"}
         )
 
         # The fact we got this far means we hit the right host as registered
         # with httpretty, so we just need to check the path. Which is just as
         # well, as httpretty doesn't appear to store the full URL
 
-        assert httpretty.last_request.path == "/path?a=b"  # pylint: disable=no-member
+        assert (
+            httpretty.last_request.path == "/path%2C?a=b"
+        )  # pylint: disable=no-member
 
     def test_redirects_to_pdf_view_for_pdfs_have_the_correct_params(
         self, call_route_by_content
     ):
-        url = "http://example.com/path?a=b"
+        url = "http://example.com/path%2C?a=b"
         results = call_route_by_content(
             "application/pdf", url, params={"other": "value"}
         )
@@ -58,14 +60,15 @@ class TestRouteByContent:
     def test_requests_to_legacy_via_are_formatted_correctly(
         self, call_route_by_content
     ):
-        url = "http://example.com/path?a=b"
+        path = "http://example.com/path%2C"
+        url = path + "?a=b"
         results = call_route_by_content("text/html", url, params={"other": "value"})
 
         # This is horrible, but the params just get blended together. It's
         # via's job to separate them on the other side
-        assert results.location == Any.url.with_path(
-            "http://example.com/path"
-        ).with_query({"a": "b", "other": "value"})
+        assert results.location == Any.url.with_path(path).with_query(
+            {"a": "b", "other": "value"}
+        )
 
     @pytest.mark.parametrize(
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)],
