@@ -2,16 +2,8 @@
 
 from markupsafe import Markup
 from pyramid import view
-from pyramid.settings import asbool
 
-
-class _QueryParams:
-    """Client configuration query parameters."""
-
-    # pylint: disable=too-few-public-methods
-
-    OPEN_SIDEBAR = "via.open_sidebar"
-    CONFIG_FROM_FRAME = "via.request_config_from_frame"
+from via.configuration import Configuration
 
 
 @view.view_config(
@@ -27,23 +19,11 @@ def view_pdf(context, request):
     nginx_server = request.registry.settings["nginx_server"]
     pdf_url = f"{nginx_server}/proxy/static/{context.url()}"
 
+    _, h_config = Configuration.extract_from_params(request.params)
+
     return {
         "pdf_url": Markup(pdf_url),
         "client_embed_url": Markup(request.registry.settings["client_embed_url"]),
         "static_url": request.static_url,
-        "hypothesis_config": _hypothesis_config(request),
+        "hypothesis_config": h_config,
     }
-
-
-def _hypothesis_config(request):
-    config = {"showHighlights": True, "appType": "via"}
-
-    open_sidebar = asbool(request.params.get(_QueryParams.OPEN_SIDEBAR, False))
-    if open_sidebar:
-        config["openSidebar"] = True
-
-    request_config = request.params.get(_QueryParams.CONFIG_FROM_FRAME, None)
-    if request_config is not None:
-        config["requestConfigFromFrame"] = request_config
-
-    return config
