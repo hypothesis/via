@@ -38,7 +38,9 @@ class TestConfiguration:
         )
 
     def test_it_filters_non_whitelisted_client_params(self):
-        _, client_params = Configuration.extract_from_params({"via.client.notAThing": "value"})
+        _, client_params = Configuration.extract_from_params(
+            {"via.client.notAThing": "value"}
+        )
 
         assert client_params == self.CLIENT_DEFAULTS
 
