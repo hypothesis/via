@@ -1,18 +1,42 @@
 """Tools for reading in configuration."""
 
-from inflection import camelize
-
 # pylint: disable=too-few-public-methods
 
 
 class Configuration:
-    """Extracts configuration from params."""
+    """Extracts configuration from params.
+
+    This class will extract and separate Client and Via configuration from a
+    mapping by interpreting the keys as dot delimited values.
+
+     * After splitting on '.' the parts are interpreted as nested dict keys
+     * Any keys starting with `via.*` will be processed
+     * Any keys starting with `via.client.*` will be separated out
+     * Keys for the client which don't match a whitelist are discarded
+
+    For example:
+
+    {
+        "other": "ignored",
+        "via.option": "value",
+        "via.client.nestOne.nestTwo": "value2"
+    }
+
+    Results in:
+
+     * Via: {"option": "value"}
+     * Client : {"nestOne": {"nextTwo": "value2"}}
+
+    No attempt is made to interpret the values for the client. The client will
+    get what we were given. If this was called from query parameters, that will
+    mean a string.
+    """
 
     # Certain configuration options include URLs which we will read, write or
     # direct the user to. This would allow an attacker to craft a URL which
     # could do that to a user, so we whitelist harmless parameters instead
     # From: https://h.readthedocs.io/projects/client/en/latest/publishers/config/#config-settings
-    H_CONFIG_WHITELIST = {
+    CLIENT_CONFIG_WHITELIST = {
         # Things we use now
         "openSidebar",
         "requestConfigFromFrame",
@@ -33,17 +57,16 @@ class Configuration:
         """
 
         via_params = cls._unflatten(params)
-        h_params = via_params.pop("h", {})
+        client_params = via_params.pop("client", {})
 
-        cls._to_camel_case(h_params)
-        cls._filter_h_params(h_params)
-        cls._move_legacy_params(via_params, h_params)
+        cls._filter_client_params(client_params)
+        cls._move_legacy_params(via_params, client_params)
 
         # Set some defaults
-        h_params["appType"] = "via"
-        h_params.setdefault("showHighlights", True)
+        client_params["appType"] = "via"
+        client_params.setdefault("showHighlights", True)
 
-        return via_params, h_params
+        return via_params, client_params
 
     @staticmethod
     def _unflatten(params):
@@ -72,36 +95,24 @@ class Configuration:
         return data
 
     @classmethod
-    def _to_camel_case(cls, data):
-        """Convert dict keys from snake to camelCase strings."""
-
-        for key, value in data.items():
-            if isinstance(value, dict):
-                cls._to_camel_case(value)
-
-            data[camelize(key, uppercase_first_letter=False)] = data.pop(key)
-
-        return data
-
-    @classmethod
-    def _filter_h_params(cls, h_params):
+    def _filter_client_params(cls, client_params):
         """Remove keys which are not in the whitelist."""
 
-        for key in set(h_params.keys()) - cls.H_CONFIG_WHITELIST:
-            h_params.pop(key)
+        for key in set(client_params.keys()) - cls.CLIENT_CONFIG_WHITELIST:
+            client_params.pop(key)
 
     @staticmethod
-    def _move_legacy_params(via_params, h_params):
+    def _move_legacy_params(via_params, client_params):
         """Handle legacy params which we can't move for now."""
 
         # This is like to be around for a while
-        h_params.setdefault("openSidebar", via_params.pop("open_sidebar", False))
+        client_params.setdefault("openSidebar", via_params.pop("open_sidebar", False))
 
         # This should be removed when LMS is refactored to send things the
         # new way
         request_config = via_params.pop("request_config_from_frame", None)
         if request_config is not None:
-            h_params["requestConfigFromFrame"] = {
+            client_params["requestConfigFromFrame"] = {
                 "origin": request_config,
                 "ancestorLevel": 2,
             }

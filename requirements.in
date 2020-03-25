@@ -5,4 +5,3 @@ requests
 newrelic
 h_pyramid_sentry
 whitenoise
-inflection

@@ -5,42 +5,42 @@ from via.configuration import Configuration
 
 
 class TestConfiguration:
-    H_DEFAULTS = {"appType": "via", "showHighlights": True, "openSidebar": False}
+    CLIENT_DEFAULTS = {"appType": "via", "showHighlights": True, "openSidebar": False}
 
     def test_it_ignores_items_not_marked_with_via(self):
-        via_params, h_params = Configuration.extract_from_params({})
+        via_params, client_params = Configuration.extract_from_params({})
         assert via_params == {}
-        assert h_params == self.H_DEFAULTS
+        assert client_params == self.CLIENT_DEFAULTS
 
     def test_it_leaves_unknown_root_elements_for_via(self):
-        via_params, h_params = Configuration.extract_from_params(
+        via_params, client_params = Configuration.extract_from_params(
             {"via.key_name": "value"}
         )
 
         assert via_params == {"key_name": "value"}
-        assert h_params == self.H_DEFAULTS
+        assert client_params == self.CLIENT_DEFAULTS
 
-    def test_it_sets_h_defaults(self):
-        _, h_params = Configuration.extract_from_params({})
+    def test_it_sets_client_defaults(self):
+        _, client_params = Configuration.extract_from_params({})
 
-        assert h_params == self.H_DEFAULTS
+        assert client_params == self.CLIENT_DEFAULTS
 
-    def test_it_extracts_nested_h_elements(self):
-        _, h_params = Configuration.extract_from_params(
+    def test_it_extracts_nested_client_elements(self):
+        _, client_params = Configuration.extract_from_params(
             {
-                "via.h.request_config_from_frame.item_one": "one",
-                "via.h.request_config_from_frame.item_two": "two",
+                "via.client.requestConfigFromFrame.itemOne": "one",
+                "via.client.requestConfigFromFrame.itemTwo": "two",
             }
         )
 
-        assert h_params == Any.dict.containing(
+        assert client_params == Any.dict.containing(
             {"requestConfigFromFrame": {"itemOne": "one", "itemTwo": "two"}}
         )
 
-    def test_it_filters_non_whitelisted_h_params(self):
-        _, h_params = Configuration.extract_from_params({"via.h.not_a_thing": "value"})
+    def test_it_filters_non_whitelisted_client_params(self):
+        _, client_params = Configuration.extract_from_params({"via.client.notAThing": "value"})
 
-        assert h_params == self.H_DEFAULTS
+        assert client_params == self.CLIENT_DEFAULTS
 
     @pytest.mark.parametrize(
         "params,expected",
@@ -52,8 +52,8 @@ class TestConfiguration:
             ),
         ),
     )
-    def test_it_moves_legacy_params_to_h_config(self, params, expected):
-        via_params, h_params = Configuration.extract_from_params(params)
+    def test_it_moves_legacy_params_to_client_config(self, params, expected):
+        via_params, client_params = Configuration.extract_from_params(params)
 
         assert via_params == {}
-        assert h_params == Any.dict.containing(expected)
+        assert client_params == Any.dict.containing(expected)
