@@ -47,7 +47,12 @@ class Configuration:
 
     @staticmethod
     def _unflatten(params):
-        """Convert dot delimited flat data into nested dicts."""
+        """Convert dot delimited flat data into nested dicts.
+
+        This method will skip any keys which do not start with "via." and will
+        return a data structure rooted after that point. So "via.a.b" will
+        start at "a".
+        """
 
         data = {}
 
@@ -57,7 +62,7 @@ class Configuration:
                 continue
 
             target = data
-            # Skip the first 'via' part and then recurse to the one before last
+            # Skip the first ('via') and last parts
             for part in parts[1:-1]:
                 target = target.setdefault(part, {})
 
