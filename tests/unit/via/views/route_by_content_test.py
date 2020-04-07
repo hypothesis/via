@@ -1,19 +1,8 @@
-from urllib.parse import urlparse
-
-import mock
 import pytest
 from h_matchers import Any
-from httpretty import httpretty
-from requests import Response
-from requests.exceptions import (
-    MissingSchema,
-    ProxyError,
-    SSLError,
-    UnrewindableBodyError,
-)
+from mock import sentinel
 
 from tests.unit.conftest import assert_cache_control
-from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
 from via.views.route_by_content import route_by_content
 
 
@@ -28,41 +17,37 @@ class TestRouteByContent:
         ),
     )
     def test_it_routes_by_content_type(
-        self, content_type, location, call_route_by_content
+        self, content_type, location, call_route_by_content, get_url_details
     ):
-        result = call_route_by_content(content_type)
+        get_url_details.return_value = (content_type, 200)
+        result = call_route_by_content()
 
         assert result.location == location
 
-    def test_we_call_third_parties_correctly(self, call_route_by_content):
-        call_route_by_content(
-            target_url="http://example.com/path%2C?a=b", params={"other": "value"}
-        )
+    def test_we_call_third_parties_correctly(
+        self, call_route_by_content, get_url_details
+    ):
+        url = "http://example.com/path%2C?a=b"
+        call_route_by_content(url, params={"other": "value"})
 
-        # The fact we got this far means we hit the right host as registered
-        # with httpretty, so we just need to check the path. Which is just as
-        # well, as httpretty doesn't appear to store the full URL
+        get_url_details.assert_called_once_with(url)
 
-        assert (
-            httpretty.last_request.path == "/path%2C?a=b"  # pylint: disable=no-member
-        )
-
+    @pytest.mark.usefixtures("pdf_response")
     def test_redirects_to_pdf_view_for_pdfs_have_the_correct_params(
         self, call_route_by_content
     ):
         url = "http://example.com/path%2C?a=b"
-        results = call_route_by_content(
-            "application/pdf", url, params={"other": "value"}
-        )
+        results = call_route_by_content(url, params={"other": "value"})
 
         assert results.location == Any.url.with_query({"other": "value", "url": url})
 
+    @pytest.mark.usefixtures("html_response")
     def test_requests_to_legacy_via_are_formatted_correctly(
         self, call_route_by_content
     ):
         path = "http://example.com/path%2C"
         url = path + "?a=b"
-        results = call_route_by_content("text/html", url, params={"other": "value"})
+        results = call_route_by_content(url, params={"other": "value"})
 
         # This is horrible, but the params just get blended together. It's
         # via's job to separate them on the other side
@@ -74,9 +59,10 @@ class TestRouteByContent:
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)],
     )
     def test_sets_correct_cache_control(
-        self, content_type, max_age, call_route_by_content
+        self, content_type, max_age, call_route_by_content, get_url_details
     ):
-        result = call_route_by_content(content_type)
+        get_url_details.return_value = (content_type, 200)
+        result = call_route_by_content()
 
         assert_cache_control(
             result.headers,
@@ -94,56 +80,31 @@ class TestRouteByContent:
         ),
     )
     def test_cache_http_response_codes_appropriately(
-        self, status_code, cache, call_route_by_content, requests
+        self, status_code, cache, call_route_by_content, get_url_details
     ):
-        response = Response()
-        response.status_code = status_code
-        response.raw = mock.Mock()
-
-        requests.get.return_value = response
-
-        result = call_route_by_content("text/html")
+        get_url_details.return_value = (sentinel.content_type, status_code)
+        result = call_route_by_content()
 
         assert result.headers == Any.iterable.containing({"Cache-Control": cache})
 
-    @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
-    def test_it_raises_BadURL_for_invalid_urls(self, bad_url, call_route_by_content):
-        with pytest.raises(BadURL):
-            call_route_by_content(target_url=bad_url)
+    @pytest.fixture(autouse=True)
+    def get_url_details(self, patch):
+        get_url_details = patch("via.views.route_by_content.get_url_details")
+        get_url_details.return_value = (sentinel.content_type, 200)
 
-    @pytest.mark.parametrize(
-        "request_exception,expected_exception",
-        (
-            (MissingSchema, BadURL),
-            (ProxyError, UpstreamServiceError),
-            (SSLError, UpstreamServiceError),
-            (UnrewindableBodyError, UnhandledException),
-        ),
-    )
-    def test_it_catches_requests_exceptions(
-        self, requests, request_exception, expected_exception, call_route_by_content
-    ):
-        requests.get.side_effect = request_exception("Oh noe")
-
-        with pytest.raises(expected_exception):
-            call_route_by_content()
+        return get_url_details
 
     @pytest.fixture
-    def requests(self, patch):
-        return patch("via.views.route_by_content.requests")
+    def pdf_response(self, get_url_details):
+        get_url_details.return_value = ("application/pdf", 200)
+
+    @pytest.fixture
+    def html_response(self, get_url_details):
+        get_url_details.return_value = ("application/html", 200)
 
     @pytest.fixture
     def call_route_by_content(self, make_request):
-        def call_route_by_content(
-            content_type="text/html", target_url="http://example.com", params=None
-        ):
-            httpretty.register_uri(
-                method=httpretty.GET,
-                uri=urlparse(target_url)._replace(query=None, fragment=None).geturl(),
-                body="DUMMY",
-                adding_headers={"Content-Type": content_type},
-            )
-
+        def call_route_by_content(target_url="http://example.com", params=None):
             return route_by_content(
                 make_request(params=dict(params or {}, url=target_url))
             )

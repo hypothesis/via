@@ -2,19 +2,11 @@
 
 from urllib.parse import parse_qsl, urlencode, urlparse
 
-import requests
 from pyramid import httpexceptions as exc
 from pyramid import view
-from requests import RequestException
 from webob.multidict import MultiDict
 
-from via.exceptions import (
-    REQUESTS_BAD_URL,
-    REQUESTS_UPSTREAM_SERVICE,
-    BadURL,
-    UnhandledException,
-    UpstreamServiceError,
-)
+from via.get_url_details import get_url_details
 
 
 @view.view_config(route_name="route_by_content")
@@ -22,7 +14,7 @@ def route_by_content(request):
     """Routes the request according to the Content-Type header."""
     path_url = request.params["url"]
 
-    mime_type, status_code = _get_url_details(path_url)
+    mime_type, status_code = get_url_details(path_url)
 
     # Can PDF mime types get extra info on the end like "encoding=?"
     if mime_type in ("application/x-pdf", "application/pdf"):
@@ -70,21 +62,6 @@ def _get_legacy_via_url(request):
     via_url = via_url._replace(query=urlencode(query))
 
     return via_url.geturl()
-
-
-def _get_url_details(url):
-    try:
-        with requests.get(url, stream=True, allow_redirects=True) as rsp:
-            return rsp.headers.get("Content-Type"), rsp.status_code
-
-    except REQUESTS_BAD_URL as err:
-        raise BadURL(err.args[0]) from None
-
-    except REQUESTS_UPSTREAM_SERVICE as err:
-        raise UpstreamServiceError(err.args[0]) from None
-
-    except RequestException as err:
-        raise UnhandledException(err.args[0]) from None
 
 
 def _caching_headers(max_age, stale_while_revalidate=86400):
