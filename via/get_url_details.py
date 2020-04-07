@@ -1,4 +1,5 @@
 """Retrieve details about a resource at a URL."""
+import re
 from functools import wraps
 
 import requests
@@ -10,6 +11,10 @@ from via.exceptions import (
     BadURL,
     UnhandledException,
     UpstreamServiceError,
+)
+
+GOOGLE_DRIVE_REGEX = re.compile(
+    r"^https://drive.google.com/uc\?id=(.*)&export=download$", re.IGNORECASE
 )
 
 
@@ -44,6 +49,9 @@ def get_url_details(url):
     :raise UpstreamServiceError: If we server gives us errors
     :raise UnhandledException: For all other request based errors
     """
+
+    if GOOGLE_DRIVE_REGEX.match(url):
+        return "application/pdf", 200
 
     with requests.get(url, stream=True, allow_redirects=True) as rsp:
         return rsp.headers.get("Content-Type"), rsp.status_code
