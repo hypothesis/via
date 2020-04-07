@@ -1,5 +1,9 @@
 """View for redirecting based on content type."""
 
+import os
+import re
+from datetime import datetime
+from logging import getLogger
 from urllib.parse import parse_qsl, urlencode, urlparse
 
 import requests
@@ -16,13 +20,21 @@ from via.exceptions import (
     UpstreamServiceError,
 )
 
+LOG = getLogger(__name__)
+
 
 @view.view_config(route_name="route_by_content")
 def route_by_content(request):
     """Routes the request according to the Content-Type header."""
     path_url = request.params["url"]
 
+    start = datetime.utcnow()
+
     mime_type, status_code = _get_url_details(path_url)
+
+    diff = datetime.utcnow() - start
+    diff = diff.seconds * 1000 + diff.microseconds / 1000
+    print(f"Got URL: '{path_url}' in {diff}ms")
 
     # Can PDF mime types get extra info on the end like "encoding=?"
     if mime_type in ("application/x-pdf", "application/pdf"):
@@ -72,10 +84,28 @@ def _get_legacy_via_url(request):
     return via_url.geturl()
 
 
+GOOGLE_DRIVE_REGEX = re.compile(
+    "^https://drive.google.com/uc\?id=(.*)&export=download$", re.IGNORECASE
+)
+GOOGLE_DRIVE_API_KEY = os.environ.get("GOOGLE_DRIVE_API_KEY")
+
+
 def _get_url_details(url):
+    is_google_drive = GOOGLE_DRIVE_REGEX.match(url)
+
     try:
-        with requests.get(url, stream=True, allow_redirects=True) as rsp:
-            return rsp.headers.get("Content-Type"), rsp.status_code
+        if is_google_drive:
+            file_id = is_google_drive.group(1)
+
+            url = f"https://www.googleapis.com/drive/v3/files/{file_id}?key={GOOGLE_DRIVE_API_KEY}"
+            rsp = requests.get(url)
+            data = rsp.json()
+
+            return data["mimeType"], rsp.status_code
+
+        else:
+            with requests.get(url, stream=True, allow_redirects=True) as rsp:
+                return rsp.headers.get("Content-Type"), rsp.status_code
 
     except REQUESTS_BAD_URL as err:
         raise BadURL(err.args[0]) from None
