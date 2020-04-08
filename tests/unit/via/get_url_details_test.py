@@ -22,7 +22,7 @@ class TestGetURLDetails:
         url = "http://example.com"
 
         result = get_url_details(url)
- 
+
         assert result == (content_type, status_code)
         requests.get.assert_called_once_with(url, allow_redirects=True, stream=True)
 
