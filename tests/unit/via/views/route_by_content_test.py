@@ -83,6 +83,7 @@ class TestRouteByContent:
         self, status_code, cache, call_route_by_content, get_url_details
     ):
         get_url_details.return_value = (sentinel.content_type, status_code)
+
         result = call_route_by_content()
 
         assert result.headers == Any.iterable.containing({"Cache-Control": cache})
