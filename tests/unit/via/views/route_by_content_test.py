@@ -20,6 +20,7 @@ class TestRouteByContent:
         self, content_type, location, call_route_by_content, get_url_details
     ):
         get_url_details.return_value = (content_type, 200)
+
         result = call_route_by_content()
 
         assert result.location == location
