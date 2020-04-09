@@ -37,10 +37,9 @@ installation process:
 
     cd via3
 
-### Setup data required to run the server
+### Create the development data and settings
 
-You will need certain items (like Google API keys) to run locally properly.
-To do that you can run:
+Create the environment variable settings needed to get Via 3 working nicely with other services (e.g. Google Drive):
 
     make devdata
 
