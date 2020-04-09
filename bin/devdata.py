@@ -1,4 +1,4 @@
-"""Copy tox environment variables from devdata."""
+"""Download .devdata.env from github.com:hypothesis/devdata.git."""
 
 import os
 from shutil import copy2, rmtree
