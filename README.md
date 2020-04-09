@@ -37,6 +37,13 @@ installation process:
 
     cd via3
 
+### Setup data required to run the server
+
+You will need certain items (like Google API keys) to run locally properly.
+To do that you can run:
+
+    make devdata
+
 ### Run the services with Docker Compose
 
 Start the services that Via 3 requires (currently just NGINX) using Docker

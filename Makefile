@@ -22,6 +22,10 @@ help:
 dev: python
 	@tox -qe dev
 
+.PHONY: devdata
+devdata: python
+	@tox -qe dev -- python bin/devdata.py
+
 .PHONY: build
 build: python
 	@tox -qe build
