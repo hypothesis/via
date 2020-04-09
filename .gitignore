@@ -4,3 +4,4 @@
 *.egg-info/
 via/static/**/*.gz
 build.tar
+.devdata.env

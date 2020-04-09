@@ -37,6 +37,12 @@ installation process:
 
     cd via3
 
+### Create the development data and settings
+
+Create the environment variable settings needed to get Via 3 working nicely with other services (e.g. Google Drive):
+
+    make devdata
+
 ### Run the services with Docker Compose
 
 Start the services that Via 3 requires (currently just NGINX) using Docker
