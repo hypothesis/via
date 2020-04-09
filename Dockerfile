@@ -28,4 +28,4 @@ COPY . .
 
 USER hypothesis
 
-CMD /usr/bin/envsubst '$${ACCESS_CONTROL_ALLOW_ORIGIN}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
+CMD /usr/bin/envsubst '$${ACCESS_CONTROL_ALLOW_ORIGIN} $${GOOGLE_API_KEY}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
