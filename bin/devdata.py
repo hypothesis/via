@@ -1,24 +1,28 @@
 """Download .devdata.env from github.com:hypothesis/devdata.git."""
 
 import os
-from shutil import copy2, rmtree
+from shutil import copyfile
 from subprocess import check_call
-from tempfile import mkdtemp
+from tempfile import TemporaryDirectory
+from pathlib import Path
+
+import via
 
 
 def _get_devdata():
-    temp_dir = mkdtemp()
-    target = os.path.abspath(".devdata.env")
+    # The directory that we'll clone the devdata git repo into.
+    with TemporaryDirectory() as tmp_dir_name:
+        git_dir = os.path.join(tmp_dir_name, "devdata")
 
-    try:
-        check_call(["git", "clone", "git@github.com:hypothesis/devdata.git", temp_dir])
-        copy2(os.path.join(temp_dir, "via/devdata.env"), target)
+        check_call(
+            ["git", "clone", "git@github.com:hypothesis/devdata.git", git_dir]
+        )
 
-        print(f"Created {target}")
-
-    finally:
-        if os.path.isdir(temp_dir):
-            rmtree(temp_dir)
+        # Copy devdata env file into place.
+        copyfile(
+            os.path.join(git_dir, "via/devdata.env"),
+            os.path.join(Path(via.__file__).parent.parent, ".devdata.env"),
+        )
 
 
 if __name__ == "__main__":
