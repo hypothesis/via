@@ -1,10 +1,10 @@
 """Download .devdata.env from github.com:hypothesis/devdata.git."""
 
 import os
+from pathlib import Path
 from shutil import copyfile
 from subprocess import check_call
 from tempfile import TemporaryDirectory
-from pathlib import Path
 
 import via
 
@@ -14,9 +14,7 @@ def _get_devdata():
     with TemporaryDirectory() as tmp_dir_name:
         git_dir = os.path.join(tmp_dir_name, "devdata")
 
-        check_call(
-            ["git", "clone", "git@github.com:hypothesis/devdata.git", git_dir]
-        )
+        check_call(["git", "clone", "git@github.com:hypothesis/devdata.git", git_dir])
 
         # Copy devdata env file into place.
         copyfile(
