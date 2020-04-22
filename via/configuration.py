@@ -107,12 +107,3 @@ class Configuration:
 
         # This is like to be around for a while
         client_params.setdefault("openSidebar", via_params.pop("open_sidebar", False))
-
-        # This should be removed when LMS is refactored to send things the
-        # new way
-        request_config = via_params.pop("request_config_from_frame", None)
-        if request_config is not None:
-            client_params["requestConfigFromFrame"] = {
-                "origin": request_config,
-                "ancestorLevel": via_params.pop("config_frame_ancestor_level", 2),
-            }
