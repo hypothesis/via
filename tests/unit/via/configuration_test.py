@@ -52,6 +52,13 @@ class TestConfiguration:
                 {"via.request_config_from_frame": "foo"},
                 {"requestConfigFromFrame": {"origin": "foo", "ancestorLevel": 2}},
             ),
+            (
+                {
+                    "via.request_config_from_frame": "foo",
+                    "via.config_frame_ancestor_level": "3",
+                },
+                {"requestConfigFromFrame": {"origin": "foo", "ancestorLevel": "3"}},
+            ),
         ),
     )
     def test_it_moves_legacy_params_to_client_config(self, params, expected):

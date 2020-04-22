@@ -114,5 +114,5 @@ class Configuration:
         if request_config is not None:
             client_params["requestConfigFromFrame"] = {
                 "origin": request_config,
-                "ancestorLevel": 2,
+                "ancestorLevel": via_params.pop("config_frame_ancestor_level", 2),
             }
