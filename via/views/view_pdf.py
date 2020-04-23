@@ -17,8 +17,7 @@ from via.configuration import Configuration
 def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
-    nginx_server = request.registry.settings["nginx_server"]
-    pdf_url = f"{nginx_server}/proxy/static/{context.url()}"
+    pdf_url = context.static_proxy_url_for(context.url())
 
     _, h_config = Configuration.extract_from_params(request.params)
 

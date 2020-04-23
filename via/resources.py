@@ -9,6 +9,10 @@ class URLResource:
 
     def __init__(self, request):
         self._request = request
+        self._nginx_server = self._request.registry.settings["nginx_server"]
+
+    def static_proxy_url_for(self, url):
+        return f"{self._nginx_server}/proxy/static/{url}"
 
     def url(self):
         """Get the 'url' parameter.

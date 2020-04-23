@@ -23,10 +23,11 @@ def route_by_content(context, request):
 
         return exc.HTTPFound(redirect_url, headers=_caching_headers(max_age=300))
 
-    via_url = _get_legacy_via_url(request)
+    # redirect_url = _get_legacy_via_url(request)
+    redirect_url = request.route_url("view_html", _query=request.params)
     headers = _cache_headers_for_http(status_code)
 
-    return exc.HTTPFound(via_url, headers=headers)
+    return exc.HTTPFound(redirect_url, headers=headers)
 
 
 def _cache_headers_for_http(status_code):

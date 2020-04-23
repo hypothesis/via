@@ -1,4 +1,3 @@
-import csv
 from pkg_resources import resource_filename
 
 from diskcache import Index

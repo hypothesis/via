@@ -1,3 +1,5 @@
+lxml
+bs4
 gunicorn
 pyramid
 pyramid-jinja2

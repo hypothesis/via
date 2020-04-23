@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <style>
+
+body {
+    padding:20px;
+}
+
+table, td, th {
+    border-collapse: collapse;
+    border:1px solid #aaa;
+    padding:4px 8px;
+}
+
+        </style>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>Domain name</th>
+                <th>Count</th>
+                <th>Original link</th>
+                <th>Via 3 link</th>
+            </tr>
+
+
+        {% for domain in domains %}
+            <tr>
+                <td>{{ domain.name }}</td>
+                <td>{{ domain.count }}</td>
+                <td><a href="{{ domain.url }}" target="_orig">Original</a></td>
+            <td><a href="{{ url_for(domain.url) }}" target="_via3">Via 3</a></td>
+            </tr>
+        {% endfor %}
+        </table>
+    </body>
+</html>
+
