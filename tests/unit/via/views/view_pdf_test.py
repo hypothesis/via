@@ -3,6 +3,7 @@ from h_matchers import Any
 from markupsafe import Markup
 
 from tests.unit.conftest import assert_cache_control
+from via.resources import URLResource
 from via.views.view_pdf import view_pdf
 
 
@@ -91,6 +92,8 @@ class TestHypothesisConfigConstruction:
 @pytest.fixture
 def call_view_pdf(make_request):
     def call_view_pdf(url="http://example.com/name.pdf", params=None):
-        return view_pdf(make_request(params=dict(params or {}, url=url)))
+        request = make_request(params=dict(params or {}, url=url))
+        context = URLResource(request)
+        return view_pdf(context, request)
 
     return call_view_pdf

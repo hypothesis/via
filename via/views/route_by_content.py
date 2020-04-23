@@ -10,11 +10,9 @@ from via.get_url_details import get_url_details
 
 
 @view.view_config(route_name="route_by_content")
-def route_by_content(request):
+def route_by_content(context, request):
     """Routes the request according to the Content-Type header."""
-    path_url = request.params["url"]
-
-    mime_type, status_code = get_url_details(path_url)
+    mime_type, status_code = get_url_details(context.url())
 
     # Can PDF mime types get extra info on the end like "encoding=?"
     if mime_type in ("application/x-pdf", "application/pdf"):
