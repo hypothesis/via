@@ -1,4 +1,3 @@
-import pytest
 from h_matchers import Any
 
 from via.configuration import Configuration
