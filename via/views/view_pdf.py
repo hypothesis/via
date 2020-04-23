@@ -25,7 +25,7 @@ def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
     nginx_server = request.registry.settings["nginx_server"]
-    pdf_url = f"{nginx_server}/proxy/static/{context.url}"
+    pdf_url = f"{nginx_server}/proxy/static/{context.url()}"
 
     return {
         "pdf_url": Markup(pdf_url),

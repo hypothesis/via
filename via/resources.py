@@ -4,24 +4,24 @@ from pyramid.httpexceptions import HTTPBadRequest
 # pylint: disable=too-few-public-methods
 
 
-class URLRoute:
+class URLResource:
     """Methods for routes which accept a 'url'."""
 
     def __init__(self, request):
         self._request = request
 
-    @property
     def url(self):
         """Get the 'url' parameter.
 
+        :return: The URL as a string
         :raise HTTPBadRequest: If the url is missing or empty
         """
         try:
-            pdf_url = self._request.params["url"]
+            url = self._request.params["url"]
         except KeyError as err:
             raise HTTPBadRequest("Required parameter 'url' missing") from err
 
-        if not pdf_url:
+        if not url:
             raise HTTPBadRequest("Required parameter 'url' is blank")
 
-        return pdf_url
+        return url
