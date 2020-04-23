@@ -21,11 +21,14 @@ class _QueryParams:
     # immutable assets when they are deployed
     http_cache=0,
 )
-def view_pdf(request):
+def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
+    nginx_server = request.registry.settings["nginx_server"]
+    pdf_url = f"{nginx_server}/proxy/static/{context.url}"
+
     return {
-        "pdf_url": Markup(_make_pdf_redirect(request)),
+        "pdf_url": Markup(pdf_url),
         "client_embed_url": Markup(request.registry.settings["client_embed_url"]),
         "static_url": request.static_url,
         "hypothesis_config": _hypothesis_config(request),
@@ -44,12 +47,3 @@ def _hypothesis_config(request):
         config["requestConfigFromFrame"] = request_config
 
     return config
-
-
-def _make_pdf_redirect(request):
-    nginx_server = request.registry.settings["nginx_server"]
-    pdf_url = request.params["url"]
-
-    # Our NGINX is capable of carrying the URL through without messing it up,
-    # and using query params is a pain, so we're sticking with this for now
-    return f"{nginx_server}/proxy/static/{pdf_url}"

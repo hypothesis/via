@@ -3,6 +3,7 @@ from h_matchers import Any
 from mock import sentinel
 
 from tests.unit.conftest import assert_cache_control
+from via.resources import URLRoute
 from via.views.route_by_content import route_by_content
 
 
@@ -108,8 +109,9 @@ class TestRouteByContent:
     @pytest.fixture
     def call_route_by_content(self, make_request):
         def call_route_by_content(target_url="http://example.com", params=None):
-            return route_by_content(
-                make_request(params=dict(params or {}, url=target_url))
-            )
+            request = make_request(params=dict(params or {}, url=target_url))
+            context = URLRoute(request)
+
+            return route_by_content(context, request)
 
         return call_route_by_content
