@@ -1,6 +1,7 @@
 import pytest
 from h_matchers import Any
 from markupsafe import Markup
+from mock import sentinel
 
 from tests.unit.conftest import assert_cache_control
 from via.resources import URLResource
@@ -49,51 +50,29 @@ class TestViewPDF:
             response.headers, ["max-age=0", "must-revalidate", "no-cache", "no-store"]
         )
 
-
-class TestHypothesisConfigConstruction:
-    MISSING = object()
-
-    def test_it_sets_expected_defaults(self, call_view_pdf):
+    def test_it_extracts_config(self, call_view_pdf, Configuration):
         response = call_view_pdf()
 
-        assert response["hypothesis_config"] == Any.dict.containing(
-            {"appType": "via", "showHighlights": True}
+        Configuration.extract_from_params.assert_called_once_with(
+            Any.mapping.containing({"url": Any.string()})
         )
 
-    @pytest.mark.parametrize(
-        "value,expected",
-        ((MISSING, False), (None, False), ("0", False), (True, True), ("1", True)),
-    )
-    def test_it_passes_open_sidebar_option(self, call_view_pdf, value, expected):
-        params = {}
-        if value is not self.MISSING:
-            params["via.open_sidebar"] = value
+        assert response["hypothesis_config"] == sentinel.h_config
 
-        response = call_view_pdf(params=params)
+    @pytest.fixture
+    def Configuration(self, patch):
+        Configuration = patch("via.views.view_pdf.Configuration")
+        Configuration.extract_from_params.return_value = (
+            sentinel.via_config,
+            sentinel.h_config,
+        )
+        return Configuration
 
-        if expected:
-            assert response["hypothesis_config"]["openSidebar"] is True
+    @pytest.fixture
+    def call_view_pdf(self, make_request):
+        def call_view_pdf(url="http://example.com/name.pdf", params=None):
+            request = make_request(params=dict(params or {}, url=url))
+            context = URLResource(request)
+            return view_pdf(context, request)
 
-    @pytest.mark.parametrize(
-        "value,expected",
-        ((MISSING, None), (None, "None"), (0, "0"), ("anything", "anything")),
-    )
-    def test_it_passes_config_from_frame_option(self, call_view_pdf, value, expected):
-        params = {}
-        if value is not self.MISSING:
-            params["via.request_config_from_frame"] = value
-
-        response = call_view_pdf(params=params)
-
-        if expected:
-            assert response["hypothesis_config"]["requestConfigFromFrame"] == expected
-
-
-@pytest.fixture
-def call_view_pdf(make_request):
-    def call_view_pdf(url="http://example.com/name.pdf", params=None):
-        request = make_request(params=dict(params or {}, url=url))
-        context = URLResource(request)
-        return view_pdf(context, request)
-
-    return call_view_pdf
+        return call_view_pdf
