@@ -1,4 +1,3 @@
-import pytest
 from h_matchers import Any
 
 from via.configuration import Configuration
@@ -44,25 +43,10 @@ class TestConfiguration:
 
         assert client_params == self.CLIENT_DEFAULTS
 
-    @pytest.mark.parametrize(
-        "params,expected",
-        (
-            ({"via.open_sidebar": "foo"}, {"openSidebar": "foo"}),
-            (
-                {"via.request_config_from_frame": "foo"},
-                {"requestConfigFromFrame": {"origin": "foo", "ancestorLevel": 2}},
-            ),
-            (
-                {
-                    "via.request_config_from_frame": "foo",
-                    "via.config_frame_ancestor_level": "3",
-                },
-                {"requestConfigFromFrame": {"origin": "foo", "ancestorLevel": "3"}},
-            ),
-        ),
-    )
-    def test_it_moves_legacy_params_to_client_config(self, params, expected):
-        via_params, client_params = Configuration.extract_from_params(params)
+    def test_it_moves_legacy_open_sidebar_to_client_config(self):
+        via_params, client_params = Configuration.extract_from_params(
+            {"via.open_sidebar": "foo"}
+        )
 
         assert via_params == {}
-        assert client_params == Any.dict.containing(expected)
+        assert client_params == Any.dict.containing({"openSidebar": "foo"})
