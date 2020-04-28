@@ -18,8 +18,9 @@
 
 {% block footer %}
     <script>
-        window.PDF_URL = "{{ pdf_url }}";
-        window.CLIENT_EMBED_URL = "{{ client_embed_url }}";
+        {# These values come pre-escaped by the backend #}
+        window.PDF_URL = {{ pdf_url }};
+        window.CLIENT_EMBED_URL = {{ client_embed_url }};
     </script>
 
     <script src="{{ static_url("via:static/js/pdfjs-init.min.js") }}"></script>

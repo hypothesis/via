@@ -1,4 +1,5 @@
 """View presenting the PDF viewer."""
+import json
 
 from markupsafe import Markup
 from pyramid import view
@@ -22,8 +23,16 @@ def view_pdf(context, request):
     _, h_config = Configuration.extract_from_params(request.params)
 
     return {
-        "pdf_url": Markup(pdf_url),
-        "client_embed_url": Markup(request.registry.settings["client_embed_url"]),
+        "pdf_url": _string_literal(pdf_url),
+        "client_embed_url": _string_literal(
+            request.registry.settings["client_embed_url"]
+        ),
         "static_url": request.static_url,
         "hypothesis_config": h_config,
     }
+
+
+def _string_literal(string):
+    """Return a JSON escaped, but otherwise un-modified string."""
+
+    return Markup(json.dumps(str(string)))
