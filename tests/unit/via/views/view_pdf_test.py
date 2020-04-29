@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from h_matchers import Any
 from markupsafe import Markup
@@ -14,7 +16,7 @@ class TestViewPDF:
 
         assert response == Any.dict.containing(
             {
-                "client_embed_url": pyramid_settings["client_embed_url"],
+                "client_embed_url": json.dumps(pyramid_settings["client_embed_url"]),
                 "static_url": Any.function(),
             }
         )
@@ -30,18 +32,25 @@ class TestViewPDF:
             "http://example.com/foo%2C.pdf?a=1&a=2",
         ],
     )
-    def test_we_pass_through_the_url_exactly(
+    def test_we_pass_through_the_url_exactly_as_a_quoted_json_string(
         self, call_view_pdf, pdf_url, pyramid_settings
     ):
         response = call_view_pdf(pdf_url)
 
-        assert (
-            response["pdf_url"]
-            == f"{pyramid_settings['nginx_server']}/proxy/static/{pdf_url}"
+        assert response["pdf_url"] == json.dumps(
+            f"{pyramid_settings['nginx_server']}/proxy/static/{pdf_url}"
         )
 
         # Check we disable Jinja 2 escaping
         assert isinstance(response["pdf_url"], Markup)
+
+    def test_we_escape_quote_literals_in_urls_to_prevent_XSS(
+        self, call_view_pdf, pyramid_settings
+    ):
+        response = call_view_pdf('a"b')
+        assert response["pdf_url"] == json.dumps(
+            f"{pyramid_settings['nginx_server']}/proxy/static/a\"b"
+        )
 
     def test_caching_is_disabled(self, test_app):
         response = test_app.get("/pdf?url=http://example.com/foo.pdf")
