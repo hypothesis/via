@@ -1,56 +1,24 @@
 import os
 import re
-from urllib.parse import urljoin
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from via.services.rewriter.rules import RewriteRules, RewriteAction
+from via.services.rewriter.rules import RewriteRules
+from via.services.rewriter.url_rewriter import URLRewriter
 
 
-class Rewriter:
-    rules = RewriteRules
-
+class AbstractRewriter:
     def __init__(self, static_url, route_url):
         """
         :param static_url: The base URL for our transparent proxying
         """
-        self._static_url = static_url
-        self._html_url_fn = lambda url: route_url("view_html", _query={"url": url})
-        self._css_url_fn = lambda url: route_url("view_css", _query={"url": url})
+        self.url_rewriter = URLRewriter(RewriteRules, static_url, route_url)
 
     def rewrite(self, doc):
         raise NotImplementedError()
 
-    def make_url_absolute(self, url, doc_url):
-        try:
-            return urljoin(doc_url, url)
-        except ValueError:
-            return url
 
-    def rewrite_url(self, tag, attribute, url, doc_url):
-        action = self.rules.action_for(tag, attribute, url)
-
-        if action is RewriteAction.NONE:
-            return None
-
-        if action is RewriteAction.PROXY_STATIC:
-            return self._static_url + url
-
-        url = self.make_url_absolute(url, doc_url)
-
-        if action is RewriteAction.MAKE_ABSOLUTE:
-            return url
-
-        if action is RewriteAction.REWRITE_CSS:
-            return self._css_url_fn(url)
-
-        if action is RewriteAction.REWRITE_HTML:
-            return self._html_url_fn(url)
-
-        raise ValueError(f"Unhandled action type: {action}")
-
-
-class HTMLRewriter(Rewriter):
+class AbstractHTMLRewriter(AbstractRewriter):
     # Things our children do
     inject_client = True
 
@@ -75,7 +43,7 @@ class HTMLRewriter(Rewriter):
         )
 
 
-class CSSRewriter(Rewriter):
+class CSSRewriter(AbstractRewriter):
     URL_REGEX = re.compile(r"url\(([^)]+)\)", re.IGNORECASE)
 
     def rewrite(self, doc):
@@ -90,7 +58,7 @@ class CSSRewriter(Rewriter):
                 continue
 
             if url.startswith("/"):
-                new_url = self.make_url_absolute(url, doc.url)
+                new_url = self.url_rewriter.make_absolute(url, doc.url)
 
                 replacements.append((match.group(0), f"url({new_url})"))
 

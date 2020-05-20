@@ -1,12 +1,12 @@
 from lxml import etree
 from lxml.html import document_fromstring, tostring
 
-from via.services.rewriter.core import HTMLRewriter
+from via.services.rewriter.core import AbstractHTMLRewriter
 from via.services.rewriter.img_source_set import ImageSourceSet
 from via.services.timeit import timeit
 
 
-class LXMLRewriter(HTMLRewriter):
+class LXMLRewriter(AbstractHTMLRewriter):
     def rewrite(self, doc):
         with timeit("parse html"):
             html_doc = document_fromstring(doc.content)
@@ -36,7 +36,7 @@ class LXMLRewriter(HTMLRewriter):
         head.insert(0, canonical_link)
 
         # Also set the base to try and catch relative links that escape us
-        base = etree.Element("base", {"href": self._html_url_fn(doc_url)})
+        base = etree.Element("base", {"href": self.url_rewriter.rewrite_html(doc_url)})
         head.insert(0, base)
 
         # Inject the script contents
@@ -46,12 +46,13 @@ class LXMLRewriter(HTMLRewriter):
 
     def _rewrite_links(self, doc, doc_url):
         for element, attribute, url, pos in self._iter_links(doc):
-            if element.tag == 'img' and attribute == 'srcset':
+            if element.tag == "img" and attribute == "srcset":
                 self._rewrite_img_srcset(element, doc_url)
                 continue
 
-            replacement = self.rewrite_url(
-                element.tag, attribute, url, doc_url)
+            replacement = self.url_rewriter.rewrite(
+                element.tag, attribute, url, doc_url
+            )
             if replacement is None:
                 continue
 
@@ -72,17 +73,19 @@ class LXMLRewriter(HTMLRewriter):
         for img in doc.xpath("//img"):
             data_src = img.attrib.get("data-src")
             if data_src:
-                yield img, 'data-src', data_src, None
+                yield img, "data-src", data_src, None
 
             src_set = img.attrib.get("srcset")
             if src_set:
-                yield img, 'srcset', src_set, None
+                yield img, "srcset", src_set, None
 
     def _rewrite_img_srcset(self, img, doc_url):
         src_set = img.attrib.get("srcset")
         if not src_set:
             return
 
-        img.attrib["srcset"] = str(ImageSourceSet(src_set).map(
-            lambda url: self.rewrite_url('img', 'srcset', url, doc_url)
-        ))
+        img.attrib["srcset"] = str(
+            ImageSourceSet(src_set).map(
+                lambda url: self.url_rewriter.rewrite("img", "srcset", url, doc_url)
+            )
+        )
