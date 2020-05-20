@@ -1,10 +1,15 @@
 import os
+import re
 from urllib.parse import urljoin
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+from via.services.rewriter.rules import RewriteRules, RewriteAction
+
 
 class Rewriter:
+    rules = RewriteRules
+
     def __init__(self, static_url, route_url):
         """
         :param static_url: The base URL for our transparent proxying
@@ -16,39 +21,38 @@ class Rewriter:
     def rewrite(self, doc):
         raise NotImplementedError()
 
-    def is_rewritable(self, url):
-        if url[:5] != "http:" and url[:6] != "https:":
-            return False
-
-        _, ext = url.rsplit(".", 1)
-        if ext in self.excluded_extensions:
-            return False
-
-        return True
-
     def make_url_absolute(self, url, doc_url):
         try:
             return urljoin(doc_url, url)
         except ValueError:
             return url
 
+    def rewrite_url(self, tag, attribute, url, doc_url):
+        action = self.rules.action_for(tag, attribute, url)
+
+        if action is RewriteAction.NONE:
+            return None
+
+        if action is RewriteAction.PROXY_STATIC:
+            return self._static_url + url
+
+        url = self.make_url_absolute(url, doc_url)
+
+        if action is RewriteAction.MAKE_ABSOLUTE:
+            return url
+
+        if action is RewriteAction.REWRITE_CSS:
+            return self._css_url_fn(url)
+
+        if action is RewriteAction.REWRITE_HTML:
+            return self._html_url_fn(url)
+
+        raise ValueError(f"Unhandled action type: {action}")
+
 
 class HTMLRewriter(Rewriter):
     # Things our children do
     inject_client = True
-
-    # Things we do
-    rewrite_html_links = True
-    rewrite_images = True
-    rewrite_image_links = False
-    rewrite_forms = False
-    rewrite_out_of_page_css = True
-
-    images = {"png", "jpg", "jpeg", "gif", "svg"}
-    fonts = {"woff", "woff2", "ttf"}
-
-    # We must statically rewrite CSS so relative links work
-    excluded_extensions = images | fonts
 
     def __init__(self, static_url, route_url, h_config):
         """
@@ -70,35 +74,27 @@ class HTMLRewriter(Rewriter):
             hypothesis_config=self._h_config,
         )
 
-    def is_rewritable(self, tag, attribute, url):
-        if not super().is_rewritable(url):
-            return False
 
-        if not self.rewrite_html_links and attribute == "href" and tag in ["link", "a"]:
-            print("NOT REWRIRR HTML LINKS")
-            return False
+class CSSRewriter(Rewriter):
+    URL_REGEX = re.compile(r"url\(([^)]+)\)", re.IGNORECASE)
 
-        if not self.rewrite_images and tag == "img" and not attribute == "data-src":
-            return False
+    def rewrite(self, doc):
+        content = doc.content.decode("utf-8")
 
-        if not self.rewrite_forms and tag == "form":
-            return False
+        replacements = []
 
-        return True
+        for match in self.URL_REGEX.finditer(content):
+            url = match.group(1)
 
-    def rewrite_url(self, tag, attribute, url):
-        if not self.is_rewritable(tag, attribute, url):
-            return None
+            if url.startswith('"') or url.startswith("'"):
+                continue
 
-        if tag == "a" and attribute == "href":
-            return self._html_url_fn(url)
+            if url.startswith("/"):
+                new_url = self.make_url_absolute(url, doc.url)
 
-        if (
-            self.rewrite_out_of_page_css
-            and tag == "link"
-            and attribute == "href"
-            and url.endswith("css")
-        ):
-            return self._css_url_fn(url)
+                replacements.append((match.group(0), f"url({new_url})"))
 
-        return self._static_url + url
+        for find, replace in replacements:
+            content = content.replace(find, replace)
+
+        return content

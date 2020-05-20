@@ -8,16 +8,11 @@ from via.services.timeit import timeit
 
 class LXMLRewriter(HTMLRewriter):
     def rewrite(self, doc):
-        # This turns things into unicode, but it's _very_ slow
-        # with timeit('unicode dance'):
-        #     dammit = UnicodeDammit(content)
-
         with timeit("parse html"):
             html_doc = document_fromstring(doc.content)
 
         with timeit("rewriting"):
-            self._make_links_absolute(html_doc, doc.url)
-            self._rewrite_links(html_doc)
+            self._rewrite_links(html_doc, doc.url)
 
             if self.inject_client:
                 self._inject_client(html_doc, doc.url)
@@ -27,32 +22,6 @@ class LXMLRewriter(HTMLRewriter):
             return (b"<!DOCTYPE html>" + tostring(html_doc, encoding="utf-8")).decode(
                 "utf-8"
             )
-
-    def _make_links_absolute(self, doc, doc_url):
-        doc.make_links_absolute(doc_url)
-
-        self._rewrite_img_srcsets(doc, lambda url: self.make_url_absolute(url, doc_url))
-
-    def _rewrite_img_srcsets(self, doc, mapping_fn):
-        # LXML doesn't understand URLs in src
-        for img in doc.xpath("//img"):
-            src_set = img.attrib.get("srcset")
-            if not src_set:
-                continue
-
-            img.attrib["srcset"] = str(ImageSourceSet(src_set).map(mapping_fn))
-
-    def _rewrite_img_data_src(self, doc, mapping_fn):
-        # LXML doesn't understand URLs in src
-        for img in doc.xpath("//img"):
-            data_src = img.attrib.get("data-src")
-            if not data_src:
-                continue
-
-            new_value = mapping_fn(data_src)
-            if new_value is None:
-                continue
-            img.attrib["srcset"] = new_value
 
     def _inject_client(self, doc, doc_url):
         head = doc.find("head")
@@ -75,31 +44,45 @@ class LXMLRewriter(HTMLRewriter):
         script_tag.text = self._get_client_embed()
         head.append(script_tag)
 
-    count = 0
-
-    def _rewrite_links(self, doc):
-        for element, attribute, url, pos in doc.iterlinks():
-            replacement = self.rewrite_url(element.tag, attribute, url)
-            if replacement is None:
+    def _rewrite_links(self, doc, doc_url):
+        for element, attribute, url, pos in self._iter_links(doc):
+            if element.tag == 'img' and attribute == 'srcset':
+                self._rewrite_img_srcset(element, doc_url)
                 continue
 
-            self.count += 1
+            replacement = self.rewrite_url(
+                element.tag, attribute, url, doc_url)
+            if replacement is None:
+                continue
 
             if attribute:
                 element.set(attribute, replacement)
                 continue
 
+            # If there's no attribute, this means we're being asked to rewrite
+            # the content of a tag not an attribute
             end = pos + len(url)
             element.text = element.text[:pos] + replacement + element.text[end:]
 
-        # LXML doesn't understand image srcsets
-        if self.rewrite_images:
-            self._rewrite_img_srcsets(
-                doc, lambda url: self.rewrite_url("img", "srcset", url)
-            )
+    def _iter_links(self, doc):
+        # This yields (element, attribute, url, pos)
+        yield from doc.iterlinks()
 
-        # We always have to rewrite img data-src as they are accessed with
-        # javascript
-        self._rewrite_img_data_src(
-            doc, lambda url: self.rewrite_url("img", "data-src", url)
-        )
+        # Lets do the same for things iterlinks doesn't find
+        for img in doc.xpath("//img"):
+            data_src = img.attrib.get("data-src")
+            if data_src:
+                yield img, 'data-src', data_src, None
+
+            src_set = img.attrib.get("srcset")
+            if src_set:
+                yield img, 'srcset', src_set, None
+
+    def _rewrite_img_srcset(self, img, doc_url):
+        src_set = img.attrib.get("srcset")
+        if not src_set:
+            return
+
+        img.attrib["srcset"] = str(ImageSourceSet(src_set).map(
+            lambda url: self.rewrite_url('img', 'srcset', url, doc_url)
+        ))
