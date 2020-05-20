@@ -27,7 +27,9 @@ class Document:
         if expect_type:
             content_type = original.headers["Content-Type"]
             if not content_type or expect_type not in content_type:
-                raise HTTPNotFound(f"No content of type '{expect_type}' found")
+                raise HTTPNotFound(
+                    f"No content of type '{expect_type}' found: got {content_type}"
+                )
 
         self.original = original
         self.content = original.content
@@ -37,8 +39,9 @@ class Document:
         # just return a dict of the right keys, or is that just dodging the
         # issue?
 
+        content_type = self.original.headers["Content-Type"]
         response = Response(
-            body=self.content, content_type=self.original.headers["Content-Type"]
+            body=self.content.encode("utf-8"), content_type=content_type
         )
 
         return response

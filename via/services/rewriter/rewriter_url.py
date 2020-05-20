@@ -41,11 +41,15 @@ class URLRewriter:
     def rewrite_html(self, url):
         return self._rewrite_end_point("view_html", url)
 
+    def rewrite_js(self, url):
+        return self._rewrite_end_point("view_js", url)
+
     ACTION_MAP = {
         RewriteAction.PROXY_STATIC: proxy_static,
+        RewriteAction.MAKE_ABSOLUTE: make_absolute,
         RewriteAction.REWRITE_HTML: rewrite_html,
         RewriteAction.REWRITE_CSS: rewrite_css,
-        RewriteAction.MAKE_ABSOLUTE: make_absolute,
+        RewriteAction.REWRITE_JS: rewrite_js,
     }
 
     def rewrite(self, tag, attribute, url, rel=None):

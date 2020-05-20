@@ -3,6 +3,7 @@ from via.services.rewriter.rewriter import NullRewriter
 from via.services.rewriter.rewriter_css import CSSRewriter
 from via.services.rewriter.rewriter_html_htmlparser import HTMLParserRewriter
 from via.services.rewriter.rewriter_html_lxml import LXMLRewriter
+from via.services.rewriter.rewriter_js import JSRewriter
 from via.services.rewriter.rewriter_url import URLRewriter
 from via.services.rewriter.rules import RewriteRules
 
@@ -18,6 +19,9 @@ class RewriterService:
     def __init__(self, context, request):
         self._context = context
         self._request = request
+
+    def get_js_rewriter(self, document_url):
+        return JSRewriter(self.get_url_rewriter(document_url))
 
     def get_css_rewriter(self, document_url):
         return CSSRewriter(self.get_url_rewriter(document_url))

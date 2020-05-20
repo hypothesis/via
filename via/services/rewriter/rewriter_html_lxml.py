@@ -19,7 +19,7 @@ class LXMLRewriter(AbstractHTMLRewriter):
 
         with timeit("stringification"):
             # TODO! - Get the original doctype
-            return (b"<!DOCTYPE html>" + tostring(html_doc, encoding="utf-8")).decode(
+            return (b"<!DOCTYPE html>\n" + tostring(html_doc, encoding="utf-8")).decode(
                 "utf-8"
             )
 
@@ -68,7 +68,7 @@ class LXMLRewriter(AbstractHTMLRewriter):
             element.text = self._update_in_place(element.text, url, replacement, pos)
 
     def _update_in_place(self, text, url, replacement, position):
-        if position == 0 and text == url:
+        if position == 0 or position is None and text == url:
             return replacement
 
         end = position + len(url)

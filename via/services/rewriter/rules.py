@@ -3,10 +3,22 @@ from enum import Enum
 
 class RewriteAction(Enum):
     NONE = 0
+    """Don't do anything at all"""
+
     MAKE_ABSOLUTE = 1
+    """Convert the URL to be absolute"""
+
     PROXY_STATIC = 2
+    """Proxy the content from us, but leave it unchanged"""
+
     REWRITE_HTML = 3
+    """Rewrite the URL so it will go through our HTML rewriting"""
+
     REWRITE_CSS = 4
+    """Rewrite the URL so it will go through our CSS rewriting"""
+
+    REWRITE_JS = 5
+    """Rewrite the URL so it will go through our JS rewriting"""
 
 
 class Rule:
@@ -40,7 +52,7 @@ class RewriteRules:
     # High level configurable behaviors
     ACTION_HTML_LINKS = RewriteAction.REWRITE_HTML
     ACTION_EXTERNAL_CSS = RewriteAction.REWRITE_CSS
-    ACTION_EXTERNAL_JS = RewriteAction.PROXY_STATIC
+    ACTION_EXTERNAL_JS = RewriteAction.REWRITE_JS
 
     ACTION_FONT = RewriteAction.PROXY_STATIC
     ACTION_IMAGES = RewriteAction.MAKE_ABSOLUTE
@@ -51,19 +63,25 @@ class RewriteRules:
     EXT_FONT = {"woff", "woff2", "ttf", "eot"}
 
     RULESET = (
-        (Rule("form"), ACTION_FORMS),
-        (Rule(ext=EXT_FONT), ACTION_FONT),
-        # Javascript rules
-        (Rule("script", "src"), ACTION_EXTERNAL_JS),
-        (Rule(ext="js"), ACTION_EXTERNAL_JS),
-        # Image rules
-        (Rule(ext=EXT_IMAGE), ACTION_IMAGES),
-        (Rule("img", {"src", "srcset", "data-src"}), ACTION_IMAGES),
-        (Rule("input", "src"), ACTION_IMAGES),
         # Links
         (Rule("a", "href"), ACTION_HTML_LINKS),
         (Rule("link", rel="stylesheet"), ACTION_EXTERNAL_CSS),
+        (Rule("link", rel="manifest"), RewriteAction.PROXY_STATIC),
         (Rule("link", "href", "css"), ACTION_EXTERNAL_CSS),
+        # Javascript rules
+        (Rule("script", "src"), ACTION_EXTERNAL_JS),
+        (Rule(ext="js"), ACTION_EXTERNAL_JS),
+        (
+            Rule("external-js"),
+            RewriteAction.PROXY_STATIC,
+        ),  # These are bare URLs found in JS
+        # Image rules
+        (Rule(ext=EXT_IMAGE), ACTION_IMAGES),
+        (Rule({"img", "image"}, {"src", "srcset", "data-src"}), ACTION_IMAGES),
+        (Rule("input", "src"), ACTION_IMAGES),
+        # Random things
+        (Rule("form"), ACTION_FORMS),
+        (Rule(ext=EXT_FONT), ACTION_FONT),
         # Default
         (Rule(), RewriteAction.MAKE_ABSOLUTE),
     )
@@ -101,17 +119,20 @@ class RewriteRules:
 
 
 class Attribute:
+    # Style attributes on anything!
     UNIVERSAL = {"style"}
+
     BY_TAG = {
         "a": {"href", "src"},
         "link": {"href"},
         "img": {"src", "srcset", "data-src"},
+        "image": {"src", "srcset", "data-src"},
         "form": {"action"},
         "iframe": {"src"},
         "script": {"src"},
         "blockquote": {"cite"},
-        "input": {"src"}
-        # Style attributes on anything!
+        "input": {"src"},
+        "head": {"profile"},
     }
 
     @classmethod
