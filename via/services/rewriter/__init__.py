@@ -1,2 +1,2 @@
-from via.services.rewriter.core import CSSRewriter
-from via.services.rewriter.lxml_html_rewriter import LXMLRewriter
+from via.services.rewriter.rewriter_css import CSSRewriter
+from via.services.rewriter.rewriter_html_lxml import LXMLRewriter

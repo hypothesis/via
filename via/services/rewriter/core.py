@@ -1,10 +1,9 @@
 import os
-import re
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+from via.services.rewriter.rewriter_url import URLRewriter
 from via.services.rewriter.rules import RewriteRules
-from via.services.rewriter.url_rewriter import URLRewriter
 
 
 class AbstractRewriter:
@@ -41,28 +40,3 @@ class AbstractHTMLRewriter(AbstractRewriter):
             h_embed_url=os.environ.get("H_EMBED_URL", "https://hypothes.is/embed.js"),
             hypothesis_config=self._h_config,
         )
-
-
-class CSSRewriter(AbstractRewriter):
-    URL_REGEX = re.compile(r"url\(([^)]+)\)", re.IGNORECASE)
-
-    def rewrite(self, doc):
-        content = doc.content.decode("utf-8")
-
-        replacements = []
-
-        for match in self.URL_REGEX.finditer(content):
-            url = match.group(1)
-
-            if url.startswith('"') or url.startswith("'"):
-                continue
-
-            if url.startswith("/"):
-                new_url = self.url_rewriter.make_absolute(url, doc.url)
-
-                replacements.append((match.group(0), f"url({new_url})"))
-
-        for find, replace in replacements:
-            content = content.replace(find, replace)
-
-        return content
