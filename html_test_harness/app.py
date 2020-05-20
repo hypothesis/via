@@ -38,10 +38,13 @@ def url_for(link):
 
     return url.geturl()
 
+def legacy_url_for(link):
+    return f'http://localhost:9080/{link}'
+
 
 @app.route('/')
 def list():
-    return render_template('list.html.jinja2', domains=DOMAINS, url_for=url_for)
+    return render_template('list.html.jinja2', domains=DOMAINS, url_for=url_for, legacy_url_for=legacy_url_for)
 
 
 if __name__ == '__main__':
