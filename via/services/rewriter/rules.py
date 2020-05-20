@@ -17,9 +17,7 @@ class Rule:
         self.attribute = attrs
         self.extensions = ext
 
-        self.parts = (
-            tag, attrs, ext
-        )
+        self.parts = (tag, attrs, ext)
 
     def applies(self, tag, attribute, extension):
         for our_value, other_value in zip(self.parts, (tag, attribute, extension)):
@@ -52,22 +50,18 @@ class RewriteRules:
 
     RULESET = (
         (Rule(ext=EXT_FONT), RewriteAction.MAKE_ABSOLUTE),
-        (Rule('form'), ACTION_FORMS),
-
+        (Rule("form"), ACTION_FORMS),
         # Javascript rules
-        (Rule('script', 'src'), ACTION_EXTERNAL_JS),
-        (Rule(ext='js'), ACTION_EXTERNAL_JS),
-
+        (Rule("script", "src"), ACTION_EXTERNAL_JS),
+        (Rule(ext="js"), ACTION_EXTERNAL_JS),
         # Image rules
         (Rule(ext=EXT_IMAGE), ACTION_IMAGES),
-        (Rule('img', {'src', 'srcset', 'data-src'}), ACTION_IMAGES),
-
+        (Rule("img", {"src", "srcset", "data-src"}), ACTION_IMAGES),
         # Links
-        (Rule('a', 'href'), ACTION_HTML_LINKS),
-        (Rule('link', 'href', 'css'), ACTION_EXTERNAL_CSS),
-
+        (Rule("a", "href"), ACTION_HTML_LINKS),
+        (Rule("link", "href", "css"), ACTION_EXTERNAL_CSS),
         # Default
-        (Rule(), RewriteAction.MAKE_ABSOLUTE)
+        (Rule(), RewriteAction.MAKE_ABSOLUTE),
     )
 
     @classmethod
@@ -83,7 +77,7 @@ class RewriteRules:
 
     @classmethod
     def get_extension(cls, url):
-        parts = url.rsplit('.', 1)
+        parts = url.rsplit(".", 1)
         if len(parts) == 2:
             return parts[1]
 
