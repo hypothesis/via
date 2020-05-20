@@ -3,25 +3,8 @@ from html.parser import HTMLParser
 from io import StringIO
 
 from via.services.rewriter.rewriter import AbstractHTMLRewriter
+from via.services.rewriter.rules import Attribute
 from via.services.timeit import timeit
-
-
-class Attribute:
-    OF_INTEREST = {
-        "a": {"href", "src"},
-        "link": {"href"},
-        "img": {"src", "srcset", "data-src"},
-        "form": {"action"},
-        "iframe": {"src"},
-    }
-
-    @classmethod
-    def is_interesting(self, tag, attr):
-        attrs = self.OF_INTEREST.get(tag)
-        if not attrs:
-            return False
-
-        return attr in attrs
 
 
 class StreamingParser(HTMLParser):

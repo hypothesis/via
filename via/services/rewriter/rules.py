@@ -12,15 +12,15 @@ class RewriteAction(Enum):
 class Rule:
     WILD = object()
 
-    def __init__(self, tag=WILD, attrs=WILD, ext=WILD):
+    def __init__(self, tag=WILD, attrs=WILD, ext=WILD, rel=WILD):
         self.tag = tag
         self.attribute = attrs
         self.extensions = ext
 
-        self.parts = (tag, attrs, ext)
+        self.parts = (tag, attrs, ext, rel)
 
-    def applies(self, tag, attribute, extension):
-        for our_value, other_value in zip(self.parts, (tag, attribute, extension)):
+    def applies(self, tag, attribute, extension, rel):
+        for our_value, other_value in zip(self.parts, (tag, attribute, extension, rel)):
             if not self._match(our_value, other_value):
                 return False
 
@@ -41,44 +41,79 @@ class RewriteRules:
     ACTION_HTML_LINKS = RewriteAction.REWRITE_HTML
     ACTION_EXTERNAL_CSS = RewriteAction.REWRITE_CSS
     ACTION_EXTERNAL_JS = RewriteAction.PROXY_STATIC
+
+    ACTION_FONT = RewriteAction.PROXY_STATIC
     ACTION_IMAGES = RewriteAction.MAKE_ABSOLUTE
     ACTION_FORMS = RewriteAction.MAKE_ABSOLUTE
 
     # Extensions
     EXT_IMAGE = {"png", "jpg", "jpeg", "gif", "svg"}
-    EXT_FONT = {"woff", "woff2", "ttf"}
+    EXT_FONT = {"woff", "woff2", "ttf", "eot"}
 
     RULESET = (
-        (Rule(ext=EXT_FONT), RewriteAction.MAKE_ABSOLUTE),
         (Rule("form"), ACTION_FORMS),
+        (Rule(ext=EXT_FONT), ACTION_FONT),
         # Javascript rules
         (Rule("script", "src"), ACTION_EXTERNAL_JS),
         (Rule(ext="js"), ACTION_EXTERNAL_JS),
         # Image rules
         (Rule(ext=EXT_IMAGE), ACTION_IMAGES),
         (Rule("img", {"src", "srcset", "data-src"}), ACTION_IMAGES),
+        (Rule("input", "src"), ACTION_IMAGES),
         # Links
         (Rule("a", "href"), ACTION_HTML_LINKS),
+        (Rule("link", rel="stylesheet"), ACTION_EXTERNAL_CSS),
         (Rule("link", "href", "css"), ACTION_EXTERNAL_CSS),
         # Default
         (Rule(), RewriteAction.MAKE_ABSOLUTE),
     )
 
     @classmethod
-    def action_for(cls, tag, attr, url):
+    def action_for(cls, tag, attr, url, rel=None):
         ext = cls.get_extension(url)
 
         for rule, action in cls.RULESET:
-            if rule.applies(tag, attr, ext):
+            if rule.applies(tag, attr, ext, rel):
                 # print(f"<{tag}:{attr}> {url} -> {action}")
+                if attr and not Attribute.is_interesting(tag, attr):
+                    # This exploision can only be raised by LXML parser, but is
+                    # actually used to improve the HTMLParser object Attribute used
+                    # below. LXML will find things by itself. HTMLParser needs to
+                    # be told what to find
+                    raise ValueError(
+                        f"Missed an interesting attribute: <{tag}:{attr}>: {url}"
+                    )
+
                 return action
 
         raise RuntimeError(f"No rule caught <{tag}:{attr}> {url}")
 
     @classmethod
     def get_extension(cls, url):
+        if "?" in url:
+            url, _ = url.split("?", 1)
+
         parts = url.rsplit(".", 1)
         if len(parts) == 2:
             return parts[1]
 
         return None
+
+
+class Attribute:
+    UNIVERSAL = {"style"}
+    BY_TAG = {
+        "a": {"href", "src"},
+        "link": {"href"},
+        "img": {"src", "srcset", "data-src"},
+        "form": {"action"},
+        "iframe": {"src"},
+        "script": {"src"},
+        "blockquote": {"cite"},
+        "input": {"src"}
+        # Style attributes on anything!
+    }
+
+    @classmethod
+    def is_interesting(self, tag, attr):
+        return attr in self.BY_TAG.get(tag, self.UNIVERSAL)

@@ -14,13 +14,13 @@ class CSSRewriter(AbstractRewriter):
         for match in self.URL_REGEX.finditer(content):
             url = match.group(1)
 
-            quotes = ''
+            quotes = ""
 
             if url.startswith('"') or url.startswith("'"):
                 quotes = url[0]
-                url = url.strip('"\'')
+                url = url.strip("\"'")
 
-            new_url = self.url_rewriter.make_absolute(url)
+            new_url = self.url_rewriter.rewrite(tag=None, attribute=None, url=url)
 
             if new_url != url:
                 replacements.append((match.group(0), f"url({quotes}{new_url}{quotes})"))

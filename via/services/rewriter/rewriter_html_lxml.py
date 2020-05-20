@@ -50,18 +50,29 @@ class LXMLRewriter(AbstractHTMLRewriter):
                 self._rewrite_img_srcset(element)
                 continue
 
-            replacement = self.url_rewriter.rewrite(element.tag, attribute, url)
+            replacement = self.url_rewriter.rewrite(
+                element.tag, attribute, url, rel=element.get("rel")
+            )
             if replacement is None:
                 continue
 
             if attribute:
-                element.set(attribute, replacement)
+                previous = element.get(attribute)
+                element.set(
+                    attribute, self._update_in_place(previous, url, replacement, pos)
+                )
                 continue
 
             # If there's no attribute, this means we're being asked to rewrite
             # the content of a tag not an attribute
-            end = pos + len(url)
-            element.text = element.text[:pos] + replacement + element.text[end:]
+            element.text = self._update_in_place(element.text, url, replacement, pos)
+
+    def _update_in_place(self, text, url, replacement, position):
+        if position == 0 and text == url:
+            return replacement
+
+        end = position + len(url)
+        return text[:position] + replacement + text[end:]
 
     def _iter_links(self, doc):
         # This yields (element, attribute, url, pos)

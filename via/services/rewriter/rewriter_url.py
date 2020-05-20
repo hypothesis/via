@@ -22,7 +22,7 @@ class URLRewriter:
         return url.startswith("http:") or url.startswith("https:")
 
     def make_absolute(self, url):
-        if url.startswith('//'):
+        if url.startswith("//"):
             # A special case where you don't mention the scheme and take it
             # from the parent document
             return f"{self._doc_scheme}:{url}"
@@ -48,8 +48,8 @@ class URLRewriter:
         RewriteAction.MAKE_ABSOLUTE: make_absolute,
     }
 
-    def rewrite(self, tag, attribute, url):
-        action = self._rules.action_for(tag, attribute, url)
+    def rewrite(self, tag, attribute, url, rel=None):
+        action = self._rules.action_for(tag, attribute, url, rel)
 
         if action is RewriteAction.NONE:
             return None
