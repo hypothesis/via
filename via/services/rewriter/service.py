@@ -1,0 +1,41 @@
+from via.configuration import Configuration
+from via.services.rewriter.rewriter import NullRewriter
+from via.services.rewriter.rewriter_css import CSSRewriter
+from via.services.rewriter.rewriter_html_htmlparser import HTMLParserRewriter
+from via.services.rewriter.rewriter_html_lxml import LXMLRewriter
+from via.services.rewriter.rewriter_url import URLRewriter
+from via.services.rewriter.rules import RewriteRules
+
+
+class RewriterService:
+    HTML_REWRITERS = {
+        "htmlparser": HTMLParserRewriter,
+        "lxml": LXMLRewriter,
+        "null": NullRewriter,
+        None: LXMLRewriter,
+    }
+
+    def __init__(self, context, request):
+        self._context = context
+        self._request = request
+
+    def get_css_rewriter(self, document_url):
+        return CSSRewriter(self.get_url_rewriter(document_url))
+
+    def get_html_rewriter(self, document_url):
+        via_config, h_config = Configuration.extract_from_params(self._request.params)
+
+        url_rewriter = self.get_url_rewriter(document_url)
+
+        return self.HTML_REWRITERS.get(via_config.get("rewriter"))(
+            url_rewriter, h_config=h_config,
+        )
+
+    def get_url_rewriter(self, document_url):
+        return URLRewriter(
+            rules=RewriteRules,
+            doc_url=document_url,
+            static_url=self._context.static_proxy_url_for(""),
+            route_url=self._request.route_url,
+            params=self._request.params,
+        )

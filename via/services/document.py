@@ -11,7 +11,7 @@ class Document:
         self.original = None
         self.content = None
 
-    def get_original(self, headers, expect_type=None):
+    def get_original(self, headers, expect_type=None, timeout=10):
         user_agent = headers.get("User-Agent")
 
         print("Requesting URL:", self.url, headers)
@@ -21,9 +21,8 @@ class Document:
                 self.url,
                 # Pass the user agent
                 headers={"User-Agent": user_agent},
+                timeout=timeout,
             )
-
-        print("GOT COOKIES", original.cookies)
 
         if expect_type:
             content_type = original.headers["Content-Type"]

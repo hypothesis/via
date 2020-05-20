@@ -1,5 +1,8 @@
+<!DOCTYPE html>
 <html>
     <head>
+        <meta http-equiv="content-language" content="en">
+        <meta name="language" content="English">
         <style>
 
 body {
@@ -30,7 +33,11 @@ table, td, th {
                 <td>{{ domain.count }}</td>
                 <td><a href="{{ domain.url }}" target="_orig">Original</a></td>
                 <td><a href="{{ legacy_url_for(domain.url) }}" target="_via">Via</a></td>
-                <td><a href="{{ url_for(domain.url) }}" target="_via3">Via 3</a></td>
+                <td>
+                    <a href="{{ url_for(domain.url, "null") }}" target="_via3">Null</a>
+                    <a href="{{ url_for(domain.url, "htmlparser") }}" target="_via3">HTMLParser</a>
+                    <a href="{{ url_for(domain.url, "lxml") }}" target="_via3">LXML</a>
+                </td>
             </tr>
         {% endfor %}
         </table>

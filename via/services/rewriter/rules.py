@@ -70,7 +70,7 @@ class RewriteRules:
 
         for rule, action in cls.RULESET:
             if rule.applies(tag, attr, ext):
-                print(f"<{tag}:{attr}> {url} -> {action}")
+                # print(f"<{tag}:{attr}> {url} -> {action}")
                 return action
 
         raise RuntimeError(f"No rule caught <{tag}:{attr}> {url}")

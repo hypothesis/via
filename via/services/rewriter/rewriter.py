@@ -2,16 +2,10 @@ import os
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from via.services.rewriter.rewriter_url import URLRewriter
-from via.services.rewriter.rules import RewriteRules
-
 
 class AbstractRewriter:
-    def __init__(self, doc_url, static_url, route_url):
-        """
-        :param static_url: The base URL for our transparent proxying
-        """
-        self.url_rewriter = URLRewriter(doc_url, RewriteRules, static_url, route_url)
+    def __init__(self, url_rewriter):
+        self.url_rewriter = url_rewriter
 
     def rewrite(self, doc):
         raise NotImplementedError()
@@ -21,11 +15,11 @@ class AbstractHTMLRewriter(AbstractRewriter):
     # Things our children do
     inject_client = True
 
-    def __init__(self, doc_url, static_url, route_url, h_config):
+    def __init__(self, url_rewriter, h_config):
         """
         :param static_url: The base URL for our transparent proxying
         """
-        super().__init__(doc_url, static_url, route_url)
+        super().__init__(url_rewriter)
 
         self._h_config = h_config
         self._jinja_env = Environment(
@@ -40,3 +34,8 @@ class AbstractHTMLRewriter(AbstractRewriter):
             h_embed_url=os.environ.get("H_EMBED_URL", "https://hypothes.is/embed.js"),
             hypothesis_config=self._h_config,
         )
+
+
+class NullRewriter(AbstractHTMLRewriter):
+    def rewrite(self, doc):
+        return doc.content

@@ -1,8 +1,8 @@
 from lxml import etree
 from lxml.html import document_fromstring, tostring
 
-from via.services.rewriter.core import AbstractHTMLRewriter
 from via.services.rewriter.img_source_set import ImageSourceSet
+from via.services.rewriter.rewriter import AbstractHTMLRewriter
 from via.services.timeit import timeit
 
 
