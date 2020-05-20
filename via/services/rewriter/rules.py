@@ -63,25 +63,30 @@ class RewriteRules:
     EXT_FONT = {"woff", "woff2", "ttf", "eot"}
 
     RULESET = (
+        # Random things
+        (Rule("form"), ACTION_FORMS),
+        (Rule(ext=EXT_FONT), ACTION_FONT),
+
         # Links
         (Rule("a", "href"), ACTION_HTML_LINKS),
         (Rule("link", rel="stylesheet"), ACTION_EXTERNAL_CSS),
         (Rule("link", rel="manifest"), RewriteAction.PROXY_STATIC),
         (Rule("link", "href", "css"), ACTION_EXTERNAL_CSS),
+
         # Javascript rules
         (Rule("script", "src"), ACTION_EXTERNAL_JS),
         (Rule(ext="js"), ACTION_EXTERNAL_JS),
         (
+            # These are bare URLs found in JS
             Rule("external-js"),
             RewriteAction.PROXY_STATIC,
-        ),  # These are bare URLs found in JS
+        ),  
+
         # Image rules
         (Rule(ext=EXT_IMAGE), ACTION_IMAGES),
         (Rule({"img", "image"}, {"src", "srcset", "data-src"}), ACTION_IMAGES),
         (Rule("input", "src"), ACTION_IMAGES),
-        # Random things
-        (Rule("form"), ACTION_FORMS),
-        (Rule(ext=EXT_FONT), ACTION_FONT),
+
         # Default
         (Rule(), RewriteAction.MAKE_ABSOLUTE),
     )
