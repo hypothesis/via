@@ -12,7 +12,7 @@ class LXMLRewriter(AbstractHTMLRewriter):
             html_doc = document_fromstring(doc.content)
 
         with timeit("rewriting"):
-            self._rewrite_links(html_doc, doc.url)
+            self._rewrite_links(html_doc)
 
             if self.inject_client:
                 self._inject_client(html_doc, doc.url)
@@ -44,15 +44,13 @@ class LXMLRewriter(AbstractHTMLRewriter):
         script_tag.text = self._get_client_embed()
         head.append(script_tag)
 
-    def _rewrite_links(self, doc, doc_url):
+    def _rewrite_links(self, doc):
         for element, attribute, url, pos in self._iter_links(doc):
             if element.tag == "img" and attribute == "srcset":
-                self._rewrite_img_srcset(element, doc_url)
+                self._rewrite_img_srcset(element)
                 continue
 
-            replacement = self.url_rewriter.rewrite(
-                element.tag, attribute, url, doc_url
-            )
+            replacement = self.url_rewriter.rewrite(element.tag, attribute, url)
             if replacement is None:
                 continue
 
@@ -79,13 +77,13 @@ class LXMLRewriter(AbstractHTMLRewriter):
             if src_set:
                 yield img, "srcset", src_set, None
 
-    def _rewrite_img_srcset(self, img, doc_url):
+    def _rewrite_img_srcset(self, img):
         src_set = img.attrib.get("srcset")
         if not src_set:
             return
 
         img.attrib["srcset"] = str(
             ImageSourceSet(src_set).map(
-                lambda url: self.url_rewriter.rewrite("img", "srcset", url, doc_url)
+                lambda url: self.url_rewriter.rewrite("img", "srcset", url)
             )
         )

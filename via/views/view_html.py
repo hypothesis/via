@@ -16,7 +16,9 @@ def view_css(context, request):
     doc.get_original(headers=request.headers, expect_type="text/css")
 
     rewriter = CSSRewriter(
-        static_url=context.static_proxy_url_for(""), route_url=request.route_url
+        doc_url=document_url,
+        static_url=context.static_proxy_url_for(""),
+        route_url=request.route_url,
     )
 
     with timeit("rewriting total"):
@@ -28,7 +30,7 @@ def view_css(context, request):
 @view.view_config(
     route_name="view_html", http_cache=3600,
 )
-def view_pdf(context, request):
+def view_html(context, request):
     document_url = context.url()
 
     doc = Document(document_url)
@@ -37,6 +39,7 @@ def view_pdf(context, request):
     via_config, h_config = Configuration.extract_from_params(request.params)
 
     rewriter = LXMLRewriter(
+        doc_url=document_url,
         static_url=context.static_proxy_url_for(""),
         route_url=request.route_url,
         h_config=h_config,

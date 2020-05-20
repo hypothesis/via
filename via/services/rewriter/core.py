@@ -7,11 +7,11 @@ from via.services.rewriter.rules import RewriteRules
 
 
 class AbstractRewriter:
-    def __init__(self, static_url, route_url):
+    def __init__(self, doc_url, static_url, route_url):
         """
         :param static_url: The base URL for our transparent proxying
         """
-        self.url_rewriter = URLRewriter(RewriteRules, static_url, route_url)
+        self.url_rewriter = URLRewriter(doc_url, RewriteRules, static_url, route_url)
 
     def rewrite(self, doc):
         raise NotImplementedError()
@@ -21,11 +21,11 @@ class AbstractHTMLRewriter(AbstractRewriter):
     # Things our children do
     inject_client = True
 
-    def __init__(self, static_url, route_url, h_config):
+    def __init__(self, doc_url, static_url, route_url, h_config):
         """
         :param static_url: The base URL for our transparent proxying
         """
-        super().__init__(static_url, route_url)
+        super().__init__(doc_url, static_url, route_url)
 
         self._h_config = h_config
         self._jinja_env = Environment(
