@@ -1,0 +1,76 @@
+basic_actions:
+  # Don't do anything at all
+  - &NONE NONE
+  # Convert the URL to be absolute
+  - &MAKE_ABSOLUTE MAKE_ABSOLUTE
+  # Proxy the content from us, but leave it unchanged
+  - &PROXY_STATIC PROXY_STATIC
+  # Rewrite the URL so it will go through our HTML rewriting
+  - &REWRITE_HTML REWRITE_HTML
+  # Rewrite the URL so it will go through our CSS rewriting
+  - &REWRITE_CSS REWRITE_CSS
+  # Rewrite the URL so it will go through our JS rewriting
+  - &REWRITE_JS REWRITE_JS
+
+settings:
+  # Sadly YAML doesn't let you redeclare an anchor...
+  - &html_links REWRITE_HTML
+  - &external_css REWRITE_CSS
+  - &external_js REWRITE_JS
+  - &fonts PROXY_STATIC
+  - &images MAKE_ABSOLUTE
+  - &forms MAKE_ABSOLUTE
+
+extensions:
+  - &image_ext [png, jpg, jpeg, gif, svg]
+  - &font_ext [woff, woff2, ttf, eot]
+
+rules:
+  # Random things
+  - match: {tag: form}
+    action: *forms
+
+  - match: {ext: *font_ext}
+    action: *fonts
+
+  # Links
+  - match: {tag: a, attr: href}
+    action: *html_links
+
+  - match: {tag: link, rel: stylesheet}
+    action: *external_css
+
+  - match: {tag: link, rel: manifest}
+    action: *PROXY_STATIC
+
+    comment: From bbc.co.uk, blocked on CORS didn't seem to help
+  - match: {tag: link, attr: href, ext: css}
+    action: *external_css
+
+  # Javascript rules
+  - match: {tag: script, attr: src}
+    action: *external_js
+
+  - match: {ext: js}
+    action: *external_js
+
+  # Image rules
+  - match: {ext: *image_ext}
+    action: *images
+
+  - match: {tag: [img, image], attr: [src, srcset, data-src]}
+    action: *images
+
+  - match: {tag: input, attr: src}
+    action: *images
+
+   # External js rules (tag="external-js" as a hack)
+  - match: {tag: external-js, ext: js}
+    action: *external_js
+
+  - match: {tag: external-js}
+    action: *PROXY_STATIC
+
+  # Default
+  - match: {}
+    action: *MAKE_ABSOLUTE

@@ -1,6 +1,6 @@
 from urllib.parse import urljoin, urlparse
 
-from via.services.rewriter.rules import RewriteAction
+from via.services.rewriter.ruleset import RewriteAction
 
 
 class URLRewriter:
