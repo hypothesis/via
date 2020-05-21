@@ -1,3 +1,16 @@
+settings:
+  # Sadly YAML doesn't let you redeclare an anchor...
+  - &html_links REWRITE_HTML
+  - &external_css REWRITE_CSS
+  - &external_js REWRITE_JS
+  - &fonts PROXY_STATIC
+  - &images MAKE_ABSOLUTE
+  - &forms MAKE_ABSOLUTE
+
+extensions:
+  - &image_ext [png, jpg, jpeg, gif, svg]
+  - &font_ext [woff, woff2, ttf, eot]
+
 basic_actions:
   # Don't do anything at all
   - &NONE NONE
@@ -11,19 +24,6 @@ basic_actions:
   - &REWRITE_CSS REWRITE_CSS
   # Rewrite the URL so it will go through our JS rewriting
   - &REWRITE_JS REWRITE_JS
-
-settings:
-  # Sadly YAML doesn't let you redeclare an anchor...
-  - &html_links REWRITE_HTML
-  - &external_css REWRITE_CSS
-  - &external_js REWRITE_JS
-  - &fonts PROXY_STATIC
-  - &images MAKE_ABSOLUTE
-  - &forms MAKE_ABSOLUTE
-
-extensions:
-  - &image_ext [png, jpg, jpeg, gif, svg]
-  - &font_ext [woff, woff2, ttf, eot]
 
 rules:
   # Random things
