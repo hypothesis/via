@@ -10,6 +10,7 @@ help:
 	@echo "make test              Run the unit tests and produce a coverage report"
 	@echo "make docstrings        View all the docstrings locally as HTML"
 	@echo "make checkdocstrings   Crash if building the docstrings fails"
+	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
 	@echo "make update-pdfjs      Update our copy of PDF-js"
 	@echo "make pip-compile       Compile requirements.in to requirements.txt"
 	@echo "make upgrade-package   Upgrade the version of a package in requirements.txt."
@@ -50,6 +51,9 @@ checkformatting: python
 .PHONY: test
 test: python
 	@tox -q
+
+.PHONY: sure
+sure: checkformatting lint test
 
 .PHONY: update-pdfjs
 update-pdfjs: python
