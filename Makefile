@@ -8,8 +8,6 @@ help:
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
 	@echo "make test              Run the unit tests and produce a coverage report"
-	@echo "make docstrings        View all the docstrings locally as HTML"
-	@echo "make checkdocstrings   Crash if building the docstrings fails"
 	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
 	@echo "make update-pdfjs      Update our copy of PDF-js"
 	@echo "make pip-compile       Compile requirements.in to requirements.txt"
@@ -58,14 +56,6 @@ sure: checkformatting lint test
 .PHONY: update-pdfjs
 update-pdfjs: python
 	@tox -qe update-pdfjs
-
-.PHONY: docstrings
-docstrings: python
-	@tox -qe docstrings
-
-.PHONY: checkdocstrings
-checkdocstrings: python
-	@tox -qe checkdocstrings
 
 .PHONY: pip-compile
 pip-compile: python
