@@ -43,14 +43,6 @@ node {
             }
         }
     },
-    "Docs": {
-        stage("Docs") {
-            testApp(image: img, runArgs: runArgs) {
-                installDeps()
-                run("make checkdocstrings")
-            }
-        }
-    },
     "Tests": {
         stage("Tests") {
             testApp(image: img, runArgs: "${runArgs}") {
