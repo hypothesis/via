@@ -6,8 +6,6 @@ from shutil import copyfile
 from subprocess import check_call
 from tempfile import TemporaryDirectory
 
-import via
-
 
 def _get_devdata():
     # The directory that we'll clone the devdata git repo into.
@@ -19,7 +17,7 @@ def _get_devdata():
         # Copy devdata env file into place.
         copyfile(
             os.path.join(git_dir, "via/devdata.env"),
-            os.path.join(Path(via.__file__).parent.parent, ".devdata.env"),
+            os.path.join(Path(__file__).parent.parent, ".devdata.env"),
         )
 
 
