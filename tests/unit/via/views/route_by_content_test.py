@@ -1,6 +1,7 @@
 import pytest
 from h_matchers import Any
 from mock import sentinel
+from webob.headers import EnvironHeaders
 
 from tests.unit.conftest import assert_cache_control
 from via.resources import URLResource
@@ -32,7 +33,7 @@ class TestRouteByContent:
         url = "http://example.com/path%2C?a=b"
         call_route_by_content(url, params={"other": "value"})
 
-        get_url_details.assert_called_once_with(url)
+        get_url_details.assert_called_once_with(url, Any.instance_of(EnvironHeaders))
 
     @pytest.mark.usefixtures("pdf_response")
     def test_redirects_to_pdf_view_for_pdfs_have_the_correct_params(
