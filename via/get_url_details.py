@@ -65,5 +65,6 @@ def get_url_details(url, headers):
         stream=True,
         allow_redirects=True,
         headers={"User-Agent": headers.get("User-Agent", BACKUP_USER_AGENT)},
+        timeout=10,
     ) as rsp:
         return rsp.headers.get("Content-Type"), rsp.status_code
