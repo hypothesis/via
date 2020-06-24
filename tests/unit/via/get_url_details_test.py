@@ -38,6 +38,7 @@ class TestGetURLDetails:
             allow_redirects=True,
             stream=True,
             headers={"User-Agent": sentinel.user_agent},
+            timeout=10,
         )
 
     def test_it_assumes_pdf_with_a_google_drive_url(self, requests):
