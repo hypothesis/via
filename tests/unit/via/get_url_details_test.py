@@ -16,14 +16,29 @@ from via.get_url_details import BACKUP_USER_AGENT, get_url_details
 
 class TestGetURLDetails:
     @pytest.mark.parametrize(
-        "content_type,status_code", (("text/html", 501), ("application/pdf", 200))
+        "content_type,mime_type,status_code",
+        (
+            ("text/html", "text/html", 501),
+            ("application/pdf", "application/pdf", 200),
+            ("application/pdf; qs=0.001", "application/pdf", 201),
+            (None, None, 301),
+        ),
     )
-    def test_it_calls_get_for_normal_urls(self, requests, content_type, status_code):
-        response = Response()
-        response.raw = BytesIO(b"")
-        response.headers = {"Content-Type": content_type}
+    def test_it_calls_get_for_normal_urls(
+        # pylint: disable=too-many-arguments
+        self,
+        requests,
+        response,
+        content_type,
+        mime_type,
+        status_code,
+    ):
+        if content_type:
+            response.headers = {"Content-Type": content_type}
+        else:
+            response.headers = {}
+
         response.status_code = status_code
-        requests.get.return_value = response
 
         url = "http://example.com"
 
@@ -32,7 +47,7 @@ class TestGetURLDetails:
             headers={"User-Agent": sentinel.user_agent, "Other-Nonsense": "ignored"},
         )
 
-        assert result == (content_type, status_code)
+        assert result == (mime_type, status_code)
         requests.get.assert_called_once_with(
             url,
             allow_redirects=True,
@@ -72,11 +87,22 @@ class TestGetURLDetails:
         with pytest.raises(expected_exception):
             get_url_details("http://example.com", {})
 
+    @pytest.mark.usefixtures("response")
     def test_it_uses_default_user_agent_if_none_found(self, requests):
         get_url_details("http://example.com", {})
 
         _, kwargs = requests.get.call_args
         assert kwargs["headers"] == {"User-Agent": BACKUP_USER_AGENT}
+
+    @pytest.fixture
+    def response(self, requests):
+        response = Response()
+        response.raw = BytesIO(b"")
+        response.headers = {"Content-Type": "dummy"}
+        response.status_code = 200
+        requests.get.return_value = response
+
+        return response
 
     @pytest.fixture
     def requests(self, patch):
