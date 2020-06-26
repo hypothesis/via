@@ -1,4 +1,5 @@
 """Retrieve details about a resource at a URL."""
+import cgi
 import re
 from functools import wraps
 
@@ -50,7 +51,7 @@ def get_url_details(url, headers):
 
     :param url: URL to retrieve
     :param headers: The original headers the request was made with
-    :return: 2-tuple of (content type, status code)
+    :return: 2-tuple of (mime type, status code)
 
     :raise BadURL: When the URL is malformed
     :raise UpstreamServiceError: If we server gives us errors
@@ -67,4 +68,10 @@ def get_url_details(url, headers):
         headers={"User-Agent": headers.get("User-Agent", BACKUP_USER_AGENT)},
         timeout=10,
     ) as rsp:
-        return rsp.headers.get("Content-Type"), rsp.status_code
+        content_type = rsp.headers.get("Content-Type")
+        if content_type:
+            mime_type, _ = cgi.parse_header(content_type)
+        else:
+            mime_type = None
+
+        return mime_type, rsp.status_code
