@@ -5,11 +5,12 @@ services:
     ports:
       - '127.0.0.1:9083:9083'
     environment:
-      - ACCESS_CONTROL_ALLOW_ORIGIN=http://localhost:9082
       - GOOGLE_API_KEY
     volumes:
-      - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./conf/nginx/via:/etc/nginx/via
-      - ./conf/nginx/envsubst.conf.template:/var/lib/hypothesis/nginx_envsubst.conf.template
-    command: /bin/sh -c "envsubst '$${ACCESS_CONTROL_ALLOW_ORIGIN} $${GOOGLE_API_KEY}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && exec nginx"
+      - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./conf/nginx/via/direct_proxy.conf:/etc/nginx/via/direct_proxy.conf:ro
+      - ./conf/nginx/via_dev/app_upstream.conf:/etc/nginx/via/app_upstream.conf:ro
+      - ./conf/nginx/dev_host_bridge.sh:/etc/nginx/dev_host_bridge.sh:ro
+      - ./conf/nginx/envsubst.conf.template:/var/lib/hypothesis/nginx_envsubst.conf.template:ro
+    command: /bin/sh -c "/etc/nginx/dev_host_bridge.sh && envsubst '$${GOOGLE_API_KEY}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && exec nginx"
 
