@@ -1,5 +1,6 @@
 -r requirements.txt
 -e .
 
+honcho
 ipython
 ipdb
