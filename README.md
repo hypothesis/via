@@ -50,12 +50,9 @@ Create the environment variable settings needed to get Via 3 working nicely with
 The first time you run `make dev` it might take a while to start because it'll
 need to install the application dependencies and build the assets.
 
-This will start the server on port 9082 (http://localhost:9082), reload the
+This will start the server on port 9083 (http://localhost:9083), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
-
-To simulate how the app works in production, you should access it through NGINX
-on port 9093 (http://localhost:9083)
 
 **That's it!** You’ve finished setting up your Via 3 development environment. Run
 `make help` to see all the commands that're available for running the tests,
