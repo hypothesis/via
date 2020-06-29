@@ -19,20 +19,28 @@ help:
 
 .PHONY: dev
 dev: python
-	@tox -qe dev
+	@tox -qe dev -- honcho start
 
 .PHONY: devdata
 devdata: python
 	@tox -qe dev -- python bin/devdata.py
+
+.PHONY: web
+web: python
+	@tox -qe dev
+
+.PHONY: nginx
+nginx: args?=up
+nginx: python
+	@tox -qe docker-compose -- $(args)
 
 .PHONY: build
 build: python
 	@tox -qe build
 
 .PHONY: services
-services: args?=up -d
-services: python
-	@tox -qe docker-compose -- $(args)
+services:
+	@true
 
 .PHONY: lint
 lint: python

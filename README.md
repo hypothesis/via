@@ -43,13 +43,6 @@ Create the environment variable settings needed to get Via 3 working nicely with
 
     make devdata
 
-### Run the services with Docker Compose
-
-Start the services that Via 3 requires (currently just NGINX) using Docker
-Compose:
-
-    make services
-
 ### Start the development server
 
     make dev
