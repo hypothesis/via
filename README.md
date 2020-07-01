@@ -171,32 +171,8 @@ in development does use the same `nginx.conf` file as the NGINX running in
 Docker in production.
 
 The Python WSGI server (Gunicorn) runs on the host (no Docker) and is exposed
-at http://localhost:9082/.
-
-NGINX is _not_ "in front of" Gunicorn in development. Rather, NGINX and
-Gunicorn are "alongside" each other:
-
-1. The front page of the app in development is http://localhost:9082/, which is
-   served by Gunicorn directly without involving NGINX.
-
-   Other URLs that're handled by the Pyramid app are also at
-   `http://localhost:9082/*` and served by Gunicorn directly.
-
-2. For requests that should be handled by NGINX directly (for example the
-   `/proxy/static/*` URLs) the Pyramid app redirects the browser to
-   `http://localhost:9083/*` URLs that're handled by the NGINX instance running
-   in Docker Compose without further involving Python.
-
-### But that means development is different from production!
-
-That's true but the difference is small. In production requests that should be
-handled by Gunicorn first go to NGINX which then proxies to Gunicorn. Whereas
-in dev these requests go directly from the browser to Gunicorn. A small part of
-the `nginx.conf` file that does the proxying to Gunicorn is used in production
-but not in dev.
-
-In practice this isn't really a problem and putting NGINX in front of Gunicorn
-in development would likely create more issues than it would solve.
+at http://localhost:9082/. The NGINX running on `:9083` proxies to the Gunicorn
+on `:9082`.
 
 ### WhiteNoise
 
