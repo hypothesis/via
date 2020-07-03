@@ -14,5 +14,6 @@ class TestIncludeMe:
             mock.call("get_status", "/_status"),
             mock.call("view_pdf", "/pdf", factory=URLResource),
             mock.call("route_by_content", "/route", factory=URLResource),
+            mock.call("debug_headers", "/debug/headers"),
         ]
         config.scan.assert_called_once_with("via.views")
