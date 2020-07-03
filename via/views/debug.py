@@ -22,6 +22,7 @@ def debug_headers(_context, request):
         body=f"""
             <h1>Instructions</h1>
             <ol>
+                <li>Access the service directly (not thru *.hypothes.is)
                 <li>Enable Do-Not-Track if supported</li>
                 <li>
                     <a href="{request.route_url('debug_headers')}">
