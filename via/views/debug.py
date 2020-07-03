@@ -6,25 +6,17 @@ from collections import OrderedDict
 from pyramid import view
 from pyramid.response import Response
 
+from via.get_url import clean_headers
+
 
 @view.view_config(route_name="debug_headers")
 def debug_headers(_context, request):
     """Dump the headers as we receive them for debugging."""
-    headers = OrderedDict()
 
-    for header_name, value in request.headers.items():
-        # Get around something in the stack giving us the wrong value here
-        if header_name == "Dnt":
-            header_name = "DNT"
-        headers[header_name] = value
-
-    # These aren't interesting to us
-    headers.pop("Cookie", None)
-    headers.pop("Host", None)
-
-    # We don't care where they really came from just where Referer appears
-    if "Referer" in headers:
-        headers["Referer"] = "https://www.google.com/"
+    if request.GET.get("raw"):
+        headers = OrderedDict(request.headers)
+    else:
+        headers = clean_headers(request.headers)
 
     return Response(
         body=f"""
@@ -38,6 +30,8 @@ def debug_headers(_context, request):
                 </li>
                 <li>Press F5 to get 'Cache-Control'</li>
             </ol>
+
+            <a href="{request.route_url('debug_headers')}?raw=1">Show all headers</a>
             <hr>
             <pre>{json.dumps(headers, indent=4)}</pre><br>
         """,
