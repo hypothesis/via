@@ -13,7 +13,7 @@ BANNED_HEADERS = {
     "X-Real-Ip",
     "X-Forwarded-Proto",
     "X-Forwarded-Port",
-    "X-Request-Start"
+    "X-Request-Start",
     # Cloudflare things
     "Cf-Request-Id",
     "Cf-Connecting-Ip",
