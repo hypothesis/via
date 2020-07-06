@@ -2,12 +2,15 @@
 
 from collections import OrderedDict
 
+# A mix of headers we don't want to pass on for one reason or another
 BANNED_HEADERS = {
     # Requests needs to set Host to the right thing for us
     "Host",
+    # Don't pass Cookies
+    "Cookie",
     # AWS things
     "X-Amzn-Trace-Id",
-    # AWS NGINX things
+    # AWS NGINX / NGINX things
     "X-Forwarded-Server",
     "X-Forwarded-For",
     "X-Real-Ip",
@@ -23,8 +26,11 @@ BANNED_HEADERS = {
     "Cdn-Loop",
 }
 
+# Something get incorrectly Title-cased by the stack by the time they've got to
+# us. If we pass them on like this could mark us out as a bot.
 HEADER_MAP = {"Dnt": "DNT"}
 
+# Some values need to be faked or fixed
 HEADER_DEFAULTS = {
     # Mimic what it looks like if you got here from a Google search
     "Referer": "https://www.google.com",
@@ -37,8 +43,11 @@ HEADER_DEFAULTS = {
 }
 
 
-def clean_headers(headers, pass_cookies=False):
+def clean_headers(headers):
     """Remove Cloudflare and other cruft from the headers.
+
+    This will attempt to present a clean version of the headers which can be
+    used to make a request to the 3rd party site.
 
     Also:
 
@@ -50,16 +59,12 @@ def clean_headers(headers, pass_cookies=False):
     upstream service.
 
     :param headers: A mapping of header values
-    :param pass_cookies: Allow cookies through
     :return: An OrderedDict of cleaned headers
     """
     clean = OrderedDict()
 
     for header_name, value in headers.items():
         if header_name in BANNED_HEADERS:
-            continue
-
-        if header_name == "Cookie" and not pass_cookies:
             continue
 
         # Map to standard names for things

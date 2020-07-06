@@ -1,7 +1,7 @@
 from io import BytesIO
 
 import pytest
-from mock import sentinel
+from h_matchers import Any
 from requests import Response
 from requests.exceptions import (
     MissingSchema,
@@ -11,7 +11,7 @@ from requests.exceptions import (
 )
 
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
-from via.get_url_details import BACKUP_USER_AGENT, get_url_details
+from via.get_url.details import get_url_details
 
 
 class TestGetURLDetails:
@@ -42,19 +42,20 @@ class TestGetURLDetails:
 
         url = "http://example.com"
 
-        result = get_url_details(
-            url,
-            headers={"User-Agent": sentinel.user_agent, "Other-Nonsense": "ignored"},
-        )
+        result = get_url_details(url, headers={})
 
         assert result == (mime_type, status_code)
         requests.get.assert_called_once_with(
-            url,
-            allow_redirects=True,
-            stream=True,
-            headers={"User-Agent": sentinel.user_agent},
-            timeout=10,
+            url, allow_redirects=True, stream=True, headers=Any(), timeout=10,
         )
+
+    @pytest.mark.usefixtures("response")
+    def test_it_cleans_and_passes_on_the_users_headers(self, requests, clean_headers):
+        get_url_details(url="http://example.com", headers={})
+
+        _args, kwargs = requests.get.call_args
+
+        assert kwargs["headers"] == clean_headers.return_value
 
     def test_it_assumes_pdf_with_a_google_drive_url(self, requests):
         result = get_url_details(
@@ -87,13 +88,6 @@ class TestGetURLDetails:
         with pytest.raises(expected_exception):
             get_url_details("http://example.com", {})
 
-    @pytest.mark.usefixtures("response")
-    def test_it_uses_default_user_agent_if_none_found(self, requests):
-        get_url_details("http://example.com", {})
-
-        _, kwargs = requests.get.call_args
-        assert kwargs["headers"] == {"User-Agent": BACKUP_USER_AGENT}
-
     @pytest.fixture
     def response(self, requests):
         response = Response()
@@ -106,4 +100,8 @@ class TestGetURLDetails:
 
     @pytest.fixture
     def requests(self, patch):
-        return patch("via.get_url_details.requests")
+        return patch("via.get_url.details.requests")
+
+    @pytest.fixture(autouse=True)
+    def clean_headers(self, patch):
+        return patch("via.get_url.details.clean_headers")
