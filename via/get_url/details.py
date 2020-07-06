@@ -13,15 +13,10 @@ from via.exceptions import (
     UnhandledException,
     UpstreamServiceError,
 )
+from via.get_url.headers import clean_headers
 
 GOOGLE_DRIVE_REGEX = re.compile(
     r"^https://drive.google.com/uc\?id=(.*)&export=download$", re.IGNORECASE
-)
-
-# The Chrome user-agent as of 24/06/2020
-BACKUP_USER_AGENT = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
-    "snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"
 )
 
 
@@ -65,7 +60,7 @@ def get_url_details(url, headers):
         url,
         stream=True,
         allow_redirects=True,
-        headers={"User-Agent": headers.get("User-Agent", BACKUP_USER_AGENT)},
+        headers=clean_headers(headers),
         timeout=10,
     ) as rsp:
         content_type = rsp.headers.get("Content-Type")

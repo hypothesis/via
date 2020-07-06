@@ -33,7 +33,10 @@ def debug_headers(_context, request):
             </ol>
 
             <a href="{request.route_url('debug_headers')}?raw=1">Show all headers</a>
+
             <hr>
+
+            <h1>Headers received</h1>
             <pre>{json.dumps(headers, indent=4)}</pre><br>
         """,
         status=200,

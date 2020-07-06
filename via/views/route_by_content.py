@@ -6,7 +6,7 @@ from pyramid import httpexceptions as exc
 from pyramid import view
 from webob.multidict import MultiDict
 
-from via.get_url_details import get_url_details
+from via.get_url import get_url_details
 
 
 @view.view_config(route_name="route_by_content")
