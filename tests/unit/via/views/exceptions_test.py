@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPClientError, HTTPUnsupportedMediaType
 from pyramid.testing import DummyRequest
 
 from via.exceptions import BadURL, UnhandledException
-from via.views.error import ERROR_MAP, error_view
+from via.views.exceptions import EXCEPTION_MAP, all_exceptions
 
 
 class TestErrorView:
@@ -26,11 +26,11 @@ class TestErrorView:
     ):
         exception = exception_class("details string")
 
-        values = error_view(exception, pyramid_request)
+        values = all_exceptions(exception, pyramid_request)
 
         assert values == Any.dict.containing(
             {
-                "error": Any.dict.containing(
+                "exception": Any.dict.containing(
                     {"class": exception.__class__.__name__, "details": "details string"}
                 ),
                 "status_code": status_code,
@@ -52,16 +52,18 @@ class TestErrorView:
     ):
         exception = exception_class("details string")
 
-        values = error_view(exception, pyramid_request)
+        values = all_exceptions(exception, pyramid_request)
 
-        assert values["error"] == Any.dict.containing(ERROR_MAP[mapped_exception])
+        assert values["exception"] == Any.dict.containing(
+            EXCEPTION_MAP[mapped_exception]
+        )
 
     @pytest.mark.parametrize("doc_url", (sentinel.doc_url, None))
     def test_it_reads_the_urls_from_the_request(self, pyramid_request, doc_url):
         pyramid_request.GET["url"] = doc_url
         pyramid_request.url = sentinel.request_url
 
-        values = error_view(ValueError(), pyramid_request)
+        values = all_exceptions(ValueError(), pyramid_request)
 
         assert values["url"] == {"original": doc_url, "retry": sentinel.request_url}
 

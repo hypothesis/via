@@ -10,7 +10,7 @@ from pyramid.view import exception_view_config
 
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
 
-ERROR_MAP = {
+EXCEPTION_MAP = {
     BadURL: {
         "title": "Oops, that URL doesn't look right",
         "long_description": [
@@ -59,23 +59,23 @@ ERROR_MAP = {
 }
 
 
-def _get_meta(error):
+def _get_meta(exception):
     """Convert an unhandled error into an managed error."""
 
-    meta = ERROR_MAP.get(type(error))
+    meta = EXCEPTION_MAP.get(type(exception))
     if meta:
         return meta
 
-    for error_type, meta in ERROR_MAP.items():
-        if isinstance(error, error_type):
+    for exception_type, meta in EXCEPTION_MAP.items():
+        if isinstance(exception, exception_type):
             return meta
 
-    return ERROR_MAP.get(UnhandledException)
+    return EXCEPTION_MAP.get(UnhandledException)
 
 
-@exception_view_config(Exception, renderer="via:templates/error.jinja2")
-@exception_view_config(HTTPError, renderer="via:templates/error.jinja2")
-def error_view(exc, request):
+@exception_view_config(Exception, renderer="via:templates/exception.html.jinja2")
+@exception_view_config(HTTPError, renderer="via:templates/exception.html.jinja2")
+def all_exceptions(exc, request):
     """Catch all errors (Pyramid or Python) and display an HTML page."""
 
     try:
@@ -86,11 +86,11 @@ def error_view(exc, request):
 
     request.response.status_int = status_code
 
-    error_meta = _get_meta(exc)
-    error_meta.update({"class": exc.__class__.__name__, "details": str(exc)})
+    exception_meta = _get_meta(exc)
+    exception_meta.update({"class": exc.__class__.__name__, "details": str(exc)})
 
     return {
         "status_code": status_code,
-        "error": error_meta,
+        "exception": exception_meta,
         "url": {"original": request.GET.get("url", None), "retry": request.url},
     }

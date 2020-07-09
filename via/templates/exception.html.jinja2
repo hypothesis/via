@@ -6,8 +6,8 @@
 
 
 {% macro flow_panel(stage, description) %}
-    <td class="flow-item {% if stage == error.stage %}error{% endif %}">
-        {% if stage == error.stage %}
+    <td class="flow-item {% if stage == exception.stage %}exception{% endif %}">
+        {% if stage == exception.stage %}
             <span class="check cross">❌</span>
         {% else %}
             <span class="check tick">✔</span>
@@ -69,7 +69,7 @@
                 color: #666;
             }
 
-            .flow-item.error .description {
+            .flow-item.exception .description {
                 font-weight: bold;
                 color: black;
             }
@@ -160,15 +160,15 @@
             }
 
         </style>
-        <title>{{ status_code }}: {{ error.title }}</title>
+        <title>{{ status_code }}: {{ exception.title }}</title>
     </head>
 
     <body>
-        <h1>{{ error.title }}</h1>
+        <h1>{{ exception.title }}</h1>
 
         <p>Hypothesis is a service that gets a web page and lets you annotate it.</p>
 
-        {% for line in error.long_description %}
+        {% for line in exception.long_description %}
             <p>{{ line | safe }}</p>
         {% endfor %}
 
@@ -191,7 +191,7 @@
             <details>
                 <summary>Error Details</summary>
                 <div class="code">
-                    <p>{{ error.class }}: {{ error.details }}</p>
+                    <p>{{ exception.class }}: {{ exception.details }}</p>
                     <p>URL: {{ url.retry }}</p>
                     <p>Third party URL: {{ url.original }}</p>
                 </div>
@@ -199,7 +199,7 @@
         </p>
 
         {% set actions = [
-            ["Try again", url.retry, error.retryable ],
+            ["Try again", url.retry, exception.retryable ],
         ] %}
 
         <div class="button-group">
