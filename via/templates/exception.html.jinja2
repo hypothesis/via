@@ -4,13 +4,16 @@
     'documentation': 'https://web.hypothes.is/help/',
 } %}
 
+{% set STAGE_ORDER = ["request", "via", "upstream"] %}
 
 {% macro flow_panel(stage, description) %}
     <td class="flow-item {% if stage == exception.stage %}exception{% endif %}">
         {% if stage == exception.stage %}
             <span class="check cross">❌</span>
-        {% else %}
+        {% elif STAGE_ORDER.index(stage) < STAGE_ORDER.index(exception.stage) %}
             <span class="check tick">✔</span>
+        {% else %}
+            <span class="check not-reached">?</span>
         {% endif %}
 
         <span class="description">{{ description }}</span>
@@ -93,6 +96,11 @@
 
             .check.cross {
                 background: red;
+            }
+
+            .check.not-reached {
+                background: grey;
+                color: grey;
             }
 
             .right-arrow {
