@@ -22,7 +22,7 @@
         <tr>
             {{ flow_panel('request', 'Your request') }}
             <td><div class="right-arrow"></div></td>
-            {{ flow_panel('via', 'Our service') }}
+            {{ flow_panel('via', 'Hypothesis') }}
             <td><div class="right-arrow"></div></td>
             {{ flow_panel('upstream', 'The web page') }}
         </tr>
@@ -165,8 +165,6 @@
 
     <body>
         <h1>{{ exception.title }}</h1>
-
-        <p>Hypothesis is a service that gets a web page and lets you annotate it.</p>
 
         {% for line in exception.long_description %}
             <p>{{ line | safe }}</p>
