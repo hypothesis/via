@@ -1,6 +1,5 @@
 httpretty
 pytest
 factory-boy
-mock
 webtest
 h-matchers >= 1.2.4

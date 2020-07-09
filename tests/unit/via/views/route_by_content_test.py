@@ -1,6 +1,7 @@
+from unittest.mock import sentinel
+
 import pytest
 from h_matchers import Any
-from mock import sentinel
 from webob.headers import EnvironHeaders
 
 from tests.unit.conftest import assert_cache_control

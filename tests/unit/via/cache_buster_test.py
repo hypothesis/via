@@ -1,5 +1,6 @@
+from unittest.mock import sentinel
+
 import pytest
-from mock import sentinel
 
 from via.cache_buster import PathCacheBuster
 

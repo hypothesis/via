@@ -1,9 +1,9 @@
 import json
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
 from markupsafe import Markup
-from mock import sentinel
 
 from tests.unit.conftest import assert_cache_control
 from via.resources import URLResource

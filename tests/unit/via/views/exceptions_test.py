@@ -1,9 +1,10 @@
+from unittest.mock import sentinel
+
 import pytest
-from _pytest.mark import param
 from h_matchers import Any
-from mock import sentinel
 from pyramid.httpexceptions import HTTPClientError, HTTPUnsupportedMediaType
 from pyramid.testing import DummyRequest
+from pytest import param
 
 from via.exceptions import BadURL, UnhandledException
 from via.views.exceptions import EXCEPTION_MAP, all_exceptions
