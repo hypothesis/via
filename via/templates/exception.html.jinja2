@@ -1,0 +1,213 @@
+{% set LINK = {
+    'support_email': 'mailto:support@hypothes.is?subject=Hypothesis%20LMS%20Support',
+    'get_help' : 'https://web.hypothes.is/get-help/',
+    'documentation': 'https://web.hypothes.is/help/',
+} %}
+
+{% set STAGE_ORDER = ["request", "via", "upstream"] %}
+
+{% macro flow_panel(stage, description) %}
+    <td class="flow-item {% if stage == exception.stage %}exception{% endif %}">
+        {% if stage == exception.stage %}
+            <span class="check cross"><span>❌</span></span>
+        {% elif STAGE_ORDER.index(stage) < STAGE_ORDER.index(exception.stage) %}
+            <span class="check tick"><span>✔</span></span>
+        {% else %}
+            <span class="check not-reached"><span>?</span></span>
+        {% endif %}
+
+        <span class="description">{{ description }}</span>
+    </td>
+{% endmacro %}
+
+{% macro flow_diagram() %}
+    <table class="flow-diagram">
+        <tr>
+            {{ flow_panel('request', 'Your request') }}
+            <td><div class="right-arrow"></div></td>
+            {{ flow_panel('via', 'Hypothesis') }}
+            <td><div class="right-arrow"></div></td>
+            {{ flow_panel('upstream', 'The web page') }}
+        </tr>
+    </table>
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+            html {
+                background: rgba(0, 0, 0, 0.5);
+                display:flex;
+                justify-content: center;
+                align-items: center;
+                height:100%;
+            }
+
+            body {
+                max-width: 602.703px;
+                padding: 20px;
+                margin:0;
+
+                background: white;
+                border-radius: 3px;
+                box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.1);
+
+                font-family: "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+                font-size: 13px;
+            }
+
+            h1 {
+                font-size: 19px;
+                margin-top: 8px;
+            }
+
+            .flow-diagram {
+                width:100%;
+                margin:auto;
+                padding: 8px 0;
+
+                text-align: center;
+            }
+
+            .flow-item .description {
+                padding-left:8px;
+                color: #666;
+            }
+
+            .flow-item.exception .description {
+                font-weight: bold;
+                color: black;
+            }
+
+            .check {
+                display:inline-block;
+
+                line-height: 20px;
+
+                height: 20px;
+                width: 20px;
+                background: url({{ static_url("via:static/css/img/icons.svg") }}) no-repeat;
+                background-size: auto 20px;
+            }
+
+            .check span {
+                font-size:0;
+            }
+
+            .check.cross {
+                background-position-x: -20px;
+            }
+
+            .check.not-reached {
+                background-position-x: -40px;
+            }
+
+            .right-arrow {
+                margin:auto;
+                width: 0;
+                height: 0;
+
+                border-style: solid;
+                border-width: 12px 0 12px 18px;
+                border-color: transparent transparent transparent #ddd;
+            }
+
+            .original-url {
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+            .original-url label {
+                padding-bottom: 4px;
+                font-weight: bold;
+            }
+
+            .button-group {
+                display: flex;
+                justify-content: right;
+                flex-direction: row-reverse;
+                flex-wrap: wrap;
+
+                width: 100%;
+                padding: 10px 0 0;
+            }
+
+            .button-group .button {
+                margin: 5px;
+            }
+
+            .button {
+                flex: 0 0 1;
+                padding: 8px 16px;
+
+                border-radius: 2px;
+                text-decoration: None;
+                font-weight: bold;
+                background: #e0e1e2;
+                color: #444;
+            }
+
+            .button.primary {
+                background: #3f3f3f;
+                color:white;
+            }
+
+            .code {
+                /* Prevent broken overflows for very long words */
+                overflow-wrap: break-word;
+                font-family: monospace, sans-serif;
+            }
+
+            details .code {
+                margin-top: 13px;
+                padding: 1px 8px;
+                font-size: 12px;
+                border: 1px solid #dbdbdb;
+                background: #f2f2f2;
+            }
+        </style>
+        <title>{{ status_code }}: {{ exception.title }}</title>
+    </head>
+
+    <body>
+        <h1>{{ exception.title }}</h1>
+
+        {% for line in exception.long_description %}
+            <p>{{ line | safe }}</p>
+        {% endfor %}
+
+        {{ flow_diagram() }}
+
+        {% if url.original %}
+            <p class='original-url'>
+                <strong>Asked to get:</strong>
+                <a class='code' href="{{ url.original }}">{{ url.original | truncate(100) }}</a>
+            </p>
+        {% endif %}
+
+        <p>If the problem persists
+            <a href="{{ LINK.support_email }}" target="_blank" rel="noopener noreferrer">send us an email</a>
+            or <a href="{{ LINK.get_help }}" target="_blank" rel="noopener noreferrer">open a support ticket</a>.
+            You can also visit our <a href="{{ LINK.documentation }}" target="_blank" rel="noopener noreferrer"> help documents</a>.
+        </p>
+
+        <p>
+            <details>
+                <summary>Error Details</summary>
+                <div class="code">
+                    <p>{{ exception.class }}: {{ exception.details }}</p>
+                    <p>URL: {{ url.retry }}</p>
+                    <p>Third party URL: {{ url.original }}</p>
+                </div>
+            </details>
+        </p>
+
+        {% if exception.retryable %}
+            <div class="button-group">
+                <a class="button primary" href="{{ url.retry }}">Try again</a>
+            </div>
+        {% endif %}
+    </body>
+</html>
