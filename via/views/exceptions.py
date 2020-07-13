@@ -30,9 +30,7 @@ EXCEPTION_MAP = {
     },
     UnhandledException: {
         "title": "Something went wrong",
-        "long_description": [
-            "We experienced an unexpected error.",
-        ],
+        "long_description": ["We experienced an unexpected error.",],
         "stage": "via",
         "retryable": True,
     },
@@ -90,5 +88,5 @@ def all_exceptions(exc, request):
         "status_code": status_code,
         "exception": exception_meta,
         "url": {"original": request.GET.get("url", None), "retry": request.url},
-        "static_url": request.static_url
+        "static_url": request.static_url,
     }
