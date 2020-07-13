@@ -9,11 +9,11 @@
 {% macro flow_panel(stage, description) %}
     <td class="flow-item {% if stage == exception.stage %}exception{% endif %}">
         {% if stage == exception.stage %}
-            <span class="check cross">❌</span>
+            <span class="check cross"><span>❌</span></span>
         {% elif STAGE_ORDER.index(stage) < STAGE_ORDER.index(exception.stage) %}
-            <span class="check tick">✔</span>
+            <span class="check tick"><span>✔</span></span>
         {% else %}
-            <span class="check not-reached">?</span>
+            <span class="check not-reached"><span>?</span></span>
         {% endif %}
 
         <span class="description">{{ description }}</span>
@@ -41,7 +41,7 @@
             }
 
             body {
-                max-width: 500px;
+                max-width: 602.703px;
                 margin: auto;
                 margin-top: 20px;
                 padding: 20px;
@@ -81,26 +81,23 @@
                 display:inline-block;
 
                 line-height: 20px;
+
                 height: 20px;
                 width: 20px;
-                border-radius: 10px;
-
-                text-align: center;
-                font-size: 18px;
-                color: white;
+                background: url({{ static_url("via:static/css/img/icons.svg") }}) no-repeat;
+                background-size: auto 20px;
             }
 
-            .check.tick {
-                background: green;
+            .check span {
+                font-size:0;
             }
 
             .check.cross {
-                background: red;
+                background-position-x: -20px;
             }
 
             .check.not-reached {
-                background: grey;
-                color: grey;
+                background-position-x: -40px;
             }
 
             .right-arrow {
@@ -161,12 +158,12 @@
             }
 
             details .code {
+                margin-top: 13px;
                 padding: 1px 8px;
                 font-size: 12px;
                 border: 1px solid #dbdbdb;
                 background: #f2f2f2;
             }
-
         </style>
         <title>{{ status_code }}: {{ exception.title }}</title>
     </head>
@@ -187,7 +184,7 @@
             </p>
         {% endif %}
 
-        <p>To get help from Hypothesis
+        <p>If the problem persists
             <a href="{{ LINK.support_email }}" target="_blank" rel="noopener noreferrer">send us an email</a>
             or <a href="{{ LINK.get_help }}" target="_blank" rel="noopener noreferrer">open a support ticket</a>.
             You can also visit our <a href="{{ LINK.documentation }}" target="_blank" rel="noopener noreferrer"> help documents</a>.
@@ -204,14 +201,10 @@
             </details>
         </p>
 
-        {% set actions = [
-            ["Try again", url.retry, exception.retryable ],
-        ] %}
-
-        <div class="button-group">
-            {% for label, url, enabled in actions if enabled %}
-                <a class="button {% if loop.index == 1 %}primary{% else %}secondary{% endif %}" href="{{ url }}">{{ label }}</a>
-            {% endfor %}
-        </div>
+        {% if exception.retryable %}
+            <div class="button-group">
+                <a class="button primary" href="{{ url.retry }}">Try again</a>
+            </div>
+        {% endif %}
     </body>
 </html>

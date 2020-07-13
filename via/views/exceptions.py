@@ -14,8 +14,7 @@ EXCEPTION_MAP = {
     BadURL: {
         "title": "The URL isn't valid",
         "long_description": [
-            "The URL you asked us to retrieve isn't valid.",
-            "Parts could be missing or in the wrong format.",
+            "Parts of the URL could be missing or in the wrong format.",
         ],
         "stage": "request",
         "retryable": False,
@@ -24,8 +23,7 @@ EXCEPTION_MAP = {
         "title": "Could not get web page",
         "long_description": [
             "Something went wrong when we tried to get the web page.",
-            "It might be missing or have returned an error to us.",
-            "Retrying might help if the web page is having temporary problems.",
+            "It might be missing or might have returned an error.",
         ],
         "stage": "upstream",
         "retryable": True,
@@ -34,7 +32,6 @@ EXCEPTION_MAP = {
         "title": "Something went wrong",
         "long_description": [
             "We experienced an unexpected error.",
-            "Retrying might help, but if you get this error repeatedly please report it.",
         ],
         "stage": "via",
         "retryable": True,
@@ -49,9 +46,8 @@ EXCEPTION_MAP = {
         "retryable": False,
     },
     HTTPClientError: {
-        "title": "Cannot understand request",
+        "title": "Bad request",
         "long_description": [
-            "Something is wrong with the request you made to us.",
             "We can't process the request because we don't understand it.",
         ],
         "stage": "request",
@@ -94,4 +90,5 @@ def all_exceptions(exc, request):
         "status_code": status_code,
         "exception": exception_meta,
         "url": {"original": request.GET.get("url", None), "retry": request.url},
+        "static_url": request.static_url
     }
