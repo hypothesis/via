@@ -21,7 +21,7 @@ pyramid==1.10.4           # via -r requirements.in, h-pyramid-sentry, pyramid-ji
 requests==2.24.0          # via -r requirements.in
 sentry-sdk==0.16.1        # via h-pyramid-sentry
 translationstring==1.4    # via pyramid
-urllib3==1.25.9           # via requests, sentry-sdk
+urllib3==1.25.10          # via requests, sentry-sdk
 venusian==3.0.0           # via pyramid
 webob==1.8.6              # via pyramid
 whitenoise==5.1.0         # via -r requirements.in
