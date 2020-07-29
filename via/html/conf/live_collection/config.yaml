@@ -1,0 +1,8 @@
+collections:
+    "html":
+        index: $live
+        banner_html: ./templates/banner.html
+        error_html: ./templates/error.html
+        head_insert: ./templates/head_insert.html
+
+framed_replay: false

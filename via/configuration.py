@@ -89,6 +89,10 @@ class Configuration:
             for part in parts[1:-1]:
                 target = target.setdefault(part, {})
 
+            # Check to see if we have a list of values (take the first)
+            if isinstance(value, list):
+                value = value[0] if value else ""
+
             # Finally set the last key to the value
             target[parts[-1]] = value
 

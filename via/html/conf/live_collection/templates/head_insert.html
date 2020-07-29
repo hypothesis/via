@@ -1,0 +1,81 @@
+<!-- WB Insert -->
+
+{#
+Hypothesis
+----------
+
+This file is copied directly from `pywb/templates/head_insert.html`
+
+The reason we change this file is to add 'ignore_prefixes' which is read here:
+https://github.com/webrecorder/wombat/blob/3f04dcdcb071042d498c4912599454a15c11f0e4/src/wombat.js#L52
+
+#}
+
+<script>
+{% set urlsplit = cdx.url | urlsplit %}
+  wbinfo = {};
+  wbinfo.top_url = "{{ top_url }}";
+{% if is_framed %}
+  // Fast Top-Frame Redirect
+  if (window == window.top && wbinfo.top_url) {
+    var loc = window.location.href.replace(window.location.hash, "");
+    loc = decodeURI(loc);
+
+    if (loc != decodeURI(wbinfo.top_url)) {
+        window.location.href = wbinfo.top_url + window.location.hash;
+    }
+  }
+{% endif %}
+  {#- Hypothesis edit starts -#}
+  wbinfo.ignore_prefixes = {{ ignore_prefixes | tojson }};
+  {#- Hypothesis edit ends -#}
+
+  wbinfo.url = "{{ cdx.url }}";
+  wbinfo.timestamp = "{{ cdx.timestamp }}";
+  wbinfo.request_ts = "{{ wb_url.timestamp }}";
+  wbinfo.prefix = decodeURI("{{ wb_prefix }}");
+  wbinfo.mod = "{{ replay_mod }}";
+  wbinfo.is_framed = {{ is_framed | tobool }};
+  wbinfo.is_live = {{ is_live | tobool }};
+  wbinfo.coll = "{{ coll }}";
+  wbinfo.proxy_magic = "{{ env.pywb_proxy_magic }}";
+  wbinfo.static_prefix = "{{ static_prefix }}/";
+  wbinfo.enable_auto_fetch = {{ config.enable_auto_fetch | tobool }};
+</script>
+{% if env.pywb_proxy_magic %}
+{% set whichWombat = 'wombatProxyMode.js' %}
+{% else %}
+{% set whichWombat = 'wombat.js' %}
+{% endif %}
+{% if not wb_url.is_banner_only or (env.pywb_proxy_magic and (config.enable_auto_fetch or config.proxy.enable_wombat)) %}
+<script src='{{ static_prefix }}/{{ whichWombat }}'> </script>
+<script>
+  wbinfo.wombat_ts = "{{ wombat_ts }}";
+  wbinfo.wombat_sec = "{{ wombat_sec }}";
+  wbinfo.wombat_scheme = "{{ urlsplit.scheme }}";
+  wbinfo.wombat_host = "{{ urlsplit.netloc }}";
+
+  wbinfo.wombat_opts = {};
+
+  if (window && window._WBWombatInit) {
+    window._WBWombatInit(wbinfo);
+  }
+</script>
+{% else %}
+<script>
+  window.devicePixelRatio = 1;
+</script>
+{% endif %}
+
+{% if config.enable_flash_video_rewrite or config.transclusions_version == 1 %}
+<script src='{{ static_prefix }}/vidrw.js'> </script>
+
+{% elif config.transclusions_version == 2 %}
+<script src="{{ static_prefix }}/transclusions.js"> </script>
+
+{% endif %}
+
+{{ banner_html }}
+
+<!-- End WB Insert -->
+

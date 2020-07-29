@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Pywb Error{% endblock %}
+{% block body %}
+<div class="container text-danger">
+    <div class="row justify-content-center">
+        <h2 class="display-2">Via Error</h2>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+        {% if err_status == 451 %}
+            <p class="lead">Access Blocked to {{ err_msg }}</p>
+
+        {% elif err_status == 404 and err_details == 'coll_not_found' %}
+            <p>Collection not found: <b>{{ err_msg }}</b></p>
+
+            <p><a href="/">See list of valid collections</a></p>
+
+        {% elif err_status == 404 and err_details == 'static_file_not_found' %}
+            <p>Static file not found: <b>{{ err_msg }}</b></p>
+
+        {% else %}
+
+            <p class="lead">{{ err_msg }}</p>
+
+            {% if err_details %}
+                <p class="lead">Error Details:</p>
+                <pre>{{ err_details }}</pre>
+            {% endif %}
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

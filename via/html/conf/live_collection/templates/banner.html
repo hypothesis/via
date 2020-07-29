@@ -1,0 +1,115 @@
+<!-- Set canonical url -->
+<link rel="canonical" href="{{ cdx.url }}"/>
+
+<!-- Inject Hypothesis -->
+<script type="application/javascript">
+    /**
+      * Return `true` if this frame has no ancestors or its nearest ancestor was
+      * not served through Via.
+      *
+      * The implementation relies on all documents proxied through Via sharing the
+      * same origin.
+      */
+    function isTopViaFrame() {
+      if (window === window.top) {
+        // Trivial case - This is the top-most frame in the tab so it must be the
+        // top Via frame.
+        return true;
+      }
+
+      try {
+        // Get a reference to the parent frame. Via's "wombat.js" frontend code
+        // monkey-patches `window.parent` in certain cases, in which case
+        // `window.__WB_orig_parent` is the _real_ parent frame.
+        var parent = window.__WB_orig_parent || window.parent;
+
+        // Try to access the parent frame's location. This will trigger an
+        // exception if the frame comes from a different, non-Via origin.
+        //
+        // This test assumes that all documents proxied through Via are served from
+        // the same origin. If a future change to Via means that is no longer the
+        // case, this function will need to be implemented differently.
+        parent.location.href;
+
+        // If the access succeeded, the parent frame was proxied through Via and so
+        // this is not the top Via frame.
+        return false;
+      } catch (err) {
+        // If the access failed, the parent frame was not proxied through Via and
+        // so this is the top Via frame.
+        return true;
+      }
+    }
+
+    function stripFragment(url) {
+      return url.replace(/#.*$/, '');
+    }
+
+    /**
+     * Test if a link will navigate to a new page as opposed to scrolling to a
+     * different location within the current page.
+     *
+     * @param {HTMLAnchorElement} linkEl
+     */
+    function isExternalLink(linkEl) {
+      // Create a link that is definitely internal and compare its absolute URL
+      // to the target link.
+      //
+      // We do this rather than the more obvious comparison of `linkEl.href` to `location.href`
+      // because Via monkey-patches `HTMLAnchorElement.prototype.href` so that it
+      // returns the original (non-proxied) URL and therefore cannot be
+      // compared directly with the real (proxied) URL that `location.href` returns.
+      const internalLink = document.createElement('a');
+
+      // nb. `href` always returns an absolute URL when read.
+      internalLink.href = '#';
+
+      return stripFragment(internalLink.href) !== stripFragment(linkEl.href);
+    }
+
+    /**
+     * Setup handling of links to other documents.
+     *
+     * @param {"same-tab"|"new-tab"} mode
+     */
+    function setupExternalLinkHandler(mode) {
+      if (mode === "new-tab") {
+        document.addEventListener("click", function (event) {
+          if (!event.target.closest) {
+            // Do nothing in browsers that don't support `element.closest` (IE 11).
+            return;
+          }
+
+          var linkEl = event.target.closest("a");
+          if (linkEl) {
+            if (isExternalLink(linkEl)) {
+              // Make link open in a new tab.
+              linkEl.target = "_blank";
+            }
+          }
+        });
+      }
+    }
+
+    (function () {
+        if (!isTopViaFrame()) {
+            // Do not inject Hypothesis into iframes in documents proxied through Via.
+            // As well as slowing down the loading of the proxied page even more, this
+            // causes problems with the way that the client "discovers" annotate-able iframes.
+            //
+            // See https://github.com/hypothesis/client/issues/568,
+            // https://github.com/hypothesis/via/issues/119 and
+            // https://github.com/hypothesis/lms/issues/701.
+            return;
+        }
+
+        // Inject the Hypothesis client.
+        window.hypothesisConfig = function () {
+            return {{ client_params(env) | tojson }};
+        }
+
+        var embed_script = document.createElement("script");
+        embed_script.src = "{{ h_embed_url }}";
+        document.head.appendChild(embed_script);
+    })();
+</script>
