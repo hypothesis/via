@@ -1,7 +1,5 @@
 """Configuration points which can be added to change `pywb` behavior."""
 
-from urllib.parse import parse_qs, parse_qsl, urlparse
-
 from via.configuration import Configuration
 
 
@@ -12,39 +10,34 @@ class Hooks:
     def __init__(self, config):
         self.config = config
 
+    @property
     def template_vars(self):
-        """Additional parameters to place in the global Jinja2 environment."""
-        vars = {"client_params": self.get_client_params}
+        """Get variables to make available in the global Jinja2 environment."""
+        vars = {"client_params": lambda http_env: self.get_config(http_env)[1]}
         vars.update(self.config)
+
+        # This is already in the config, but run through the property just in
+        # case that grows some logic in it
         vars["ignore_prefixes"] = self.ignore_prefixes
 
         return vars
 
     @property
     def ignore_prefixes(self):
-        """The list of URL prefixes to ignore (server and client side)."""
+        """Get the list of URL prefixes to ignore (server and client side)."""
         return self.config["ignore_prefixes"]
 
     @classmethod
-    def get_client_params(cls, http_env):
+    def get_config(cls, http_env):
         """Return the h-client parameters from a WSGI environment."""
 
-        params = parse_qs(http_env.get("QUERY_STRING"))
-
-        via_params, client_params = Configuration.extract_from_params(params)
-
-        return str(client_params)
+        return Configuration.extract_from_wsgi_environment(http_env)
 
     @classmethod
-    def filter_doc_url(cls, doc_url):
-        """Map a URL before retrieving it for rewriting."""
+    def get_upstream_url(cls, doc_url):
+        """Modify the URL before we attempt to get it from ourselves."""
 
-        parts = urlparse(doc_url)
-        query_parts = parse_qsl(parts.query)
-
-        # TODO: Here you would strip out the configuration stuff...
-        # return parts._replace(query='wat=bat').geturl()
-
-        # TODO: How does this work when moving from URL to URL via link?
-
-        return doc_url
+        # The major reason to do this is to ensure the "canonical" URL in the
+        # page is correct. Most other URLs are resources in the page which
+        # don't have any of our params anyway
+        return Configuration.strip_from_url(doc_url)
