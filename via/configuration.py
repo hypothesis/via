@@ -1,6 +1,7 @@
 """Tools for reading in configuration."""
 
 # pylint: disable=too-few-public-methods
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse
 
 
 class Configuration:
@@ -48,6 +49,8 @@ class Configuration:
         "theme",
     }
 
+    KEY_PREFIX = "via"
+
     @classmethod
     def extract_from_params(cls, params):
         """Extract Via and H config from query parameters.
@@ -68,8 +71,82 @@ class Configuration:
 
         return via_params, client_params
 
-    @staticmethod
-    def _unflatten(params):
+    @classmethod
+    def extract_from_wsgi_environment(cls, http_env):
+        params = parse_qs(http_env.get("QUERY_STRING"))
+
+        return cls.extract_from_params(params)
+
+    @classmethod
+    def extract_from_url(cls, url):
+        params = parse_qs(urlparse(url).query)
+
+        return cls.extract_from_params(params)
+
+    @classmethod
+    def strip_from_url(cls, url):
+        """Remove any Via configuration parameters from the URL.
+
+        If the URL has no parameters left, remove the query string entirely.
+        :param url: URL to strip
+        :return: A string URL with the via parts removed
+        """
+
+        # Quick exit if this cannot contain any of our params
+        if cls.KEY_PREFIX not in url:
+            return url
+
+        url_parts = urlparse(url)
+        _, non_via = cls.split_params(parse_qsl(url_parts.query))
+        return url_parts._replace(query=urlencode(non_via)).geturl()
+
+    @classmethod
+    def add_to_url(cls, url, via_params, client_params):
+        url_parts = urlparse(url)
+        query_items = parse_qsl(url_parts.query)
+
+        flat_params = cls._flatten(dict(via_params, client=client_params))
+        query_items.extend(flat_params.items())
+
+        return url_parts._replace(query=urlencode(query_items)).geturl()
+
+    @classmethod
+    def split_params(cls, items):
+        """Split params into via and non-via params.
+
+        :param items: An iterable of key value pairs
+        :return: A tuple of (via, non-via) key-value lists
+        """
+
+        via_params = []
+        non_via_params = []
+
+        for key, value in items:
+            if key.split(".")[0] == cls.KEY_PREFIX:
+                via_params.append((key, value))
+            else:
+                non_via_params.append((key, value))
+
+        return via_params, non_via_params
+
+    @classmethod
+    def _flatten(cls, config, so_far=None, key_prefix=KEY_PREFIX):
+        key_prefix += "."
+
+        if so_far is None:
+            so_far = {}
+
+        for key, value in config.items():
+            flat_key = key_prefix + key
+            if isinstance(value, dict):
+                cls._flatten(value, so_far=so_far, key_prefix=flat_key)
+            else:
+                so_far[flat_key] = value
+
+        return so_far
+
+    @classmethod
+    def _unflatten(cls, params):
         """Convert dot delimited flat data into nested dicts.
 
         This method will skip any keys which do not start with "via." and will
@@ -79,12 +156,12 @@ class Configuration:
 
         data = {}
 
-        for key, value in params.items():
-            parts = key.split(".")
-            if parts[0] != "via":
-                continue
+        via_params, _ = cls.split_params(params.items())
 
+        for key, value in via_params:
+            parts = key.split(".")
             target = data
+
             # Skip the first ('via') and last parts
             for part in parts[1:-1]:
                 target = target.setdefault(part, {})
