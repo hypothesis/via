@@ -1,5 +1,5 @@
 collections:
-    "html":
+    "v":
         index: $live
         banner_html: ./templates/banner.html
         error_html: ./templates/error.html
