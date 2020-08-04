@@ -24,7 +24,7 @@ translationstring==1.4    # via pyramid
 urllib3==1.25.10          # via requests, sentry-sdk
 venusian==3.0.0           # via pyramid
 webob==1.8.6              # via pyramid
-whitenoise==5.1.0         # via -r requirements.in
+whitenoise==5.2.0         # via -r requirements.in
 zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2
 zope.interface==4.7.2     # via pyramid
 
