@@ -11,6 +11,7 @@ h-pyramid-sentry==1.2.1   # via -r requirements.in
 hupper==1.10.2            # via pyramid
 idna==2.10                # via requests
 jinja2==2.11.2            # via pyramid-jinja2
+lxml==4.5.0               # via -r requirements.in
 markupsafe==1.1.1         # via jinja2, pyramid-jinja2
 newrelic==5.14.1.144      # via -r requirements.in
 pastedeploy==2.1.0        # via plaster-pastedeploy
@@ -18,6 +19,7 @@ plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 pyramid-jinja2==2.8       # via -r requirements.in
 pyramid==1.10.4           # via -r requirements.in, h-pyramid-sentry, pyramid-jinja2
+pyyaml==5.3.1             # via -r requirements.in
 requests==2.24.0          # via -r requirements.in
 sentry-sdk==0.16.3        # via h-pyramid-sentry
 translationstring==1.4    # via pyramid

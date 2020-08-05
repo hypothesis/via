@@ -12,5 +12,6 @@ services:
       - ./conf/nginx/via_dev/app_upstream.conf:/etc/nginx/via/app_upstream.conf:ro
       - ./conf/nginx/dev_host_bridge.sh:/etc/nginx/dev_host_bridge.sh:ro
       - ./conf/nginx/envsubst.conf.template:/var/lib/hypothesis/nginx_envsubst.conf.template:ro
+      # For speed testing
+      # - ./html_test_harness/_hexdump:/var/hexdump:ro
     command: /bin/sh -c "/etc/nginx/dev_host_bridge.sh && envsubst '$${GOOGLE_API_KEY}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && exec nginx"
-
