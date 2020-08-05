@@ -1,0 +1,51 @@
+collections_root: collections
+
+# Per-Collection Paths
+archive_paths: archive
+index_paths: indexes
+acl_paths: acl
+static_path: static
+
+default_access: allow
+
+templates_dir: templates
+
+# Template HTML
+banner_html: banner.html
+head_insert_html: head_insert.html
+frame_insert_html: frame_insert.html
+
+query_html: query.html
+search_html: search.html
+not_found_html: not_found.html
+
+home_html: index.html
+error_html: error.html
+
+proxy_cert_download_html: proxy_cert_download.html
+proxy_select_html: proxy_select.html
+
+# Info JSON
+info_json: collinfo.json
+
+# HTML Templates List
+html_templates:
+    - banner_html
+    - head_insert_html
+    - frame_insert_html
+
+    - query_html
+    - search_html
+    - not_found_html
+
+    - home_html
+    - error_html
+    - proxy_cert_download_html
+    - proxy_select_html
+
+# Other Settings
+enable_memento: true
+
+rules_config: pkg://pywb/rules.yaml
+
+

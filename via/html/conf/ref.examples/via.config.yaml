@@ -1,0 +1,41 @@
+pdf_viewer: &pdf_viewer 'pdfjs_viewer.html'
+
+collections:
+    '':
+        index_paths: $liveweb
+        wb_handler_class: !!python/name:via.rewriter.TemplateRewriteHandler
+        templates:
+            'application/pdf': *pdf_viewer
+            'application/x-pdf': *pdf_viewer
+
+        #frame_insert_html: ./templates/frame_insert.html
+        #head_insert_html: ./templates/head_insert.html
+        redir_to_exact: false
+
+        #cookie_scope: host
+
+        rewrite_opts:
+            rewrite_rel_canon: false
+            client:
+                no_rewrite_prefixes:
+                    - 'http://localhost:5000/' # Hypothesis dev server
+                    - 'http://localhost:3001/' # Hypothesis client dev server
+                    - 'https://localhost:5000/' # Hypothesis dev server (SSL)
+                    - 'https://localhost:3001/' # Hypothesis client dev server (SSL)
+                    - 'https://hypothes.is/'
+                    - 'https://qa.hypothes.is/'
+                    - 'https://cdn.hypothes.is/'
+                    - '/assets/'
+
+                #skip_createElement: true
+
+                http_cache: pass
+
+                #skip_setAttribute: true
+                #skip_dom: true
+                #skip_postmessage: true
+
+search_html: index.html
+home_html: index.html
+
+framed_replay: false

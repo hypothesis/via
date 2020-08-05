@@ -8,7 +8,13 @@ from whitenoise import WhiteNoise
 from via.cache_buster import PathCacheBuster
 from via.sentry_filters import SENTRY_FILTERS
 
-REQUIRED_PARAMS = ["client_embed_url", "nginx_server", "legacy_via_url"]
+REQUIRED_PARAMS = [
+    "client_embed_url",
+    "nginx_server",
+    "legacy_via_url",
+]
+
+OPTIONAL_PARAMS = ["disable_js_cache"]
 
 
 def load_settings(settings):
@@ -21,6 +27,9 @@ def load_settings(settings):
     :raise ValueError: If a required parameter is not filled
     :return: A dict of settings
     """
+    for param in OPTIONAL_PARAMS:
+        settings[param] = settings.get(param, os.environ.get(param.upper()))
+
     for param in REQUIRED_PARAMS:
         value = settings[param] = settings.get(param, os.environ.get(param.upper()))
 
@@ -35,7 +44,8 @@ def load_settings(settings):
 
 def create_app(_=None, **settings):
     """Configure and return the WSGI app."""
-    config = pyramid.config.Configurator(settings=load_settings(settings))
+    settings = load_settings(settings)
+    config = pyramid.config.Configurator(settings=settings)
 
     config.include("pyramid_jinja2")
     config.include("via.views")
@@ -47,7 +57,10 @@ def create_app(_=None, **settings):
     print(f"Cache buster salt: {cache_buster.salt}")
 
     config.add_static_view(name="static", path="via:static")
-    config.add_cache_buster("via:static", cachebust=cache_buster)
+
+    # TESTING
+    # if not settings.get("disable_js_cache"):
+    #     config.add_cache_buster("via:static", cachebust=cache_buster)
 
     app = WhiteNoise(
         config.make_wsgi_app(),
