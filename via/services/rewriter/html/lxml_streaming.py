@@ -1,5 +1,4 @@
 from lxml.html import HTMLParser
-from lxml.html.html5parser import HTMLParser as HTMLParser5
 
 from via.services.rewriter.html.abstract import AbstractHTMLRewriter
 from via.services.rewriter.html.tag_factory import TagFactory
