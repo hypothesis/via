@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <style>
+
+body {
+    padding:20px;
+}
+
+table, td, th {
+    border-collapse: collapse;
+    border:1px solid #aaa;
+    padding:4px 8px;
+}
+
+textarea {
+    border:none;
+    margin: -4px;
+    padding: 2px 4px;
+}
+
+        </style>
+    </head>
+    <body>
+        <form method="POST" action="/save_comments">
+            <button>Save comments</button>
+            <table>
+                <tr>
+                    <th>#</th>
+                    <th>Domain name</th>
+                    <th>Count</th>
+                    <th>Original link</th>
+                    <th>Via link</th>
+                    <th>Via ok?</th>
+                    <th>Via 3 link</th>
+
+                    <th>Comments</th>
+                </tr>
+
+            {% for domain in domains %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ domain.name }}</td>
+                    <td>{{ domain.count }}</td>
+                    <td><a href="{{ domain.url }}" target="_orig">Original</a></td>
+                    <td>
+                        <a href="{{ url_for.legacy_via(domain.url) }}" target="_via">Via</a>
+                        <a href="{{ url_for.legacy_via_qa(domain.url) }}" target="_via">(QA)</a>
+                    </td>
+                    <td><input type="text" name="legacy_via|{{ domain.name }}" value="{{ comments.get('legacy_via', {}).get(domain.name) }}"></td>
+                    <td>
+                        <a href={{ url_for.rewriter_with_path(domain.url, "null") }} target="_via3">Null</a>
+                        <a href={{ url_for.rewriter_with_path(domain.url, "null_stream") }} target="_via3">(Stream)</a>
+                        <a href={{ url_for.rewriter_with_path(domain.url, "htmlparser") }} target="_via3">HTMLParser</a>
+                        <a href={{ url_for.rewriter_with_path(domain.url, "lxml") }} target="_via3">LXML</a>
+                        <a href={{ url_for.rewriter_with_path(domain.url, "lxml_stream") }} target="_via3">(Stream)</a>
+                    </td>
+
+                    <td>
+                        <textarea cols="50" rows="2" name="comment|{{ domain.name }}">{{ comments.get('comment', {}).get(domain.name) }}</textarea>
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+        </form>
+    </body>
+</html>
+

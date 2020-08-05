@@ -1,4 +1,3 @@
-import csv
 from pkg_resources import resource_filename
 
 from diskcache import Index
@@ -42,6 +41,7 @@ class DomainStore:
             yield self.get(domain_name, request=True)
 
     def _prepopulate(self):
+        print("Prepopulating...")
         csv_file = resource_filename('html_test_harness', 'data/example_urls.csv')
 
         for domain in CSVData.from_csv(csv_file):
@@ -50,4 +50,5 @@ class DomainStore:
                 continue
 
             self.cache[domain.name] = domain
+        print("Done")
 
