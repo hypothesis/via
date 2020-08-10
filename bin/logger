@@ -64,24 +64,69 @@ we redirect the aggregated output back to STDOUT (FD 1). You can also log the
 aggregated output to a single file.
 """
 
+import itertools
 import sys
 
 WIDTH = 20
 
 
+class Colors:
+    colors = itertools.cycle(
+        {
+            "cyan": "36",
+            "yellow": "33",
+            "green": "32",
+            "magenta": "35",
+            "blue": "34",
+            "intense_cyan": "36;1",
+            "intense_yellow": "33;1",
+            "intense_green": "32;1",
+            "intense_magenta": "35;1",
+            "intense_blue": "34;1",
+        }.values()
+    )
+
+    intense_red = "31;1"
+
+    def __init__(self):
+        self._process_colors = {}
+
+    def color(self, process_name, s, error=False):
+        if error:
+            color = self.intense_red
+        else:
+            color = self._process_colors.get(process_name)
+
+            if not color:
+                color = self._process_colors[process_name] = next(self.colors)
+
+        return self._color_string(color, s)
+
+    @staticmethod
+    def _ansi(code):
+        return "\033[{0}m".format(code)
+
+    @classmethod
+    def _color_string(cls, color, s):
+        return "{0}{1}{2}{3}".format(cls._ansi(0), cls._ansi(color), s, cls._ansi(0))
+
+
+colors = Colors()
+
+
 def main():
     while True:
-        _write('READY\n')
+        _write("READY\n")
         header = _parse_header(sys.stdin.readline())
-        payload = sys.stdin.read(int(header['len']))
+        payload = sys.stdin.read(int(header["len"]))
 
         # Only handle PROCESS_LOG_* events and just ACK anything else.
-        if header['eventname'] == 'PROCESS_LOG_STDOUT':
+        if header["eventname"] == "PROCESS_LOG_STDOUT":
             _log_payload(payload)
-        elif header['eventname'] == 'PROCESS_LOG_STDERR':
+        elif header["eventname"] == "PROCESS_LOG_STDERR":
             _log_payload(payload, err=True)
 
-        _write('RESULT 2\nOK')
+        _write("RESULT 2\nOK")
 
 
 def _write(s):
@@ -90,20 +135,36 @@ def _write(s):
 
 
 def _parse_header(data):
-    return dict([x.split(':') for x in data.split()])
+    return dict([x.split(":") for x in data.split()])
+
+
+# Patterns in log lines that identify them as not being errors, even if the
+# log line was written to stderr.
+NON_ERROR_MARKERS = ["[INFO]"]
 
 
 def _log_payload(payload, err=False):
-    headerdata, data = payload.split('\n', 1)
+    headerdata, data = payload.split("\n", 1)
     header = _parse_header(headerdata)
-    name = header['processname']
+    name = header["processname"]
     if err:
-        name += ' (stderr)'
-    prefix = '{name:{width}} | '.format(name=name, width=WIDTH)
+        name += " (stderr)"
+    prefix = "{name:{width}} | ".format(name=name, width=WIDTH)
+
     for line in data.splitlines():
-        sys.stderr.write(prefix + line + '\n')
+        format_as_error = err and all(
+            [marker not in line for marker in NON_ERROR_MARKERS]
+        )
+
+        output_line = prefix + line + "\n"
+
+        if "--dev" in sys.argv:
+            output_line = colors.color(name, output_line, error=format_as_error)
+
+        sys.stderr.write(output_line)
+
     sys.stderr.flush()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
