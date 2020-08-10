@@ -1,0 +1,9 @@
+collections:
+    "v":
+        index: $live
+        templates:
+            banner: templates/banner.rewriter
+            error: templates/error.rewriter
+            head_insert: templates/head_insert.rewriter
+
+framed_replay: false

@@ -91,6 +91,10 @@ web: python
 nginx: python
 	@tox -qe dev --run-command 'docker-compose run --rm --service-ports nginx-proxy'
 
+.PHONY: rewriter
+rewriter:
+	@tox -e rewriter
+
 .PHONY: python
 python:
 	@./bin/install-python
