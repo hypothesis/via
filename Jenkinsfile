@@ -25,30 +25,10 @@ node {
         img = buildApp(name: "hypothesis/via3")
     }
 
-    // Run each of the stages in parallel.
-    parallel failFast: true,
-    "Lint": {
-        stage("Lint") {
-            testApp(image: img, runArgs: runArgs) {
-                installDeps()
-                run("make lint")
-            }
-        }
-    },
-    "Format": {
-        stage("Format") {
-            testApp(image: img, runArgs: runArgs) {
-                installDeps()
-                run("make checkformatting")
-            }
-        }
-    },
-    "Tests": {
-        stage("Tests") {
-            testApp(image: img, runArgs: "${runArgs}") {
-                installDeps()
-                run("make test")
-            }
+    stage("Tests") {
+        testApp(image: img, runArgs: "${runArgs}") {
+            installDeps()
+            run("make test")
         }
     }
 
