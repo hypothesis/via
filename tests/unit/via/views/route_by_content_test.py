@@ -2,6 +2,7 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
+from pyramid.request import Request
 from webob.headers import EnvironHeaders
 
 from tests.unit.conftest import assert_cache_control
@@ -46,18 +47,15 @@ class TestRouteByContent:
         assert results.location == Any.url.with_query({"other": "value", "url": url})
 
     @pytest.mark.usefixtures("html_response")
-    def test_requests_to_legacy_via_are_formatted_correctly(
-        self, call_route_by_content
+    def test_html_payloads_are_handled_by_the_html_rewriter_service(
+        self, call_route_by_content, html_rewriter, html_rewriter_factory
     ):
-        path = "http://example.com/path%2C"
-        url = path + "?a=b"
+        url = "http://example.com/path%2C?a=b"
         results = call_route_by_content(url, params={"other": "value"})
 
-        # This is horrible, but the params just get blended together. It's
-        # via's job to separate them on the other side
-        assert results.location == Any.url.with_path(path).with_query(
-            {"a": "b", "other": "value"}
-        )
+        html_rewriter_factory.assert_called_once_with(Any.instance_of(Request))
+        html_rewriter.url_for.assert_called_once_with({"other": "value", "url": url})
+        assert results.location == html_rewriter.url_for.return_value
 
     @pytest.mark.parametrize(
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)],
@@ -117,3 +115,13 @@ class TestRouteByContent:
             return route_by_content(context, request)
 
         return call_route_by_content
+
+    @pytest.fixture
+    def html_rewriter(self, patch):
+        return patch("via.services.html_rewriter.HTMLRewriter")
+
+    @pytest.fixture
+    def html_rewriter_factory(self, patch, html_rewriter):
+        factory = patch("via.views.route_by_content.html_rewriter_factory")
+        factory.return_value = html_rewriter
+        return factory
