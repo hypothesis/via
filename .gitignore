@@ -5,3 +5,5 @@
 via/static/**/*.gz
 build.tar
 .devdata.env
+supervisord.log
+supervisord.pid
