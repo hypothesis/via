@@ -6,6 +6,7 @@ from pyramid import httpexceptions as exc
 from pyramid import view
 from webob.multidict import MultiDict
 
+from via.configuration import Configuration
 from via.get_url import get_url_details
 
 
@@ -23,7 +24,7 @@ def route_by_content(context, request):
 
         return exc.HTTPFound(redirect_url, headers=_caching_headers(max_age=300))
 
-    via_url = _get_legacy_via_url(request)
+    via_url = _get_html_url(request)
     headers = _cache_headers_for_http(status_code)
 
     return exc.HTTPFound(via_url, headers=headers)
@@ -45,21 +46,34 @@ def _cache_headers_for_http(status_code):
     return {"Cache-Control": "no-cache"}
 
 
-def _get_legacy_via_url(request):
+def _html_rewriter_url(request):
+    via_config, _ = Configuration.extract_from_params(request.params)
+
+    if via_config.get("rewrite"):
+        # Attempt to enable internal rewriter
+
+        url = request.registry.settings.get("internal_rewriter_url")
+        if url:
+            return url
+
+    return request.registry.settings["legacy_via_url"]
+
+
+def _get_html_url(request):
     # Get the query we were called with and remove the url
     query = MultiDict(request.params)
     raw_url = urlparse(query.pop("url"))
 
     # Create a legacy via URL by concatenating the urls
-    via_url = request.registry.settings["legacy_via_url"]
+    rewriter_url = _html_rewriter_url(request)
     bare_url = raw_url._replace(query=None).geturl()
-    via_url = urlparse(f"{via_url}/{bare_url}")
+    rewriter_url = urlparse(f"{rewriter_url}/{bare_url}")
 
     # Add the merged query parameters
     query.update(parse_qsl(raw_url.query))
-    via_url = via_url._replace(query=urlencode(query))
+    rewriter_url = rewriter_url._replace(query=urlencode(query))
 
-    return via_url.geturl()
+    return rewriter_url.geturl()
 
 
 def _caching_headers(max_age, stale_while_revalidate=86400):
