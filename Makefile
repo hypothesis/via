@@ -83,6 +83,14 @@ clean:
 	@find . -type d -name "__pycache__" -delete
 	@find . -type f -name "*.gz" -delete
 
+.PHONY: web
+web: python
+	@tox -qe dev --run-command 'gunicorn -c conf/gunicorn/dev.conf.py --paste conf/development.ini'
+
+.PHONY: nginx
+nginx: python
+	@tox -qe dev --run-command 'docker-compose run --rm --service-ports nginx-proxy'
+
 .PHONY: python
 python:
 	@./bin/install-python
