@@ -7,20 +7,20 @@ from webob.multidict import MultiDict
 
 from via.configuration import Configuration
 
-# pylint: disable=too-few-public-methods
-
-
-def html_rewriter_factory(request):
-    """Get an instance of HTMLRewriter from a pyramid Request object."""
-
-    return HTMLRewriter(
-        legacy_via_url=request.registry.settings["legacy_via_url"],
-        internal_rewriter_url=request.registry.settings.get("internal_rewriter_url"),
-    )
-
 
 class HTMLRewriter:
     """A service for creating URLs for HTML rewriting engines."""
+
+    @classmethod
+    def from_request(cls, request):
+        """Get an instance of HTMLRewriter from a pyramid Request object."""
+
+        return cls(
+            legacy_via_url=request.registry.settings["legacy_via_url"],
+            internal_rewriter_url=request.registry.settings.get(
+                "internal_rewriter_url"
+            ),
+        )
 
     def __init__(self, legacy_via_url, internal_rewriter_url=None):
         """Create an HTMLRewriter.
