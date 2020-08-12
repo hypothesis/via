@@ -3,23 +3,21 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
-from via.services.html_rewriter import HTMLRewriter, html_rewriter_factory
+from via.views.route_by_content._html_rewriter import HTMLRewriter
 
 
-class TestHTMLRewriterFactory:
-    def test_it(self, pyramid_request):
+class TestHTMLRewriter:
+    def test_from_request(self, pyramid_request):
         settings = {
             "legacy_via_url": sentinel.legacy_via_url,
             "internal_rewriter_url": sentinel.internal_rewriter_url,
         }
         pyramid_request.registry.settings.update(settings)
 
-        rewriter = html_rewriter_factory(pyramid_request)
+        rewriter = HTMLRewriter.from_request(pyramid_request)
 
         assert rewriter == Any.instance_of(HTMLRewriter).with_attrs(settings)
 
-
-class TestHTMLRewriter:
     def test_it_defaults_to_original_via(self):
         rewriter = HTMLRewriter(legacy_via_url=sentinel.legacy_via_url)
         assert rewriter.internal_rewriter_url == sentinel.legacy_via_url

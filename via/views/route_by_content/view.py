@@ -4,7 +4,7 @@ from pyramid import httpexceptions as exc
 from pyramid import view
 
 from via.get_url import get_url_details
-from via.services.html_rewriter import html_rewriter_factory
+from via.views.route_by_content._html_rewriter import HTMLRewriter
 
 
 @view.view_config(route_name="route_by_content")
@@ -21,7 +21,7 @@ def route_by_content(context, request):
 
         return exc.HTTPFound(redirect_url, headers=_caching_headers(max_age=300))
 
-    url = html_rewriter_factory(request).url_for(request.params)
+    url = HTMLRewriter.from_request(request).url_for(request.params)
     headers = _cache_headers_for_http(status_code)
 
     return exc.HTTPFound(url, headers=headers)

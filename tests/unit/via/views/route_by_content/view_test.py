@@ -7,7 +7,7 @@ from webob.headers import EnvironHeaders
 
 from tests.unit.conftest import assert_cache_control
 from via.resources import URLResource
-from via.views.route_by_content import route_by_content
+from via.views.route_by_content.view import route_by_content
 
 
 class TestRouteByContent:
@@ -48,12 +48,13 @@ class TestRouteByContent:
 
     @pytest.mark.usefixtures("html_response")
     def test_html_payloads_are_handled_by_the_html_rewriter_service(
-        self, call_route_by_content, html_rewriter, html_rewriter_factory
+        self, call_route_by_content, HTMLRewriter
     ):
         url = "http://example.com/path%2C?a=b"
         results = call_route_by_content(url, params={"other": "value"})
 
-        html_rewriter_factory.assert_called_once_with(Any.instance_of(Request))
+        HTMLRewriter.from_request.assert_called_once_with(Any.instance_of(Request))
+        html_rewriter = HTMLRewriter.from_request.return_value
         html_rewriter.url_for.assert_called_once_with({"other": "value", "url": url})
         assert results.location == html_rewriter.url_for.return_value
 
@@ -93,7 +94,7 @@ class TestRouteByContent:
 
     @pytest.fixture(autouse=True)
     def get_url_details(self, patch):
-        get_url_details = patch("via.views.route_by_content.get_url_details")
+        get_url_details = patch("via.views.route_by_content.view.get_url_details")
         get_url_details.return_value = (sentinel.content_type, 200)
 
         return get_url_details
@@ -117,11 +118,5 @@ class TestRouteByContent:
         return call_route_by_content
 
     @pytest.fixture
-    def html_rewriter(self, patch):
-        return patch("via.services.html_rewriter.HTMLRewriter")
-
-    @pytest.fixture
-    def html_rewriter_factory(self, patch, html_rewriter):
-        factory = patch("via.views.route_by_content.html_rewriter_factory")
-        factory.return_value = html_rewriter
-        return factory
+    def HTMLRewriter(self, patch):
+        return patch("via.views.route_by_content.view.HTMLRewriter")
