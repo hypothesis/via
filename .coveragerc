@@ -2,7 +2,7 @@
 branch = True
 parallel = True
 source =
-    py_proxy
+    via
     tests/unit
 
 [report]
