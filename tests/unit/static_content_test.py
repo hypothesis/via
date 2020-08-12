@@ -17,7 +17,7 @@ class TestStaticContent:
             ("/robots.txt", "text/plain"),
             ("/favicon.ico", "image/x-icon"),
             ("/", "text/html"),
-            ("/js/pdfjs-init.js", "application/javascript"),
+            ("/js/pdfjs-init.js", "text/javascript"),
         ),
     )
     def test_get_static_content(self, url, mime_type, test_app):
