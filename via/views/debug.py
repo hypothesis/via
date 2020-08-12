@@ -18,6 +18,8 @@ def debug_headers(_context, request):
     else:
         headers = clean_headers(request.headers)
 
+    self_url = request.route_url("debug_headers")
+
     return Response(
         body=f"""
             <h1>Instructions</h1>
@@ -25,14 +27,14 @@ def debug_headers(_context, request):
                 <li>Access the service directly (not thru *.hypothes.is)
                 <li>Enable Do-Not-Track if supported</li>
                 <li>
-                    <a href="{request.route_url('debug_headers')}">
+                    <a href="{self_url}">
                         Click here to get referer
                     </a>
                 </li>
                 <li>Press F5 to get 'Cache-Control'</li>
             </ol>
 
-            <a href="{request.route_url('debug_headers')}?raw=1">Show all headers</a>
+            <a href="{self_url}?raw=1">Show all headers</a>
 
             <hr>
 
