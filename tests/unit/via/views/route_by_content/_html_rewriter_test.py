@@ -2,6 +2,7 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
+from pyramid.testing import DummyRequest
 
 from via.views.route_by_content._html_rewriter import HTMLRewriter
 
@@ -72,4 +73,4 @@ class TestHTMLRewriter:
 
 @pytest.fixture
 def pyramid_request(make_request):
-    return make_request()
+    return DummyRequest()
