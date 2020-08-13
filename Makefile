@@ -93,7 +93,7 @@ nginx: python
 
 .PHONY: rewriter
 rewriter:
-	@tox -e rewriter
+	@tox -qe dev --run-command 'uwsgi via/rewriter/conf/development.ini'
 
 .PHONY: python
 python:
