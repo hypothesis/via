@@ -5,5 +5,3 @@ ipython
 ipdb
 supervisor
 docker-compose
-pywb
-uwsgi
