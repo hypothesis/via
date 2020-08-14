@@ -17,19 +17,17 @@ class HTMLRewriter:
 
         return cls(
             legacy_via_url=request.registry.settings["legacy_via_url"],
-            internal_rewriter_url=request.registry.settings.get(
-                "internal_rewriter_url"
-            ),
+            via_html_url=request.registry.settings.get("via_html_url"),
         )
 
-    def __init__(self, legacy_via_url, internal_rewriter_url=None):
+    def __init__(self, legacy_via_url, via_html_url=None):
         """Create an HTMLRewriter.
 
         :param legacy_via_url: URL to use for original Via
-        :param internal_rewriter_url: URL to use for internal rewriting module
+        :param via_html_url: URL to use for internal rewriting module
         """
         self.legacy_via_url = legacy_via_url
-        self.internal_rewriter_url = internal_rewriter_url or legacy_via_url
+        self.via_html_url = via_html_url or legacy_via_url
 
     def url_for(self, params):
         """Get the rewriter URL to return based on the passed params.
@@ -54,7 +52,7 @@ class HTMLRewriter:
             # Attempt to enable internal rewriter if `via.rewrite` is in the
             # query string and truthy
 
-            return self.internal_rewriter_url
+            return self.via_html_url
 
         return self.legacy_via_url
 
