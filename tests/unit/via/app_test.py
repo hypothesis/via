@@ -11,30 +11,23 @@ def test_settings_raise_value_error_if_environment_variable_is_not_set():
         load_settings({})
 
 
-def test_settings_are_configured_from_environment_variables(os_env):
-    expected_settings = {
-        "client_embed_url": "https://hypothes.is/embed.js",
-        "nginx_server": "https://via3.hypothes.is",
-        "legacy_via_url": "https://via.hypothes.is",
-    }
+def test_settings_are_configured_from_environment_variables(os_env, pyramid_settings):
+    expected_settings = pyramid_settings
 
-    pyramid_settings = load_settings({})
+    settings = load_settings({})
 
     for key, value in expected_settings.items():
-        assert pyramid_settings[key] == value
+        assert settings[key] == value
 
 
-def test_app(configurator, pyramid, os_env):
+def test_app(configurator, pyramid, os_env, pyramid_settings):
     create_app()
 
-    pyramid.config.Configurator.assert_called_once_with(
-        settings={
-            "client_embed_url": "https://hypothes.is/embed.js",
-            "nginx_server": "https://via3.hypothes.is",
-            "legacy_via_url": "https://via.hypothes.is",
-            "h_pyramid_sentry.filters": SENTRY_FILTERS,
-        }
+    expected_settings = dict(
+        {"h_pyramid_sentry.filters": SENTRY_FILTERS}, **pyramid_settings
     )
+
+    pyramid.config.Configurator.assert_called_once_with(settings=expected_settings)
     assert configurator.include.call_args_list == [
         mock.call("pyramid_jinja2"),
         mock.call("via.views"),
@@ -54,14 +47,9 @@ def pyramid(patch):
 
 
 @pytest.fixture
-def os_env(patch):
+def os_env(patch, pyramid_settings):
     def get(env_var):
-        env = {
-            "CLIENT_EMBED_URL": "https://hypothes.is/embed.js",
-            "NGINX_SERVER": "https://via3.hypothes.is",
-            "LEGACY_VIA_URL": "https://via.hypothes.is",
-        }
-        return env[env_var]
+        return pyramid_settings[env_var.lower()]
 
     os = patch("via.app.os")
     os.environ.get = get

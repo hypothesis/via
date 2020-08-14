@@ -8,7 +8,7 @@ from whitenoise import WhiteNoise
 from via.cache_buster import PathCacheBuster
 from via.sentry_filters import SENTRY_FILTERS
 
-REQUIRED_PARAMS = ["client_embed_url", "nginx_server", "legacy_via_url"]
+REQUIRED_PARAMS = ["client_embed_url", "nginx_server", "legacy_via_url", "via_html_url"]
 
 
 def load_settings(settings):
