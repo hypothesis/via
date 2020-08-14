@@ -1,36 +1,62 @@
+import logging
 import os
-from gevent.monkey import patch_all;patch_all()
+
+from gevent.monkey import patch_all
+
+patch_all()
+
 from pywb.apps.frontendapp import FrontEndApp
 
-from via.rewriter.config import Configuration
 from via.rewriter.hooks import Hooks
-from via.rewriter.patch import apply_pre_app_hooks, apply_post_app_hooks
+from via.rewriter.patch import apply_post_app_hooks, apply_pre_app_hooks
 
 
-# The pywb CLI does this when enabling debug mode for dev. Should we do
-# something similar?
+class Application:
+    @classmethod
+    def create(cls):
+        # Move into the correct directory as template paths are relative
+        os.chdir("via/rewriter")
+        os.environ["PYWB_CONFIG_FILE"] = "pywb_config.yaml"
 
-# logging.basicConfig(
-#   format='%(asctime)s: [%(levelname)s]: %(message)s',
-#   level=logging.DEBUG if self.r.debug else logging.INFO
-#   )
+        config = cls._config_from_env()
+        cls._setup_logging(config["debug"])
 
-def create_app():
-    config = Configuration.parse()
+        # Setup hook points and apply those which must be done pre-application
+        hooks = Hooks(config)
+        apply_pre_app_hooks(hooks)
 
-    # Change the directory so that the relative template paths work
-    os.chdir(config['base_dir'])
+        application = FrontEndApp()
 
-    hooks = Hooks(config)
-    apply_pre_app_hooks(hooks)
+        # Setup hook points after the app is loaded
+        apply_post_app_hooks(application.rewriterapp, hooks)
 
-    application = FrontEndApp()
+        return application
 
-    apply_post_app_hooks(application.rewriterapp, hooks)
+    @classmethod
+    def _setup_logging(cls, debug=False):
+        if debug:
+            print("Enabling debug level logging")
 
-    return application
+        logging.basicConfig(
+            format="%(asctime)s: [%(levelname)s]: %(message)s",
+            level=logging.DEBUG if debug else logging.INFO,
+        )
+
+    @classmethod
+    def _config_from_env(cls):
+        """Parse options from environment variables."""
+
+        return {
+            "ignore_prefixes": cls._split_multiline(os.environ["VIA_IGNORE_PREFIXES"]),
+            "h_embed_url": os.environ["VIA_H_EMBED_URL"],
+            "debug": os.environ.get("VIA_DEBUG", False),
+        }
+
+    @classmethod
+    def _split_multiline(cls, value):
+        return [part for part in [p.strip() for p in value.split(",")] if part]
 
 
 # Our job here is to leave this `application` attribute laying around as it's
 # what uWSGI expects to find.
-application = create_app()
+application = Application.create()
