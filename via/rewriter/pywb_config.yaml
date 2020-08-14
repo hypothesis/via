@@ -6,4 +6,8 @@ collections:
             error: templates/error.rewriter
             head_insert: templates/head_insert.rewriter
 
+            index: template/index.html
+            search: template/search.html
+            query: template/query.html
+
 framed_replay: false
