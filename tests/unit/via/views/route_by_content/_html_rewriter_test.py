@@ -11,7 +11,7 @@ class TestHTMLRewriter:
     def test_from_request(self, pyramid_request):
         settings = {
             "legacy_via_url": sentinel.legacy_via_url,
-            "internal_rewriter_url": sentinel.internal_rewriter_url,
+            "via_html_url": sentinel.via_html_url,
         }
         pyramid_request.registry.settings.update(settings)
 
@@ -21,7 +21,7 @@ class TestHTMLRewriter:
 
     def test_it_defaults_to_original_via(self):
         rewriter = HTMLRewriter(legacy_via_url=sentinel.legacy_via_url)
-        assert rewriter.internal_rewriter_url == sentinel.legacy_via_url
+        assert rewriter.via_html_url == sentinel.legacy_via_url
 
     def test_it_extracts_the_url_and_prepends_it(self, rewriter):
         doc_url = "http://example.com/doc"
@@ -51,9 +51,9 @@ class TestHTMLRewriter:
             ("False", "legacy_via_url"),
             ("", "legacy_via_url"),
             ("0", "legacy_via_url"),
-            ("True", "internal_rewriter_url"),
-            ("1", "internal_rewriter_url"),
-            ("yes", "internal_rewriter_url"),
+            ("True", "via_html_url"),
+            ("1", "via_html_url"),
+            ("yes", "via_html_url"),
         ),
     )
     def test_it_switches_rewriter_based_on_rewrite_option(
@@ -67,7 +67,7 @@ class TestHTMLRewriter:
     def rewriter(self):
         return HTMLRewriter(
             legacy_via_url="http://example.com/legacy_via_url",
-            internal_rewriter_url="http://example.com/internal_rewriter_url",
+            via_html_url="http://example.com/via_html_url",
         )
 
 
