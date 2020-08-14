@@ -1,18 +1,19 @@
 """Tools to apply the hooks to a running `pywb` app."""
 from pywb.apps.rewriterapp import RewriterApp
+from pywb.rewrite.default_rewriter import DefaultRewriter
+from pywb.rewrite.html_rewriter import HTMLRewriter
 from pywb.rewrite.url_rewriter import UrlRewriter
 
 
 def apply_post_app_hooks(rewriter_app, hooks):
-    # Add most hook points
     _PatchedRewriterApp.patch(rewriter_app, hooks)
 
 
 def apply_pre_app_hooks(hooks):
     """Apply hooks before the app has been instantiated."""
 
-    # Patch out URLs to ignore
     _patch_url_rewriter(hooks)
+    _PatchedHTMLRewriter.patch()
 
 
 def _patch_url_rewriter(hooks):
@@ -20,6 +21,24 @@ def _patch_url_rewriter(hooks):
     prefixes = list(UrlRewriter.NO_REWRITE_URI_PREFIX)
     prefixes.extend(hooks.ignore_prefixes)
     UrlRewriter.NO_REWRITE_URI_PREFIX = tuple(prefixes)
+
+
+class _PatchedHTMLRewriter(HTMLRewriter):
+    @classmethod
+    def patch(cls):
+        DefaultRewriter.DEFAULT_REWRITERS["html"] = _PatchedHTMLRewriter
+
+    def _rewrite_link_href(self, attr_value, tag_attrs, rw_mod):
+        # Prevent `pywb` from attempting to insert Javascript style rewriting
+        # stuff into "<link rel='manifest'>" items. This fixes a bug with
+        # www.theguardian.com which declares it's manifest as `text/javascript`
+        rel = self.get_attr(tag_attrs, "rel")
+
+        if rel == "manifest":
+            # 'id_' type hint appears to disable any rewriting
+            return self._rewrite_url(attr_value, "id_")
+
+        return super()._rewrite_link_href(attr_value, tag_attrs, rw_mod)
 
 
 class _PatchedRewriterApp(RewriterApp):
