@@ -50,3 +50,10 @@ class TestConfiguration:
 
         assert via_params == {}
         assert client_params == Any.dict.containing({"openSidebar": "foo"})
+
+    def test_it_picks_the_first_item_from_lists(self):
+        via_params, _ = Configuration.extract_from_params(
+            {"via.key_name": ["value_1", "value_2"]}
+        )
+
+        assert via_params["key_name"] == "value_1"
