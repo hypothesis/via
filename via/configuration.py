@@ -71,7 +71,7 @@ class Configuration:
         return via_params, client_params
 
     @classmethod
-    def extract_from_wsgi_environment(cls, http_env):
+    def extract_from_wsgi_environment(cls, http_env):  # pragma: no cover
         """Extract Via and H config from a WSGI environment object.
 
         :param http_env: WSGI provided environment variable
@@ -82,7 +82,7 @@ class Configuration:
         return cls.extract_from_params(params)
 
     @classmethod
-    def extract_from_url(cls, url):
+    def extract_from_url(cls, url):  # pragma: no cover
         """Extract Via and H config from a URL.
 
         :param url: A URL to extract config from
@@ -93,7 +93,7 @@ class Configuration:
         return cls.extract_from_params(params)
 
     @classmethod
-    def strip_from_url(cls, url):
+    def strip_from_url(cls, url):  # pragma: no cover
         """Remove any Via configuration parameters from the URL.
 
         If the URL has no parameters left, remove the query string entirely.
@@ -110,7 +110,7 @@ class Configuration:
         return url_parts._replace(query=urlencode(non_via)).geturl()
 
     @classmethod
-    def add_to_url(cls, url, via_params, client_params):
+    def add_to_url(cls, url, via_params, client_params):  # pragma: no cover
         """Add configuration parameters to a given URL.
 
         This will merge and preserve any parameters already on the URL.
@@ -148,7 +148,7 @@ class Configuration:
         return via_params, non_via_params
 
     @classmethod
-    def _flatten(cls, config, so_far=None, key_prefix=KEY_PREFIX):
+    def _flatten(cls, config, so_far=None, key_prefix=KEY_PREFIX):  # pragma: no cover
         key_prefix += "."
 
         if so_far is None:
