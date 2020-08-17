@@ -1,10 +1,13 @@
+"""The application providing a WSGI entry-point."""
+
 import logging
 import os
 
 from gevent.monkey import patch_all
 
-patch_all()
+patch_all()  # This needs to happen before we load other classes
 
+# pylint: disable=wrong-import-position
 from pywb.apps.frontendapp import FrontEndApp
 
 from via.rewriter.hooks import Hooks
@@ -12,8 +15,12 @@ from via.rewriter.patch import apply_post_app_hooks, apply_pre_app_hooks
 
 
 class Application:
+    """A collection of tools to create and configure `pywb`."""
+
     @classmethod
     def create(cls):
+        """Create a WSGI application for proxying HTML."""
+
         # Move into the correct directory as template paths are relative
         os.chdir("via/rewriter")
         os.environ["PYWB_CONFIG_FILE"] = "pywb_config.yaml"
@@ -25,12 +32,12 @@ class Application:
         hooks = Hooks(config)
         apply_pre_app_hooks(hooks)
 
-        application = FrontEndApp()
+        app = FrontEndApp()
 
         # Setup hook points after the app is loaded
-        apply_post_app_hooks(application.rewriterapp, hooks)
+        apply_post_app_hooks(app.rewriterapp, hooks)
 
-        return application
+        return app
 
     @classmethod
     def _setup_logging(cls, debug=False):
@@ -59,4 +66,4 @@ class Application:
 
 # Our job here is to leave this `application` attribute laying around as it's
 # what uWSGI expects to find.
-application = Application.create()
+application = Application.create()  # pylint: disable=invalid-name

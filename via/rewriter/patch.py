@@ -1,4 +1,5 @@
 """Tools to apply the hooks to a running `pywb` app."""
+
 from pywb.apps.rewriterapp import RewriterApp
 from pywb.rewrite.default_rewriter import DefaultRewriter
 from pywb.rewrite.html_rewriter import HTMLRewriter
@@ -6,6 +7,7 @@ from pywb.rewrite.url_rewriter import UrlRewriter
 
 
 def apply_post_app_hooks(rewriter_app, hooks):
+    """Apply hooks after the app has been instantiated."""
     _PatchedRewriterApp.patch(rewriter_app, hooks)
 
 
@@ -23,9 +25,11 @@ def _patch_url_rewriter(hooks):
     UrlRewriter.NO_REWRITE_URI_PREFIX = tuple(prefixes)
 
 
-class _PatchedHTMLRewriter(HTMLRewriter):
+class _PatchedHTMLRewriter(HTMLRewriter):  # pylint: disable=abstract-method
     @classmethod
     def patch(cls):
+        """Patch the parent object."""
+
         DefaultRewriter.DEFAULT_REWRITERS["html"] = _PatchedHTMLRewriter
 
     def _rewrite_link_href(self, attr_value, tag_attrs, rw_mod):
@@ -46,6 +50,8 @@ class _PatchedRewriterApp(RewriterApp):
 
     @classmethod
     def patch(cls, rewriter, hooks):
+        """Patch the rewriter object."""
+
         # Change the class of the rewriter to be this class, forcibly casting
         # it to be an instance of this class
         rewriter.__class__ = cls

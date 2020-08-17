@@ -11,9 +11,16 @@ load-plugins=pylint.extensions.bad_builtin,
              pylint.extensions.redefined_variable_type,
 
 [MESSAGES CONTROL]
+enable=
+    bad-inline-option,
+    deprecated-pragma,
+    useless-suppression,
+    use-symbolic-message-instead
+
 disable=bad-continuation,
         missing-type-doc,
         missing-return-type-doc,
+        too-few-public-methods
 
 [REPORTS]
 output-format=colorized

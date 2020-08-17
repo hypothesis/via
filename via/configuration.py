@@ -1,6 +1,5 @@
 """Tools for reading in configuration."""
 
-# pylint: disable=too-few-public-methods
 from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse
 
 
@@ -73,12 +72,22 @@ class Configuration:
 
     @classmethod
     def extract_from_wsgi_environment(cls, http_env):
+        """Extract Via and H config from a WSGI environment object.
+
+        :param http_env: WSGI provided environment variable
+        :return: A tuple of Via, and H config
+        """
         params = parse_qs(http_env.get("QUERY_STRING"))
 
         return cls.extract_from_params(params)
 
     @classmethod
     def extract_from_url(cls, url):
+        """Extract Via and H config from a URL.
+
+        :param url: A URL to extract config from
+        :return: A tuple of Via, and H config
+        """
         params = parse_qs(urlparse(url).query)
 
         return cls.extract_from_params(params)
@@ -102,6 +111,15 @@ class Configuration:
 
     @classmethod
     def add_to_url(cls, url, via_params, client_params):
+        """Add configuration parameters to a given URL.
+
+        This will merge and preserve any parameters already on the URL.
+
+        :param url: URL to extract from
+        :param via_params: Configuration to add for Via
+        :param client_params: Configuration to add for the client
+        :return: The URL with expected parameters added
+        """
         url_parts = urlparse(url)
         query_items = parse_qsl(url_parts.query)
 
