@@ -4,6 +4,8 @@ from via.configuration import Configuration
 
 
 class Hooks:
+    """A collection of configuration points for `pywb`."""
+
     # Disable the Content-Security-Policy which blocks our embed
     csp_header = None
 
@@ -13,18 +15,20 @@ class Hooks:
     @property
     def template_vars(self):
         """Get variables to make available in the global Jinja2 environment."""
-        vars = {"client_params": lambda http_env: self.get_config(http_env)[1]}
-        vars.update(self.config)
+
+        template_vars = {"client_params": lambda http_env: self.get_config(http_env)[1]}
+        template_vars.update(self.config)
 
         # This is already in the config, but run through the property just in
         # case that grows some logic in it
-        vars["ignore_prefixes"] = self.ignore_prefixes
+        template_vars["ignore_prefixes"] = self.ignore_prefixes
 
-        return vars
+        return template_vars
 
     @property
     def ignore_prefixes(self):
         """Get the list of URL prefixes to ignore (server and client side)."""
+
         return self.config["ignore_prefixes"]
 
     @classmethod
