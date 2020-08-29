@@ -37,7 +37,7 @@ pyyaml==5.3.1             # via pywb
 redis==2.10.6             # via fakeredis, pywb
 requests-file==1.5.1      # via tldextract
 requests==2.24.0          # via -r requirements.in, pywb, requests-file, tldextract
-sentry-sdk==0.17.0        # via h-pyramid-sentry
+sentry-sdk==0.17.1        # via h-pyramid-sentry
 six==1.15.0               # via cryptography, pyopenssl, pywb, requests-file, surt, warcio, wsgiprox
 surt==0.3.1               # via pywb
 tldextract==2.2.3         # via certauth, pywb, surt
