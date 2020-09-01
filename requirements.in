@@ -4,6 +4,7 @@ pyramid-jinja2
 requests
 newrelic
 h_pyramid_sentry
+h_vialib
 whitenoise
 uwsgi
 pywb

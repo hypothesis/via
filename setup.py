@@ -11,7 +11,7 @@ setup(
     version='3.0',
     description='Hypothesis Proxy Application',
     long_description=README,
-    url='https://github.com/hypothesis/lms',
+    url='https://github.com/hypothesis/via3',
     packages=find_packages(),
     include_package_data=True,
 )
