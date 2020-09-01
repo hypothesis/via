@@ -1,10 +1,9 @@
 """View presenting the PDF viewer."""
 import json
 
+from h_vialib import Configuration
 from markupsafe import Markup
 from pyramid import view
-
-from via.configuration import Configuration
 
 
 @view.view_config(

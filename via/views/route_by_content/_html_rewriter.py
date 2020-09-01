@@ -2,10 +2,9 @@
 
 from urllib.parse import parse_qsl, urlencode, urlparse
 
+from h_vialib import Configuration
 from pyramid.settings import asbool
 from webob.multidict import MultiDict
-
-from via.configuration import Configuration
 
 
 class HTMLRewriter:
@@ -59,6 +58,7 @@ class HTMLRewriter:
     @classmethod
     def _merge_params(cls, rewriter_url, params):
         # Get the query we were called with and remove the url
+
         query = MultiDict(params)
         raw_url = urlparse(query.pop("url"))
 

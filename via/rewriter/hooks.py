@@ -1,6 +1,6 @@
 """Configuration points which can be added to change `pywb` behavior."""
 
-from via.configuration import Configuration
+from h_vialib import Configuration
 
 
 class Hooks:
