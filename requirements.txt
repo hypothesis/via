@@ -17,7 +17,7 @@ gevent==1.4.0             # via pywb
 greenlet==0.4.16          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
 h-pyramid-sentry==1.2.1   # via -r requirements.in
-h-vialib==1.0.0           # via -r requirements.in
+h-vialib==1.0.1           # via -r requirements.in
 hupper==1.10.2            # via pyramid
 idna==2.10                # via requests, tldextract
 jinja2==2.11.2            # via pyramid-jinja2, pywb
