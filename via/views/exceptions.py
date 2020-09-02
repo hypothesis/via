@@ -14,7 +14,7 @@ EXCEPTION_MAP = {
     BadURL: {
         "title": "The URL isn't valid",
         "long_description": [
-            "Parts of the URL could be missing or in the wrong format.",
+            "Parts of the URL could be missing or in the wrong format."
         ],
         "stage": "request",
         "retryable": False,
@@ -30,7 +30,7 @@ EXCEPTION_MAP = {
     },
     UnhandledException: {
         "title": "Something went wrong",
-        "long_description": ["We experienced an unexpected error.",],
+        "long_description": ["We experienced an unexpected error."],
         "stage": "via",
         "retryable": True,
     },
@@ -46,7 +46,7 @@ EXCEPTION_MAP = {
     HTTPClientError: {
         "title": "Bad request",
         "long_description": [
-            "We can't process the request because we don't understand it.",
+            "We can't process the request because we don't understand it."
         ],
         "stage": "request",
         "retryable": False,
