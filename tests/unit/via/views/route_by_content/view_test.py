@@ -59,7 +59,7 @@ class TestRouteByContent:
         assert results.location == html_rewriter.url_for.return_value
 
     @pytest.mark.parametrize(
-        "content_type,max_age", [("application/pdf", 300), ("text/html", 60)],
+        "content_type,max_age", [("application/pdf", 300), ("text/html", 60)]
     )
     def test_sets_correct_cache_control(
         self, content_type, max_age, call_route_by_content, get_url_details
