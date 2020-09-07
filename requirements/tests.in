@@ -1,5 +1,7 @@
+coverage
 httpretty
 pytest
 factory-boy
 webtest
 h-matchers >= 1.2.4
+-r requirements.txt

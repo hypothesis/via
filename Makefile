@@ -12,9 +12,6 @@ help:
 	@echo "make test              Run the unit tests and produce a coverage report"
 	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
 	@echo "make update-pdfjs      Update our copy of PDF-js"
-	@echo "make pip-compile       Compile requirements.in to requirements.txt"
-	@echo "make upgrade-package   Upgrade the version of a package in requirements.txt."
-	@echo '                       Usage: `make upgrade-package name=some-package`.'
 	@echo "make docker            Make the app's Docker image"
 	@echo "make clean             Delete development artefacts (cached files, "
 	@echo "                       dependencies, etc)"
@@ -60,15 +57,7 @@ sure: checkformatting lint test
 
 .PHONY: update-pdfjs
 update-pdfjs: python
-	@tox -qe update-pdfjs
-
-.PHONY: pip-compile
-pip-compile: python
-	@tox -qe pip-compile
-
-.PHONY: upgrade-package
-upgrade-package: python
-	@tox -qe pip-compile -- --upgrade-package $(name)
+	@tox -qe updatepdfjs
 
 .PHONY: docker
 docker: build

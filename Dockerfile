@@ -15,7 +15,7 @@ WORKDIR /var/lib/hypothesis
 RUN chown -R hypothesis:hypothesis /etc/nginx/conf.d /var/log/nginx /var/lib/nginx /var/tmp/nginx
 
 # Copy minimal data to allow installation of python dependencies.
-COPY ./requirements.txt ./
+COPY requirements/requirements.txt ./
 
 # Install build deps, build, and then clean up.
 RUN apk add --no-cache --virtual build-deps \

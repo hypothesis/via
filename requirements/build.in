@@ -1,0 +1,5 @@
+-e file:.#egg=via
+whitenoise
+rcssmin
+rjsmin
+htmlmin
