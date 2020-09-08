@@ -4,4 +4,3 @@
 #
 #    pip-compile requirements/updatepdfjs.in
 #
--e file:.#egg=via         # via -r requirements/updatepdfjs.in

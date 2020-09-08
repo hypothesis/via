@@ -4,7 +4,6 @@
 #
 #    pip-compile requirements/dev.in
 #
--e file:.#egg=via         # via -r requirements/dev.in
 attrs==20.2.0             # via jsonschema
 babel==2.8.0              # via -r requirements/requirements.txt, pywb
 backcall==0.2.0           # via ipython
