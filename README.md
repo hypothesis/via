@@ -68,7 +68,7 @@ Updating the PDF viewer
 
 Via 3 serves PDFs using [PDF.js](https://mozilla.github.io/pdf.js/). PDF.js is
 vendored into the source tree and the viewer HTML is patched to load the Hypothesis
-client. To update the PDF viewer, run `tools/update-pdfjs`.
+client. To update the PDF viewer, run `make update-pdfjs`.
 
 How Via 3 works
 ---------------
