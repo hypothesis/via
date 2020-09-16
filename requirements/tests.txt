@@ -54,7 +54,7 @@ pyyaml==5.3.1             # via -r requirements/requirements.txt, pywb
 redis==2.10.6             # via -r requirements/requirements.txt, fakeredis, pywb
 requests-file==1.5.1      # via -r requirements/requirements.txt, tldextract
 requests==2.24.0          # via -r requirements/requirements.txt, pywb, requests-file, tldextract
-sentry-sdk==0.17.1        # via -r requirements/requirements.txt, h-pyramid-sentry
+sentry-sdk==0.17.6        # via -r requirements/requirements.txt, h-pyramid-sentry
 six==1.15.0               # via -r requirements/requirements.txt, cryptography, packaging, pyopenssl, python-dateutil, pywb, requests-file, surt, warcio, webtest, wsgiprox
 soupsieve==2.0.1          # via beautifulsoup4
 surt==0.3.1               # via -r requirements/requirements.txt, pywb
