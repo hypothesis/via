@@ -63,7 +63,7 @@ redis==2.10.6             # via -r requirements/requirements.txt, -r requirement
 requests-file==1.5.1      # via -r requirements/requirements.txt, -r requirements/tests.txt, tldextract
 requests==2.24.0          # via -r requirements/requirements.txt, -r requirements/tests.txt, pywb, requests-file, tldextract
 rjsmin==1.1.0             # via -r requirements/lint.in
-sentry-sdk==0.17.1        # via -r requirements/requirements.txt, -r requirements/tests.txt, h-pyramid-sentry
+sentry-sdk==0.17.6        # via -r requirements/requirements.txt, -r requirements/tests.txt, h-pyramid-sentry
 six==1.15.0               # via -r requirements/requirements.txt, -r requirements/tests.txt, astroid, cryptography, packaging, pyopenssl, python-dateutil, pywb, requests-file, surt, warcio, webtest, wsgiprox
 snowballstemmer==2.0.0    # via pydocstyle
 soupsieve==2.0.1          # via -r requirements/tests.txt, beautifulsoup4
