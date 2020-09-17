@@ -52,7 +52,7 @@ prompt-toolkit==3.0.7     # via ipython
 ptyprocess==0.6.0         # via pexpect
 py3amf==0.8.10            # via -r requirements/requirements.txt, pywb
 pycparser==2.20           # via -r requirements/requirements.txt, cffi
-pygments==2.6.1           # via ipython
+pygments==2.7.1           # via ipython
 pynacl==1.4.0             # via paramiko
 pyopenssl==19.1.0         # via -r requirements/requirements.txt, certauth
 pyramid-jinja2==2.8       # via -r requirements/requirements.txt
