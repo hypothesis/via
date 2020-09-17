@@ -19,7 +19,7 @@ cryptography==3.1         # via -r requirements/requirements.txt, paramiko, pyop
 decorator==4.4.2          # via ipython, traitlets
 defusedxml==0.6.0         # via -r requirements/requirements.txt, py3amf
 distro==1.5.0             # via docker-compose
-docker-compose==1.26.2    # via -r requirements/dev.in
+docker-compose==1.27.3    # via -r requirements/dev.in
 docker[ssh]==4.3.1        # via docker-compose
 dockerpty==0.4.1          # via docker-compose
 docopt==0.6.2             # via docker-compose
@@ -66,7 +66,7 @@ redis==2.10.6             # via -r requirements/requirements.txt, fakeredis, pyw
 requests-file==1.5.1      # via -r requirements/requirements.txt, tldextract
 requests==2.24.0          # via -r requirements/requirements.txt, docker, docker-compose, pywb, requests-file, tldextract
 sentry-sdk==0.17.6        # via -r requirements/requirements.txt, h-pyramid-sentry
-six==1.15.0               # via -r requirements/requirements.txt, bcrypt, cryptography, docker, docker-compose, dockerpty, jsonschema, pynacl, pyopenssl, pyrsistent, pywb, requests-file, surt, traitlets, warcio, websocket-client, wsgiprox
+six==1.15.0               # via -r requirements/requirements.txt, bcrypt, cryptography, docker, dockerpty, jsonschema, pynacl, pyopenssl, pyrsistent, pywb, requests-file, surt, traitlets, warcio, websocket-client, wsgiprox
 supervisor==4.2.1         # via -r requirements/dev.in
 surt==0.3.1               # via -r requirements/requirements.txt, pywb
 texttable==1.6.3          # via docker-compose
