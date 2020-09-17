@@ -57,7 +57,7 @@ pynacl==1.4.0             # via paramiko
 pyopenssl==19.1.0         # via -r requirements/requirements.txt, certauth
 pyramid-jinja2==2.8       # via -r requirements/requirements.txt
 pyramid==1.10.4           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-jinja2
-pyrsistent==0.16.0        # via jsonschema
+pyrsistent==0.17.3        # via jsonschema
 python-dotenv==0.14.0     # via docker-compose
 pytz==2020.1              # via -r requirements/requirements.txt, babel
 pywb==2.4.2               # via -r requirements/requirements.txt
@@ -66,7 +66,7 @@ redis==2.10.6             # via -r requirements/requirements.txt, fakeredis, pyw
 requests-file==1.5.1      # via -r requirements/requirements.txt, tldextract
 requests==2.24.0          # via -r requirements/requirements.txt, docker, docker-compose, pywb, requests-file, tldextract
 sentry-sdk==0.17.6        # via -r requirements/requirements.txt, h-pyramid-sentry
-six==1.15.0               # via -r requirements/requirements.txt, bcrypt, cryptography, docker, dockerpty, jsonschema, pynacl, pyopenssl, pyrsistent, pywb, requests-file, surt, traitlets, warcio, websocket-client, wsgiprox
+six==1.15.0               # via -r requirements/requirements.txt, bcrypt, cryptography, docker, dockerpty, jsonschema, pynacl, pyopenssl, pywb, requests-file, surt, traitlets, warcio, websocket-client, wsgiprox
 supervisor==4.2.1         # via -r requirements/dev.in
 surt==0.3.1               # via -r requirements/requirements.txt, pywb
 texttable==1.6.3          # via docker-compose
