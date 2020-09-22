@@ -38,7 +38,7 @@ jedi==0.17.2              # via ipython
 jinja2==2.11.2            # via -r requirements/requirements.txt, pyramid-jinja2, pywb
 jsonschema==3.2.0         # via docker-compose
 markupsafe==1.1.1         # via -r requirements/requirements.txt, jinja2, pyramid-jinja2
-newrelic==5.18.0.148      # via -r requirements/requirements.txt
+newrelic==5.20.0.149      # via -r requirements/requirements.txt
 paramiko==2.7.2           # via docker
 parso==0.7.1              # via jedi
 pastedeploy==2.1.0        # via -r requirements/requirements.txt, plaster-pastedeploy
