@@ -15,7 +15,7 @@ chardet==3.0.4            # via -r requirements/requirements.txt, requests
 coverage==5.3             # via -r requirements/tests.in
 cryptography==3.1         # via -r requirements/requirements.txt, pyopenssl
 defusedxml==0.6.0         # via -r requirements/requirements.txt, py3amf
-factory-boy==3.0.1        # via -r requirements/tests.in
+factory-boy==3.1.0        # via -r requirements/tests.in
 faker==4.1.2              # via factory-boy
 fakeredis==0.16.0         # via -r requirements/requirements.txt, pywb
 gevent==1.4.0             # via -r requirements/requirements.txt, pywb
