@@ -67,4 +67,4 @@ class Application:
 
 # Our job here is to leave this `application` attribute laying around as it's
 # what uWSGI expects to find.
-application = Application.create()  # pylint: disable=invalid-name
+application = Application.create()

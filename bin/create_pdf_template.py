@@ -38,9 +38,6 @@ def _insert_jinja2_blocks(contents):
 
 
 if __name__ == "__main__":
-    # pylint: disable=invalid-name
-    # template isn't a global you dolt!
-
     with open(SOURCE_FILE) as handle:
         template = _insert_jinja2_blocks(handle.read())
         template = _insert(
