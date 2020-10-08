@@ -31,7 +31,7 @@ hupper==1.10.2            # via -r requirements/requirements.txt, -r requirement
 idna==2.10                # via -r requirements/requirements.txt, -r requirements/tests.txt, requests, tldextract
 importlib-metadata==1.7.0  # via -r requirements/tests.txt, pluggy, pytest
 iniconfig==1.0.1          # via -r requirements/tests.txt, pytest
-isort==5.5.4              # via pylint
+isort==5.6.1              # via pylint
 jinja2==2.11.2            # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid-jinja2, pywb
 lazy-object-proxy==1.4.3  # via astroid
 markupsafe==1.1.1         # via -r requirements/requirements.txt, -r requirements/tests.txt, jinja2, pyramid-jinja2
