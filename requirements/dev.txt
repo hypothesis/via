@@ -14,7 +14,7 @@ certauth==1.3.0           # via -r requirements/requirements.txt, wsgiprox
 certifi==2020.6.20        # via -r requirements/requirements.txt, requests, sentry-sdk
 cffi==1.14.2              # via -r requirements/requirements.txt, bcrypt, brotlipy, cryptography, pynacl
 chardet==3.0.4            # via -r requirements/requirements.txt, requests
-cryptography==3.1         # via -r requirements/requirements.txt, paramiko, pyopenssl
+cryptography==3.2         # via -r requirements/requirements.txt, paramiko, pyopenssl
 decorator==4.4.2          # via ipython, traitlets
 defusedxml==0.6.0         # via -r requirements/requirements.txt, py3amf
 distro==1.5.0             # via docker-compose

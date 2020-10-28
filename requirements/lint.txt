@@ -14,7 +14,7 @@ certifi==2020.6.20        # via -r requirements/requirements.txt, -r requirement
 cffi==1.14.2              # via -r requirements/requirements.txt, -r requirements/tests.txt, brotlipy, cryptography
 chardet==3.0.4            # via -r requirements/requirements.txt, -r requirements/tests.txt, requests
 coverage==5.3             # via -r requirements/tests.txt
-cryptography==3.1         # via -r requirements/requirements.txt, -r requirements/tests.txt, pyopenssl
+cryptography==3.2         # via -r requirements/requirements.txt, -r requirements/tests.txt, pyopenssl
 defusedxml==0.6.0         # via -r requirements/requirements.txt, -r requirements/tests.txt, py3amf
 factory-boy==3.1.0        # via -r requirements/tests.txt
 faker==4.1.2              # via -r requirements/tests.txt, factory-boy
