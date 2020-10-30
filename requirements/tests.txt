@@ -21,7 +21,7 @@ fakeredis==0.16.0         # via -r requirements/requirements.txt, pywb
 gevent==1.4.0             # via -r requirements/requirements.txt, pywb
 greenlet==0.4.16          # via -r requirements/requirements.txt, gevent
 gunicorn==20.0.4          # via -r requirements/requirements.txt
-h-matchers==1.2.9         # via -r requirements/tests.in
+h-matchers==1.2.10        # via -r requirements/tests.in
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt
 h-vialib==1.0.1           # via -r requirements/requirements.txt
 httpretty==1.0.2          # via -r requirements/tests.in
