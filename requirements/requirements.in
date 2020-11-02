@@ -6,5 +6,3 @@ newrelic
 h_pyramid_sentry
 h-vialib
 whitenoise
-uwsgi
-pywb
