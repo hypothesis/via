@@ -4,8 +4,6 @@ parallel = True
 source =
     via
     tests/unit
-omit =
-    via/rewriter/*
 
 [report]
 show_missing = True
