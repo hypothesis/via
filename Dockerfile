@@ -2,10 +2,7 @@ FROM python:3.6.9-alpine3.10
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install nginx & supervisor
-RUN apk add --no-cache nginx gettext supervisor build-base libffi-dev openssl-dev
-# "build-base libffi-dev openssl-dev" were all added for pywb based rewriter
-# These should be removed and this should be tried again if we move this stuff
-# out
+RUN apk add --no-cache nginx gettext supervisor
 
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
