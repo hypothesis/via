@@ -63,6 +63,16 @@ your browser.
 `make help` to see all the commands that're available for running the tests,
 linting, code formatting, etc.
 
+Configuration
+-------------
+
+Environment variables:
+
+| Name             | Purpose | Example |
+|------------------|---------|---------|
+| `VIA_HTML_URL`     | The URL of the Via HTML component | `https://viahtml3.hypothes.is/proxy`
+| `VIA_HTML_RATIO`   | A ratio of HTML request (between 0 and 1) to send to Via HTML | `0.25`
+
 Updating the PDF viewer
 -----------------------
 
