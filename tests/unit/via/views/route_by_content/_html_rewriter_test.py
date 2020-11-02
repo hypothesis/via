@@ -46,24 +46,6 @@ class TestHTMLRewriter:
         )
 
     @pytest.mark.parametrize(
-        "enable_rewrite,expected_url",
-        (
-            ("False", "legacy_via_url"),
-            ("", "legacy_via_url"),
-            ("0", "legacy_via_url"),
-            ("True", "via_html_url"),
-            ("1", "via_html_url"),
-            ("yes", "via_html_url"),
-        ),
-    )
-    def test_it_switches_rewriter_based_on_rewrite_option(
-        self, rewriter, enable_rewrite, expected_url
-    ):
-        url = rewriter.url_for({"via.rewrite": enable_rewrite, "url": "anything"})
-
-        assert url.startswith(getattr(rewriter, expected_url))
-
-    @pytest.mark.parametrize(
         "env_value,random_value,expected_url",
         (
             ("0.5", 0.1, "via_html_url"),
