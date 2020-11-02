@@ -63,6 +63,30 @@ class TestHTMLRewriter:
 
         assert url.startswith(getattr(rewriter, expected_url))
 
+    @pytest.mark.parametrize(
+        "env_value,random_value,expected_url",
+        (
+            ("0.5", 0.1, "via_html_url"),
+            (" 0.5  ", 0.1, "via_html_url"),
+            ("0.5", 0.9, "legacy_via_url"),
+            ("not_a_number", 0.1, "legacy_via_url"),
+            (..., 0.5, "legacy_via_url"),
+        ),
+    )
+    # pylint: disable=too-many-arguments
+    def test_it_switches_rewriter_based_on_ratio(
+        self, rewriter, os, random, env_value, random_value, expected_url
+    ):
+        os.environ = {}
+        if env_value is not ...:
+            os.environ["VIA_HTML_RATIO"] = env_value
+
+        random.return_value = random_value
+
+        url = rewriter.url_for({"url": "anything"})
+
+        assert url.startswith(getattr(rewriter, expected_url))
+
     @pytest.fixture
     def rewriter(self):
         return HTMLRewriter(
@@ -70,7 +94,14 @@ class TestHTMLRewriter:
             via_html_url="http://example.com/via_html_url",
         )
 
+    @pytest.fixture
+    def pyramid_request(self, make_request):
+        return DummyRequest()
 
-@pytest.fixture
-def pyramid_request(make_request):
-    return DummyRequest()
+    @pytest.fixture
+    def os(self, patch):
+        return patch("via.views.route_by_content._html_rewriter.os")
+
+    @pytest.fixture
+    def random(self, patch):
+        return patch("via.views.route_by_content._html_rewriter.random")
