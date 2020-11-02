@@ -68,20 +68,6 @@
 
   </style>
 
-  <script type="text/javascript">
-    window.onload = function(){
-        let isChecked = localStorage.getItem("via.rewrite").toLowerCase();
-        isChecked = isChecked !== null && isChecked.toLowerCase() === "true";
-
-        const checkbox = document.getElementById("via.rewrite");
-        checkbox.checked = isChecked;
-    }
-
-    function captureExperimentalState(){
-        const checkbox = document.getElementById("via.rewrite");
-        localStorage.setItem("via.rewrite", checkbox.checked);
-    }
-  </script>
 </head>
 <body>
   <div class="content">
@@ -104,11 +90,6 @@
            placeholder="Paste a link to annotate"
            type="url"
      >
-    <div class="input-group">
-      <input type="checkbox" name="via.rewrite" id="via.rewrite" onclick="captureExperimentalState()">
-      <label for="via.rewrite">Use experimental HTML rewriter</label>
-    </div>
-
     <button type="submit" class="annotate-btn">Annotate</button>
   </form>
   </div>

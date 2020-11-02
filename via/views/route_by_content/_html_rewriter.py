@@ -3,8 +3,6 @@ import os
 from random import random
 from urllib.parse import parse_qsl, urlencode, urlparse
 
-from h_vialib import Configuration
-from pyramid.settings import asbool
 from webob.multidict import MultiDict
 
 
@@ -42,24 +40,17 @@ class HTMLRewriter:
         :return: URL to redirect the user to to view the document
         """
 
-        rewriter_url = self._html_rewriter_url(params)
+        rewriter_url = self._html_rewriter_url()
         return self._merge_params(rewriter_url, params)
 
-    def _html_rewriter_url(self, params):
-        via_config, _ = Configuration.extract_from_params(params)
+    def _html_rewriter_url(self):
+        # Redirect a random portion of requests to ViaHTML if requested
+        try:
+            via_html_ratio = float(os.environ.get("VIA_HTML_RATIO", 0))
+        except ValueError:
+            via_html_ratio = 0.0
 
-        use_via_html = asbool(via_config.get("rewrite"))
-        if not use_via_html:
-            # Redirect a random portion of requests to ViaHTML if requested
-            try:
-                via_html_ratio = float(os.environ.get("VIA_HTML_RATIO", 0))
-            except ValueError:
-                via_html_ratio = 0.0
-
-            if random() < via_html_ratio:
-                use_via_html = True
-
-        if use_via_html:
+        if random() < via_html_ratio:
             # Attempt to enable internal rewriter if `via.rewrite` is in the
             # query string and truthy
 
