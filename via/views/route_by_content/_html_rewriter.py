@@ -37,26 +37,34 @@ class HTMLRewriter:
         to a truthy value, the internal rewriter will be used instead.
 
         :param params: A mapping of query params
-        :return: URL to redirect the user to to view the document
+        :return: URL to redirect the user to to view the document and whether
+            it's cacheable as a tuple
         """
 
-        rewriter_url = self._html_rewriter_url()
-        return self._merge_params(rewriter_url, params)
+        rewriter_url, cacheable = self._html_rewriter_url()
+        return self._merge_params(rewriter_url, params), cacheable
 
     def _html_rewriter_url(self):
         # Redirect a random portion of requests to ViaHTML if requested
+
+        cacheable = True
         try:
             via_html_ratio = float(os.environ.get("VIA_HTML_RATIO", 0))
         except ValueError:
             via_html_ratio = 0.0
 
+        # We can't let Cloudflare cache us while we returning different
+        # results for the same end-point
+        if 0.0 < via_html_ratio < 1.0:
+            cacheable = False
+
         if random() < via_html_ratio:
             # Attempt to enable internal rewriter if `via.rewrite` is in the
             # query string and truthy
 
-            return self.via_html_url
+            return self.via_html_url, cacheable
 
-        return self.legacy_via_url
+        return self.legacy_via_url, cacheable
 
     @classmethod
     def _merge_params(cls, rewriter_url, params):
