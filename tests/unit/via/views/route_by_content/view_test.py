@@ -16,8 +16,8 @@ class TestRouteByContent:
         (
             ("application/x-pdf", Any.url.with_path("/pdf")),
             ("application/pdf", Any.url.with_path("/pdf")),
-            ("text/html", Any.url.with_host("via.hypothes.is")),
-            ("other", Any.url.with_host("via.hypothes.is")),
+            ("text/html", Any.url.with_host("viahtml3.hypothes.is")),
+            ("other", Any.url.with_host("viahtml3.hypothes.is")),
         ),
     )
     def test_it_routes_by_content_type(
@@ -50,15 +50,13 @@ class TestRouteByContent:
     def test_html_payloads_are_handled_by_the_html_rewriter_service(
         self, call_route_by_content, HTMLRewriter
     ):
-        html_rewriter = HTMLRewriter.from_request.return_value
-        html_rewriter.url_for.return_value = "http://example.com", True
-
         url = "http://example.com/path%2C?a=b"
         results = call_route_by_content(url, params={"other": "value"})
 
         HTMLRewriter.from_request.assert_called_once_with(Any.instance_of(Request))
+        html_rewriter = HTMLRewriter.from_request.return_value
         html_rewriter.url_for.assert_called_once_with({"other": "value", "url": url})
-        assert results.location == "http://example.com"
+        assert results.location == html_rewriter.url_for.return_value
 
     @pytest.mark.parametrize(
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)]

@@ -42,7 +42,6 @@ def pyramid_settings():
     return {
         "client_embed_url": "http://hypothes.is/embed.js",
         "nginx_server": "http://via3.hypothes.is",
-        "legacy_via_url": "http://via.hypothes.is",
         "via_html_url": "https://viahtml3.hypothes.is/proxy",
     }
 

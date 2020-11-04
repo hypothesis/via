@@ -1,6 +1,4 @@
 """Logic for interacting with HTML rewriters."""
-import os
-from random import random
 from urllib.parse import parse_qsl, urlencode, urlparse
 
 from webob.multidict import MultiDict
@@ -14,18 +12,15 @@ class HTMLRewriter:
         """Get an instance of HTMLRewriter from a pyramid Request object."""
 
         return cls(
-            legacy_via_url=request.registry.settings["legacy_via_url"],
-            via_html_url=request.registry.settings.get("via_html_url"),
+            via_html_url=request.registry.settings["via_html_url"],
         )
 
-    def __init__(self, legacy_via_url, via_html_url=None):
+    def __init__(self, via_html_url):
         """Create an HTMLRewriter.
 
-        :param legacy_via_url: URL to use for original Via
         :param via_html_url: URL to use for internal rewriting module
         """
-        self.legacy_via_url = legacy_via_url
-        self.via_html_url = via_html_url or legacy_via_url
+        self._via_html_url = via_html_url
 
     def url_for(self, params):
         """Get the rewriter URL to return based on the passed params.
@@ -41,41 +36,13 @@ class HTMLRewriter:
             it's cacheable as a tuple
         """
 
-        rewriter_url, cacheable = self._html_rewriter_url()
-        return self._merge_params(rewriter_url, params), cacheable
-
-    def _html_rewriter_url(self):
-        # Redirect a random portion of requests to ViaHTML if requested
-
-        cacheable = True
-        try:
-            via_html_ratio = float(os.environ.get("VIA_HTML_RATIO", 0))
-        except ValueError:
-            via_html_ratio = 0.0
-
-        # We can't let Cloudflare cache us while we returning different
-        # results for the same end-point
-        if 0.0 < via_html_ratio < 1.0:
-            cacheable = False
-
-        if random() < via_html_ratio:
-            # Attempt to enable internal rewriter if `via.rewrite` is in the
-            # query string and truthy
-
-            return self.via_html_url, cacheable
-
-        return self.legacy_via_url, cacheable
-
-    @classmethod
-    def _merge_params(cls, rewriter_url, params):
         # Get the query we were called with and remove the url
-
         query = MultiDict(params)
         raw_url = urlparse(query.pop("url"))
 
         # Create a pywb compatible URL by concatenating the urls
         bare_url = raw_url._replace(query=None).geturl()
-        rewriter_url = urlparse(f"{rewriter_url}/{bare_url}")
+        rewriter_url = urlparse(f"{self._via_html_url}/{bare_url}")
 
         # Add the merged query parameters
         query.update(parse_qsl(raw_url.query))
