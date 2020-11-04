@@ -21,14 +21,8 @@ def route_by_content(context, request):
 
         return exc.HTTPFound(redirect_url, headers=_caching_headers(max_age=300))
 
-    url, cacheable = HTMLRewriter.from_request(request).url_for(request.params)
-    headers = (
-        _cache_headers_for_http(status_code)
-        if cacheable
-        else {"Cache-Control": "no-cache"}
-    )
-
-    return exc.HTTPFound(url, headers=headers)
+    url = HTMLRewriter.from_request(request).url_for(request.params)
+    return exc.HTTPFound(url, headers=_cache_headers_for_http(status_code))
 
 
 def _cache_headers_for_http(status_code):
