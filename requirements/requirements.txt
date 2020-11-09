@@ -18,7 +18,7 @@ pastedeploy==2.1.0        # via plaster-pastedeploy
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 pyramid-jinja2==2.8       # via -r requirements/requirements.in
-pyramid==1.10.4           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-jinja2
+pyramid==1.10.5           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-jinja2
 requests==2.24.0          # via -r requirements/requirements.in
 sentry-sdk==0.17.6        # via h-pyramid-sentry
 translationstring==1.4    # via pyramid
