@@ -17,7 +17,7 @@ h-matchers==1.2.10        # via -r requirements/tests.txt
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt, -r requirements/tests.txt
 h-vialib==1.0.1           # via -r requirements/requirements.txt, -r requirements/tests.txt
 htmlmin==0.1.12           # via -r requirements/lint.in
-httpretty==1.0.2          # via -r requirements/tests.txt
+httpretty==1.0.3          # via -r requirements/tests.txt
 hupper==1.10.2            # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid
 idna==2.10                # via -r requirements/requirements.txt, -r requirements/tests.txt, requests
 importlib-metadata==1.7.0  # via -r requirements/tests.txt, pluggy, pytest
