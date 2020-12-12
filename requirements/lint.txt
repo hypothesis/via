@@ -39,7 +39,7 @@ pylint==2.6.0             # via -r requirements/lint.in
 pyparsing==2.4.7          # via -r requirements/tests.txt, packaging
 pyramid-jinja2==2.8       # via -r requirements/requirements.txt, -r requirements/tests.txt
 pyramid==1.10.5           # via -r requirements/requirements.txt, -r requirements/tests.txt, h-pyramid-sentry, pyramid-jinja2
-pytest==6.1.2             # via -r requirements/tests.txt
+pytest==6.2.0             # via -r requirements/tests.txt
 python-dateutil==2.8.1    # via -r requirements/tests.txt, faker
 rcssmin==1.0.6            # via -r requirements/lint.in
 requests==2.25.0          # via -r requirements/requirements.txt, -r requirements/tests.txt
