@@ -49,7 +49,7 @@ pyramid==1.10.5           # via -r requirements/requirements.txt, h-pyramid-sent
 pyrsistent==0.17.3        # via jsonschema
 python-dotenv==0.14.0     # via docker-compose
 pyyaml==5.3.1             # via docker-compose
-requests==2.25.0          # via -r requirements/requirements.txt, docker, docker-compose
+requests==2.25.1          # via -r requirements/requirements.txt, docker, docker-compose
 sentry-sdk==0.17.6        # via -r requirements/requirements.txt, h-pyramid-sentry
 six==1.15.0               # via bcrypt, cryptography, docker, dockerpty, jsonschema, pynacl, traitlets, websocket-client
 supervisor==4.2.1         # via -r requirements/dev.in
