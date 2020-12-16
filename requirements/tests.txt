@@ -34,7 +34,7 @@ pyramid-jinja2==2.8       # via -r requirements/requirements.txt
 pyramid==1.10.5           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-jinja2
 pytest==6.2.1             # via -r requirements/tests.in
 python-dateutil==2.8.1    # via faker
-requests==2.25.0          # via -r requirements/requirements.txt
+requests==2.25.1          # via -r requirements/requirements.txt
 sentry-sdk==0.17.6        # via -r requirements/requirements.txt, h-pyramid-sentry
 six==1.15.0               # via packaging, python-dateutil, webtest
 soupsieve==2.0.1          # via beautifulsoup4
