@@ -11,12 +11,18 @@ from tests.unit.conftest import assert_cache_control
 
 
 class TestStaticContent:
+    def test_get_front_page(self, test_app):
+        response = test_app.get("/", status=404)
+
+        assert dict(response.headers) == Any.dict.containing(
+            {"Content-Type": Any.string.containing("text/plain")}
+        )
+
     @pytest.mark.parametrize(
         "url,mime_type",
         (
             ("/robots.txt", "text/plain"),
             ("/favicon.ico", "image/x-icon"),
-            ("/", "text/html"),
             ("/js/pdfjs-init.js", "text/javascript"),
         ),
     )
