@@ -137,7 +137,7 @@ pyramid==1.10.5
     #   -r requirements/tests.txt
     #   h-pyramid-sentry
     #   pyramid-jinja2
-pytest==6.2.1
+pytest==6.2.2
     # via -r requirements/tests.txt
 python-dateutil==2.8.1
     # via
