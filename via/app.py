@@ -61,7 +61,7 @@ def create_app(_=None, **settings):
 
     app.add_files(
         # Config for serving files at / which are marked as mutable. This is
-        # for robots.txt and / -> index.html
+        # for / -> index.html
         root=resource_filename("via", "static"),
         prefix="/",
     )
