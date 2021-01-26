@@ -21,7 +21,6 @@ class TestStaticContent:
     @pytest.mark.parametrize(
         "url,mime_type",
         (
-            ("/robots.txt", "text/plain"),
             ("/favicon.ico", "image/x-icon"),
             ("/js/pdfjs-init.js", "text/javascript"),
         ),
@@ -38,7 +37,7 @@ class TestStaticContent:
     def test_immutable_contents(self, test_app):
         salt = self.get_salt(test_app)
 
-        response = test_app.get(f"/static/{salt}/robots.txt")
+        response = test_app.get(f"/static/{salt}/favicon.ico")
 
         assert_cache_control(
             response.headers, ["max-age=315360000", "public", "immutable"]
