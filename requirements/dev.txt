@@ -4,188 +4,70 @@
 #
 #    pip-compile requirements/dev.in
 #
-attrs==20.2.0
-    # via jsonschema
-backcall==0.2.0
-    # via ipython
-bcrypt==3.2.0
-    # via paramiko
-cached-property==1.5.1
-    # via docker-compose
-certifi==2020.6.20
-    # via
-    #   -r requirements/requirements.txt
-    #   requests
-    #   sentry-sdk
-cffi==1.14.2
-    # via
-    #   bcrypt
-    #   cryptography
-    #   pynacl
-chardet==3.0.4
-    # via
-    #   -r requirements/requirements.txt
-    #   requests
-cryptography==3.2
-    # via paramiko
-decorator==4.4.2
-    # via
-    #   ipython
-    #   traitlets
-distro==1.5.0
-    # via docker-compose
-docker-compose==1.28.2
-    # via -r requirements/dev.in
-docker[ssh]==4.4.1
-    # via docker-compose
-dockerpty==0.4.1
-    # via docker-compose
-docopt==0.6.2
-    # via docker-compose
-gunicorn==20.0.4
-    # via -r requirements/requirements.txt
-h-pyramid-sentry==1.2.1
-    # via -r requirements/requirements.txt
-h-vialib==1.0.1
-    # via -r requirements/requirements.txt
-hupper==1.10.2
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
-idna==2.10
-    # via
-    #   -r requirements/requirements.txt
-    #   requests
-importlib-metadata==1.7.0
-    # via jsonschema
-ipdb==0.13.4
-    # via -r requirements/dev.in
-ipython-genutils==0.2.0
-    # via traitlets
-ipython==7.16.1
-    # via
-    #   -r requirements/dev.in
-    #   ipdb
-jedi==0.17.2
-    # via ipython
-jinja2==2.11.2
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid-jinja2
-jsonschema==3.2.0
-    # via docker-compose
-markupsafe==1.1.1
-    # via
-    #   -r requirements/requirements.txt
-    #   jinja2
-    #   pyramid-jinja2
-newrelic==6.0.1.155
-    # via -r requirements/requirements.txt
-paramiko==2.7.2
-    # via docker
-parso==0.7.1
-    # via jedi
-pastedeploy==2.1.0
-    # via
-    #   -r requirements/requirements.txt
-    #   plaster-pastedeploy
-pexpect==4.8.0
-    # via ipython
-pickleshare==0.7.5
-    # via ipython
-plaster-pastedeploy==0.7
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
-plaster==1.0
-    # via
-    #   -r requirements/requirements.txt
-    #   plaster-pastedeploy
-    #   pyramid
-prompt-toolkit==3.0.7
-    # via ipython
-ptyprocess==0.6.0
-    # via pexpect
-pycparser==2.20
-    # via cffi
-pygments==2.7.1
-    # via ipython
-pynacl==1.4.0
-    # via paramiko
-pyramid-jinja2==2.8
-    # via -r requirements/requirements.txt
-pyramid==1.10.5
-    # via
-    #   -r requirements/requirements.txt
-    #   h-pyramid-sentry
-    #   pyramid-jinja2
-pyrsistent==0.17.3
-    # via jsonschema
-python-dotenv==0.14.0
-    # via docker-compose
-pyyaml==5.3.1
-    # via docker-compose
-requests==2.25.1
-    # via
-    #   -r requirements/requirements.txt
-    #   docker
-    #   docker-compose
-sentry-sdk==0.17.6
-    # via
-    #   -r requirements/requirements.txt
-    #   h-pyramid-sentry
-six==1.15.0
-    # via
-    #   bcrypt
-    #   cryptography
-    #   docker
-    #   dockerpty
-    #   jsonschema
-    #   pynacl
-    #   traitlets
-    #   websocket-client
-supervisor==4.2.1
-    # via -r requirements/dev.in
-texttable==1.6.3
-    # via docker-compose
-traitlets==4.3.3
-    # via ipython
-translationstring==1.4
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
-urllib3==1.25.10
-    # via
-    #   -r requirements/requirements.txt
-    #   requests
-    #   sentry-sdk
-venusian==3.0.0
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
-wcwidth==0.2.5
-    # via prompt-toolkit
-webob==1.8.6
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
-websocket-client==0.57.0
-    # via
-    #   docker
-    #   docker-compose
-whitenoise==5.2.0
-    # via -r requirements/requirements.txt
-zipp==3.1.0
-    # via importlib-metadata
-zope.deprecation==4.4.0
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
-    #   pyramid-jinja2
-zope.interface==5.1.0
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
+attrs==20.3.0             # via -r requirements/requirements.txt, jsonschema
+backcall==0.2.0           # via ipython
+bcrypt==3.2.0             # via paramiko
+cached-property==1.5.1    # via docker-compose
+certifi==2020.6.20        # via -r requirements/requirements.txt, requests, sentry-sdk
+cffi==1.14.2              # via bcrypt, cryptography, pynacl
+chardet==3.0.4            # via -r requirements/requirements.txt, requests
+cryptography==3.2         # via paramiko
+decorator==4.4.2          # via ipython, traitlets
+distro==1.5.0             # via docker-compose
+docker-compose==1.27.4    # via -r requirements/dev.in
+docker[ssh]==4.3.1        # via docker-compose
+dockerpty==0.4.1          # via docker-compose
+docopt==0.6.2             # via docker-compose
+future==0.18.2            # via -r requirements/requirements.txt, h-checkmatelib
+gunicorn==20.0.4          # via -r requirements/requirements.txt
+h-checkmatelib==1.0.3     # via -r requirements/requirements.txt
+h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt
+h-vialib==1.0.1           # via -r requirements/requirements.txt
+hupper==1.10.2            # via -r requirements/requirements.txt, pyramid
+idna==2.10                # via -r requirements/requirements.txt, requests
+importlib-metadata==3.4.0  # via -r requirements/requirements.txt, jsonschema
+ipdb==0.13.4              # via -r requirements/dev.in
+ipython-genutils==0.2.0   # via traitlets
+ipython==7.16.1           # via -r requirements/dev.in, ipdb
+jedi==0.17.2              # via ipython
+jinja2==2.11.2            # via -r requirements/requirements.txt, pyramid-jinja2
+jsonschema==3.2.0         # via -r requirements/requirements.txt, docker-compose, h-checkmatelib
+markupsafe==1.1.1         # via -r requirements/requirements.txt, jinja2, pyramid-jinja2
+newrelic==5.24.0.153      # via -r requirements/requirements.txt
+paramiko==2.7.2           # via docker
+parso==0.7.1              # via jedi
+pastedeploy==2.1.0        # via -r requirements/requirements.txt, plaster-pastedeploy
+pexpect==4.8.0            # via ipython
+pickleshare==0.7.5        # via ipython
+plaster-pastedeploy==0.7  # via -r requirements/requirements.txt, pyramid
+plaster==1.0              # via -r requirements/requirements.txt, plaster-pastedeploy, pyramid
+prompt-toolkit==3.0.7     # via ipython
+ptyprocess==0.6.0         # via pexpect
+pycparser==2.20           # via cffi
+pygments==2.7.1           # via ipython
+pynacl==1.4.0             # via paramiko
+pyramid-jinja2==2.8       # via -r requirements/requirements.txt
+pyramid==1.10.5           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-jinja2
+pyrsistent==0.17.3        # via -r requirements/requirements.txt, jsonschema
+python-dotenv==0.14.0     # via docker-compose
+pyyaml==5.3.1             # via docker-compose
+requests==2.25.1          # via -r requirements/requirements.txt, docker, docker-compose, h-checkmatelib
+sentry-sdk==0.17.6        # via -r requirements/requirements.txt, h-pyramid-sentry
+six==1.15.0               # via -r requirements/requirements.txt, bcrypt, cryptography, docker, dockerpty, jsonschema, pynacl, traitlets, websocket-client
+supervisor==4.2.1         # via -r requirements/dev.in
+texttable==1.6.3          # via docker-compose
+traitlets==4.3.3          # via ipython
+translationstring==1.4    # via -r requirements/requirements.txt, pyramid
+typing-extensions==3.7.4.3  # via -r requirements/requirements.txt, importlib-metadata
+urllib3==1.25.10          # via -r requirements/requirements.txt, requests, sentry-sdk
+venusian==3.0.0           # via -r requirements/requirements.txt, pyramid
+wcwidth==0.2.5            # via prompt-toolkit
+webob==1.8.6              # via -r requirements/requirements.txt, pyramid
+websocket-client==0.57.0  # via docker, docker-compose
+whitenoise==5.2.0         # via -r requirements/requirements.txt
+zipp==3.4.0               # via -r requirements/requirements.txt, importlib-metadata
+zope.deprecation==4.4.0   # via -r requirements/requirements.txt, pyramid, pyramid-jinja2
+zope.interface==5.1.0     # via -r requirements/requirements.txt, pyramid
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
