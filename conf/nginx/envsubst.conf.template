@@ -1,1 +1,2 @@
 set $google_api_key "${GOOGLE_API_KEY}";
+set $nginx_secure_link_secret "${NGINX_SECURE_LINK_SECRET}";
