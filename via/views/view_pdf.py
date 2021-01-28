@@ -5,6 +5,8 @@ from h_vialib import Configuration
 from markupsafe import Markup
 from pyramid import view
 
+from via.views.blocker import checkmate_block
+
 
 @view.view_config(
     renderer="via:templates/pdf_viewer.html.jinja2",
@@ -12,6 +14,7 @@ from pyramid import view
     # We have to keep the leash short here for caching so we can pick up new
     # immutable assets when they are deployed
     http_cache=0,
+    decorator=checkmate_block,
 )
 def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
