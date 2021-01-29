@@ -1,12 +1,10 @@
 import json
 from unittest.mock import sentinel
 
-import httpretty
 import pytest
 from h_matchers import Any
 from markupsafe import Markup
 
-from tests.unit.conftest import assert_cache_control
 from via.resources import URLResource
 from via.views.view_pdf import view_pdf
 
@@ -52,32 +50,6 @@ class TestViewPDF:
         assert response["pdf_url"] == json.dumps(
             f"{pyramid_settings['nginx_server']}/proxy/static/a\"b"
         )
-
-    def test_caching_is_disabled(self, test_app):
-        httpretty.register_uri(
-            httpretty.GET,
-            "http://localhost:9099/api/check",
-            status=204,
-        )
-
-        response = test_app.get("/pdf?url=http://example.com/foo.pdf")
-
-        assert_cache_control(
-            response.headers, ["max-age=0", "must-revalidate", "no-cache", "no-store"]
-        )
-
-    def test_blocked_by_checkmate(self, test_app):
-        httpretty.register_uri(
-            httpretty.GET,
-            "http://localhost:9099/api/check",
-            status=200,
-            body='{"data": [{"type": "reason", "id": "not-explicitly-allowed",'
-            '"attributes": {"severity": "advisory"}}], "meta": {"maxSeverity": "advisory"},'
-            '"links": {"html": "http://localhost:9099/error"}}',
-        )
-        response = test_app.get("/pdf?url=http://example.com/foo.pdf")
-
-        assert response.status_code == 307
 
     def test_it_extracts_config(self, call_view_pdf, Configuration):
         response = call_view_pdf()

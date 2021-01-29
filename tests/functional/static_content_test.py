@@ -8,7 +8,7 @@ from h_matchers import Any
 
 # pylint: disable=no-value-for-parameter
 # Pylint doesn't seem to understand h_matchers here for some reason
-from tests.unit.conftest import assert_cache_control
+from tests.conftest import assert_cache_control
 
 
 class TestStaticContent:
