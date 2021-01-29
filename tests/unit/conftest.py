@@ -6,12 +6,9 @@ from urllib.parse import urlencode
 
 import httpretty
 import pytest
-import webtest
-from h_matchers import Any
 from pyramid import testing
 from pyramid.request import Request
 
-from via.app import create_app
 from via.views import add_routes
 
 
@@ -38,16 +35,6 @@ def pyramid_config(pyramid_settings):
 
 
 @pytest.fixture
-def pyramid_settings():
-    return {
-        "client_embed_url": "http://hypothes.is/embed.js",
-        "nginx_server": "http://via3.hypothes.is",
-        "via_html_url": "https://viahtml3.hypothes.is/proxy",
-        "checkmate_url": "http://localhost:9099",
-    }
-
-
-@pytest.fixture
 def make_request(pyramid_config):
     def make_request(path="/irrelevant", params=None):
         if params:
@@ -58,11 +45,6 @@ def make_request(pyramid_config):
         return pyramid_request
 
     return make_request
-
-
-@pytest.fixture
-def test_app(pyramid_settings):
-    return webtest.TestApp(create_app(None, **pyramid_settings))
 
 
 @pytest.fixture(autouse=True)
@@ -79,11 +61,3 @@ def httpretty_():
 
     httpretty.disable()
     httpretty.reset()
-
-
-def assert_cache_control(headers, cache_parts):
-    """Assert that all parts of the Cache-Control header are present."""
-    assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
-    assert (
-        headers["Cache-Control"].split(", ") == Any.list.containing(cache_parts).only()
-    )
