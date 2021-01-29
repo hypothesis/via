@@ -8,6 +8,7 @@ touch requirements/format.txt
 touch requirements/lint.txt
 touch requirements/requirements.txt
 touch requirements/tests.txt
+touch requirements/functests.txt
 touch requirements/updatepdfjs.txt
 
 # No dependencies
@@ -19,6 +20,7 @@ tox -e updatepdfjs --run-command "pip-compile requirements/updatepdfjs.in"
 # Depends on requirements.txt
 tox -e dev --run-command "pip-compile requirements/dev.in"
 tox -e tests --run-command "pip-compile requirements/tests.in"
+tox -e functests --run-command "pip-compile requirements/functests.in"
 
 # Depends on requirements.txt and tests.txt
 tox -e lint --run-command "pip-compile requirements/lint.in"
