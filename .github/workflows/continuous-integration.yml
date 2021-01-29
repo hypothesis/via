@@ -24,4 +24,4 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-tox-
     - name: Run tox
-      run: tox --parallel auto -e lint,checkformatting,tests
+      run: tox --parallel auto -e lint,checkformatting,tests,functests
