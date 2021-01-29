@@ -2,6 +2,7 @@
 import datetime
 import hashlib
 import json
+import os
 from base64 import b64encode
 
 from h_vialib import Configuration
@@ -20,12 +21,11 @@ def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
     nginx_server = request.registry.settings["nginx_server"]
-    pdf_url = _pdf_url(context.url())
-
+    pdf_url = _pdf_url(context.url(), nginx_server)
     _, h_config = Configuration.extract_from_params(request.params)
 
     return {
-        "pdf_url": _string_literal(pdf_url),
+        "pdf_url": pdf_url,
         "client_embed_url": _string_literal(
             request.registry.settings["client_embed_url"]
         ),
@@ -34,7 +34,9 @@ def view_pdf(context, request):
     }
 
 
-def _pdf_url(url, secret="seekrit"):
+def _pdf_url(url, nginx_server):
+    secret = os.environ["NGINX_SECURE_LINK_SECRET"]
+
     # Compute the expiry time to put into the URL.
     now = datetime.datetime.now()
     exp = (
@@ -54,7 +56,7 @@ def _pdf_url(url, secret="seekrit"):
     sec = sec.decode()
 
     # Construct the URL.
-    return f"/proxy/static/{sec}/{exp}/{url}"
+    return _string_literal(f"{nginx_server}/proxy/static/{sec}/{exp}/{url}")
 
 
 def _string_literal(string):
