@@ -1,5 +1,5 @@
 -r requirements.txt
-ipython
+pyramid_ipython
 ipdb
 supervisor
 docker-compose

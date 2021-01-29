@@ -4,67 +4,30 @@
 #
 #    pip-compile requirements/requirements.in
 #
-certifi==2020.6.20
-    # via
-    #   requests
-    #   sentry-sdk
-chardet==3.0.4
-    # via requests
-gunicorn==20.0.4
-    # via -r requirements/requirements.in
-h-pyramid-sentry==1.2.1
-    # via -r requirements/requirements.in
-h-vialib==1.0.1
-    # via -r requirements/requirements.in
-hupper==1.10.2
-    # via pyramid
-idna==2.10
-    # via requests
-jinja2==2.11.2
-    # via pyramid-jinja2
-markupsafe==1.1.1
-    # via
-    #   jinja2
-    #   pyramid-jinja2
-newrelic==6.0.1.155
-    # via -r requirements/requirements.in
-pastedeploy==2.1.0
-    # via plaster-pastedeploy
-plaster-pastedeploy==0.7
-    # via pyramid
-plaster==1.0
-    # via
-    #   plaster-pastedeploy
-    #   pyramid
-pyramid-jinja2==2.8
-    # via -r requirements/requirements.in
-pyramid==1.10.5
-    # via
-    #   -r requirements/requirements.in
-    #   h-pyramid-sentry
-    #   pyramid-jinja2
-requests==2.25.1
-    # via -r requirements/requirements.in
-sentry-sdk==0.17.6
-    # via h-pyramid-sentry
-translationstring==1.4
-    # via pyramid
-urllib3==1.25.10
-    # via
-    #   requests
-    #   sentry-sdk
-venusian==3.0.0
-    # via pyramid
-webob==1.8.6
-    # via pyramid
-whitenoise==5.2.0
-    # via -r requirements/requirements.in
-zope.deprecation==4.4.0
-    # via
-    #   pyramid
-    #   pyramid-jinja2
-zope.interface==5.1.0
-    # via pyramid
+certifi==2020.6.20        # via requests, sentry-sdk
+chardet==3.0.4            # via requests
+gunicorn==20.0.4          # via -r requirements/requirements.in
+h-pyramid-sentry==1.2.1   # via -r requirements/requirements.in
+h-vialib==1.0.1           # via -r requirements/requirements.in
+hupper==1.10.2            # via pyramid
+idna==2.10                # via requests
+jinja2==2.11.2            # via pyramid-jinja2
+markupsafe==1.1.1         # via jinja2, pyramid-jinja2
+newrelic==6.0.1.155       # via -r requirements/requirements.in
+pastedeploy==2.1.0        # via plaster-pastedeploy
+plaster-pastedeploy==0.7  # via pyramid
+plaster==1.0              # via plaster-pastedeploy, pyramid
+pyramid-jinja2==2.8       # via -r requirements/requirements.in
+pyramid==1.10.5           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-jinja2
+requests==2.25.1          # via -r requirements/requirements.in
+sentry-sdk==0.17.6        # via h-pyramid-sentry
+translationstring==1.4    # via pyramid
+urllib3==1.25.10          # via requests, sentry-sdk
+venusian==3.0.0           # via pyramid
+webob==1.8.6              # via pyramid
+whitenoise==5.2.0         # via -r requirements/requirements.in
+zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2
+zope.interface==5.1.0     # via pyramid
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
