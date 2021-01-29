@@ -5,7 +5,7 @@ from h_matchers import Any
 from pyramid.request import Request
 from webob.headers import EnvironHeaders
 
-from tests.unit.conftest import assert_cache_control
+from tests.conftest import assert_cache_control
 from via.resources import URLResource
 from via.views.route_by_content.view import route_by_content
 
