@@ -4,6 +4,7 @@ help:
 	@echo "make dev               Run the app in the development server"
 	@echo "make supervisor        Launch a supervisorctl shell for managing the processes "
 	@echo '                       that `make dev` starts, type `help` for docs'
+	@echo "make shell             Launch a Python shell in the dev environment"
 	@echo 'make services          Run the services that `make dev` requires'
 	@echo 'make build             Prepare the build files'
 	@echo "make lint              Run the code linter(s) and print any warnings"
@@ -28,6 +29,10 @@ supervisor: python
 .PHONY: devdata
 devdata: python
 	@tox -qe dev -- python bin/devdata.py
+
+.PHONY: shell
+shell: python
+	@tox -qe dev --run-command 'pshell conf/development.ini'
 
 .PHONY: build
 build: python
