@@ -28,7 +28,7 @@ node {
     stage("Tests") {
         testApp(image: img, runArgs: "${runArgs}") {
             installDeps()
-            run("make test")
+            run("make functests")
         }
     }
 
