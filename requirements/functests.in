@@ -1,0 +1,5 @@
+pytest
+webtest
+h_matchers
+httpretty
+-r requirements.txt
