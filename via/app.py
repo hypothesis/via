@@ -3,6 +3,7 @@ import os
 
 import pyramid.config
 from pkg_resources import resource_filename
+from pyramid.settings import asbool
 from whitenoise import WhiteNoise
 
 from via.cache_buster import PathCacheBuster
@@ -29,6 +30,8 @@ def load_settings(settings):
 
     # Configure sentry
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
+
+    settings["checkmate_enabled"] = asbool(os.environ.get("CHECKMATE_ENABLED"))
 
     return settings
 

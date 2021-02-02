@@ -26,6 +26,19 @@ class TestCheckMateBlockDecorator:
         assert response.status_code == 200
         assert response.text == "ok"
 
+    def test_blocked_url_disabled_checkmate(self, CheckmateClient, make_request):
+        url = "http://bad.example.com"
+        mock_check_url = CheckmateClient.return_value.check_url
+        request = make_request(params={"url": url})
+        request.registry.settings["checkmate_enabled"] = False
+
+        response = dummy_view(None, request)
+
+        mock_check_url.assert_not_called()
+
+        assert response.status_code == 200
+        assert response.text == "ok"
+
     def test_blocked_url(self, CheckmateClient, make_request, block_response):
         url = "http://bad.example.com"
         mock_check_url = CheckmateClient.return_value.check_url
