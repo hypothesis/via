@@ -9,6 +9,7 @@ def pyramid_settings():
         "nginx_server": "http://via3.hypothes.is",
         "via_html_url": "https://viahtml3.hypothes.is/proxy",
         "checkmate_url": "http://localhost:9099",
+        "checkmate_enabled": True,
     }
 
 
