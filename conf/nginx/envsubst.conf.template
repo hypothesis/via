@@ -1,1 +1,5 @@
+# Set nginx variables from environment variables.
+# The envsubst command that we run during our Docker build replaces the
+# ${FOO}'s in this file with values from environment variables.
+
 set $google_api_key "${GOOGLE_API_KEY}";
