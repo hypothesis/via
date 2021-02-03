@@ -15,6 +15,7 @@ REQUIRED_PARAMS = [
     "via_html_url",
     "checkmate_url",
     "via_secret",
+    "checkmate_api_key",
 ]
 
 

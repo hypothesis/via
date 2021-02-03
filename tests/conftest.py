@@ -14,6 +14,7 @@ def pyramid_settings():
         "nginx_secure_link_secret": "not_a_secret",
         "via_secret": "not_a_secret",
         "signed_urls_required": True,
+        "checkmate_api_key": "dev_api_key",
     }
 
 
