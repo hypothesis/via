@@ -22,7 +22,10 @@ def checkmate_block(view, url_param="url", allow_all=True):
         if not request.registry.settings["checkmate_enabled"]:
             return view(context, request)
 
-        checkmate = CheckmateClient(request.registry.settings["checkmate_url"])
+        checkmate = CheckmateClient(
+            request.registry.settings["checkmate_url"],
+            request.registry.settings["checkmate_api_key"],
+        )
 
         url = request.params[url_param]
         blocked = None
