@@ -11,12 +11,9 @@ BANNED_HEADERS = {
     # AWS things
     "X-Amzn-Trace-Id",
     # AWS NGINX / NGINX things
-    "X-Forwarded-Server",
-    "X-Forwarded-For",
     "X-Real-Ip",
     "X-Forwarded-Proto",
     "X-Forwarded-Port",
-    "X-Request-Start",
     # Cloudflare things
     "Cf-Request-Id",
     "Cf-Connecting-Ip",
