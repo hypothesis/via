@@ -22,7 +22,7 @@ RUN apk add --no-cache --virtual build-deps \
 
 COPY ./conf/supervisord.conf ./conf/supervisord.conf
 COPY ./conf/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY ./conf/nginx/via /etc/nginx/via
+COPY ./conf/nginx/includes /etc/nginx/includes
 COPY ./conf/nginx/envsubst.conf.template /var/lib/hypothesis/nginx_envsubst.conf.template
 COPY . .
 
