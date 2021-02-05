@@ -3,7 +3,6 @@
 import functools
 from urllib.parse import urlencode
 
-import httpretty
 from pyramid import testing
 from pyramid.request import Request, apply_request_extensions
 
@@ -47,19 +46,3 @@ def make_request(pyramid_config):
         return pyramid_request
 
     return make_request
-
-
-@pytest.fixture(autouse=True)
-def httpretty_():
-    """Monkey-patch Python's socket core module to mock all HTTP responses.
-
-    We never want real HTTP requests to be sent by the tests so replace them
-    all with mock responses. This handles requests sent using the standard
-    urllib2 library and the third-party httplib2 and requests libraries.
-    """
-    httpretty.enable(allow_net_connect=False)
-
-    yield
-
-    httpretty.disable()
-    httpretty.reset()
