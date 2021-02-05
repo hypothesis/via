@@ -32,6 +32,7 @@ def load_settings(settings):
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
 
     settings["checkmate_enabled"] = asbool(os.environ.get("CHECKMATE_ENABLED"))
+    settings["nginx_secure_link_secret"] = os.environ["NGINX_SECURE_LINK_SECRET"]
 
     return settings
 

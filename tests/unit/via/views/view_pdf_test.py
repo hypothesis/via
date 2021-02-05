@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta, timezone
 from unittest.mock import sentinel
 
 import pytest
@@ -23,6 +24,17 @@ class TestViewPDF:
         # Check we disable Jinja 2 escaping
         assert isinstance(response["client_embed_url"], Markup)
 
+    def test_it_signs_the_url(self, call_view_pdf, quantized_expiry):
+        response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
+
+        quantized_expiry.assert_called_once_with(max_age=timedelta(hours=2))
+        signed_url = json.loads(response["pdf_url"])
+        signed_url_parts = signed_url.split("/")
+        signature = signed_url_parts[5]
+        expiry = signed_url_parts[6]
+        assert signature == "qTq65RXvm6P2Y4bfzWdPzg"
+        assert expiry == "1581183021"
+
     @pytest.mark.parametrize(
         "pdf_url",
         [
@@ -31,25 +43,22 @@ class TestViewPDF:
             "http://example.com/foo%2C.pdf?a=1&a=2",
         ],
     )
-    def test_we_pass_through_the_url_exactly_as_a_quoted_json_string(
+    def test_it_passes_through_the_url_exactly_as_a_quoted_json_string(
         self, call_view_pdf, pdf_url, pyramid_settings
     ):
         response = call_view_pdf(pdf_url)
 
-        assert response["pdf_url"] == json.dumps(
-            f"{pyramid_settings['nginx_server']}/proxy/static/{pdf_url}"
-        )
+        assert json.loads(response["pdf_url"]).endswith(f"/{pdf_url}")
 
         # Check we disable Jinja 2 escaping
         assert isinstance(response["pdf_url"], Markup)
 
-    def test_we_escape_quote_literals_in_urls_to_prevent_XSS(
+    def test_it_escapes_quote_literals_in_urls_to_prevent_XSS(
         self, call_view_pdf, pyramid_settings
     ):
         response = call_view_pdf('a"b')
-        assert response["pdf_url"] == json.dumps(
-            f"{pyramid_settings['nginx_server']}/proxy/static/a\"b"
-        )
+
+        assert json.loads(response["pdf_url"]).endswith('a"b')
 
     def test_it_extracts_config(self, call_view_pdf, Configuration):
         response = call_view_pdf()
@@ -77,3 +86,19 @@ class TestViewPDF:
             return view_pdf(context, request)
 
         return call_view_pdf
+
+
+@pytest.fixture(autouse=True)
+def quantized_expiry(patch):
+    return patch(
+        "via.views.view_pdf.quantized_expiry",
+        return_value=datetime(
+            year=2020,
+            month=2,
+            day=8,
+            hour=17,
+            minute=30,
+            second=21,
+            tzinfo=timezone.utc,
+        ),
+    )

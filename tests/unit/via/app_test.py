@@ -11,7 +11,7 @@ def test_settings_raise_value_error_if_environment_variable_is_not_set():
         load_settings({})
 
 
-def test_settings_are_configured_from_environment_variables(os_env, pyramid_settings):
+def test_settings_are_configured_from_environment_variables(os, pyramid_settings):
     expected_settings = pyramid_settings
 
     settings = load_settings({})
@@ -20,7 +20,7 @@ def test_settings_are_configured_from_environment_variables(os_env, pyramid_sett
         assert settings[key] == value
 
 
-def test_app(configurator, pyramid, os_env, pyramid_settings):
+def test_app(configurator, pyramid, os, pyramid_settings):
     create_app()
 
     expected_settings = dict(
@@ -47,10 +47,8 @@ def pyramid(patch):
 
 
 @pytest.fixture
-def os_env(patch, pyramid_settings):
-    def get(env_var):
-        return pyramid_settings[env_var.lower()]
-
-    os = patch("via.app.os")
-    os.environ.get = get
-    return os
+def os(patch, pyramid_settings):
+    return patch(
+        "via.app.os",
+        environ={key.upper(): value for key, value in pyramid_settings.items()},
+    )
