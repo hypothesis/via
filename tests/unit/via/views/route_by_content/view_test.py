@@ -44,7 +44,9 @@ class TestRouteByContent:
         url = "http://example.com/path%2C?a=b"
         results = call_route_by_content(url, params={"other": "value"})
 
-        assert results.location == Any.url.with_query({"other": "value", "url": url})
+        assert results.location == Any.url.with_query(
+            {"other": "value", "url": url, "via.sec": Any.string()}
+        )
 
     @pytest.mark.usefixtures("html_response")
     def test_html_payloads_are_handled_by_the_html_rewriter_service(

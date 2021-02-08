@@ -11,6 +11,8 @@ def pyramid_settings():
         "checkmate_url": "http://localhost:9099",
         "checkmate_enabled": True,
         "nginx_secure_link_secret": "not_a_secret",
+        "via_secret": "not_a_secret",
+        "signed_urls_required": True,
     }
 
 
