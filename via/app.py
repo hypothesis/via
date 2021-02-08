@@ -9,7 +9,13 @@ from whitenoise import WhiteNoise
 from via.cache_buster import PathCacheBuster
 from via.sentry_filters import SENTRY_FILTERS
 
-REQUIRED_PARAMS = ["client_embed_url", "nginx_server", "via_html_url", "checkmate_url"]
+REQUIRED_PARAMS = [
+    "client_embed_url",
+    "nginx_server",
+    "via_html_url",
+    "checkmate_url",
+    "via_secret",
+]
 
 
 def load_settings(settings):
@@ -32,6 +38,7 @@ def load_settings(settings):
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
 
     settings["checkmate_enabled"] = asbool(os.environ.get("CHECKMATE_ENABLED"))
+    settings["signed_urls_required"] = asbool(os.environ.get("SIGNED_URLS_REQUIRED"))
     settings["nginx_secure_link_secret"] = os.environ["NGINX_SECURE_LINK_SECRET"]
 
     return settings
