@@ -22,7 +22,7 @@ future==0.18.2            # via -r requirements/requirements.txt, h-checkmatelib
 gunicorn==20.0.4          # via -r requirements/requirements.txt
 h-checkmatelib==1.0.3     # via -r requirements/requirements.txt
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt
-h-vialib==1.0.1           # via -r requirements/requirements.txt
+h-vialib==1.0.3           # via -r requirements/requirements.txt
 hupper==1.10.2            # via -r requirements/requirements.txt, pyramid
 idna==2.10                # via -r requirements/requirements.txt, requests
 importlib-metadata==3.4.0  # via -r requirements/requirements.txt, jsonschema
@@ -45,6 +45,7 @@ prompt-toolkit==3.0.14    # via ipython
 ptyprocess==0.7.0         # via pexpect
 pycparser==2.20           # via cffi
 pygments==2.7.4           # via ipython
+pyjwt==2.0.1              # via -r requirements/requirements.txt, h-vialib
 pynacl==1.4.0             # via paramiko
 pyramid-ipython==0.2      # via -r requirements/dev.in
 pyramid-jinja2==2.8       # via -r requirements/requirements.txt
