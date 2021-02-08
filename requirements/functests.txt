@@ -13,7 +13,7 @@ gunicorn==20.0.4          # via -r requirements/requirements.txt
 h-checkmatelib==1.0.3     # via -r requirements/requirements.txt
 h-matchers==1.2.10        # via -r requirements/functests.in
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt
-h-vialib==1.0.1           # via -r requirements/requirements.txt
+h-vialib==1.0.3           # via -r requirements/requirements.txt
 httpretty==1.0.5          # via -r requirements/functests.in
 hupper==1.10.2            # via -r requirements/requirements.txt, pyramid
 idna==2.10                # via -r requirements/requirements.txt, requests
@@ -29,6 +29,7 @@ plaster-pastedeploy==0.7  # via -r requirements/requirements.txt, pyramid
 plaster==1.0              # via -r requirements/requirements.txt, plaster-pastedeploy, pyramid
 pluggy==0.13.1            # via pytest
 py==1.10.0                # via pytest
+pyjwt==2.0.1              # via -r requirements/requirements.txt, h-vialib
 pyparsing==2.4.7          # via packaging
 pyramid-jinja2==2.8       # via -r requirements/requirements.txt
 pyramid==1.10.5           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-jinja2
