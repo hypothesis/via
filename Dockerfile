@@ -28,4 +28,4 @@ COPY . .
 
 USER hypothesis
 
-CMD /usr/bin/envsubst '$${GOOGLE_API_KEY}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
+CMD /usr/bin/envsubst '$${GOOGLE_API_KEY}:$${NGINX_SECURE_LINK_SECRET}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
