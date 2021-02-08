@@ -11,7 +11,7 @@ future==0.18.2            # via h-checkmatelib
 gunicorn==20.0.4          # via -r requirements/requirements.in
 h-checkmatelib==1.0.3     # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.in
-h-vialib==1.0.1           # via -r requirements/requirements.in
+h-vialib===1.0.3          # via -r requirements/requirements.in
 hupper==1.10.2            # via pyramid
 idna==2.10                # via requests
 importlib-metadata==3.4.0  # via jsonschema
@@ -22,6 +22,7 @@ newrelic==6.0.1.155       # via -r requirements/requirements.in
 pastedeploy==2.1.1        # via plaster-pastedeploy
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
+pyjwt==2.0.1              # via h-vialib
 pyramid-jinja2==2.8       # via -r requirements/requirements.in
 pyramid==1.10.5           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-jinja2
 pyrsistent==0.17.3        # via jsonschema
