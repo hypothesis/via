@@ -9,7 +9,7 @@ from h_vialib.secure import quantized_expiry
 from markupsafe import Markup
 from pyramid import view
 
-from via.views.blocker import checkmate_block
+from via.views.decorators import checkmate_block
 
 
 @view.view_config(
