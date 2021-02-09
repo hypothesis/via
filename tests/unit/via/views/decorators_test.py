@@ -5,7 +5,7 @@ import pytest
 from checkmatelib import CheckmateException
 from pyramid.response import Response
 
-from via.views.blocker import checkmate_block
+from via.views.decorators import checkmate_block
 
 
 @checkmate_block
@@ -70,4 +70,4 @@ class TestCheckMateBlockDecorator:
 
     @pytest.fixture
     def CheckmateClient(self, patch):
-        return patch("via.views.blocker.CheckmateClient")
+        return patch("via.views.decorators.CheckmateClient")
