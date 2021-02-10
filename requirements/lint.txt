@@ -17,7 +17,7 @@ gunicorn==20.0.4          # via -r requirements/requirements.txt, -r requirement
 h-checkmatelib==1.0.3     # via -r requirements/requirements.txt, -r requirements/tests.txt
 h-matchers==1.2.10        # via -r requirements/tests.txt
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.txt, -r requirements/tests.txt
-h-vialib==1.0.6           # via -r requirements/requirements.txt, -r requirements/tests.txt
+h-vialib==1.0.8           # via -r requirements/requirements.txt, -r requirements/tests.txt
 htmlmin==0.1.12           # via -r requirements/lint.in
 httpretty==1.0.5          # via -r requirements/tests.txt
 hupper==1.10.2            # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid
@@ -61,7 +61,7 @@ typing-extensions==3.7.4.3  # via -r requirements/requirements.txt, -r requireme
 urllib3==1.26.3           # via -r requirements/requirements.txt, -r requirements/tests.txt, requests, sentry-sdk
 venusian==3.0.0           # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid
 waitress==1.4.4           # via -r requirements/tests.txt, webtest
-webob==1.8.6              # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid, webtest
+webob==1.8.6              # via -r requirements/requirements.txt, -r requirements/tests.txt, h-vialib, pyramid, webtest
 webtest==2.0.35           # via -r requirements/tests.txt
 whitenoise==5.2.0         # via -r requirements/requirements.txt, -r requirements/tests.txt
 wrapt==1.12.1             # via astroid
