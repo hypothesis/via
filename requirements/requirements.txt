@@ -11,7 +11,7 @@ future==0.18.2            # via h-checkmatelib
 gunicorn==20.0.4          # via -r requirements/requirements.in
 h-checkmatelib==1.0.3     # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.1   # via -r requirements/requirements.in
-h-vialib==1.0.6           # via -r requirements/requirements.in
+h-vialib==1.0.8           # via -r requirements/requirements.in
 hupper==1.10.2            # via pyramid
 idna==2.10                # via requests
 importlib-metadata==3.4.0  # via jsonschema
@@ -33,7 +33,7 @@ translationstring==1.4    # via pyramid
 typing-extensions==3.7.4.3  # via importlib-metadata
 urllib3==1.26.3           # via requests, sentry-sdk
 venusian==3.0.0           # via pyramid
-webob==1.8.6              # via pyramid
+webob==1.8.6              # via h-vialib, pyramid
 whitenoise==5.2.0         # via -r requirements/requirements.in
 zipp==3.4.0               # via importlib-metadata
 zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2
