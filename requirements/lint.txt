@@ -42,7 +42,8 @@ pyjwt==2.0.1              # via -r requirements/requirements.txt, -r requirement
 pylint==2.6.0             # via -r requirements/lint.in
 pyparsing==2.4.7          # via -r requirements/tests.txt, packaging
 pyramid-jinja2==2.8       # via -r requirements/requirements.txt, -r requirements/tests.txt
-pyramid==1.10.5           # via -r requirements/requirements.txt, -r requirements/tests.txt, h-pyramid-sentry, pyramid-jinja2
+pyramid-services==2.2     # via -r requirements/requirements.txt, -r requirements/tests.txt
+pyramid==1.10.5           # via -r requirements/requirements.txt, -r requirements/tests.txt, h-pyramid-sentry, pyramid-jinja2, pyramid-services
 pyrsistent==0.17.3        # via -r requirements/requirements.txt, -r requirements/tests.txt, jsonschema
 pytest==6.2.2             # via -r requirements/tests.txt
 python-dateutil==2.8.1    # via -r requirements/tests.txt, faker
@@ -64,10 +65,11 @@ waitress==1.4.4           # via -r requirements/tests.txt, webtest
 webob==1.8.6              # via -r requirements/requirements.txt, -r requirements/tests.txt, h-vialib, pyramid, webtest
 webtest==2.0.35           # via -r requirements/tests.txt
 whitenoise==5.2.0         # via -r requirements/requirements.txt, -r requirements/tests.txt
+wired==0.3                # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid-services
 wrapt==1.12.1             # via astroid
 zipp==3.4.0               # via -r requirements/requirements.txt, -r requirements/tests.txt, importlib-metadata
 zope.deprecation==4.4.0   # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid, pyramid-jinja2
-zope.interface==5.2.0     # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid
+zope.interface==5.2.0     # via -r requirements/requirements.txt, -r requirements/tests.txt, pyramid, pyramid-services, wired
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

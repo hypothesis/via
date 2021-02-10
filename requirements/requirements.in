@@ -1,6 +1,7 @@
 gunicorn
 pyramid
 pyramid-jinja2
+pyramid-services
 requests
 newrelic
 h_pyramid_sentry
