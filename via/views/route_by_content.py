@@ -1,12 +1,11 @@
 """View for redirecting based on content type."""
 
-from h_vialib.secure.url import ViaSecureURL
 from pyramid import httpexceptions as exc
 from pyramid import view
 
 from via.get_url import get_url_details
+from via.services import ViaClientService
 from via.views.decorators import has_secure_url_token
-from via.views.route_by_content._html_rewriter import HTMLRewriter
 
 
 @view.view_config(route_name="route_by_content", decorator=has_secure_url_token)
@@ -18,16 +17,20 @@ def route_by_content(context, request):
     if mime_type in ("application/x-pdf", "application/pdf"):
         # Unless we have some very baroque error messages they shouldn't
         # really be returning PDFs
+        content_type, caching_headers = "pdf", _caching_headers(max_age=300)
+    else:
+        content_type, caching_headers = "html", _cache_headers_for_http(status_code)
 
-        # Re-sign for the new URL
-        signed_via_pdf_url = ViaSecureURL(
-            request.registry.settings["via_secret"]
-        ).create(request.route_url("view_pdf", _query=request.params))
+    # The via client will handle the URL correctly for us, we don't want to
+    # include it as a param in case we are going to ViaHTML. All other params
+    # should be passed on
+    options = dict(request.params)
+    options.pop("url")
 
-        return exc.HTTPFound(signed_via_pdf_url, headers=_caching_headers(max_age=300))
+    via_client = request.find_service(ViaClientService)
+    url = via_client.url_for(context.url(), content_type=content_type, options=options)
 
-    url = HTMLRewriter.from_request(request).url_for(request.params)
-    return exc.HTTPFound(url, headers=_cache_headers_for_http(status_code))
+    return exc.HTTPFound(url, headers=caching_headers)
 
 
 def _cache_headers_for_http(status_code):

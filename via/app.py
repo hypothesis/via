@@ -49,8 +49,11 @@ def create_app(_=None, **settings):
     config = pyramid.config.Configurator(settings=load_settings(settings))
 
     config.include("pyramid_jinja2")
-    config.include("via.views")
+    config.include("pyramid_services")
     config.include("h_pyramid_sentry")
+
+    config.include("via.views")
+    config.include("via.services")
 
     # Configure Pyramid so we can generate static URLs
     static_path = resource_filename("via", "static")
