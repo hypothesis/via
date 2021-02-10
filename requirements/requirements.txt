@@ -4,40 +4,89 @@
 #
 #    pip-compile requirements/requirements.in
 #
-attrs==20.3.0             # via jsonschema
-certifi==2020.12.5        # via requests, sentry-sdk
-chardet==4.0.0            # via requests
-future==0.18.2            # via h-checkmatelib
-gunicorn==20.0.4          # via -r requirements/requirements.in
-h-checkmatelib==1.0.3     # via -r requirements/requirements.in
-h-pyramid-sentry==1.2.1   # via -r requirements/requirements.in
-h-vialib==1.0.3           # via -r requirements/requirements.in
-hupper==1.10.2            # via pyramid
-idna==2.10                # via requests
-importlib-metadata==3.4.0  # via jsonschema
-jinja2==2.11.3            # via pyramid-jinja2
-jsonschema==3.2.0         # via h-checkmatelib
-markupsafe==1.1.1         # via jinja2, pyramid-jinja2
-newrelic==6.0.1.155       # via -r requirements/requirements.in
-pastedeploy==2.1.1        # via plaster-pastedeploy
-plaster-pastedeploy==0.7  # via pyramid
-plaster==1.0              # via plaster-pastedeploy, pyramid
-pyjwt==2.0.1              # via h-vialib
-pyramid-jinja2==2.8       # via -r requirements/requirements.in
-pyramid==1.10.5           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-jinja2
-pyrsistent==0.17.3        # via jsonschema
-requests==2.25.1          # via -r requirements/requirements.in, h-checkmatelib
-sentry-sdk==0.19.5        # via h-pyramid-sentry
-six==1.15.0               # via jsonschema
-translationstring==1.4    # via pyramid
-typing-extensions==3.7.4.3  # via importlib-metadata
-urllib3==1.26.3           # via requests, sentry-sdk
-venusian==3.0.0           # via pyramid
-webob==1.8.6              # via pyramid
-whitenoise==5.2.0         # via -r requirements/requirements.in
-zipp==3.4.0               # via importlib-metadata
-zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2
-zope.interface==5.2.0     # via pyramid
+attrs==20.3.0
+    # via jsonschema
+certifi==2020.12.5
+    # via
+    #   requests
+    #   sentry-sdk
+chardet==4.0.0
+    # via requests
+future==0.18.2
+    # via h-checkmatelib
+gunicorn==20.0.4
+    # via -r requirements/requirements.in
+h-checkmatelib==1.0.3
+    # via -r requirements/requirements.in
+h-pyramid-sentry==1.2.1
+    # via -r requirements/requirements.in
+h-vialib==1.0.5
+    # via -r requirements/requirements.in
+hupper==1.10.2
+    # via pyramid
+idna==2.10
+    # via requests
+importlib-metadata==3.4.0
+    # via jsonschema
+jinja2==2.11.3
+    # via pyramid-jinja2
+jsonschema==3.2.0
+    # via h-checkmatelib
+markupsafe==1.1.1
+    # via
+    #   jinja2
+    #   pyramid-jinja2
+newrelic==6.0.1.155
+    # via -r requirements/requirements.in
+pastedeploy==2.1.1
+    # via plaster-pastedeploy
+plaster-pastedeploy==0.7
+    # via pyramid
+plaster==1.0
+    # via
+    #   plaster-pastedeploy
+    #   pyramid
+pyjwt==2.0.1
+    # via h-vialib
+pyramid-jinja2==2.8
+    # via -r requirements/requirements.in
+pyramid==1.10.5
+    # via
+    #   -r requirements/requirements.in
+    #   h-pyramid-sentry
+    #   pyramid-jinja2
+pyrsistent==0.17.3
+    # via jsonschema
+requests==2.25.1
+    # via
+    #   -r requirements/requirements.in
+    #   h-checkmatelib
+sentry-sdk==0.19.5
+    # via h-pyramid-sentry
+six==1.15.0
+    # via jsonschema
+translationstring==1.4
+    # via pyramid
+typing-extensions==3.7.4.3
+    # via importlib-metadata
+urllib3==1.26.3
+    # via
+    #   requests
+    #   sentry-sdk
+venusian==3.0.0
+    # via pyramid
+webob==1.8.6
+    # via pyramid
+whitenoise==5.2.0
+    # via -r requirements/requirements.in
+zipp==3.4.0
+    # via importlib-metadata
+zope.deprecation==4.4.0
+    # via
+    #   pyramid
+    #   pyramid-jinja2
+zope.interface==5.2.0
+    # via pyramid
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
