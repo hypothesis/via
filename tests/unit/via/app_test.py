@@ -1,5 +1,3 @@
-from unittest import mock
-
 import pytest
 
 from via.app import create_app, load_settings
@@ -28,11 +26,6 @@ def test_app(configurator, pyramid, os, pyramid_settings):
     )
 
     pyramid.config.Configurator.assert_called_once_with(settings=expected_settings)
-    assert configurator.include.call_args_list == [
-        mock.call("pyramid_jinja2"),
-        mock.call("via.views"),
-        mock.call("h_pyramid_sentry"),
-    ]
     configurator.make_wsgi_app.assert_called_once_with()
 
 

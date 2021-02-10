@@ -1,14 +1,13 @@
 # pylint: disable=no-self-use
 """A place to put fixture functions that are useful application-wide."""
 import functools
-from unittest import mock
 from urllib.parse import urlencode
 
 import httpretty
-import pytest
 from pyramid import testing
-from pyramid.request import Request
+from pyramid.request import Request, apply_request_extensions
 
+from tests.unit.services import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from via.views import add_routes
 
 
@@ -30,6 +29,7 @@ def patch(request):
 @pytest.fixture
 def pyramid_config(pyramid_settings):
     with testing.testConfig(settings=pyramid_settings) as config:
+        config.include("pyramid_services")
         add_routes(config)
         yield config
 
@@ -42,6 +42,8 @@ def make_request(pyramid_config):
 
         pyramid_request = Request.blank(path)
         pyramid_request.registry = pyramid_config.registry
+        apply_request_extensions(pyramid_request)
+
         return pyramid_request
 
     return make_request

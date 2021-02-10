@@ -2,32 +2,42 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
-from pyramid.request import Request
 from webob.headers import EnvironHeaders
 
 from tests.conftest import assert_cache_control
 from via.resources import URLResource
-from via.views.route_by_content.view import route_by_content
+from via.views.route_by_content import route_by_content
 
 
+@pytest.mark.usefixtures("via_client_service")
 class TestRouteByContent:
     @pytest.mark.parametrize(
-        "content_type,location",
+        "content_type,passed_type",
         (
-            ("application/x-pdf", Any.url.with_path("/pdf")),
-            ("application/pdf", Any.url.with_path("/pdf")),
-            ("text/html", Any.url.with_host("viahtml3.hypothes.is")),
-            ("other", Any.url.with_host("viahtml3.hypothes.is")),
+            ("application/x-pdf", "pdf"),
+            ("application/pdf", "pdf"),
+            ("text/html", "html"),
+            ("other", "html"),
         ),
     )
     def test_it_routes_by_content_type(
-        self, content_type, location, call_route_by_content, get_url_details
+        self,
+        content_type,
+        passed_type,
+        call_route_by_content,
+        get_url_details,
+        via_client_service,
     ):
+        url = "http://example.com/path%2C?a=b"
         get_url_details.return_value = (content_type, 200)
 
-        result = call_route_by_content()
+        results = call_route_by_content(url, params={"other": "value"})
 
-        assert result.location == location
+        via_client_service.url_for.assert_called_once_with(
+            url, content_type=passed_type, options={"other": "value"}
+        )
+
+        assert results.location == via_client_service.url_for.return_value
 
     def test_we_call_third_parties_correctly(
         self, call_route_by_content, get_url_details
@@ -36,29 +46,6 @@ class TestRouteByContent:
         call_route_by_content(url, params={"other": "value"})
 
         get_url_details.assert_called_once_with(url, Any.instance_of(EnvironHeaders))
-
-    @pytest.mark.usefixtures("pdf_response")
-    def test_redirects_to_pdf_view_for_pdfs_have_the_correct_params(
-        self, call_route_by_content
-    ):
-        url = "http://example.com/path%2C?a=b"
-        results = call_route_by_content(url, params={"other": "value"})
-
-        assert results.location == Any.url.with_query(
-            {"other": "value", "url": url, "via.sec": Any.string()}
-        )
-
-    @pytest.mark.usefixtures("html_response")
-    def test_html_payloads_are_handled_by_the_html_rewriter_service(
-        self, call_route_by_content, HTMLRewriter
-    ):
-        url = "http://example.com/path%2C?a=b"
-        results = call_route_by_content(url, params={"other": "value"})
-
-        HTMLRewriter.from_request.assert_called_once_with(Any.instance_of(Request))
-        html_rewriter = HTMLRewriter.from_request.return_value
-        html_rewriter.url_for.assert_called_once_with({"other": "value", "url": url})
-        assert results.location == html_rewriter.url_for.return_value
 
     @pytest.mark.parametrize(
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)]
@@ -94,21 +81,6 @@ class TestRouteByContent:
 
         assert result.headers == Any.iterable.containing({"Cache-Control": cache})
 
-    @pytest.fixture(autouse=True)
-    def get_url_details(self, patch):
-        get_url_details = patch("via.views.route_by_content.view.get_url_details")
-        get_url_details.return_value = (sentinel.content_type, 200)
-
-        return get_url_details
-
-    @pytest.fixture
-    def pdf_response(self, get_url_details):
-        get_url_details.return_value = ("application/pdf", 200)
-
-    @pytest.fixture
-    def html_response(self, get_url_details):
-        get_url_details.return_value = ("application/html", 200)
-
     @pytest.fixture
     def call_route_by_content(self, make_request):
         def call_route_by_content(target_url="http://example.com", params=None):
@@ -119,6 +91,9 @@ class TestRouteByContent:
 
         return call_route_by_content
 
-    @pytest.fixture
-    def HTMLRewriter(self, patch):
-        return patch("via.views.route_by_content.view.HTMLRewriter")
+    @pytest.fixture(autouse=True)
+    def get_url_details(self, patch):
+        get_url_details = patch("via.views.route_by_content.get_url_details")
+        get_url_details.return_value = (sentinel.content_type, 200)
+
+        return get_url_details
