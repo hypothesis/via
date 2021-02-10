@@ -49,7 +49,8 @@ pyjwt==2.0.1              # via -r requirements/requirements.txt, h-vialib
 pynacl==1.4.0             # via paramiko
 pyramid-ipython==0.2      # via -r requirements/dev.in
 pyramid-jinja2==2.8       # via -r requirements/requirements.txt
-pyramid==1.10.5           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-ipython, pyramid-jinja2
+pyramid-services==2.2     # via -r requirements/requirements.txt
+pyramid==1.10.5           # via -r requirements/requirements.txt, h-pyramid-sentry, pyramid-ipython, pyramid-jinja2, pyramid-services
 pyrsistent==0.17.3        # via -r requirements/requirements.txt, jsonschema
 python-dotenv==0.15.0     # via docker-compose
 pyyaml==5.4.1             # via docker-compose
@@ -67,9 +68,10 @@ wcwidth==0.2.5            # via prompt-toolkit
 webob==1.8.6              # via -r requirements/requirements.txt, h-vialib, pyramid
 websocket-client==0.57.0  # via docker, docker-compose
 whitenoise==5.2.0         # via -r requirements/requirements.txt
+wired==0.3                # via -r requirements/requirements.txt, pyramid-services
 zipp==3.4.0               # via -r requirements/requirements.txt, importlib-metadata
 zope.deprecation==4.4.0   # via -r requirements/requirements.txt, pyramid, pyramid-jinja2
-zope.interface==5.2.0     # via -r requirements/requirements.txt, pyramid
+zope.interface==5.2.0     # via -r requirements/requirements.txt, pyramid, pyramid-services, wired
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

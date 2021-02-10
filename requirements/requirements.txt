@@ -24,7 +24,8 @@ plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 pyjwt==2.0.1              # via h-vialib
 pyramid-jinja2==2.8       # via -r requirements/requirements.in
-pyramid==1.10.5           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-jinja2
+pyramid-services==2.2     # via -r requirements/requirements.in
+pyramid==1.10.5           # via -r requirements/requirements.in, h-pyramid-sentry, pyramid-jinja2, pyramid-services
 pyrsistent==0.17.3        # via jsonschema
 requests==2.25.1          # via -r requirements/requirements.in, h-checkmatelib
 sentry-sdk==0.19.5        # via h-pyramid-sentry
@@ -35,9 +36,10 @@ urllib3==1.26.3           # via requests, sentry-sdk
 venusian==3.0.0           # via pyramid
 webob==1.8.6              # via h-vialib, pyramid
 whitenoise==5.2.0         # via -r requirements/requirements.in
+wired==0.3                # via pyramid-services
 zipp==3.4.0               # via importlib-metadata
 zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2
-zope.interface==5.2.0     # via pyramid
+zope.interface==5.2.0     # via pyramid, pyramid-services, wired
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
