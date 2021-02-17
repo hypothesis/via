@@ -9,7 +9,7 @@ services:
       - NGINX_SECURE_LINK_SECRET
     volumes:
       - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./conf/nginx/includes/direct_proxy.conf:/etc/nginx/includes/direct_proxy.conf:ro
+      - ./conf/nginx/includes/proxy.conf:/etc/nginx/includes/proxy.conf:ro
       - ./conf/nginx/includes/errors.conf:/etc/nginx/includes/errors.conf:ro
       - ./conf/nginx/includes/robots.conf:/etc/nginx/includes/robots.conf:ro
       - ./conf/nginx/includes/secure_links.conf:/etc/nginx/includes/secure_links.conf:ro
