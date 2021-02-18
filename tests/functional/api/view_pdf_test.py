@@ -1,5 +1,3 @@
-import pytest
-
 from tests.conftest import assert_cache_control
 
 
