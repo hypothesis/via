@@ -1,9 +1,9 @@
 """Monitoring views."""
 
-from pyramid import response, view
+from pyramid import view
 
 
-@view.view_config(route_name="get_status")
+@view.view_config(route_name="get_status", renderer="json")
 def get_status(_request):
     """Status endpoint."""
-    return response.Response(status_int=200, status="200 OK", content_type="text/plain")
+    return {"status": "okay"}
