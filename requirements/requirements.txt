@@ -52,7 +52,7 @@ pyramid-jinja2==2.8
     # via -r requirements/requirements.in
 pyramid-services==2.2
     # via -r requirements/requirements.in
-pyramid==1.10.5
+pyramid==1.10.7
     # via
     #   -r requirements/requirements.in
     #   h-pyramid-sentry
