@@ -28,6 +28,8 @@ def route_by_content(context, request):
     # should be passed on
     options = dict(request.params)
     options.pop("url")
+    # Checkmate check already done, no need to keep passing this
+    options.pop("via.blocked_for", None)
 
     via_client = request.find_service(ViaClientService)
     url = via_client.url_for(context.url(), content_type=content_type, options=options)

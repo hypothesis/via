@@ -28,9 +28,12 @@ def checkmate_block(view, url_param="url", allow_all=True):
         )
 
         url = request.params[url_param]
+        blocked_for = request.params.get("via.blocked_for")
         blocked = None
         try:
-            blocked = checkmate.check_url(url, allow_all=allow_all)
+            blocked = checkmate.check_url(
+                url, allow_all=allow_all, blocked_for=blocked_for
+            )
         except CheckmateException:
             logging.exception("Failed to check url against checkmate")
 
