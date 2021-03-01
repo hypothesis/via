@@ -171,7 +171,7 @@ six==1.15.0
     #   pynacl
     #   traitlets
     #   websocket-client
-supervisor==4.2.1
+supervisor==4.2.2
     # via -r requirements/dev.in
 texttable==1.6.3
     # via docker-compose
