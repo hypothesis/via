@@ -27,7 +27,7 @@ chardet==4.0.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   requests
-coverage==5.4
+coverage==5.5
     # via -r requirements/tests.txt
 factory-boy==3.2.0
     # via -r requirements/tests.txt
