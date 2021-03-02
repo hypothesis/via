@@ -135,7 +135,7 @@ pyramid-jinja2==2.8
     # via -r requirements/requirements.txt
 pyramid-services==2.2
     # via -r requirements/requirements.txt
-pyramid==1.10.7
+pyramid==1.10.8
     # via
     #   -r requirements/requirements.txt
     #   h-pyramid-sentry
