@@ -47,22 +47,6 @@ class TestRouteByContent:
 
         get_url_details.assert_called_once_with(url, Any.instance_of(EnvironHeaders))
 
-    def test_blocked_for_passed_to_viahtml(
-        self, call_route_by_content, via_client_service, get_url_details
-    ):
-        get_url_details.return_value = ("html", 200)
-        url = "http://example.com/path%2C?a=b"
-
-        call_route_by_content(
-            url,
-            params={"via.blocked_for": "lms"},
-            settings={"checkmate_enabled": False},
-        )
-
-        via_client_service.url_for.assert_called_once_with(
-            url, content_type="html", options={"via.blocked_for": "lms"}
-        )
-
     @pytest.mark.parametrize(
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)]
     )
@@ -103,10 +87,6 @@ class TestRouteByContent:
             target_url="http://example.com", params=None, settings=None
         ):
             request = make_request(params=dict(params or {}, url=target_url))
-            if settings:
-
-                for key, value in settings.items():
-                    request.registry.settings[key] = value
             context = URLResource(request)
 
             return route_by_content(context, request)
