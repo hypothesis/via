@@ -19,9 +19,6 @@ def checkmate_block(view, url_param="url", allow_all=True):
     """
 
     def view_wrapper(context, request):
-        if not request.registry.settings["checkmate_enabled"]:
-            return view(context, request)
-
         checkmate = CheckmateClient(
             request.registry.settings["checkmate_url"],
             request.registry.settings["checkmate_api_key"],

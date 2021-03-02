@@ -15,7 +15,7 @@ class TestRouteByContent:
         "via.external_link_mode": "new-tab",
     }
 
-    @pytest.mark.usefixtures("html_response")
+    @pytest.mark.usefixtures("html_response", "checkmate_pass")
     def test_proxy_html(self, test_app):
         target_url = "http://example.com"
 
@@ -27,7 +27,7 @@ class TestRouteByContent:
             f"https://viahtml3.hypothes.is/proxy/{target_url}/"
         ).with_query(query)
 
-    @pytest.mark.usefixtures("pdf_response")
+    @pytest.mark.usefixtures("pdf_response", "checkmate_pass")
     def test_proxy_pdf(self, test_app):
         target_url = "http://example.com"
 

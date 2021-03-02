@@ -2,7 +2,6 @@
 
 import re
 
-import httpretty
 import pytest
 from h_matchers import Any
 
@@ -35,6 +34,7 @@ class TestStaticContent:
 
         assert_cache_control(response.headers, ["public", "max-age=60"])
 
+    @pytest.mark.usefixtures("checkmate_pass")
     def test_immutable_contents(self, test_app):
 
         salt = self.get_salt(test_app)
@@ -52,13 +52,6 @@ class TestStaticContent:
         actually make a call with immutable assets and then scrape the HTML
         for the salt value.
         """
-        httpretty.register_uri(
-            httpretty.GET,
-            "http://localhost:9099/api/check",
-            status=204,
-            body={"data": []},
-        )
-
         response = test_app.get("/pdf?url=http://example.com")
         static_match = re.search("/static/([^/]+)/", response.text)
         assert static_match

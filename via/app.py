@@ -38,7 +38,6 @@ def load_settings(settings):
     # Configure sentry
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
 
-    settings["checkmate_enabled"] = asbool(os.environ.get("CHECKMATE_ENABLED"))
     settings["checkmate_ignore_reasons"] = os.environ.get("CHECKMATE_IGNORE_REASONS")
     settings["signed_urls_required"] = asbool(os.environ.get("SIGNED_URLS_REQUIRED"))
     settings["nginx_secure_link_secret"] = os.environ["NGINX_SECURE_LINK_SECRET"]
