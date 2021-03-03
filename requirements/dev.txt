@@ -68,7 +68,7 @@ importlib-metadata==3.4.0
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-ipdb==0.13.4
+ipdb==0.13.5
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
