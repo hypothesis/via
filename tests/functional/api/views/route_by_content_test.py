@@ -23,7 +23,6 @@ class TestRouteByContent:
 
         assert response.status_code == 302
         query = dict(self.DEFAULT_OPTIONS)
-        query["via.sec"] = Any.string()
         assert response.location == Any.url.matching(
             f"https://viahtml3.hypothes.is/proxy/{target_url}/"
         ).with_query(query)
