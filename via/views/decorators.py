@@ -32,7 +32,10 @@ def checkmate_block(view, url_param="url", allow_all=True):
         blocked = None
         try:
             blocked = checkmate.check_url(
-                url, allow_all=allow_all, blocked_for=blocked_for
+                url,
+                allow_all=allow_all,
+                blocked_for=blocked_for,
+                ignore_reasons=request.registry.settings["checkmate_ignore_reasons"],
             )
         except CheckmateException:
             logging.exception("Failed to check url against checkmate")
