@@ -26,7 +26,7 @@ future==0.18.2
     #   h-checkmatelib
 gunicorn==20.0.4
     # via -r requirements/requirements.txt
-h-checkmatelib==1.0.6
+h-checkmatelib==1.0.7
     # via -r requirements/requirements.txt
 h-matchers==1.2.10
     # via -r requirements/functests.in
