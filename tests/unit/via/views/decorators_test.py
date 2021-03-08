@@ -28,7 +28,9 @@ class TestCheckMateBlockDecorator:
 
         response = dummy_view_checkmate_block(None, request)
 
-        mock_check_url.assert_called_once_with(url, allow_all=True, blocked_for=None)
+        mock_check_url.assert_called_once_with(
+            url, allow_all=True, blocked_for=None, ignore_reasons=None
+        )
         assert response.status_code == 200
         assert response.text == "ok"
 
@@ -53,7 +55,9 @@ class TestCheckMateBlockDecorator:
 
         response = dummy_view_checkmate_block(None, request)
 
-        mock_check_url.assert_called_once_with(url, allow_all=True, blocked_for=None)
+        mock_check_url.assert_called_once_with(
+            url, allow_all=True, blocked_for=None, ignore_reasons=None
+        )
         assert response.status_code == 307
         assert response.location == block_response.presentation_url
 
