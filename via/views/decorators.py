@@ -1,12 +1,8 @@
 """View decorators to integrate with checkmate's API."""
-import logging
-
 from checkmatelib import CheckmateClient, CheckmateException
 from h_vialib.exceptions import TokenException
 from h_vialib.secure.url import ViaSecureURL
 from pyramid.httpexceptions import HTTPTemporaryRedirect, HTTPUnauthorized
-
-logger = logging.getLogger(__name__)
 
 
 def checkmate_block(view, url_param="url", allow_all=True):
@@ -26,7 +22,7 @@ def checkmate_block(view, url_param="url", allow_all=True):
 
         url = request.params[url_param]
         blocked_for = request.params.get("via.blocked_for")
-        blocked = None
+
         try:
             blocked = checkmate.check_url(
                 url,
@@ -35,7 +31,7 @@ def checkmate_block(view, url_param="url", allow_all=True):
                 ignore_reasons=request.registry.settings["checkmate_ignore_reasons"],
             )
         except CheckmateException:
-            logging.exception("Failed to check url against checkmate")
+            blocked = None
 
         if blocked:
             return HTTPTemporaryRedirect(location=blocked.presentation_url)
