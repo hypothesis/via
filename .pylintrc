@@ -20,7 +20,10 @@ enable=
 disable=bad-continuation,
         missing-type-doc,
         missing-return-type-doc,
-        too-few-public-methods
+        too-few-public-methods,
+        # Docstrings are encouraged but we don't want to enforce that everything
+        # must have a docstring.
+        missing-docstring,
 
 [REPORTS]
 output-format=colorized
