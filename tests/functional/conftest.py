@@ -13,5 +13,5 @@ def test_app(pyramid_settings):
 @pytest.fixture
 def checkmate_pass(pyramid_settings):
     httpretty.register_uri(
-        httpretty.GET, "http://localhost:9099/api/check", status=204, body=""
+        httpretty.GET, "http://localhost:9099/api/check", status=204, body=None
     )
