@@ -1,5 +1,8 @@
 [pydocstyle]
-ignore = D100, D101, D102, D103, D104, D105, D106, D107,  # Missing docstrings
+ignore = D104,  # Missing docstring in public package
+                # Prevents us from having useless comments in __init__.py
+         D105,  # Missing docstring in magic method
+         D107,  # Missing docstring in __init__
          D202,  # "No blank lines allowed after function docstring" conflicts with
                 # the Black code formatter, which insists on inserting blank lines
                 # after function docstrings.
