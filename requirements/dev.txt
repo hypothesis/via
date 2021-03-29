@@ -48,7 +48,7 @@ future==0.18.2
     # via
     #   -r requirements/requirements.txt
     #   h-checkmatelib
-gunicorn==20.0.4
+gunicorn==20.1.0
     # via -r requirements/requirements.txt
 h-checkmatelib==1.0.7
     # via -r requirements/requirements.txt
