@@ -1,10 +1,8 @@
-import json
 from datetime import datetime, timedelta, timezone
 from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
-from markupsafe import Markup
 
 from via.resources import URLResource
 from via.views.view_pdf import view_pdf
@@ -16,19 +14,16 @@ class TestViewPDF:
 
         assert response == Any.dict.containing(
             {
-                "client_embed_url": json.dumps(pyramid_settings["client_embed_url"]),
+                "client_embed_url": pyramid_settings["client_embed_url"],
                 "static_url": Any.function(),
             }
         )
-
-        # Check we disable Jinja 2 escaping
-        assert isinstance(response["client_embed_url"], Markup)
 
     def test_it_signs_the_url(self, call_view_pdf, quantized_expiry):
         response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
 
         quantized_expiry.assert_called_once_with(max_age=timedelta(hours=2))
-        signed_url = json.loads(response["pdf_url"])
+        signed_url = response["pdf_url"]
         signed_url_parts = signed_url.split("/")
         signature = signed_url_parts[5]
         expiry = signed_url_parts[6]
@@ -43,22 +38,10 @@ class TestViewPDF:
             "http://example.com/foo%2C.pdf?a=1&a=2",
         ],
     )
-    def test_it_passes_through_the_url_exactly_as_a_quoted_json_string(
-        self, call_view_pdf, pdf_url, pyramid_settings
-    ):
+    def test_it_passes_through_the_url(self, call_view_pdf, pdf_url, pyramid_settings):
         response = call_view_pdf(pdf_url)
 
-        assert json.loads(response["pdf_url"]).endswith(f"/{pdf_url}")
-
-        # Check we disable Jinja 2 escaping
-        assert isinstance(response["pdf_url"], Markup)
-
-    def test_it_escapes_quote_literals_in_urls_to_prevent_XSS(
-        self, call_view_pdf, pyramid_settings
-    ):
-        response = call_view_pdf('a"b')
-
-        assert json.loads(response["pdf_url"]).endswith('a"b')
+        assert response["pdf_url"].endswith(f"/{pdf_url}")
 
     def test_it_extracts_config(self, call_view_pdf, Configuration):
         response = call_view_pdf()
