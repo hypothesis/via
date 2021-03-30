@@ -1,12 +1,10 @@
 """View presenting the PDF viewer."""
 import hashlib
-import json
 from base64 import b64encode
 from datetime import timedelta
 
 from h_vialib import Configuration
 from h_vialib.secure import quantized_expiry
-from markupsafe import Markup
 from pyramid import view
 
 from via.views.decorators import checkmate_block, has_secure_url_token
@@ -34,9 +32,7 @@ def view_pdf(context, request):
 
     return {
         "pdf_url": pdf_url,
-        "client_embed_url": _string_literal(
-            request.registry.settings["client_embed_url"]
-        ),
+        "client_embed_url": request.registry.settings["client_embed_url"],
         "static_url": request.static_url,
         "hypothesis_config": h_config,
     }
@@ -70,10 +66,4 @@ def _pdf_url(url, nginx_server, secret):
 
     # Construct the URL, inserting sec and exp where our NGINX config file
     # expects to find them.
-    return _string_literal(f"{nginx_server}/proxy/static/{sec}/{exp}/{url}")
-
-
-def _string_literal(string):
-    """Return a JSON escaped, but otherwise un-modified string."""
-
-    return Markup(json.dumps(str(string)))
+    return f"{nginx_server}/proxy/static/{sec}/{exp}/{url}"
