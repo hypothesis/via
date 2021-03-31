@@ -18,7 +18,15 @@
 
 {% block footer %}
     <script>
-        window.PDF_URL = {{ pdf_url | tojson }};
+        // The URL of the PDF proxied through Via. This is where the viewer should
+        // actually load the PDF from.
+        window.PROXIED_PDF_URL = {{ proxied_pdf_url | tojson }};
+
+        // The upstream URL. This is what should be recorded as the `target_uri` of
+        // annotations.
+        window.ORIGINAL_PDF_URL = {{ original_pdf_url | tojson }};
+
+        // URL of the Hypothesis client's boot script.
         window.CLIENT_EMBED_URL = {{ client_embed_url | tojson }};
     </script>
 

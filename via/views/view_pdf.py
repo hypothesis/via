@@ -31,7 +31,8 @@ def view_pdf(context, request):
     _, h_config = Configuration.extract_from_params(request.params)
 
     return {
-        "pdf_url": pdf_url,
+        "proxied_pdf_url": pdf_url,
+        "original_pdf_url": context.url(),
         "client_embed_url": request.registry.settings["client_embed_url"],
         "static_url": request.static_url,
         "hypothesis_config": h_config,
