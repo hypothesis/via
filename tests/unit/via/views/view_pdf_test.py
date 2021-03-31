@@ -23,7 +23,7 @@ class TestViewPDF:
         response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
 
         quantized_expiry.assert_called_once_with(max_age=timedelta(hours=2))
-        signed_url = response["pdf_url"]
+        signed_url = response["proxied_pdf_url"]
         signed_url_parts = signed_url.split("/")
         signature = signed_url_parts[5]
         expiry = signed_url_parts[6]
@@ -41,7 +41,8 @@ class TestViewPDF:
     def test_it_passes_through_the_url(self, call_view_pdf, pdf_url, pyramid_settings):
         response = call_view_pdf(pdf_url)
 
-        assert response["pdf_url"].endswith(f"/{pdf_url}")
+        assert response["original_pdf_url"] == pdf_url
+        assert response["proxied_pdf_url"].endswith(f"/{pdf_url}")
 
     def test_it_extracts_config(self, call_view_pdf, Configuration):
         response = call_view_pdf()
