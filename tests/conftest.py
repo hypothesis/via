@@ -12,7 +12,7 @@ def pyramid_settings():
         "checkmate_url": "http://localhost:9099",
         "nginx_secure_link_secret": "not_a_secret",
         "via_secret": "not_a_secret",
-        "signed_urls_required": True,
+        "signed_urls_required": False,
         "checkmate_api_key": "dev_api_key",
         "checkmate_ignore_reasons": None,
     }
