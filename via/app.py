@@ -9,14 +9,19 @@ from whitenoise import WhiteNoise
 from via.cache_buster import PathCacheBuster
 from via.sentry_filters import SENTRY_FILTERS
 
-REQUIRED_PARAMS = [
-    "client_embed_url",
-    "nginx_server",
-    "via_html_url",
-    "checkmate_url",
-    "via_secret",
-    "checkmate_api_key",
-]
+PARAMETERS = {
+    # Required
+    "client_embed_url": {"required": True},
+    "nginx_server": {"required": True},
+    "via_html_url": {"required": True},
+    "checkmate_url": {"required": True},
+    "via_secret": {"required": True},
+    "checkmate_api_key": {"required": True},
+    "nginx_secure_link_secret": {"required": True},
+    # Optional
+    "checkmate_ignore_reasons": {},
+    "signed_urls_required": {"formatter": asbool},
+}
 
 
 def load_settings(settings):
@@ -29,18 +34,18 @@ def load_settings(settings):
     :raise ValueError: If a required parameter is not filled
     :return: A dict of settings
     """
-    for param in REQUIRED_PARAMS:
-        value = settings[param] = settings.get(param, os.environ.get(param.upper()))
+    for param, options in PARAMETERS.items():
+        formatter = options.get("formatter", lambda v: v)
 
-        if value is None:
+        value = settings[param] = formatter(
+            settings.get(param, os.environ.get(param.upper()))
+        )
+
+        if value is None and options.get("required"):
             raise ValueError(f"Param {param} must be provided.")
 
     # Configure sentry
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
-
-    settings["checkmate_ignore_reasons"] = os.environ.get("CHECKMATE_IGNORE_REASONS")
-    settings["signed_urls_required"] = asbool(os.environ.get("SIGNED_URLS_REQUIRED"))
-    settings["nginx_secure_link_secret"] = os.environ["NGINX_SECURE_LINK_SECRET"]
 
     return settings
 
