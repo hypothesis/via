@@ -41,15 +41,38 @@ node {
 
 onlyOnMaster {
     milestone()
-    stage("qa deploy") {
-        deployApp(image: img, app: "via3", env: "qa")
+    stage("Deploy (qa)") {
+	lock("qa deploy") {
+	    parallel(
+	        lms: {
+		    sleep 2
+		    deployApp(image: img, app: "via3", env: "qa")
+		},
+		public: {
+		    deployApp(image: img, app: "via", env: "qa")
+		}
+	    )
+	}
     }
 
     milestone()
-    stage("prod deploy") {
-        input(message: "Deploy to prod?")
-        milestone()
-        deployApp(image: img, app: "via3", env: "prod")
+    stage("Approval") {
+        input(message: "Proceed to production deploy?")
+    }
+
+    milestone()
+    stage("Deploy (prod)") {
+	lock("prod deploy") {
+	    parallel(
+	        lms: {
+		    sleep 2
+		    deployApp(image: img, app: "via3", env: "prod")
+		},
+		public: {
+		    deployApp(image: img, app: "via", env: "prod")
+		}
+	    )
+	}
     }
 }
 
