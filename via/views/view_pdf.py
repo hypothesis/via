@@ -22,7 +22,7 @@ def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
     nginx_server = request.registry.settings["nginx_server"]
-    pdf_url = _pdf_url(
+    proxy_pdf_url = _pdf_url(
         context.url(),
         nginx_server,
         request.registry.settings["nginx_secure_link_secret"],
@@ -31,8 +31,10 @@ def view_pdf(context, request):
     _, h_config = Configuration.extract_from_params(request.params)
 
     return {
-        "proxied_pdf_url": pdf_url,
-        "original_pdf_url": context.url(),
+        # The upstream PDF URL that should be associated with any annotations.
+        "pdf_url": context.url(),
+        # The CORS-proxied PDF URL which the viewer should actually load the PDF from.
+        "proxy_pdf_url": proxy_pdf_url,
         "client_embed_url": request.registry.settings["client_embed_url"],
         "static_url": request.static_url,
         "hypothesis_config": h_config,
@@ -40,6 +42,8 @@ def view_pdf(context, request):
 
 
 def _pdf_url(url, nginx_server, secret):
+    """Return the URL from which the PDF viewer should load the PDF."""
+
     # Compute the expiry time to put into the URL.
     exp = int(quantized_expiry(max_age=timedelta(hours=2)).timestamp())
 

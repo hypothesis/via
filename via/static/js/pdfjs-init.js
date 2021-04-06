@@ -8,7 +8,7 @@
 
 // Listen for `webviewerloaded` event to configure the viewer after its files
 // have been loaded but before it is initialized.
-document.addEventListener('webviewerloaded', function(event) {
+document.addEventListener('webviewerloaded', function (event) {
   var appOptions = window.PDFViewerApplicationOptions;
   var app = window.PDFViewerApplication;
 
@@ -24,8 +24,8 @@ document.addEventListener('webviewerloaded', function(event) {
   appOptions.set('defaultUrl', '');
 
   // Read configuration rendered into template as global vars.
-  var url = window.PROXIED_PDF_URL;
-  var originalUrl = window.ORIGINAL_PDF_URL;
+  var proxyPdfUrl = window.PROXY_PDF_URL;
+  var pdfUrl = window.PDF_URL;
   var clientEmbedUrl = window.CLIENT_EMBED_URL;
 
   // Wait for the PDF viewer to be fully initialized and then load the Hypothesis client.
@@ -52,8 +52,14 @@ document.addEventListener('webviewerloaded', function(event) {
     // overwritten by the one that ships with Hypothesis (both from core-js).
     //
     // See https://github.com/hypothesis/via/issues/81#issuecomment-531121534
-    if (typeof Promise === 'function' && typeof PromiseRejectionEvent === 'undefined') {
-      window.PromiseRejectionEvent = function FakePromiseRejectionEvent(type, options) {
+    if (
+      typeof Promise === 'function' &&
+      typeof PromiseRejectionEvent === 'undefined'
+    ) {
+      window.PromiseRejectionEvent = function FakePromiseRejectionEvent(
+        type,
+        options
+      ) {
         // core-js doesn't actually use this, it just tests for `typeof PromiseRejectionEvent`
         console.warn('Tried to construct fake `PromiseRejectionEvent`');
       };
@@ -74,11 +80,11 @@ document.addEventListener('webviewerloaded', function(event) {
     // and https://github.com/mozilla/pdf.js/issues/10435#issuecomment-452706770
     app.open({
       // Load PDF through Via to work around CORS restrictions.
-      url: url,
+      url: proxyPdfUrl,
 
       // Make sure `PDFViewerApplication.url` returns the original URL, as this
       // is the URL associated with annotations.
-      originalUrl: originalUrl,
+      originalUrl: pdfUrl,
     });
   });
 });
