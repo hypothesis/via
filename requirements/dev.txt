@@ -36,9 +36,9 @@ decorator==4.4.2
     #   traitlets
 distro==1.5.0
     # via docker-compose
-docker-compose==1.28.6
+docker-compose==1.29.0
     # via -r requirements/dev.in
-docker[ssh]==4.4.4
+docker[ssh]==5.0.0
     # via docker-compose
 dockerpty==0.4.1
     # via docker-compose
@@ -165,7 +165,6 @@ six==1.15.0
     #   -r requirements/requirements.txt
     #   bcrypt
     #   cryptography
-    #   docker
     #   dockerpty
     #   jsonschema
     #   pynacl
