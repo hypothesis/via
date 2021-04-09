@@ -17,14 +17,11 @@ def checkmate_block(view):
             request.registry.settings["checkmate_api_key"],
         )
 
-        url = request.params["url"]
-        blocked_for = request.params.get("via.blocked_for")
-
         try:
             blocked = checkmate.check_url(
-                url,
+                request.params["url"],
                 allow_all=request.registry.settings["checkmate_allow_all"],
-                blocked_for=blocked_for,
+                blocked_for=request.params.get("via.blocked_for"),
                 ignore_reasons=request.registry.settings["checkmate_ignore_reasons"],
             )
         except CheckmateException:
