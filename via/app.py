@@ -20,6 +20,7 @@ PARAMETERS = {
     "nginx_secure_link_secret": {"required": True},
     # Optional
     "checkmate_ignore_reasons": {},
+    "checkmate_allow_all": {"formatter": asbool},
     "signed_urls_required": {"formatter": asbool},
 }
 

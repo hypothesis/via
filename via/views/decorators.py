@@ -23,7 +23,7 @@ def checkmate_block(view):
         try:
             blocked = checkmate.check_url(
                 url,
-                allow_all=True,
+                allow_all=request.registry.settings["checkmate_allow_all"],
                 blocked_for=blocked_for,
                 ignore_reasons=request.registry.settings["checkmate_ignore_reasons"],
             )
