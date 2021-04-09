@@ -5,13 +5,10 @@ from h_vialib.secure.url import ViaSecureURL
 from pyramid.httpexceptions import HTTPTemporaryRedirect, HTTPUnauthorized
 
 
-def checkmate_block(view, url_param="url", allow_all=True):
+def checkmate_block(view):
     """Intended to be used as a decorator for pyramid views.
 
     The view must accept a url a query param.
-
-    :param url_param name of the query param that contains the URL to check
-    :allow_all Check against checkmate's allow list (True) or not.
     """
 
     def view_wrapper(context, request):
@@ -20,13 +17,13 @@ def checkmate_block(view, url_param="url", allow_all=True):
             request.registry.settings["checkmate_api_key"],
         )
 
-        url = request.params[url_param]
+        url = request.params["url"]
         blocked_for = request.params.get("via.blocked_for")
 
         try:
             blocked = checkmate.check_url(
                 url,
-                allow_all=allow_all,
+                allow_all=True,
                 blocked_for=blocked_for,
                 ignore_reasons=request.registry.settings["checkmate_ignore_reasons"],
             )
