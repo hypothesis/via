@@ -15,6 +15,7 @@ def pyramid_settings():
         "signed_urls_required": False,
         "checkmate_api_key": "dev_api_key",
         "checkmate_ignore_reasons": None,
+        "checkmate_allow_all": False,
     }
 
 

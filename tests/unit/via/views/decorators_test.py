@@ -20,30 +20,36 @@ def dummy_view_url_token(context, request):
 
 
 class TestCheckMateBlockDecorator:
-    def test_allowed_url(self, CheckmateClient, make_request):
+    @pytest.mark.parametrize("allow_all", [True, False])
+    def test_allowed_url(self, CheckmateClient, make_request, allow_all):
         url = "http://example.com"
         mock_check_url = CheckmateClient.return_value.check_url
         mock_check_url.return_value = None
         request = make_request(params={"url": url})
+        request.registry.settings["checkmate_allow_all"] = allow_all
 
         response = dummy_view_checkmate_block(None, request)
 
         mock_check_url.assert_called_once_with(
-            url, allow_all=True, blocked_for=None, ignore_reasons=None
+            url, allow_all=allow_all, blocked_for=None, ignore_reasons=None
         )
         assert response.status_code == 200
         assert response.text == "ok"
 
-    def test_blocked_url(self, CheckmateClient, make_request, block_response):
+    @pytest.mark.parametrize("allow_all", [True, False])
+    def test_blocked_url(
+        self, CheckmateClient, make_request, block_response, allow_all
+    ):
         url = "http://bad.example.com"
         mock_check_url = CheckmateClient.return_value.check_url
         mock_check_url.return_value = block_response
         request = make_request(params={"url": url})
+        request.registry.settings["checkmate_allow_all"] = allow_all
 
         response = dummy_view_checkmate_block(None, request)
 
         mock_check_url.assert_called_once_with(
-            url, allow_all=True, blocked_for=None, ignore_reasons=None
+            url, allow_all=allow_all, blocked_for=None, ignore_reasons=None
         )
         assert response.status_code == 307
         assert response.location == block_response.presentation_url
