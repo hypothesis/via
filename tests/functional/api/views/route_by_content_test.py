@@ -10,8 +10,6 @@ from tests.conftest import assert_cache_control
 class TestRouteByContent:
     DEFAULT_OPTIONS = {
         "via.client.openSidebar": "1",
-        "via.client.requestConfigFromFrame.origin": "http://localhost",
-        "via.client.requestConfigFromFrame.ancestorLevel": "2",
         "via.external_link_mode": "new-tab",
     }
 

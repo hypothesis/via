@@ -12,8 +12,6 @@ def factory(_context, request):
     settings = request.registry.settings
 
     return ViaClientService(
-        # Where we are coming from
-        host_url=request.host_url,
         # Where we are going for general / HTML specifically
         service_url=request.host_url,
         html_service_url=settings["via_html_url"],
