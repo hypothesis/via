@@ -16,7 +16,6 @@ class TestFactory:
 
         assert service == ViaClientService.return_value
         ViaClientService.assert_called_once_with(
-            host_url=pyramid_request.host_url,
             service_url=pyramid_request.host_url,
             html_service_url=sentinel.via_html_url,
             secret=sentinel.via_secret,
