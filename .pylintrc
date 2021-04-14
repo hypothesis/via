@@ -18,6 +18,7 @@ enable=
     use-symbolic-message-instead
 
 disable=bad-continuation,
+        missing-docstring,
         missing-type-doc,
         missing-return-type-doc,
         too-few-public-methods
