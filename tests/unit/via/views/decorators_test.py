@@ -21,14 +21,14 @@ def dummy_view_url_token(context, request):
 
 class TestCheckMateBlockDecorator:
     @pytest.mark.parametrize("allow_all", [True, False])
-    def test_allowed_url(self, CheckmateClient, make_request, allow_all):
+    def test_allowed_url(self, CheckmateClient, pyramid_request, allow_all):
         url = "http://example.com"
         mock_check_url = CheckmateClient.return_value.check_url
         mock_check_url.return_value = None
-        request = make_request(params={"url": url})
-        request.registry.settings["checkmate_allow_all"] = allow_all
+        pyramid_request.params["url"] = url
+        pyramid_request.registry.settings["checkmate_allow_all"] = allow_all
 
-        response = dummy_view_checkmate_block(None, request)
+        response = dummy_view_checkmate_block(None, pyramid_request)
 
         mock_check_url.assert_called_once_with(
             url, allow_all=allow_all, blocked_for=None, ignore_reasons=None
@@ -38,15 +38,15 @@ class TestCheckMateBlockDecorator:
 
     @pytest.mark.parametrize("allow_all", [True, False])
     def test_blocked_url(
-        self, CheckmateClient, make_request, block_response, allow_all
+        self, CheckmateClient, pyramid_request, block_response, allow_all
     ):
         url = "http://bad.example.com"
         mock_check_url = CheckmateClient.return_value.check_url
         mock_check_url.return_value = block_response
-        request = make_request(params={"url": url})
-        request.registry.settings["checkmate_allow_all"] = allow_all
+        pyramid_request.params["url"] = url
+        pyramid_request.registry.settings["checkmate_allow_all"] = allow_all
 
-        response = dummy_view_checkmate_block(None, request)
+        response = dummy_view_checkmate_block(None, pyramid_request)
 
         mock_check_url.assert_called_once_with(
             url, allow_all=allow_all, blocked_for=None, ignore_reasons=None
@@ -54,12 +54,12 @@ class TestCheckMateBlockDecorator:
         assert response.status_code == 307
         assert response.location == block_response.presentation_url
 
-    def test_invalid_url(self, CheckmateClient, make_request):
+    def test_invalid_url(self, CheckmateClient, pyramid_request):
         url = "http://bad.example.com]"
         CheckmateClient.return_value.check_url.side_effect = CheckmateException()
-        request = make_request(params={"url": url})
+        pyramid_request.params["url"] = url
 
-        response = dummy_view_checkmate_block(None, request)
+        response = dummy_view_checkmate_block(None, pyramid_request)
 
         # Request continues despite Checkmate errors
         assert response.status_code == 200
@@ -77,38 +77,37 @@ class TestCheckMateBlockDecorator:
 
 
 class TestSignedURLDecorator:
-    def test_signed_urls_disabled(self, make_request, ViaSecureURL):
-        request = make_request()
-        request.registry.settings["signed_urls_required"] = False
+    def test_signed_urls_disabled(self, pyramid_request, ViaSecureURL):
+        pyramid_request.registry.settings["signed_urls_required"] = False
 
-        response = dummy_view_url_token(None, request)
+        response = dummy_view_url_token(None, pyramid_request)
 
         ViaSecureURL.assert_not_called()
         assert response.status_code == 200
         assert response.text == "ok"
 
-    def test_signed_urls_disabled_with_signature(self, make_request, ViaSecureURL):
-        request = make_request(params={"via.sec": "invalid"})
-        request.registry.settings["signed_urls_required"] = False
+    def test_signed_urls_disabled_with_signature(self, pyramid_request, ViaSecureURL):
+        pyramid_request.params["via.sec"] = "invalid"
+        pyramid_request.registry.settings["signed_urls_required"] = False
         ViaSecureURL.return_value.verify.side_effect = TokenException()
 
-        response = dummy_view_url_token(None, request)
+        response = dummy_view_url_token(None, pyramid_request)
 
         assert response.status_code == 401
 
-    def test_invalid_token(self, make_request, ViaSecureURL):
+    def test_invalid_token(self, pyramid_request, ViaSecureURL):
         ViaSecureURL.return_value.verify.side_effect = TokenException()
-        request = make_request(params={"via.sec": "invalid"})
+        pyramid_request.params["via.sec"] = "invalid"
 
-        response = dummy_view_url_token(None, request)
+        response = dummy_view_url_token(None, pyramid_request)
 
         assert response.status_code == 401
 
-    def test_valid_token(self, make_request, ViaSecureURL):
+    def test_valid_token(self, pyramid_request, ViaSecureURL):
         ViaSecureURL.return_value.verify.return_value = "secure"
-        request = make_request(params={"via.sec": "secure"})
+        pyramid_request.params["via.sec"] = "secure"
 
-        response = dummy_view_url_token(None, request)
+        response = dummy_view_url_token(None, pyramid_request)
 
         assert response.status_code == 200
         assert response.text == "ok"

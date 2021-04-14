@@ -63,11 +63,11 @@ class TestViewPDF:
         return Configuration
 
     @pytest.fixture
-    def call_view_pdf(self, make_request):
+    def call_view_pdf(self, pyramid_request):
         def call_view_pdf(url="http://example.com/name.pdf", params=None):
-            request = make_request(params=dict(params or {}, url=url))
-            context = URLResource(request)
-            return view_pdf(context, request)
+            pyramid_request.params = dict(params or {}, url=url)
+            context = URLResource(pyramid_request)
+            return view_pdf(context, pyramid_request)
 
         return call_view_pdf
 
