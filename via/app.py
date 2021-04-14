@@ -7,6 +7,7 @@ from pyramid.settings import asbool
 from whitenoise import WhiteNoise
 
 from via.cache_buster import PathCacheBuster
+from via.checkmate import checkmate
 from via.sentry_filters import SENTRY_FILTERS
 
 PARAMETERS = {
@@ -69,6 +70,9 @@ def create_app(_=None, **settings):
 
     config.add_static_view(name="static", path="via:static")
     config.add_cache_buster("via:static", cachebust=cache_buster)
+
+    # Make the CheckmateClient object available as request.checkmate.
+    config.add_request_method(checkmate, reify=True)
 
     app = WhiteNoise(
         config.make_wsgi_app(),
