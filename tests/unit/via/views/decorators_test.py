@@ -21,42 +21,37 @@ def dummy_view_url_token(context, request):
 
 class TestCheckMateBlockDecorator:
     @pytest.mark.parametrize("allow_all", [True, False])
-    def test_allowed_url(self, CheckmateClient, pyramid_request, allow_all):
+    def test_allowed_url(self, pyramid_request, allow_all):
         url = "http://example.com"
-        mock_check_url = CheckmateClient.return_value.check_url
-        mock_check_url.return_value = None
         pyramid_request.params["url"] = url
         pyramid_request.registry.settings["checkmate_allow_all"] = allow_all
 
         response = dummy_view_checkmate_block(None, pyramid_request)
 
-        mock_check_url.assert_called_once_with(
+        pyramid_request.checkmate.check_url.assert_called_once_with(
             url, allow_all=allow_all, blocked_for=None, ignore_reasons=None
         )
         assert response.status_code == 200
         assert response.text == "ok"
 
     @pytest.mark.parametrize("allow_all", [True, False])
-    def test_blocked_url(
-        self, CheckmateClient, pyramid_request, block_response, allow_all
-    ):
+    def test_blocked_url(self, pyramid_request, block_response, allow_all):
         url = "http://bad.example.com"
-        mock_check_url = CheckmateClient.return_value.check_url
-        mock_check_url.return_value = block_response
+        pyramid_request.checkmate.check_url.return_value = block_response
         pyramid_request.params["url"] = url
         pyramid_request.registry.settings["checkmate_allow_all"] = allow_all
 
         response = dummy_view_checkmate_block(None, pyramid_request)
 
-        mock_check_url.assert_called_once_with(
+        pyramid_request.checkmate.check_url.assert_called_once_with(
             url, allow_all=allow_all, blocked_for=None, ignore_reasons=None
         )
         assert response.status_code == 307
         assert response.location == block_response.presentation_url
 
-    def test_invalid_url(self, CheckmateClient, pyramid_request):
+    def test_invalid_url(self, pyramid_request):
         url = "http://bad.example.com]"
-        CheckmateClient.return_value.check_url.side_effect = CheckmateException()
+        pyramid_request.checkmate.check_url.side_effect = CheckmateException
         pyramid_request.params["url"] = url
 
         response = dummy_view_checkmate_block(None, pyramid_request)
@@ -70,10 +65,6 @@ class TestCheckMateBlockDecorator:
         return mock.create_autospec(
             checkmatelib.client.BlockResponse, instance=True, spec_set=True
         )
-
-    @pytest.fixture
-    def CheckmateClient(self, patch):
-        return patch("via.views.decorators.CheckmateClient")
 
 
 class TestSignedURLDecorator:

@@ -1,7 +1,9 @@
 # pylint: disable=no-self-use
 """A place to put fixture functions that are useful application-wide."""
 import functools
+from unittest.mock import create_autospec
 
+from checkmatelib import CheckmateClient
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 
@@ -37,5 +39,12 @@ def pyramid_request(
     pyramid_config,  # pylint:disable=unused-argument
 ):
     pyramid_request = testing.DummyRequest()
+
     apply_request_extensions(pyramid_request)
+
+    pyramid_request.checkmate = create_autospec(
+        CheckmateClient, spec_set=True, instance=True
+    )
+    pyramid_request.checkmate.check_url.return_value = None
+
     return pyramid_request
