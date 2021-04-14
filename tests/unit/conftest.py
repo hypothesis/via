@@ -1,10 +1,9 @@
 # pylint: disable=no-self-use
 """A place to put fixture functions that are useful application-wide."""
 import functools
-from urllib.parse import urlencode
 
 from pyramid import testing
-from pyramid.request import Request, apply_request_extensions
+from pyramid.request import apply_request_extensions
 
 from tests.unit.services import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from via.views import add_routes
@@ -34,15 +33,9 @@ def pyramid_config(pyramid_settings):
 
 
 @pytest.fixture
-def make_request(pyramid_config):
-    def make_request(path="/irrelevant", params=None):
-        if params:
-            path += "?" + urlencode(params)
-
-        pyramid_request = Request.blank(path)
-        pyramid_request.registry = pyramid_config.registry
-        apply_request_extensions(pyramid_request)
-
-        return pyramid_request
-
-    return make_request
+def pyramid_request(
+    pyramid_config,  # pylint:disable=unused-argument
+):
+    pyramid_request = testing.DummyRequest()
+    apply_request_extensions(pyramid_request)
+    return pyramid_request

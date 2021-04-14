@@ -2,7 +2,6 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
-from webob.headers import EnvironHeaders
 
 from tests.conftest import assert_cache_control
 from via.resources import URLResource
@@ -45,7 +44,7 @@ class TestRouteByContent:
         url = "http://example.com/path%2C?a=b"
         call_route_by_content(url, params={"other": "value"})
 
-        get_url_details.assert_called_once_with(url, Any.instance_of(EnvironHeaders))
+        get_url_details.assert_called_once_with(url, Any.instance_of(dict))
 
     @pytest.mark.parametrize(
         "content_type,max_age", [("application/pdf", 300), ("text/html", 60)]
@@ -82,14 +81,14 @@ class TestRouteByContent:
         assert result.headers == Any.iterable.containing({"Cache-Control": cache})
 
     @pytest.fixture
-    def call_route_by_content(self, make_request):
+    def call_route_by_content(self, pyramid_request):
         def call_route_by_content(
             target_url="http://example.com", params=None, settings=None
         ):
-            request = make_request(params=dict(params or {}, url=target_url))
-            context = URLResource(request)
+            pyramid_request.params = dict(params or {}, url=target_url)
+            context = URLResource(pyramid_request)
 
-            return route_by_content(context, request)
+            return route_by_content(context, pyramid_request)
 
         return call_route_by_content
 
