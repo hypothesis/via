@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>via.hypothes.is</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .proxied-content-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+  <body>
+    <iframe class="proxied-content-iframe" src={{ src }}></iframe>
+  </body>
+</html>

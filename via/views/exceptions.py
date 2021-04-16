@@ -1,6 +1,5 @@
 """Error views to handle when things go wrong in the app."""
 
-from pyramid.config import not_
 from pyramid.httpexceptions import (
     HTTPClientError,
     HTTPError,
@@ -70,13 +69,7 @@ def _get_meta(exception):
 
 
 @exception_view_config(Exception, renderer="via:templates/exception.html.jinja2")
-@exception_view_config(
-    HTTPError,
-    renderer="via:templates/exception.html.jinja2",
-    # Match any page *except* the front page ("/").
-    # We don't want our fancy error page to be used on the front page.
-    path_info=not_(r"^\/$"),
-)
+@exception_view_config(HTTPError, renderer="via:templates/exception.html.jinja2")
 def all_exceptions(exc, request):
     """Catch all errors (Pyramid or Python) and display an HTML page."""
 
