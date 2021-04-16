@@ -48,7 +48,7 @@ h-checkmatelib==1.0.7
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
-h-matchers==1.2.10
+h-matchers==1.2.11
     # via -r requirements/tests.txt
 h-pyramid-sentry==1.2.1
     # via
