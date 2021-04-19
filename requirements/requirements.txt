@@ -16,7 +16,7 @@ future==0.18.2
     # via h-checkmatelib
 gunicorn==20.1.0
     # via -r requirements/requirements.in
-h-checkmatelib==1.0.7
+h-checkmatelib==1.0.8
     # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.1
     # via -r requirements/requirements.in
