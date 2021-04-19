@@ -26,14 +26,14 @@ future==0.18.2
     #   h-checkmatelib
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
-h-checkmatelib==1.0.7
+h-checkmatelib==1.0.8
     # via -r requirements/requirements.txt
+h-matchers==1.2.11
+    # via -r requirements/functests.in
 h-pyramid-sentry==1.2.1
     # via -r requirements/requirements.txt
 h-vialib==1.0.14
     # via -r requirements/requirements.txt
-h_matchers==1.2.11
-    # via -r requirements/functests.in
 httpretty==1.0.5
     # via -r requirements/functests.in
 hupper==1.10.2
