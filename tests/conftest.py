@@ -16,6 +16,7 @@ def pyramid_settings():
         "checkmate_api_key": "dev_api_key",
         "checkmate_ignore_reasons": None,
         "checkmate_allow_all": False,
+        "enable_front_page": True,
     }
 
 

@@ -23,6 +23,7 @@ PARAMETERS = {
     "checkmate_ignore_reasons": {},
     "checkmate_allow_all": {"formatter": asbool},
     "signed_urls_required": {"formatter": asbool},
+    "enable_front_page": {"formatter": asbool},
 }
 
 
