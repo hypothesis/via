@@ -75,6 +75,7 @@ Environment variables:
 | `CHECKMATE_ALLOW_ALL` | Whether to bypass Checkmate's allow-list (and use only the blocklist) | `true`
 | `CHECKMATE_IGNORE_REASONS` | Comma-separated list of Checkmate block reasons to ignore | `publisher-blocked,high-io` |
 | `CLIENT_EMBED_URL` | The URL of the client's embed script | `https://hypothes.is/embed.js`
+| `ENABLE_FRONT_PAGE` | Show a front page at the root URL | `true` |
 | `GOOGLE_API_KEY` | The API key to use to authenticate with the Google Drive API |
 | `NEW_RELIC_*` | Various New Relic settings. See New Relic's docs for details |
 | `NGINX_SECURE_LINK_SECRET` | The NGINX secure links signing secret. This is used by Via's Python endpoints to generate the signed URLs required by its NGINX-implemented `/proxy/static/` endpoint. All instances of Via must have this setting |
