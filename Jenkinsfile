@@ -46,7 +46,7 @@ onlyOnMaster {
 	    parallel(
 	        lms: {
 		    sleep 2
-		    deployApp(image: img, app: "via3", env: "qa")
+		    deployApp(image: img, app: "lms-via", env: "qa")
 		},
 		public: {
 		    deployApp(image: img, app: "via", env: "qa")
@@ -66,7 +66,7 @@ onlyOnMaster {
 	    parallel(
 	        lms: {
 		    sleep 2
-		    deployApp(image: img, app: "via3", env: "prod")
+		    deployApp(image: img, app: "lms-via", env: "prod")
 		},
 		public: {
 		    deployApp(image: img, app: "via", env: "prod")
