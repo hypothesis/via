@@ -12,14 +12,12 @@ backcall==0.2.0
     # via ipython
 bcrypt==3.2.0
     # via paramiko
-cached-property==1.5.2
-    # via docker-compose
 certifi==2020.12.5
     # via
     #   -r requirements/requirements.txt
     #   requests
     #   sentry-sdk
-cffi==1.14.4
+cffi==1.14.5
     # via
     #   bcrypt
     #   cryptography
@@ -28,12 +26,10 @@ chardet==4.0.0
     # via
     #   -r requirements/requirements.txt
     #   requests
-cryptography==3.3.2
+cryptography==3.4.7
     # via paramiko
-decorator==4.4.2
-    # via
-    #   ipython
-    #   traitlets
+decorator==5.0.7
+    # via ipython
 distro==1.5.0
     # via docker-compose
 docker-compose==1.29.1
@@ -64,15 +60,11 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
-importlib-metadata==3.4.0
-    # via
-    #   -r requirements/requirements.txt
-    #   jsonschema
 ipdb==0.13.7
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.16.1
+ipython==7.22.0
     # via
     #   ipdb
     #   pyramid-ipython
@@ -96,7 +88,7 @@ newrelic==6.2.0.156
     # via -r requirements/requirements.txt
 paramiko==2.7.2
     # via docker
-parso==0.8.1
+parso==0.8.2
     # via jedi
 pastedeploy==2.1.1
     # via
@@ -115,13 +107,13 @@ plaster==1.0
     #   -r requirements/requirements.txt
     #   plaster-pastedeploy
     #   pyramid
-prompt-toolkit==3.0.14
+prompt-toolkit==3.0.18
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
 pycparser==2.20
     # via cffi
-pygments==2.7.4
+pygments==2.8.1
     # via ipython
 pyjwt==2.0.1
     # via
@@ -146,7 +138,7 @@ pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-python-dotenv==0.15.0
+python-dotenv==0.17.0
     # via docker-compose
 pyyaml==5.4.1
     # via docker-compose
@@ -164,11 +156,9 @@ six==1.15.0
     # via
     #   -r requirements/requirements.txt
     #   bcrypt
-    #   cryptography
     #   dockerpty
     #   jsonschema
     #   pynacl
-    #   traitlets
     #   websocket-client
 supervisor==4.2.2
     # via -r requirements/dev.in
@@ -176,16 +166,12 @@ texttable==1.6.3
     # via docker-compose
 toml==0.10.2
     # via ipdb
-traitlets==4.3.3
+traitlets==5.0.5
     # via ipython
 translationstring==1.4
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-typing-extensions==3.7.4.3
-    # via
-    #   -r requirements/requirements.txt
-    #   importlib-metadata
 urllib3==1.26.3
     # via
     #   -r requirements/requirements.txt
@@ -202,7 +188,7 @@ webob==1.8.6
     #   -r requirements/requirements.txt
     #   h-vialib
     #   pyramid
-websocket-client==0.57.0
+websocket-client==0.58.0
     # via
     #   docker
     #   docker-compose
@@ -212,10 +198,6 @@ wired==0.3
     # via
     #   -r requirements/requirements.txt
     #   pyramid-services
-zipp==3.4.0
-    # via
-    #   -r requirements/requirements.txt
-    #   importlib-metadata
 zope.deprecation==4.4.0
     # via
     #   -r requirements/requirements.txt
