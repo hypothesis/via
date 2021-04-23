@@ -44,12 +44,6 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
-importlib-metadata==3.4.0
-    # via
-    #   -r requirements/requirements.txt
-    #   jsonschema
-    #   pluggy
-    #   pytest
 iniconfig==1.1.1
     # via pytest
 jinja2==2.11.3
@@ -129,10 +123,6 @@ translationstring==1.4
     # via
     #   -r requirements/requirements.txt
     #   pyramid
-typing-extensions==3.7.4.3
-    # via
-    #   -r requirements/requirements.txt
-    #   importlib-metadata
 urllib3==1.26.3
     # via
     #   -r requirements/requirements.txt
@@ -158,10 +148,6 @@ wired==0.3
     # via
     #   -r requirements/requirements.txt
     #   pyramid-services
-zipp==3.4.0
-    # via
-    #   -r requirements/requirements.txt
-    #   importlib-metadata
 zope.deprecation==4.4.0
     # via
     #   -r requirements/requirements.txt
