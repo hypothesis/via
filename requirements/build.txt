@@ -4,11 +4,5 @@
 #
 #    pip-compile requirements/build.in
 #
-htmlmin==0.1.12
-    # via -r requirements/build.in
-rcssmin==1.0.6
-    # via -r requirements/build.in
-rjsmin==1.1.0
-    # via -r requirements/build.in
 whitenoise==5.2.0
     # via -r requirements/build.in
