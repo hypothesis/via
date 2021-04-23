@@ -24,8 +24,45 @@
       padding: 0;
     }
   </style>
+
+  <script>
+  /**
+   * Perform basic validation of the structure of a notification from the content
+   * frame.
+   *
+   * Returns the input if valid or `null` otherwise.
+   */
+  function validateContentFrameMessage(data) {
+    if (!data || typeof data.type !== 'string') {
+      return null;
+    }
+    if (data.type === 'metadatachange' && data.metadata) {
+      return data;
+    } else {
+      return null;
+    }
+  }
+
+  // Listen for events from the proxied content in order to reflect document
+  // metadata etc. in the current frame.
+  window.addEventListener('message', event => {
+    const contentFrame = document.querySelector('.js-content-frame');
+    if (event.source !== contentFrame.contentWindow) {
+      return;
+    }
+
+    const message = validateContentFrameMessage(event.data);
+    if (!message) {
+      return;
+    }
+
+    if (message.type === 'metadatachange') {
+      document.title = `Via: ${message.metadata.title}`;
+    }
+  });
+  </script>
 </head>
   <body>
-    <iframe class="proxied-content-iframe" src={{ src }}></iframe>
+    <iframe class="js-content-frame proxied-content-iframe" src={{ src }}></iframe>
   </body>
 </html>
