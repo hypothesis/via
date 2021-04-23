@@ -9,7 +9,7 @@ RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hy
 WORKDIR /var/lib/hypothesis
 
 # Ensure nginx state and log directories writeable by unprivileged user.
-RUN chown -R hypothesis:hypothesis /etc/nginx/conf.d /var/log/nginx /var/lib/nginx /var/tmp/nginx
+RUN chown -R hypothesis:hypothesis /etc/nginx/conf.d /var/log/nginx /var/lib/nginx
 
 # Copy minimal data to allow installation of python dependencies.
 COPY requirements/requirements.txt ./
