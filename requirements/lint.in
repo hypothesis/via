@@ -1,7 +1,4 @@
 pylint<2.9
 pydocstyle
-rcssmin
-rjsmin
-htmlmin
 -r tests.txt
 -r requirements.txt
