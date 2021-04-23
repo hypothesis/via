@@ -3,6 +3,7 @@
 *.pyc
 *.egg-info/
 via/static/**/*.gz
+node_modules/
 build.tar
 .devdata.env
 supervisord.log
