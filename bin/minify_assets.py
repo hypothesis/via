@@ -5,10 +5,7 @@ import os
 import re
 from argparse import ArgumentParser
 from glob import glob
-
-from htmlmin import minify
-from rcssmin import cssmin
-from rjsmin import jsmin
+from subprocess import check_output
 
 # pylint: disable=too-few-public-methods
 
@@ -21,19 +18,22 @@ PARSER.add_argument(
 )
 
 
-def _htmlmin(content):
-    return minify(content, remove_comments=True, remove_empty_space=True)
+def minify_js(file_name):
+    return check_output(
+        ["./node_modules/.bin/terser", "--compress", "--safari10", file_name]
+    ).decode("utf-8")
+
+
+def minify_css(file_name):
+    return check_output(
+        ["./node_modules/.bin/sass", "--style=compressed", file_name]
+    ).decode("utf-8")
 
 
 class Minifier:
     """Minifier for CSS, Javascript and HTML."""
 
-    handlers = {
-        "js": jsmin,
-        "css": cssmin,
-        "html": _htmlmin,
-        "jinja2": _htmlmin,
-    }
+    handlers = {"js": minify_js, "css": minify_css}
 
     @classmethod
     def minify(cls, instructions):
@@ -87,7 +87,7 @@ class Minifier:
             print("NOO", path)
             return
 
-        minified = handler(content)
+        minified = handler(path)
 
         target = path
         if not in_place:
@@ -97,6 +97,10 @@ class Minifier:
         percent = int(1000 * len(minified) / len(content)) / 10.0
         print(path)
         print(f"\t-> {target} {len(content)} -> {len(minified)} ({percent}%)")
+
+        if len(minified) > len(content):
+            print("\tRe-using old content (it's no smaller)")
+            minified = content
 
         with open(target, "w") as handle:
             handle.write(minified)
