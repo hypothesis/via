@@ -36,8 +36,12 @@ shell: python
 	@tox -qe dev --run-command 'pshell conf/development.ini'
 
 .PHONY: build
-build: python
+build: python node_modules/.uptodate
 	@tox -qe build
+
+node_modules/.uptodate: package.json package-lock.json
+	npm install
+	@touch $@
 
 .PHONY: services
 services:
@@ -82,6 +86,7 @@ clean:
 	@find . -type f -name "*.py[co]" -delete
 	@find . -type d -name "__pycache__" -delete
 	@find . -type f -name "*.gz" -delete
+	@rm -f node_modules/.uptodate
 
 .PHONY: web
 web: python
