@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/lint.in
 #
-astroid==2.5.2
+astroid==2.5.6
     # via pylint
 attrs==20.3.0
     # via
@@ -144,7 +144,7 @@ pyjwt==2.0.1
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   h-vialib
-pylint==2.7.4
+pylint==2.8.1
     # via -r requirements/lint.in
 pyparsing==2.4.7
     # via
