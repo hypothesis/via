@@ -2,19 +2,33 @@
 from h_vialib import ViaClient
 
 
-class ViaClientService(ViaClient):
-    """Place holder for a service, in case we want to diverge."""
+class ViaClientService:
+    """A wrapper service for h_vialib.ViaClient."""
+
+    def __init__(self, via_client):
+        self.via_client = via_client
+
+    @staticmethod
+    def is_pdf(mime_type):
+        """Return True if the given MIME type is a PDF one."""
+        return mime_type in ("application/x-pdf", "application/pdf")
+
+    def url_for(self, url, mime_type, params):
+        """Return a Via URL for the given `url`."""
+        content_type = "pdf" if self.is_pdf(mime_type) else "html"
+
+        options = dict(params)
+
+        options.pop("via.blocked_for", None)
+
+        return self.via_client.url_for(url, content_type=content_type, options=options)
 
 
 def factory(_context, request):
-    """Create a ViaClientService object from the request."""
-
-    settings = request.registry.settings
-
     return ViaClientService(
-        # Where we are going for general / HTML specifically
-        service_url=request.host_url,
-        html_service_url=settings["via_html_url"],
-        # Secret used to sign everything
-        secret=settings["via_secret"],
+        via_client=ViaClient(
+            service_url=request.host_url,
+            html_service_url=request.registry.settings["via_html_url"],
+            secret=request.registry.settings["via_secret"],
+        )
     )

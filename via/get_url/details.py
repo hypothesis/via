@@ -41,7 +41,7 @@ def _handle_errors(inner):
 
 
 @_handle_errors
-def get_url_details(url, headers):
+def get_url_details(url, headers=None):
     """Get the content type and status code for a given URL.
 
     :param url: URL to retrieve
@@ -52,6 +52,8 @@ def get_url_details(url, headers):
     :raise UpstreamServiceError: If we server gives us errors
     :raise UnhandledException: For all other request based errors
     """
+    if headers is None:
+        headers = {}
 
     if GOOGLE_DRIVE_REGEX.match(url):
         return "application/pdf", 200

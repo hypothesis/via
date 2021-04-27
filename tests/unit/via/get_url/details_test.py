@@ -1,4 +1,5 @@
 from io import BytesIO
+from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
@@ -42,7 +43,7 @@ class TestGetURLDetails:
 
         url = "http://example.com"
 
-        result = get_url_details(url, headers={})
+        result = get_url_details(url, headers=sentinel.headers)
 
         assert result == (mime_type, status_code)
         requests.get.assert_called_once_with(
@@ -51,7 +52,7 @@ class TestGetURLDetails:
 
     @pytest.mark.usefixtures("response")
     def test_it_cleans_and_passes_on_the_users_headers(self, requests, clean_headers):
-        get_url_details(url="http://example.com", headers={})
+        get_url_details(url="http://example.com")
 
         _args, kwargs = requests.get.call_args
 
@@ -59,7 +60,7 @@ class TestGetURLDetails:
 
     def test_it_assumes_pdf_with_a_google_drive_url(self, requests):
         result = get_url_details(
-            "https://drive.google.com/uc?id=--FILEID--&export=download", {}
+            "https://drive.google.com/uc?id=--FILEID--&export=download"
         )
 
         assert result == ("application/pdf", 200)
@@ -69,7 +70,7 @@ class TestGetURLDetails:
     @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
     def test_it_raises_BadURL_for_invalid_urls(self, bad_url):
         with pytest.raises(BadURL):
-            get_url_details(bad_url, {})
+            get_url_details(bad_url)
 
     @pytest.mark.parametrize(
         "request_exception,expected_exception",
@@ -86,7 +87,7 @@ class TestGetURLDetails:
         requests.get.side_effect = request_exception("Oh noe")
 
         with pytest.raises(expected_exception):
-            get_url_details("http://example.com", {})
+            get_url_details("http://example.com")
 
     @pytest.fixture
     def response(self, requests):
