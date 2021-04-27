@@ -13,6 +13,8 @@ class IndexViews:
         if not self.enabled:
             return HTTPNotFound()
 
+        self.request.response.headers["X-Robots-Tag"] = "all"
+
         return {}
 
     @view_config(request_method="POST")
