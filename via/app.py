@@ -75,6 +75,8 @@ def create_app(_=None, **settings):
     # Make the CheckmateClient object available as request.checkmate.
     config.add_request_method(checkmate, reify=True)
 
+    config.add_tween("via.tweens.robots_tween_factory")
+
     app = WhiteNoise(
         config.make_wsgi_app(),
         index_file=True,
