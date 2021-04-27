@@ -13,26 +13,19 @@ from via.views.decorators import checkmate_block, has_secure_url_token
 )
 def route_by_content(context, request):
     """Routes the request according to the Content-Type header."""
-    mime_type, status_code = get_url_details(context.url(), request.headers)
+    url = context.url()
+    mime_type, status_code = get_url_details(url, request.headers)
+    via_client_svc = request.find_service(ViaClientService)
 
-    # Can PDF mime types get extra info on the end like "encoding=?"
-    if mime_type in ("application/x-pdf", "application/pdf"):
-        # Unless we have some very baroque error messages they shouldn't
-        # really be returning PDFs
-        content_type, caching_headers = "pdf", _caching_headers(max_age=300)
+    if via_client_svc.is_pdf(mime_type):
+        caching_headers = _caching_headers(max_age=300)
     else:
-        content_type, caching_headers = "html", _cache_headers_for_http(status_code)
+        caching_headers = _cache_headers_for_http(status_code)
 
-    # The via client will handle the URL correctly for us, we don't want to
-    # include it as a param in case we are going to ViaHTML. All other params
-    # should be passed on
-    options = dict(request.params)
-    options.pop("url")
-    # Already passed this to checkmate. Viahtml will decide a new value if any.
-    options.pop("via.blocked_for", None)
+    params = dict(request.params)
+    params.pop("url", None)
 
-    via_client = request.find_service(ViaClientService)
-    url = via_client.url_for(context.url(), content_type=content_type, options=options)
+    url = via_client_svc.url_for(url, mime_type, params)
 
     return exc.HTTPFound(url, headers=caching_headers)
 
