@@ -23,6 +23,51 @@
       margin: 0;
       padding: 0;
     }
+
+    .center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Loading spinner */
+    .spinner__icon {
+      height: 28px;
+      padding-top: 2px;
+      width: 24px;
+    }
+    .spinner__text {
+      margin-top: 116px;
+    }
+    .spinner__stationary-ring {
+      border: 3px solid #dbdbdb;
+      border-radius: 50%;
+      height: 74px;
+      width: 74px;
+    }
+    .spinner__moving-ring {
+      animation-duration: 1s;
+      animation-fill-mode: forwards;
+      animation-iteration-count: infinite;
+      animation-name: moving-ring;
+      animation-timing-function: linear;
+      border-left: 3px solid #a6a6a6;
+      border-radius: 100% 0 0 0;
+      border-top: 3px solid #a6a6a6;
+      height: 37px;
+      transform: translate(-3px, -3px);
+      transform-origin: bottom right;
+      width: 37px;
+    }
+    @keyframes moving-ring {
+      from {
+        transform: translate(-3px, -3px) rotate(0deg);
+      }
+      to {
+        transform: translate(-3px, -3px) rotate(359deg);
+      }
+    }
   </style>
 
   <script>
@@ -47,6 +92,8 @@
   // metadata etc. in the current frame.
   window.addEventListener('message', event => {
     const contentFrame = document.querySelector('.js-content-frame');
+    const loadingIndicator = document.querySelector('.js-loading-spinner');
+
     if (event.source !== contentFrame.contentWindow) {
       return;
     }
@@ -57,6 +104,11 @@
     }
 
     if (message.type === 'metadatachange') {
+      // Treat the first `metadatachange` message as a hint that the iframe is
+      // done loading. This event is sent in response to `DOMContentLoaded` within the
+      // ViaHTML iframe, so sub-resources on the page may still be loading.
+      loadingIndicator.style.display = 'none';
+
       document.title = `Via: ${message.metadata.title}`;
     }
   });
@@ -64,5 +116,22 @@
 </head>
   <body>
     <iframe class="js-content-frame proxied-content-iframe" src={{ src }}></iframe>
+
+    {# Hypothesis logo loading indicator.
+
+       This is not essential in Chrome and Firefox as the tab's loading indicator will remain
+       visible while the iframe loads. In Safari however there is no indication that anything is
+       loading once the main frame has loaded.
+    #}
+    <div class="js-loading-spinner">
+      <div class="center spinner__stationary-ring">
+        <svg alt="Hypothesis logo" class="center spinner_icon" width="24" height="28" viewBox="0 0 24 28">
+          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M0,2.00494659 C0,0.897645164 0.897026226,0 2.00494659,0 L21.9950534,0 C23.1023548,0 24,0.897026226 24,2.00494659 L24,21.9950534 C24,23.1023548 23.1029738,24 21.9950534,24 L2.00494659,24 C0.897645164,24 0,23.1029738 0,21.9950534 L0,2.00494659 Z M9,24 L12,28 L15,24 L9,24 Z M7.00811294,4 L4,4 L4,20 L7.00811294,20 L7.00811294,15.0028975 C7.00811294,12.004636 8.16824717,12.0097227 9,12 C10,12.0072451 11.0189302,12.0606714 11.0189302,14.003477 L11.0189302,20 L14.0270431,20 L14.0270431,13.1087862 C14.0270433,10 12,9.00309038 10,9.00309064 C8.01081726,9.00309091 8,9.00309086 7.00811294,11.0019317 L7.00811294,4 Z M19,19.9869002 C20.1045695,19.9869002 21,19.0944022 21,17.9934501 C21,16.892498 20.1045695,16 19,16 C17.8954305,16 17,16.892498 17,17.9934501 C17,19.0944022 17.8954305,19.9869002 19,19.9869002 Z" fill="#A6A6A6"></path>
+          </g>
+        </svg>
+        <div class="spinner__moving-ring"></div>
+      </div>
+    </div>
   </body>
 </html>
