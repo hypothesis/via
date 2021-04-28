@@ -35,13 +35,6 @@ class TestViaClientService:
         )
         assert url == via_client.url_for.return_value
 
-    def test_url_for_pops_blocked_for_from_params(self, svc, via_client):
-        params = {"foo": "bar", "via.blocked_for": sentinel.blocked_for}
-
-        svc.url_for(sentinel.url, sentinel.mime_type, params)
-
-        assert via_client.url_for.call_args[1]["options"] == {"foo": "bar"}
-
     @pytest.fixture
     def svc(self, via_client):
         return ViaClientService(via_client)
