@@ -1,6 +1,7 @@
 """Retrieve details about a resource at a URL."""
 import cgi
 import re
+from collections import OrderedDict
 from functools import wraps
 
 import requests
@@ -53,16 +54,21 @@ def get_url_details(url, headers=None):
     :raise UnhandledException: For all other request based errors
     """
     if headers is None:
-        headers = {}
+        headers = OrderedDict()
 
     if GOOGLE_DRIVE_REGEX.match(url):
         return "application/pdf", 200
+
+    headers = clean_headers(headers)
+    # Pass our abuse policy in request headers for third-party site admins.
+    headers["X-Abuse-Policy"] = "https://web.hypothes.is/abuse-policy/"
+    headers["X-Complaints-To"] = "https://web.hypothes.is/report-abuse/"
 
     with requests.get(
         url,
         stream=True,
         allow_redirects=True,
-        headers=clean_headers(headers),
+        headers=headers,
         timeout=10,
     ) as rsp:
         content_type = rsp.headers.get("Content-Type")
