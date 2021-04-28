@@ -58,6 +58,14 @@ class TestGetURLDetails:
 
         assert kwargs["headers"] == clean_headers.return_value
 
+    @pytest.mark.usefixtures("response")
+    def test_it_adds_abuse_policy_headers(self, requests):
+        get_url_details(url="http://example.com", headers={})
+
+        headers = requests.get.call_args[1]["headers"]
+        assert headers["X-Abuse-Policy"] == "https://web.hypothes.is/abuse-policy/"
+        assert headers["X-Complaints-To"] == "https://web.hypothes.is/report-abuse/"
+
     def test_it_assumes_pdf_with_a_google_drive_url(self, requests):
         result = get_url_details(
             "https://drive.google.com/uc?id=--FILEID--&export=download"
@@ -105,4 +113,4 @@ class TestGetURLDetails:
 
     @pytest.fixture(autouse=True)
     def clean_headers(self, patch):
-        return patch("via.get_url.details.clean_headers")
+        return patch("via.get_url.details.clean_headers", return_value={})
