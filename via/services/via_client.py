@@ -15,13 +15,11 @@ class ViaClientService:
 
     def url_for(self, url, mime_type, params):
         """Return a Via URL for the given `url`."""
-        content_type = "pdf" if self.is_pdf(mime_type) else "html"
-
-        options = dict(params)
-
-        options.pop("via.blocked_for", None)
-
-        return self.via_client.url_for(url, content_type=content_type, options=options)
+        return self.via_client.url_for(
+            url,
+            content_type="pdf" if self.is_pdf(mime_type) else "html",
+            options=params,
+        )
 
 
 def factory(_context, request):
