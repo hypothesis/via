@@ -68,6 +68,17 @@
         transform: translate(-3px, -3px) rotate(359deg);
       }
     }
+
+    .js-loading-indicator {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .js-loading-indicator.is-loading {
+      opacity: 1.0;
+    }
+    .js-loading-indicator.is-done {
+      opacity: 0.0;
+    }
   </style>
 
   <script>
@@ -92,7 +103,7 @@
   // metadata etc. in the current frame.
   window.addEventListener('message', event => {
     const contentFrame = document.querySelector('.js-content-frame');
-    const loadingIndicator = document.querySelector('.js-loading-spinner');
+    const loadingIndicator = document.querySelector('.js-loading-indicator');
 
     if (event.source !== contentFrame.contentWindow) {
       return;
@@ -107,7 +118,7 @@
       // Treat the first `metadatachange` message as a hint that the iframe is
       // done loading. This event is sent in response to `DOMContentLoaded` within the
       // ViaHTML iframe, so sub-resources on the page may still be loading.
-      loadingIndicator.style.display = 'none';
+      loadingIndicator.classList.add('is-done');
 
       document.title = `Via: ${message.metadata.title}`;
     }
@@ -123,7 +134,7 @@
        visible while the iframe loads. In Safari however there is no indication that anything is
        loading once the main frame has loaded.
     #}
-    <div class="js-loading-spinner">
+    <div class="js-loading-indicator">
       <div class="center spinner__stationary-ring">
         <svg alt="Hypothesis logo" class="center spinner_icon" width="24" height="28" viewBox="0 0 24 28">
           <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -133,5 +144,16 @@
         <div class="spinner__moving-ring"></div>
       </div>
     </div>
+    <script>
+      /**
+       * Show the loading spinner after a short delay. The delay avoids a flash
+       * of the indicator if the content loads very quickly.
+       */
+      function showLoadingIndicator() {
+        const loadingIndicator = document.querySelector('.js-loading-indicator');
+        setTimeout(() => loadingIndicator.classList.add('is-loading'), 500);
+      }
+      showLoadingIndicator();
+    </script>
   </body>
 </html>
