@@ -28,6 +28,25 @@
 
         // URL of the Hypothesis client's boot script.
         window.CLIENT_EMBED_URL = {{ client_embed_url | tojson }};
+
+        // When this PDF is hosted inside an iframe, notify the parent frame of
+        // the PDF's metadata. ViaHTML sends the same message for HTML documents.
+        //
+        // The PDF filename is used as a title because that is immediately available
+        // before the PDF has loaded.
+        if (window.parent !== window) {
+          const pdfURL = new URL(window.PDF_URL);
+          const pathSegments = pdfURL.pathname.split('/').filter(s => s !== '');
+          const filename = pathSegments.length > 0 ? pathSegments[pathSegments.length - 1] : pdfURL.hostname;
+
+          window.parent.postMessage({
+            type: 'metadatachange',
+            metadata: {
+              location: pdfURL.href,
+              title: filename
+            },
+          }, '*');
+        }
     </script>
 
     <script src="{{ static_url("via:static/js/pdfjs-init.min.js") }}"></script>
