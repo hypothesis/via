@@ -152,8 +152,9 @@
     <div class="js-loading-indicator loading-bar">
     <script>
       /**
-       * Show the loading spinner after a short delay. The delay avoids a flash
-       * of the indicator if the content loads very quickly.
+       * Show the loading indicator after a short delay. The delay avoids showing
+       * the "loading started" state if the content loads very quickly, although
+       * the loading bar will still briefly fade in and out.
        */
       function showLoadingIndicator() {
         const loadingIndicator = document.querySelector('.js-loading-indicator');
