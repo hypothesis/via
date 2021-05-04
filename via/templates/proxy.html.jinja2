@@ -160,7 +160,23 @@
         const loadingIndicator = document.querySelector('.js-loading-indicator');
         setTimeout(() => loadingIndicator.classList.add('is-loading'), 500);
       }
+
+      /**
+       * Copy the fragment from the top frame's URL to the iframe's URL.
+       *
+       * This is needed so that direct links to annotations, which use a
+       * `#annotations:` fragment, are respected by the client in the iframe.
+       */
+      function copyFragmentToFrame() {
+        const fragment = location.hash;
+        if (fragment) {
+          const iframe = document.querySelector('.js-content-frame');
+          iframe.src += fragment;
+        }
+      }
+
       showLoadingIndicator();
+      copyFragmentToFrame();
     </script>
   </body>
 </html>
