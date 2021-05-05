@@ -150,7 +150,7 @@
       // URL shouldn't be retained in the tab's history. If we update the URL
       // in response to client-side URL changes in the iframe in future, we'll
       // probably want to change this.
-      const viaURL = `${location.origin}/${metadata.location}`;
+      const viaURL = `/${metadata.location}`;
       history.replaceState(null, document.title, viaURL);
     }
   });
