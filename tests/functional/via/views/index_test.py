@@ -13,12 +13,14 @@ from tests.functional.matchers import temporary_redirect_to
             "http://localhost/https://example.com/foo/",
         ),
         (
-            "example.com/foo/",
-            "http://localhost/example.com/foo/",
-        ),
-        (
             "http://example.com/foo/",
             "http://localhost/http://example.com/foo/",
+        ),
+        # The submitted URL is normalized to strip leading/trailing spaces and
+        # add a protocol.
+        (
+            "example.com/foo/",
+            "http://localhost/https://example.com/foo/",
         ),
         # If you submit an empty form it just reloads the front page again.
         ("", "http://localhost/"),
