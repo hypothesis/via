@@ -15,8 +15,6 @@ help:
 	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
 	@echo "make update-pdfjs      Update our copy of PDF-js"
 	@echo "make docker            Make the app's Docker image"
-	@echo "make clean             Delete development artefacts (cached files, "
-	@echo "                       dependencies, etc)"
 
 .PHONY: dev
 dev: python
@@ -79,13 +77,6 @@ docker: build
 	@tar --update -f build.tar via/static
 	@gzip -c build.tar | docker build -t hypothesis/via3:$(DOCKER_TAG) -
 	@rm build.tar
-
-.PHONY: clean
-clean:
-	@find . -type f -name "*.py[co]" -delete
-	@find . -type d -name "__pycache__" -delete
-	@find . -type f -name "*.gz" -delete
-	@rm -f node_modules/.uptodate
 
 .PHONY: web
 web: python
