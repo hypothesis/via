@@ -75,7 +75,7 @@ update-pdfjs: python
 docker: build
 	@git archive --format=tar HEAD > build.tar
 	@tar --update -f build.tar via/static
-	@gzip -c build.tar | docker build -t hypothesis/via3:$(DOCKER_TAG) -
+	@gzip -c build.tar | docker build -t hypothesis/via:$(DOCKER_TAG) -
 	@rm build.tar
 
 .PHONY: web
