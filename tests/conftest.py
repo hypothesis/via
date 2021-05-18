@@ -7,8 +7,8 @@ from h_matchers import Any
 def pyramid_settings():
     return {
         "client_embed_url": "http://hypothes.is/embed.js",
-        "nginx_server": "http://via3.hypothes.is",
-        "via_html_url": "https://viahtml3.hypothes.is/proxy",
+        "nginx_server": "http://via.hypothes.is",
+        "via_html_url": "https://viahtml.hypothes.is/proxy",
         "checkmate_url": "http://localhost:9099",
         "nginx_secure_link_secret": "not_a_secret",
         "via_secret": "not_a_secret",
