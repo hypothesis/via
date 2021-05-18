@@ -128,7 +128,7 @@ py==1.10.0
     # via
     #   -r requirements/tests.txt
     #   pytest
-pydocstyle==6.0.0
+pydocstyle==6.1.1
     # via -r requirements/lint.in
 pyjwt==2.0.1
     # via
