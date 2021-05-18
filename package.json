@@ -1,14 +1,14 @@
 {
-  "name": "via3",
+  "name": "via",
   "version": "1.0.0",
-  "description": "Via 3",
+  "description": "Via",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hypothesis/via3.git"
+    "url": "git+https://github.com/hypothesis/via.git"
   },
   "bugs": {
-    "url": "https://github.com/hypothesis/via3/issues"
+    "url": "https://github.com/hypothesis/via/issues"
   },
   "dependencies": {
     "sass": "^1.32.11",

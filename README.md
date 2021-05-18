@@ -1,25 +1,25 @@
-Via 3
-=====
+Via
+===
 
 A proxy that serves up third party PDF files and HTML pages with the
 [Hypothesis client](https://github.com/hypothesis/client) embedded, so you can
 annotate them.
 
-Installing Via 3 in a development environment
----------------------------------------------
+Installing Via in a development environment
+-------------------------------------------
 
 ### You will need
 
-* Via 3 integrates with h and the Hypothesis client, so you will need to
-  set up development environments for each of those before you can develop Via:
+* Via integrates with h and the Hypothesis client, so you will need to set up
+  development environments for each of those before you can develop Via:
 
   * https://h.readthedocs.io/en/latest/developing/install/
   * https://h.readthedocs.io/projects/client/en/latest/developers/developing/
 
-* For now, Via 3 also redirects to legacy Via to proxy HTML pages, so you'll
-  need to set up a legacy Via development environment too:
+* Via redirects to Via HTML to proxy HTML pages, so you'll need to set up a
+  Via HTML development environment too:
 
-  * https://github.com/hypothesis/via3
+  * https://github.com/hypothesis/viahtml
 
 * [Git](https://git-scm.com/)
 
@@ -29,17 +29,17 @@ Installing Via 3 in a development environment
 
 ### Clone the git repo
 
-    git clone https://github.com/hypothesis/via3.git
+    git clone https://github.com/hypothesis/via.git
 
-This will download the code into a `via3` directory in your current working
-directory. You need to be in the `via3` directory from the remainder of the
+This will download the code into a `via` directory in your current working
+directory. You need to be in the `via` directory from the remainder of the
 installation process:
 
-    cd via3
+    cd via
 
 ### Create the development data and settings
 
-Create the environment variable settings needed to get Via 3 working nicely with other services (e.g. Google Drive):
+Create the environment variable settings needed to get Via working nicely with other services (e.g. Google Drive):
 
     make devdata
 
@@ -55,11 +55,11 @@ Gunicorn on http://localhost:9082, reload the application whenever changes are
 made to the source code, and restart it should it crash for some reason.
 
 **You should use NGINX (http://localhost:9083) as your main entry point** to
-Via 3 in development. This is how it's used in production, and if you visit
+Via in development. This is how it's used in production, and if you visit
 Gunicorn directly you'll get CORS (Cross Origin Resource Sharing) errors from
 your browser.
 
-**That's it!** You’ve finished setting up your Via 3 development environment. Run
+**That's it!** You’ve finished setting up your Via development environment. Run
 `make help` to see all the commands that're available for running the tests,
 linting, code formatting, etc.
 
@@ -88,22 +88,22 @@ Environment variables:
 Updating the PDF viewer
 -----------------------
 
-Via 3 serves PDFs using [PDF.js](https://mozilla.github.io/pdf.js/). PDF.js is
+Via serves PDFs using [PDF.js](https://mozilla.github.io/pdf.js/). PDF.js is
 vendored into the source tree and the viewer HTML is patched to load the Hypothesis
 client. To update the PDF viewer, run `make update-pdfjs`.
 
-How Via 3 works
----------------
+How Via works
+-------------
 
-Via 3 allows users to annotate arbitrary web pages or PDF files by proxying the
+Via allows users to annotate arbitrary web pages or PDF files by proxying the
 page or file and injecting the Hypothesis client. Users go to
-<https://via3.hypothes.is/> and paste in a PDF or HTML URL (or visit
-`https://via3.hypothes.is/<SOME_URL>` directly) and Via 3 responds with an
+<https://via.hypothes.is/> and paste in a PDF or HTML URL (or visit
+`https://via.hypothes.is/<SOME_URL>` directly) and Via responds with an
 annotatable version.
 
-### Via 3's architecture
+### Via's architecture
 
-Via 3 is composed of four separable components:
+Via is composed of four separable components:
 
 1. A **top-level component** that responds to requests to the top-level
    `/<THIRD_PARTY_URL>` endpoint by deciding whether the URL is a PDF file or
@@ -160,7 +160,7 @@ Via 3 is composed of four separable components:
 
    This is what enables users to annotate web pages.
 
-   The HTML proxy isn't implemented yet. Via 3 currently redirects to legacy Via for HTML proxying.
+   The HTML proxy isn't implemented yet. Via currently redirects to legacy Via for HTML proxying.
 
    The HTML proxy's job is to enable annotating of HTML pages by proxying the
    page and injecting the Hypothesis client into it.
@@ -168,7 +168,7 @@ Via 3 is composed of four separable components:
    It also has to rewrite various elements of the page that would otherwise
    break because the page is being proxied.
 
-### How Via 3 works in production
+### How Via works in production
 
 In production both NGINX and Gunicorn (the WSGI server for the Python / Pyramid
 app) run inside a single Docker container defined by the app's `Dockerfile`.
@@ -189,7 +189,7 @@ NGINX is "in front of" Gunicorn in production:
 3. If the request is to one of the URLs that should be handled by the Pyramid
    app then NGINX proxies to Gunicorn on a UNIX socket.
 
-### How Via 3 works in development
+### How Via works in development
 
 In development NGINX runs in Docker Compose and is exposed at
 http://localhost:9083/. This is defined in `docker-compose.yml`. The app's
