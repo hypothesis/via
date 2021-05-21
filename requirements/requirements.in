@@ -1,10 +1,11 @@
 gunicorn
+h-checkmatelib
+h-pyramid-sentry
+h-vialib
+importlib_resources
+newrelic
 pyramid
 pyramid-jinja2
 pyramid-services
 requests
-newrelic
-h-pyramid-sentry
-h-vialib
 whitenoise
-h-checkmatelib
