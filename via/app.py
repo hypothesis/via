@@ -1,8 +1,8 @@
 """The main application entrypoint module."""
 import os
 
+import importlib_resources
 import pyramid.config
-from pkg_resources import resource_filename
 from pyramid.settings import asbool
 from whitenoise import WhiteNoise
 
@@ -65,7 +65,7 @@ def create_app(_=None, **settings):
     config.include("via.services")
 
     # Configure Pyramid so we can generate static URLs
-    static_path = resource_filename("via", "static")
+    static_path = str(importlib_resources.files("via") / "static")
     cache_buster = PathCacheBuster(static_path)
     print(f"Cache buster salt: {cache_buster.salt}")
 
@@ -90,7 +90,7 @@ def create_app(_=None, **settings):
     app.add_files(
         # Config for serving files at / which are marked as mutable. This is
         # for / -> index.html
-        root=resource_filename("via", "static"),
+        root=static_path,
         prefix="/",
     )
 

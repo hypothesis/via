@@ -1,9 +1,10 @@
 """Create the PDFjs template."""
 
-from pkg_resources import resource_filename
+import importlib_resources
 
-SOURCE_FILE = resource_filename("via", "static/vendor/pdfjs-2/web/viewer.html")
-TARGET_FILE = resource_filename("via", "templates/pdf_wrapper.html.jinja2")
+BASE_DIR = importlib_resources.files("via")
+SOURCE_FILE = str(BASE_DIR / "static/vendor/pdfjs-2/web/viewer.html")
+TARGET_FILE = str(BASE_DIR / "templates/pdf_wrapper.html.jinja2")
 
 # We want control over where these are so we'll remove them
 ITEMS_TO_REMOVE = [
