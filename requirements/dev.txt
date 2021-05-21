@@ -60,6 +60,8 @@ idna==2.10
     # via
     #   -r requirements.txt
     #   requests
+importlib-resources==5.1.3
+    # via -r requirements/requirements.txt
 ipdb==0.13.7
     # via -r dev.in
 ipython-genutils==0.2.0
