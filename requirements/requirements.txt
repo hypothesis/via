@@ -15,13 +15,13 @@ chardet==4.0.0
 future==0.18.2
     # via h-checkmatelib
 gunicorn==20.1.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 h-checkmatelib==1.0.8
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 h-pyramid-sentry==1.2.3
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 h-vialib==1.0.15
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 hupper==1.10.2
     # via pyramid
 idna==2.10
@@ -35,7 +35,7 @@ markupsafe==1.1.1
     #   jinja2
     #   pyramid-jinja2
 newrelic==6.2.0.156
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pastedeploy==2.1.1
     # via plaster-pastedeploy
 plaster-pastedeploy==0.7
@@ -47,12 +47,12 @@ plaster==1.0
 pyjwt==2.0.1
     # via h-vialib
 pyramid-jinja2==2.8
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid-services==2.2
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 pyramid==2.0
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   h-pyramid-sentry
     #   pyramid-jinja2
     #   pyramid-services
@@ -60,7 +60,7 @@ pyrsistent==0.17.3
     # via jsonschema
 requests==2.25.1
     # via
-    #   -r requirements/requirements.in
+    #   -r requirements.in
     #   h-checkmatelib
 sentry-sdk==0.19.5
     # via h-pyramid-sentry
@@ -68,7 +68,7 @@ six==1.15.0
     # via jsonschema
 translationstring==1.4
     # via pyramid
-urllib3==1.26.3
+urllib3==1.26.4
     # via
     #   requests
     #   sentry-sdk
@@ -79,7 +79,7 @@ webob==1.8.6
     #   h-vialib
     #   pyramid
 whitenoise==5.2.0
-    # via -r requirements/requirements.in
+    # via -r requirements.in
 wired==0.3
     # via pyramid-services
 zope.deprecation==4.4.0
