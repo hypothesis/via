@@ -40,13 +40,9 @@ dockerpty==0.4.1
     # via docker-compose
 docopt==0.6.2
     # via docker-compose
-future==0.18.2
-    # via
-    #   -r requirements/requirements.txt
-    #   h-checkmatelib
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
-h-checkmatelib==1.0.8
+h-checkmatelib==1.0.9
     # via -r requirements/requirements.txt
 h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.txt
@@ -60,8 +56,10 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
-importlib_resources==5.1.4
-    # via -r requirements/requirements.txt
+importlib-resources==5.1.4
+    # via
+    #   -r requirements/requirements.txt
+    #   h-checkmatelib
 ipdb==0.13.7
     # via -r requirements/dev.in
 ipython-genutils==0.2.0

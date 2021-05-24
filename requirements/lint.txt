@@ -35,16 +35,11 @@ faker==5.8.0
     # via
     #   -r requirements/tests.txt
     #   factory-boy
-future==0.18.2
-    # via
-    #   -r requirements/requirements.txt
-    #   -r requirements/tests.txt
-    #   h-checkmatelib
 gunicorn==20.1.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
-h-checkmatelib==1.0.8
+h-checkmatelib==1.0.9
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
@@ -70,10 +65,11 @@ idna==2.10
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   requests
-importlib_resources==5.1.4
+importlib-resources==5.1.4
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
+    #   h-checkmatelib
 iniconfig==1.1.1
     # via
     #   -r requirements/tests.txt

@@ -20,13 +20,9 @@ chardet==4.0.0
     # via
     #   -r requirements/requirements.txt
     #   requests
-future==0.18.2
-    # via
-    #   -r requirements/requirements.txt
-    #   h-checkmatelib
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
-h-checkmatelib==1.0.8
+h-checkmatelib==1.0.9
     # via -r requirements/requirements.txt
 h-matchers==1.2.11
     # via -r requirements/functests.in
@@ -44,8 +40,10 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
-importlib_resources==5.1.4
-    # via -r requirements/requirements.txt
+importlib-resources==5.1.4
+    # via
+    #   -r requirements/requirements.txt
+    #   h-checkmatelib
 iniconfig==1.1.1
     # via pytest
 jinja2==2.11.3

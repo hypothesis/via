@@ -12,11 +12,9 @@ certifi==2020.12.5
     #   sentry-sdk
 chardet==4.0.0
     # via requests
-future==0.18.2
-    # via h-checkmatelib
 gunicorn==20.1.0
     # via -r requirements/requirements.in
-h-checkmatelib==1.0.8
+h-checkmatelib==1.0.9
     # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
@@ -26,8 +24,10 @@ hupper==1.10.2
     # via pyramid
 idna==2.10
     # via requests
-importlib_resources==5.1.4
-    # via -r requirements/requirements.in
+importlib-resources==5.1.4
+    # via
+    #   -r requirements/requirements.in
+    #   h-checkmatelib
 jinja2==2.11.3
     # via pyramid-jinja2
 jsonschema==3.2.0
