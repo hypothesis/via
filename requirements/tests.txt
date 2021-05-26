@@ -65,7 +65,7 @@ markupsafe==1.1.1
     #   -r requirements/requirements.txt
     #   jinja2
     #   pyramid-jinja2
-newrelic==6.2.0.156
+newrelic==6.4.0.157
     # via -r requirements/requirements.txt
 packaging==20.9
     # via pytest
