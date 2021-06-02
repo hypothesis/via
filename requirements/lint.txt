@@ -204,7 +204,7 @@ translationstring==1.4
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   pyramid
-urllib3==1.26.4
+urllib3==1.26.5
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt

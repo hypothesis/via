@@ -70,7 +70,7 @@ six==1.15.0
     # via jsonschema
 translationstring==1.4
     # via pyramid
-urllib3==1.26.4
+urllib3==1.26.5
     # via
     #   requests
     #   sentry-sdk
