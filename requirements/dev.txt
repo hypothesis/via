@@ -62,7 +62,7 @@ importlib-resources==5.1.4
     # via
     #   -r requirements/requirements.txt
     #   h-checkmatelib
-ipdb==0.13.8
+ipdb==0.13.9
     # via -r requirements/dev.in
 ipython-genutils==0.2.0
     # via traitlets
