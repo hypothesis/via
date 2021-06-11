@@ -1,4 +1,4 @@
-# Caching strategy
+# Caching strategy 
 
 ## Short `max-age`, long `stale-while-revalidate`
 
