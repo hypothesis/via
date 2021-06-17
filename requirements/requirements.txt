@@ -18,7 +18,7 @@ h-checkmatelib==1.0.9
     # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
-h-vialib==1.0.15
+h-vialib==1.0.17
     # via -r requirements/requirements.in
 hupper==1.10.2
     # via pyramid
