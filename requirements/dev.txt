@@ -34,10 +34,10 @@ decorator==5.0.7
     #   ipython
 distro==1.5.0
     # via docker-compose
-docker-compose==1.29.2
-    # via -r requirements/dev.in
 docker[ssh]==5.0.0
     # via docker-compose
+docker-compose==1.29.2
+    # via -r requirements/dev.in
 dockerpty==0.4.1
     # via docker-compose
 docopt==0.6.2
@@ -64,12 +64,12 @@ importlib-resources==5.1.4
     #   h-checkmatelib
 ipdb==0.13.9
     # via -r requirements/dev.in
-ipython-genutils==0.2.0
-    # via traitlets
 ipython==7.22.0
     # via
     #   ipdb
     #   pyramid-ipython
+ipython-genutils==0.2.0
+    # via traitlets
 jedi==0.18.0
     # via ipython
 jinja2==2.11.3
@@ -86,7 +86,7 @@ markupsafe==1.1.1
     #   -r requirements/requirements.txt
     #   jinja2
     #   pyramid-jinja2
-newrelic==6.4.2.159
+newrelic==6.4.3.160
     # via -r requirements/requirements.txt
 paramiko==2.7.2
     # via docker
@@ -100,14 +100,14 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-plaster-pastedeploy==0.7
-    # via
-    #   -r requirements/requirements.txt
-    #   pyramid
 plaster==1.0
     # via
     #   -r requirements/requirements.txt
     #   plaster-pastedeploy
+    #   pyramid
+plaster-pastedeploy==0.7
+    # via
+    #   -r requirements/requirements.txt
     #   pyramid
 prompt-toolkit==3.0.18
     # via ipython
@@ -123,12 +123,6 @@ pyjwt==2.0.1
     #   h-vialib
 pynacl==1.4.0
     # via paramiko
-pyramid-ipython==0.2
-    # via -r requirements/dev.in
-pyramid-jinja2==2.8
-    # via -r requirements/requirements.txt
-pyramid-services==2.2
-    # via -r requirements/requirements.txt
 pyramid==2.0
     # via
     #   -r requirements/requirements.txt
@@ -136,6 +130,12 @@ pyramid==2.0
     #   pyramid-ipython
     #   pyramid-jinja2
     #   pyramid-services
+pyramid-ipython==0.2
+    # via -r requirements/dev.in
+pyramid-jinja2==2.8
+    # via -r requirements/requirements.txt
+pyramid-services==2.2
+    # via -r requirements/requirements.txt
 pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
