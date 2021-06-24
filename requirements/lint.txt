@@ -96,7 +96,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==6.4.2.159
+newrelic==6.4.3.160
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
@@ -109,16 +109,16 @@ pastedeploy==2.1.1
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   plaster-pastedeploy
-plaster-pastedeploy==0.7
-    # via
-    #   -r requirements/requirements.txt
-    #   -r requirements/tests.txt
-    #   pyramid
 plaster==1.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   plaster-pastedeploy
+    #   pyramid
+plaster-pastedeploy==0.7
+    # via
+    #   -r requirements/requirements.txt
+    #   -r requirements/tests.txt
     #   pyramid
 pluggy==0.13.1
     # via
@@ -141,6 +141,13 @@ pyparsing==2.4.7
     # via
     #   -r requirements/tests.txt
     #   packaging
+pyramid==2.0
+    # via
+    #   -r requirements/requirements.txt
+    #   -r requirements/tests.txt
+    #   h-pyramid-sentry
+    #   pyramid-jinja2
+    #   pyramid-services
 pyramid-jinja2==2.8
     # via
     #   -r requirements/requirements.txt
@@ -149,13 +156,6 @@ pyramid-services==2.2
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
-pyramid==2.0
-    # via
-    #   -r requirements/requirements.txt
-    #   -r requirements/tests.txt
-    #   h-pyramid-sentry
-    #   pyramid-jinja2
-    #   pyramid-services
 pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
