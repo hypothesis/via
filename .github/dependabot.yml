@@ -1,14 +1,19 @@
 version: 2
 updates:
+
 - package-ecosystem: pip
   directory: "/"
   schedule:
     interval: daily
     time: "10:00"
   open-pull-requests-limit: 10
+
 - package-ecosystem: docker
   directory: "/"
   schedule:
     interval: daily
-    time: "10:00"
   open-pull-requests-limit: 10
+  ignore:
+    # Only send PRs for patch versions of Python.
+    - dependency-name: "python"
+      update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
