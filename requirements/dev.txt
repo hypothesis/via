@@ -22,7 +22,7 @@ cffi==1.14.5
     #   bcrypt
     #   cryptography
     #   pynacl
-chardet==4.0.0
+charset-normalizer==2.0.1
     # via
     #   -r requirements/requirements.txt
     #   requests
@@ -144,7 +144,7 @@ python-dotenv==0.17.0
     # via docker-compose
 pyyaml==5.4.1
     # via docker-compose
-requests==2.25.1
+requests==2.26.0
     # via
     #   -r requirements/requirements.txt
     #   docker
