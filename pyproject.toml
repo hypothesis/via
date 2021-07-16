@@ -1,3 +1,7 @@
+[tool.hdev]
+project_name = "via"
+project_type = "application"
+
 [tool.hdev.clean]
 # File and directory names which will be removed anywhere they
 # are found. These support shell expansions and patterns
