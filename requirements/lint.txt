@@ -228,7 +228,7 @@ webob==1.8.6
     #   webtest
 webtest==2.0.35
     # via -r requirements/tests.txt
-whitenoise==5.2.0
+whitenoise==5.3.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
