@@ -65,7 +65,7 @@ idna==2.10
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   requests
-importlib_resources==5.2.1
+importlib-resources==5.2.1
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
@@ -96,7 +96,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==6.4.4.161
+newrelic==6.6.0.162
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
