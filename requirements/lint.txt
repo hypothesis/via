@@ -65,7 +65,7 @@ idna==2.10
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   requests
-importlib-resources==5.2.1
+importlib_resources==5.2.2
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
