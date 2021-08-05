@@ -3,7 +3,6 @@
 from pyramid import httpexceptions as exc
 from pyramid import view
 
-from via.checkmate import raise_if_blocked
 from via.get_url import get_url_details
 from via.services import ViaClientService
 from via.views.decorators import has_secure_url_token
@@ -14,7 +13,7 @@ def route_by_content(context, request):
     """Routes the request according to the Content-Type header."""
     url = context.url()
 
-    raise_if_blocked(request, url)
+    request.checkmate.raise_if_blocked(url)
 
     mime_type, status_code = get_url_details(url, request.headers)
     via_client_svc = request.find_service(ViaClientService)

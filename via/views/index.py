@@ -27,6 +27,7 @@ class IndexViews:
         if not self.enabled:
             return HTTPNotFound()
 
+        # Should this be context.url()?
         url = url_from_user_input(self.request.params.get("url", ""))
         try:
             parsed = urlparse(url)

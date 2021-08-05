@@ -7,7 +7,6 @@ from h_vialib import Configuration
 from h_vialib.secure import quantized_expiry
 from pyramid import view
 
-from via.checkmate import raise_if_blocked
 from via.views.decorators import has_secure_url_token
 
 
@@ -22,11 +21,13 @@ from via.views.decorators import has_secure_url_token
 def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
-    raise_if_blocked(request, context.url())
+    url = context.url()
+
+    request.checkmate.raise_if_blocked(url)
 
     nginx_server = request.registry.settings["nginx_server"]
     proxy_pdf_url = _pdf_url(
-        context.url(),
+        url,
         nginx_server,
         request.registry.settings["nginx_secure_link_secret"],
     )
@@ -35,7 +36,7 @@ def view_pdf(context, request):
 
     return {
         # The upstream PDF URL that should be associated with any annotations.
-        "pdf_url": context.url(),
+        "pdf_url": url,
         # The CORS-proxied PDF URL which the viewer should actually load the PDF from.
         "proxy_pdf_url": proxy_pdf_url,
         "client_embed_url": request.registry.settings["client_embed_url"],

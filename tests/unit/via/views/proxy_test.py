@@ -7,20 +7,15 @@ from via.views.proxy import proxy
 
 class TestProxy:
     def test_it(
-        self,
-        pyramid_request,
-        get_url_details,
-        via_client_service,
-        url_from_user_input,
-        raise_if_blocked,
+        self, pyramid_request, get_url_details, via_client_service, url_from_user_input
     ):
         pyramid_request.path = "/https://example.org"
 
         result = proxy(pyramid_request)
 
         url_from_user_input.assert_called_with("https://example.org")
-        raise_if_blocked.assert_called_once_with(
-            pyramid_request, url_from_user_input.return_value
+        pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(
+            url_from_user_input.return_value
         )
         get_url_details.assert_called_once_with(url_from_user_input.return_value)
         via_client_service.url_for.assert_called_once_with(
@@ -37,7 +32,3 @@ class TestProxy:
     @pytest.fixture(autouse=True)
     def url_from_user_input(self, patch):
         return patch("via.views.proxy.url_from_user_input")
-
-    @pytest.fixture(autouse=True)
-    def raise_if_blocked(self, patch):
-        return patch("via.views.proxy.raise_if_blocked")
