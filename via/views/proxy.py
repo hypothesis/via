@@ -1,5 +1,6 @@
 from pyramid.view import view_config
 
+from via.checkmate import raise_if_blocked
 from via.get_url import get_url_details
 from via.services import ViaClientService
 from via.views._helpers import url_from_user_input
@@ -9,6 +10,8 @@ from via.views._helpers import url_from_user_input
 def proxy(request):
     # Strip leading '/' and normalize URL.
     url = url_from_user_input(request.path[1:])
+
+    raise_if_blocked(request, url)
 
     mime_type, _status_code = get_url_details(url)
 
