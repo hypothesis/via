@@ -96,7 +96,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==6.6.0.162
+newrelic==6.8.0.163
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
