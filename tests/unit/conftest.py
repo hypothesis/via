@@ -3,11 +3,11 @@
 import functools
 from unittest.mock import create_autospec
 
-from checkmatelib import CheckmateClient
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 
 from tests.unit.services import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from via.checkmate import ViaCheckmateClient
 from via.views import add_routes
 
 
@@ -43,7 +43,7 @@ def pyramid_request(
     apply_request_extensions(pyramid_request)
 
     pyramid_request.checkmate = create_autospec(
-        CheckmateClient, spec_set=True, instance=True
+        ViaCheckmateClient, spec_set=True, instance=True
     )
     pyramid_request.checkmate.check_url.return_value = None
 

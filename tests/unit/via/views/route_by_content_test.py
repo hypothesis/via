@@ -30,7 +30,6 @@ class TestRouteByContent:
         pyramid_request,
         status_code,
         via_client_service,
-        raise_if_blocked,
     ):
         pyramid_request.params = {"url": sentinel.url, "foo": "bar"}
         get_url_details.return_value = (sentinel.mime_type, status_code)
@@ -38,15 +37,12 @@ class TestRouteByContent:
 
         response = route_by_content(context, pyramid_request)
 
-        raise_if_blocked.assert_called_once_with(
-            pyramid_request, context.url.return_value
-        )
-        get_url_details.assert_called_once_with(
-            context.url.return_value, pyramid_request.headers
-        )
+        url = context.url.return_value
+        pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(url)
+        get_url_details.assert_called_once_with(url, pyramid_request.headers)
         via_client_service.is_pdf.assert_called_once_with(sentinel.mime_type)
         via_client_service.url_for.assert_called_once_with(
-            context.url.return_value, sentinel.mime_type, {"foo": "bar"}
+            url, sentinel.mime_type, {"foo": "bar"}
         )
         assert response == temporary_redirect_to(
             via_client_service.url_for.return_value
@@ -62,7 +58,3 @@ class TestRouteByContent:
     @pytest.fixture(autouse=True)
     def get_url_details(self, patch):
         return patch("via.views.route_by_content.get_url_details")
-
-    @pytest.fixture(autouse=True)
-    def raise_if_blocked(self, patch):
-        return patch("via.views.route_by_content.raise_if_blocked")
