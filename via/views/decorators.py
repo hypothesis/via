@@ -1,33 +1,7 @@
 """View decorators to integrate with checkmate's API."""
-from checkmatelib import CheckmateException
 from h_vialib.exceptions import TokenException
 from h_vialib.secure.url import ViaSecureURL
-from pyramid.httpexceptions import HTTPTemporaryRedirect, HTTPUnauthorized
-
-
-def checkmate_block(view):
-    """Intended to be used as a decorator for pyramid views.
-
-    The view must accept a url a query param.
-    """
-
-    def view_wrapper(context, request):
-        try:
-            blocked = request.checkmate.check_url(
-                request.params["url"],
-                allow_all=request.registry.settings["checkmate_allow_all"],
-                blocked_for=request.params.get("via.blocked_for"),
-                ignore_reasons=request.registry.settings["checkmate_ignore_reasons"],
-            )
-        except CheckmateException:
-            blocked = None
-
-        if blocked:
-            return HTTPTemporaryRedirect(location=blocked.presentation_url)
-
-        return view(context, request)
-
-    return view_wrapper
+from pyramid.httpexceptions import HTTPUnauthorized
 
 
 def has_secure_url_token(view, signature_param="via.sec"):

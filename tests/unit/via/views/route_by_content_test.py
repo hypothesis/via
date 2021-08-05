@@ -30,6 +30,7 @@ class TestRouteByContent:
         pyramid_request,
         status_code,
         via_client_service,
+        raise_if_blocked,
     ):
         pyramid_request.params = {"url": sentinel.url, "foo": "bar"}
         get_url_details.return_value = (sentinel.mime_type, status_code)
@@ -37,6 +38,9 @@ class TestRouteByContent:
 
         response = route_by_content(context, pyramid_request)
 
+        raise_if_blocked.assert_called_once_with(
+            pyramid_request, context.url.return_value
+        )
         get_url_details.assert_called_once_with(
             context.url.return_value, pyramid_request.headers
         )
@@ -58,3 +62,7 @@ class TestRouteByContent:
     @pytest.fixture(autouse=True)
     def get_url_details(self, patch):
         return patch("via.views.route_by_content.get_url_details")
+
+    @pytest.fixture(autouse=True)
+    def raise_if_blocked(self, patch):
+        return patch("via.views.route_by_content.raise_if_blocked")
