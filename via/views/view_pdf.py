@@ -7,7 +7,8 @@ from h_vialib import Configuration
 from h_vialib.secure import quantized_expiry
 from pyramid import view
 
-from via.views.decorators import checkmate_block, has_secure_url_token
+from via.checkmate import raise_if_blocked
+from via.views.decorators import has_secure_url_token
 
 
 @view.view_config(
@@ -16,10 +17,12 @@ from via.views.decorators import checkmate_block, has_secure_url_token
     # We have to keep the leash short here for caching so we can pick up new
     # immutable assets when they are deployed
     http_cache=0,
-    decorator=(checkmate_block, has_secure_url_token),
+    decorator=(has_secure_url_token,),
 )
 def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
+
+    raise_if_blocked(request, context.url())
 
     nginx_server = request.registry.settings["nginx_server"]
     proxy_pdf_url = _pdf_url(

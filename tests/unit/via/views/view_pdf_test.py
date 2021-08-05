@@ -53,14 +53,10 @@ class TestViewPDF:
 
         assert response["hypothesis_config"] == sentinel.h_config
 
-    @pytest.fixture
-    def Configuration(self, patch):
-        Configuration = patch("via.views.view_pdf.Configuration")
-        Configuration.extract_from_params.return_value = (
-            sentinel.via_config,
-            sentinel.h_config,
-        )
-        return Configuration
+    def test_it_calls_checkmate(self, call_view_pdf, raise_if_blocked, pyramid_request):
+        call_view_pdf(sentinel.url)
+
+        raise_if_blocked.assert_called_once_with(pyramid_request, sentinel.url)
 
     @pytest.fixture
     def call_view_pdf(self, pyramid_request):
@@ -70,6 +66,19 @@ class TestViewPDF:
             return view_pdf(context, pyramid_request)
 
         return call_view_pdf
+
+    @pytest.fixture
+    def Configuration(self, patch):
+        Configuration = patch("via.views.view_pdf.Configuration")
+        Configuration.extract_from_params.return_value = (
+            sentinel.via_config,
+            sentinel.h_config,
+        )
+        return Configuration
+
+    @pytest.fixture(autouse=True)
+    def raise_if_blocked(self, patch):
+        return patch("via.views.view_pdf.raise_if_blocked")
 
 
 @pytest.fixture(autouse=True)
