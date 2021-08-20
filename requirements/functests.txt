@@ -114,7 +114,6 @@ six==1.15.0
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-    #   webtest
 soupsieve==2.1
     # via beautifulsoup4
 toml==0.10.2
@@ -140,7 +139,7 @@ webob==1.8.6
     #   h-vialib
     #   pyramid
     #   webtest
-webtest==2.0.35
+webtest==3.0.0
     # via -r requirements/functests.in
 whitenoise==5.3.0
     # via -r requirements/requirements.txt
