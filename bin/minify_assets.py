@@ -80,7 +80,7 @@ class Minifier:
 
     @classmethod
     def _execute(cls, path, handler, in_place=False):
-        with open(path) as handle:
+        with open(path, encoding="utf8") as handle:
             content = handle.read()
 
         if not content:
@@ -102,7 +102,7 @@ class Minifier:
             print("\tRe-using old content (it's no smaller)")
             minified = content
 
-        with open(target, "w") as handle:
+        with open(target, "w", encoding="utf8") as handle:
             handle.write(minified)
 
 
@@ -114,7 +114,7 @@ def main():
 
     print(f"Loading config from {config_file}...")
 
-    with open(config_file) as handle:
+    with open(config_file, encoding="utf8") as handle:
         config = json.load(handle)
 
     Minifier.minify(config)

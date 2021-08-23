@@ -39,7 +39,7 @@ def _insert_jinja2_blocks(contents):
 
 
 if __name__ == "__main__":
-    with open(SOURCE_FILE) as handle:
+    with open(SOURCE_FILE, encoding="utf8") as handle:
         template = _insert_jinja2_blocks(handle.read())
         template = _insert(
             template,
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         print(f"Removing: {item}")
         template = template.replace(item, f"<!-- {item} -->")
 
-    with open(TARGET_FILE, "w") as handle:
+    with open(TARGET_FILE, "w", encoding="utf8") as handle:
         handle.write(template)
 
     print(f"Created {TARGET_FILE} from {SOURCE_FILE}")
