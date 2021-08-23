@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements/lint.in
 #
-astroid==2.6.5
+astroid==2.7.2
     # via pylint
 attrs==20.3.0
     # via
@@ -120,6 +120,8 @@ plaster-pastedeploy==0.7
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   pyramid
+platformdirs==2.2.0
+    # via pylint
 pluggy==0.13.1
     # via
     #   -r requirements/tests.txt
@@ -135,7 +137,7 @@ pyjwt==2.0.1
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   h-vialib
-pylint==2.9.6
+pylint==2.10.2
     # via -r requirements/lint.in
 pyparsing==2.4.7
     # via
