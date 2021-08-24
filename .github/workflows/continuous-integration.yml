@@ -52,4 +52,4 @@ jobs:
           ${{ runner.os }}-tox-
 
     - name: Run tox
-      run: tox --parallel auto -e lint,checkformatting,tests,functests
+      run: tox --parallel -e lint,checkformatting,tests,coverage,functests
