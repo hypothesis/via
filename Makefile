@@ -10,7 +10,8 @@ help:
 	@echo "make lint              Run the code linter(s) and print any warnings"
 	@echo "make format            Correctly format the code"
 	@echo "make checkformatting   Crash if the code isn't correctly formatted"
-	@echo "make test              Run the unit tests and produce a coverage report"
+	@echo "make test              Run the unit tests"
+	@echo "make coverage          Print the unit test coverage report"
 	@echo "make functests         Run the functional tests"
 	@echo "make sure              Make sure that the formatter, linter, tests, etc all pass"
 	@echo "make update-pdfjs      Update our copy of PDF-js"
@@ -60,12 +61,16 @@ checkformatting: python
 test: python
 	@tox -q
 
+.PHONY: coverage
+coverage: python
+	@tox -qe coverage
+
 .PHONY: functests
 functests: python
 	@tox -qe functests
 
 .PHONY: sure
-sure: checkformatting lint test functests
+sure: checkformatting lint test coverage functests
 
 .PHONY: update-pdfjs
 update-pdfjs: python
