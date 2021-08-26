@@ -9,3 +9,6 @@ pyramid-jinja2
 pyramid-services
 requests
 whitenoise
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
