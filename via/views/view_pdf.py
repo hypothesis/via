@@ -1,11 +1,15 @@
 """View presenting the PDF viewer."""
 import hashlib
+import logging
+import re
 from base64 import b64encode
 from datetime import timedelta
 
+import requests
 from h_vialib import Configuration
 from h_vialib.secure import quantized_expiry
 from pyramid import view
+from pyramid.response import Response
 
 from via.views.decorators import has_secure_url_token
 
@@ -27,6 +31,7 @@ def view_pdf(context, request):
 
     nginx_server = request.registry.settings["nginx_server"]
     proxy_pdf_url = _pdf_url(
+        request,
         url,
         nginx_server,
         request.registry.settings["nginx_secure_link_secret"],
@@ -45,8 +50,44 @@ def view_pdf(context, request):
     }
 
 
-def _pdf_url(url, nginx_server, secret):
+@view.view_config(route_name="proxy_google_drive")
+def proxy_google_drive(context, request):
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+
+    SERVICE_ACCOUNT_FILE = "/home/marcos/hypo/token.json"
+    SCOPES = [
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive.metadata",
+    ]
+    url = request.params["url"]
+    file_id = re.match(
+        r"https://drive.google.com/uc\?id=(.*)&export=download", url
+    ).group(1)
+
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    )
+    service = build("drive", "v3", credentials=credentials)
+    try:
+        pdf_contents = service.files().get_media(fileId=file_id).execute()
+        return Response(body=pdf_contents)
+    except:
+        google_api_key = request.registry.settings["google_api_key"]
+        response = requests.get(
+            f"https://www.googleapis.com/drive/v3/files/$2?key={google_api_key}&alt=media"
+        )
+        response.raise_for_status()
+        return Response(body=response.contents)
+
+
+def _pdf_url(request, url, nginx_server, secret):
     """Return the URL from which the PDF viewer should load the PDF."""
+
+    if url.startswith("https://drive.google.com/uc"):
+        return request.route_url("proxy_google_drive", _query={"url": url})
 
     # Compute the expiry time to put into the URL.
     exp = int(quantized_expiry(max_age=timedelta(hours=2)).timestamp())

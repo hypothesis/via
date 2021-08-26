@@ -19,6 +19,7 @@ PARAMETERS = {
     "via_secret": {"required": True},
     "checkmate_api_key": {"required": True},
     "nginx_secure_link_secret": {"required": True},
+    "google_api_key": {"required": True},
     # Optional
     "checkmate_ignore_reasons": {},
     "checkmate_allow_all": {"formatter": asbool},
