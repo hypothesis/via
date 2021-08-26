@@ -22,7 +22,7 @@ class TestViewPDF:
     def test_it_signs_the_url(self, call_view_pdf, quantized_expiry):
         response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
 
-        quantized_expiry.assert_called_once_with(max_age=timedelta(hours=2))
+        quantized_expiry.assert_called_once_with(max_age=timedelta(hours=25))
         signed_url = response["proxy_pdf_url"]
         signed_url_parts = signed_url.split("/")
         signature = signed_url_parts[5]

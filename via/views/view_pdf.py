@@ -49,7 +49,7 @@ def _pdf_url(url, nginx_server, secret):
     """Return the URL from which the PDF viewer should load the PDF."""
 
     # Compute the expiry time to put into the URL.
-    exp = int(quantized_expiry(max_age=timedelta(hours=2)).timestamp())
+    exp = int(quantized_expiry(max_age=timedelta(hours=25)).timestamp())
 
     # The expression to be hashed.
     #
