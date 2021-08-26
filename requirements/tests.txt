@@ -11,6 +11,10 @@ attrs==20.3.0
     #   pytest
 beautifulsoup4==4.9.3
     # via webtest
+cachetools==4.2.2
+    # via
+    #   -r requirements/requirements.txt
+    #   google-auth
 certifi==2020.12.5
     # via
     #   -r requirements/requirements.txt
@@ -26,6 +30,29 @@ factory-boy==3.2.0
     # via -r requirements/tests.in
 faker==5.8.0
     # via factory-boy
+google-api-core==2.0.0
+    # via
+    #   -r requirements/requirements.txt
+    #   google-api-python-client
+google-api-python-client==2.18.0
+    # via -r requirements/requirements.txt
+google-auth==2.0.1
+    # via
+    #   -r requirements/requirements.txt
+    #   google-api-core
+    #   google-api-python-client
+    #   google-auth-httplib2
+    #   google-auth-oauthlib
+google-auth-httplib2==0.1.0
+    # via
+    #   -r requirements/requirements.txt
+    #   google-api-python-client
+google-auth-oauthlib==0.4.5
+    # via -r requirements/requirements.txt
+googleapis-common-protos==1.53.0
+    # via
+    #   -r requirements/requirements.txt
+    #   google-api-core
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
 h-checkmatelib==1.0.9
@@ -36,6 +63,11 @@ h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.txt
 h-vialib==1.0.17
     # via -r requirements/requirements.txt
+httplib2==0.19.1
+    # via
+    #   -r requirements/requirements.txt
+    #   google-api-python-client
+    #   google-auth-httplib2
 httpretty==1.1.4
     # via -r requirements/tests.in
 hupper==1.10.2
@@ -67,6 +99,10 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 newrelic==6.8.1.164
     # via -r requirements/requirements.txt
+oauthlib==3.1.1
+    # via
+    #   -r requirements/requirements.txt
+    #   requests-oauthlib
 packaging==20.9
     # via pytest
 pastedeploy==2.1.1
@@ -84,14 +120,31 @@ plaster-pastedeploy==0.7
     #   pyramid
 pluggy==0.13.1
     # via pytest
+protobuf==3.17.3
+    # via
+    #   -r requirements/requirements.txt
+    #   google-api-core
+    #   googleapis-common-protos
 py==1.10.0
     # via pytest
+pyasn1==0.4.8
+    # via
+    #   -r requirements/requirements.txt
+    #   pyasn1-modules
+    #   rsa
+pyasn1-modules==0.2.8
+    # via
+    #   -r requirements/requirements.txt
+    #   google-auth
 pyjwt==2.0.1
     # via
     #   -r requirements/requirements.txt
     #   h-vialib
 pyparsing==2.4.7
-    # via packaging
+    # via
+    #   -r requirements/requirements.txt
+    #   httplib2
+    #   packaging
 pyramid==2.0
     # via
     #   -r requirements/requirements.txt
@@ -113,7 +166,17 @@ python-dateutil==2.8.1
 requests==2.26.0
     # via
     #   -r requirements/requirements.txt
+    #   google-api-core
     #   h-checkmatelib
+    #   requests-oauthlib
+requests-oauthlib==1.3.0
+    # via
+    #   -r requirements/requirements.txt
+    #   google-auth-oauthlib
+rsa==4.7.2
+    # via
+    #   -r requirements/requirements.txt
+    #   google-auth
 sentry-sdk==0.19.5
     # via
     #   -r requirements/requirements.txt
@@ -121,7 +184,9 @@ sentry-sdk==0.19.5
 six==1.15.0
     # via
     #   -r requirements/requirements.txt
+    #   google-auth-httplib2
     #   jsonschema
+    #   protobuf
     #   python-dateutil
 soupsieve==2.1
     # via beautifulsoup4
@@ -133,6 +198,10 @@ translationstring==1.4
     # via
     #   -r requirements/requirements.txt
     #   pyramid
+uritemplate==3.0.1
+    # via
+    #   -r requirements/requirements.txt
+    #   google-api-python-client
 urllib3==1.26.5
     # via
     #   -r requirements/requirements.txt
