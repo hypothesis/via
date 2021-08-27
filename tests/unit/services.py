@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from via.services import ViaClientService
+from via.services import SecureLinkService, ViaClientService
 
 
 @pytest.fixture
@@ -19,3 +19,8 @@ def mock_service(pyramid_config):
 @pytest.fixture
 def via_client_service(mock_service):
     return mock_service(ViaClientService)
+
+
+@pytest.fixture
+def secure_link_service(mock_service):
+    return mock_service(SecureLinkService)
