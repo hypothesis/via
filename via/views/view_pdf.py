@@ -7,7 +7,7 @@ from h_vialib import Configuration
 from h_vialib.secure import quantized_expiry
 from pyramid import view
 
-from via.views.decorators import has_secure_url_token
+from via.services import has_secure_url_token
 
 
 @view.view_config(

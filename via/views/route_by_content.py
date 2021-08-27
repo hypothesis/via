@@ -4,8 +4,7 @@ from pyramid import httpexceptions as exc
 from pyramid import view
 
 from via.get_url import get_url_details
-from via.services import ViaClientService
-from via.views.decorators import has_secure_url_token
+from via.services import ViaClientService, has_secure_url_token
 
 
 @view.view_config(route_name="route_by_content", decorator=(has_secure_url_token,))
