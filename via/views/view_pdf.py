@@ -7,7 +7,8 @@ from h_vialib import Configuration
 from h_vialib.secure import quantized_expiry
 from pyramid import view
 
-from via.services import has_secure_url_token
+from via.services import GoogleDriveAPI
+from via.services.secure_link import SecureLinkService, has_secure_url_token
 
 
 @view.view_config(
@@ -25,12 +26,20 @@ def view_pdf(context, request):
 
     request.checkmate.raise_if_blocked(url)
 
-    nginx_server = request.registry.settings["nginx_server"]
-    proxy_pdf_url = _pdf_url(
-        url,
-        nginx_server,
-        request.registry.settings["nginx_secure_link_secret"],
-    )
+    google_drive_api = request.find_service(GoogleDriveAPI)
+    if google_drive_api.is_available and (
+        file_id := google_drive_api.google_drive_id(url)
+    ):
+        proxy_pdf_url = request.find_service(SecureLinkService).sign_url(
+            request.route_url("google_drive_file", file_id=file_id)
+        )
+
+    else:
+        proxy_pdf_url = _pdf_url(
+            url,
+            nginx_server=request.registry.settings["nginx_server"],
+            secret=request.registry.settings["nginx_secure_link_secret"],
+        )
 
     _, h_config = Configuration.extract_from_params(request.params)
 
