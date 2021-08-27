@@ -22,6 +22,7 @@ PARAMETERS = {
     # Optional
     "checkmate_ignore_reasons": {},
     "checkmate_allow_all": {"formatter": asbool},
+    "google_drive_credentials_file": {},
     "signed_urls_required": {"formatter": asbool},
     "enable_front_page": {"formatter": asbool},
 }
