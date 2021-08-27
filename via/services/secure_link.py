@@ -31,6 +31,12 @@ class SecureLinkService:
 
         return True
 
+    def sign_url(self, url):
+        if self._signed_urls_required:
+            return self._secure_token.create(url)
+
+        return url
+
 
 def factory(_context, request):
     return SecureLinkService(
