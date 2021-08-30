@@ -17,7 +17,8 @@ def pyramid_settings():
         "checkmate_ignore_reasons": None,
         "checkmate_allow_all": False,
         "enable_front_page": True,
-        "google_drive_credentials_file": None,
+        "google_drive_credentials": None,
+        "google_drive_in_python": False,
     }
 
 
