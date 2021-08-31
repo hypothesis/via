@@ -35,32 +35,34 @@ def build_http_exception(status_code, message=None):
 
 
 class TestGoogleDriveAPI:
-    def test_it_builds_a_service_as_we_expect(self, Credentials, build):
+    def test_it_builds_a_service_as_we_expect(self, google, googleapiclient):
         api = GoogleDriveAPI(sentinel.credentials)
 
-        Credentials.from_service_account_info.assert_called_once_with(
+        google.oauth2.service_account.Credentials.from_service_account_info.assert_called_once_with(
             sentinel.credentials, scopes=GoogleDriveAPI.SCOPES
         )
-        build.assert_called_once_with(
+        googleapiclient.discovery.build.assert_called_once_with(
             "drive",
             "v3",
-            credentials=Credentials.from_service_account_info.return_value,
+            credentials=google.oauth2.service_account.Credentials.from_service_account_info.return_value,
         )
         # pylint: disable=protected-access
-        assert api._service == build.return_value
+        assert api._service == googleapiclient.discovery.build.return_value
 
-    def test_it_with_bad_credentials(self, Credentials):
+    def test_it_with_bad_credentials(self, google):
         # Google seems to raise plain ValueError's for bad config
-        Credentials.from_service_account_info.side_effect = ValueError
+        google.oauth2.service_account.Credentials.from_service_account_info.side_effect = (
+            ValueError
+        )
 
         with pytest.raises(ConfigurationError):
             GoogleDriveAPI(sentinel.bad_credentials)
 
-    def test_iter_file(self, MediaIoBaseDownload):
+    def test_iter_file(self, googleapiclient):
         # This is all a bit black box, we don't necessarily know what all these
         # Google objects do, so we'll just check we call them in the right way
         api = GoogleDriveAPI(sentinel.credentials)
-        MediaIoBaseDownload.return_value.next_chunk.side_effect = [
+        googleapiclient.http.MediaIoBaseDownload.return_value.next_chunk.side_effect = [
             (sentinel.status, False),
             (sentinel.status, False),
             (sentinel.status, True),
@@ -73,12 +75,12 @@ class TestGoogleDriveAPI:
         api._service.files.return_value.get_media.assert_called_once_with(
             fileId=sentinel.file_id
         )
-        MediaIoBaseDownload.assert_called_once_with(
+        googleapiclient.http.MediaIoBaseDownload.assert_called_once_with(
             Any.instance_of(BytesIO),
             api._service.files.return_value.get_media.return_value,
         )
 
-        MediaIoBaseDownload.return_value.next_chunk.assert_has_calls(
+        googleapiclient.http.MediaIoBaseDownload.return_value.next_chunk.assert_has_calls(
             [call(), call(), call()]
         )
 
@@ -94,20 +96,20 @@ class TestGoogleDriveAPI:
             (500, UpstreamServiceError),
         ),
     )
-    def test_iter_file_with_errors(self, MediaIoBaseDownload, code, expected_exception):
+    def test_iter_file_with_errors(self, googleapiclient, code, expected_exception):
         api = GoogleDriveAPI(sentinel.credentials)
-        MediaIoBaseDownload.return_value.next_chunk.side_effect = build_http_exception(
-            code, "Some error message"
+        googleapiclient.http.MediaIoBaseDownload.return_value.next_chunk.side_effect = (
+            build_http_exception(code, "Some error message")
         )
 
         with pytest.raises(expected_exception):
             list(api.iter_file(sentinel.file_id))
 
-    def test_download_with_malformed_error_from_google(self, MediaIoBaseDownload):
+    def test_download_with_malformed_error_from_google(self, googleapiclient):
         # Check we don't rely on the specific shape of the error
         api = GoogleDriveAPI(sentinel.credentials)
-        MediaIoBaseDownload.return_value.next_chunk.side_effect = build_http_exception(
-            404, message=None
+        googleapiclient.http.MediaIoBaseDownload.return_value.next_chunk.side_effect = (
+            build_http_exception(404, message=None)
         )
 
         with pytest.raises(HTTPNotFound):
@@ -132,16 +134,12 @@ class TestGoogleDriveAPI:
         assert GoogleDriveAPI.google_drive_id(url) == expected
 
     @pytest.fixture(autouse=True)
-    def build(self, patch):
-        return patch("via.services.google_drive.build")
+    def googleapiclient(self, patch):
+        return patch("via.services.google_drive.googleapiclient")
 
     @pytest.fixture(autouse=True)
-    def Credentials(self, patch):
-        return patch("via.services.google_drive.Credentials")
-
-    @pytest.fixture(autouse=True)
-    def MediaIoBaseDownload(self, patch):
-        return patch("via.services.google_drive.MediaIoBaseDownload")
+    def google(self, patch):
+        return patch("via.services.google_drive.google")
 
 
 class TestFactory:

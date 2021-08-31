@@ -4,10 +4,10 @@ from io import BytesIO
 from json import JSONDecodeError
 from typing import ByteString, Iterator
 
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
+import google.oauth2.service_account
+import googleapiclient.discovery
+import googleapiclient.http
 from googleapiclient.errors import HttpError
-from googleapiclient.http import MediaIoBaseDownload
 from pyramid.httpexceptions import HTTPNotFound
 
 from via.exceptions import ConfigurationError, UpstreamServiceError
@@ -33,15 +33,19 @@ class GoogleDriveAPI:
         """
         if service_account_info:
             try:
-                credentials = Credentials.from_service_account_info(
-                    service_account_info, scopes=self.SCOPES
+                credentials = (
+                    google.oauth2.service_account.Credentials.from_service_account_info(
+                        service_account_info, scopes=self.SCOPES
+                    )
                 )
             except ValueError as exc:
                 raise ConfigurationError(
                     "The Google Drive service account information is invalid"
                 ) from exc
 
-            self._service = build("drive", "v3", credentials=credentials)
+            self._service = googleapiclient.discovery.build(
+                "drive", "v3", credentials=credentials
+            )
         else:
             self._service = None
 
@@ -79,7 +83,7 @@ class GoogleDriveAPI:
         request = self._service.files().get_media(fileId=file_id)
 
         handle = BytesIO()
-        downloader = MediaIoBaseDownload(handle, request)
+        downloader = googleapiclient.http.MediaIoBaseDownload(handle, request)
         done = False
         while not done:
             try:
