@@ -9,8 +9,7 @@ from h_matchers import Any
 from pyramid.httpexceptions import HTTPNotFound
 
 from via.exceptions import ConfigurationError, UpstreamServiceError
-from via.services import GoogleDriveAPI
-from via.services.google_drive import factory
+from via.services.google_drive import GoogleDriveAPI, factory
 
 
 def build_http_exception(status_code, message=None):

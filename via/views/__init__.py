@@ -9,7 +9,7 @@ def add_routes(config):
     config.add_route("view_pdf", "/pdf", factory=URLResource)
     config.add_route("route_by_content", "/route", factory=URLResource)
     config.add_route("debug_headers", "/debug/headers")
-    config.add_route("google_drive_file", "google_drive/{file_id}")
+    config.add_route("proxy_google_drive_file", "/google_drive/{file_id}")
     config.add_route("proxy", "/{url:.*}")
 
 

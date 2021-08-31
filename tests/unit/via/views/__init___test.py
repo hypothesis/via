@@ -16,7 +16,7 @@ class TestIncludeMe:
             mock.call("view_pdf", "/pdf", factory=URLResource),
             mock.call("route_by_content", "/route", factory=URLResource),
             mock.call("debug_headers", "/debug/headers"),
-            mock.call("google_drive_file", "google_drive/{file_id}"),
+            mock.call("proxy_google_drive_file", "/google_drive/{file_id}"),
             mock.call("proxy", "/{url:.*}"),
         ]
         config.scan.assert_called_once_with("via.views")

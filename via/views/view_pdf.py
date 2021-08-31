@@ -31,7 +31,7 @@ def view_pdf(context, request):
         file_id := google_drive_api.google_drive_id(url)
     ):
         proxy_pdf_url = request.find_service(SecureLinkService).sign_url(
-            request.route_url("google_drive_file", file_id=file_id)
+            request.route_url("proxy_google_drive_file", file_id=file_id)
         )
 
     else:

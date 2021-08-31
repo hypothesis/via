@@ -4,12 +4,9 @@ from via.services.google_drive import GoogleDriveAPI
 from via.services.secure_link import has_secure_url_token
 
 
-@view_config(
-    route_name="google_drive_file",
-    decorator=(has_secure_url_token,),
-)
-def get_file_content(_context, request):
-    """Download a file from Google Drive."""
+@view_config(route_name="proxy_google_drive_file", decorator=(has_secure_url_token,))
+def proxy_google_drive_file(request):
+    """Proxy a file from Google Drive."""
 
     response = request.response
     response.headers.update(

@@ -1,6 +1,6 @@
 from unittest.mock import sentinel
 
-from via.views.google_drive import get_file_content
+from via.views.google_drive import proxy_google_drive_file
 
 
 class TestGetFileContent:
@@ -9,7 +9,7 @@ class TestGetFileContent:
             {"file_id": sentinel.file_id, "token": sentinel.token}
         )
 
-        response = get_file_content(sentinel.context, pyramid_request)
+        response = proxy_google_drive_file(pyramid_request)
 
         assert response.headers["Content-Disposition"] == "inline"
         assert response.headers["Content-Type"] == "application/pdf"
