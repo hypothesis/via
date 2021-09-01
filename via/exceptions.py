@@ -16,3 +16,7 @@ class UpstreamServiceError(HTTPConflict):
 
 class UnhandledException(HTTPExpectationFailed):
     """Something we did not plan for went wrong."""
+
+
+class ConfigurationError(UnhandledException):
+    """The application configuration is malformed."""
