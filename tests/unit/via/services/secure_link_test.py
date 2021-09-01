@@ -51,6 +51,18 @@ class TestSecureLinkService:
 
         service._via_secure_url.verify.assert_not_called()
 
+    def test_sign_url(self, service):
+        result = service.sign_url(sentinel.url)
+
+        service._via_secure_url.create.assert_called_once_with(sentinel.url)
+        assert result == service._via_secure_url.create.return_value
+
+    @pytest.mark.usefixtures("with_signed_urls_not_required")
+    def test_sign_url_if_signatures_not_required(self, service):
+        result = service.sign_url(sentinel.url)
+
+        assert result == sentinel.url
+
     @pytest.fixture
     def service(self):
         return SecureLinkService(secret="not_a_secret", signed_urls_required=True)
