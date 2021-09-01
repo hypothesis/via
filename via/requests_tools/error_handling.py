@@ -38,3 +38,23 @@ def handle_errors(inner):
             raise UnhandledException() from err
 
     return deco
+
+
+def iter_handle_errors(inner):
+    """Translate errors into our application errors."""
+
+    @wraps(inner)
+    def deco(*args, **kwargs):
+        try:
+            yield from inner(*args, **kwargs)
+
+        except REQUESTS_BAD_URL as err:
+            raise BadURL(err.args[0]) from None
+
+        except REQUESTS_UPSTREAM_SERVICE as err:
+            raise UpstreamServiceError(err.args[0]) from None
+
+        except RequestException as err:
+            raise UnhandledException(err.args[0]) from None
+
+    return deco
