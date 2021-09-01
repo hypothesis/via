@@ -4,15 +4,10 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 from requests import Response
-from requests.exceptions import (
-    MissingSchema,
-    ProxyError,
-    SSLError,
-    UnrewindableBodyError,
-)
+from requests.exceptions import SSLError
 
-from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
-from via.get_url.details import get_url_details
+from via.exceptions import BadURL, UpstreamServiceError
+from via.get_url import get_url_details
 
 
 class TestGetURLDetails:
@@ -51,20 +46,14 @@ class TestGetURLDetails:
         )
 
     @pytest.mark.usefixtures("response")
-    def test_it_cleans_and_passes_on_the_users_headers(self, requests, clean_headers):
-        get_url_details(url="http://example.com")
+    def test_it_modifies_headers(self, requests, clean_headers, add_request_headers):
+        get_url_details(url="http://example.com", headers={"X-Pre-Existing": 1})
 
         _args, kwargs = requests.get.call_args
 
-        assert kwargs["headers"] == clean_headers.return_value
-
-    @pytest.mark.usefixtures("response")
-    def test_it_adds_abuse_policy_headers(self, requests):
-        get_url_details(url="http://example.com", headers={})
-
-        headers = requests.get.call_args[1]["headers"]
-        assert headers["X-Abuse-Policy"] == "https://web.hypothes.is/abuse-policy/"
-        assert headers["X-Complaints-To"] == "https://web.hypothes.is/report-abuse/"
+        clean_headers.assert_called_once_with({"X-Pre-Existing": 1})
+        add_request_headers.assert_called_once_with(clean_headers.return_value)
+        assert kwargs["headers"] == add_request_headers.return_value
 
     def test_it_assumes_pdf_with_a_google_drive_url(self, requests):
         result = get_url_details(
@@ -80,21 +69,12 @@ class TestGetURLDetails:
         with pytest.raises(BadURL):
             get_url_details(bad_url)
 
-    @pytest.mark.parametrize(
-        "request_exception,expected_exception",
-        (
-            (MissingSchema, BadURL),
-            (ProxyError, UpstreamServiceError),
-            (SSLError, UpstreamServiceError),
-            (UnrewindableBodyError, UnhandledException),
-        ),
-    )
-    def test_it_catches_requests_exceptions(
-        self, requests, request_exception, expected_exception
-    ):
-        requests.get.side_effect = request_exception("Oh noe")
+    def test_it_catches_requests_exceptions(self, requests):
+        # We'll test one (of the many) error translations that `@handle_errors`
+        # does for us to prove it's in use on the method.
+        requests.get.side_effect = SSLError("Oh noe")
 
-        with pytest.raises(expected_exception):
+        with pytest.raises(UpstreamServiceError):
             get_url_details("http://example.com")
 
     @pytest.fixture
@@ -109,8 +89,12 @@ class TestGetURLDetails:
 
     @pytest.fixture
     def requests(self, patch):
-        return patch("via.get_url.details.requests")
+        return patch("via.get_url.requests")
+
+    @pytest.fixture(autouse=True)
+    def add_request_headers(self, patch):
+        return patch("via.get_url.add_request_headers", return_value={})
 
     @pytest.fixture(autouse=True)
     def clean_headers(self, patch):
-        return patch("via.get_url.details.clean_headers", return_value={})
+        return patch("via.get_url.clean_headers", return_value={})

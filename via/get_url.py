@@ -2,46 +2,18 @@
 import cgi
 import re
 from collections import OrderedDict
-from functools import wraps
 
 import requests
-from requests import RequestException
 
-from via.exceptions import (
-    REQUESTS_BAD_URL,
-    REQUESTS_UPSTREAM_SERVICE,
-    BadURL,
-    UnhandledException,
-    UpstreamServiceError,
-)
-from via.get_url.headers import clean_headers
+from via.requests_tools.error_handling import handle_errors
+from via.requests_tools.headers import add_request_headers, clean_headers
 
 GOOGLE_DRIVE_REGEX = re.compile(
     r"^https://drive.google.com/uc\?id=(.*)&export=download$", re.IGNORECASE
 )
 
 
-def _handle_errors(inner):
-    """Translate errors into our application errors."""
-
-    @wraps(inner)
-    def deco(*args, **kwargs):
-        try:
-            return inner(*args, **kwargs)
-
-        except REQUESTS_BAD_URL as err:
-            raise BadURL(err.args[0]) from None
-
-        except REQUESTS_UPSTREAM_SERVICE as err:
-            raise UpstreamServiceError(err.args[0]) from None
-
-        except RequestException as err:
-            raise UnhandledException(err.args[0]) from None
-
-    return deco
-
-
-@_handle_errors
+@handle_errors
 def get_url_details(url, headers=None):
     """Get the content type and status code for a given URL.
 
@@ -59,10 +31,7 @@ def get_url_details(url, headers=None):
     if GOOGLE_DRIVE_REGEX.match(url):
         return "application/pdf", 200
 
-    headers = clean_headers(headers)
-    # Pass our abuse policy in request headers for third-party site admins.
-    headers["X-Abuse-Policy"] = "https://web.hypothes.is/abuse-policy/"
-    headers["X-Complaints-To"] = "https://web.hypothes.is/report-abuse/"
+    headers = add_request_headers(clean_headers(headers))
 
     with requests.get(
         url,

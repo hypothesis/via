@@ -73,3 +73,13 @@ def clean_headers(headers):
         clean[header_name] = value
 
     return clean
+
+
+def add_request_headers(headers):
+    """Add headers for 3rd party providers which we access data from."""
+
+    # Pass our abuse policy in request headers for third-party site admins.
+    headers["X-Abuse-Policy"] = "https://web.hypothes.is/abuse-policy/"
+    headers["X-Complaints-To"] = "https://web.hypothes.is/report-abuse/"
+
+    return headers

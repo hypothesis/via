@@ -2,10 +2,11 @@ from collections import OrderedDict
 
 import pytest
 
-from via.get_url.headers import (
+from via.requests_tools.headers import (
     BANNED_HEADERS,
     HEADER_DEFAULTS,
     HEADER_MAP,
+    add_request_headers,
     clean_headers,
 )
 
@@ -48,3 +49,14 @@ class TestCleanHeaders:
 
         assert result[mapped_name] == "value"
         assert header_name not in result
+
+
+class TestAddHeaders:
+    def test_it(self):
+        headers = add_request_headers({"X-Existing": "existing"})
+
+        assert headers == {
+            "X-Abuse-Policy": "https://web.hypothes.is/abuse-policy/",
+            "X-Complaints-To": "https://web.hypothes.is/report-abuse/",
+            "X-Existing": "existing",
+        }
