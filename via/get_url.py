@@ -1,16 +1,12 @@
 """Retrieve details about a resource at a URL."""
 import cgi
-import re
 from collections import OrderedDict
 
 import requests
 
 from via.requests_tools.error_handling import handle_errors
 from via.requests_tools.headers import add_request_headers, clean_headers
-
-GOOGLE_DRIVE_REGEX = re.compile(
-    r"^https://drive.google.com/uc\?id=(.*)&export=download$", re.IGNORECASE
-)
+from via.services.google_drive import GoogleDriveAPI
 
 
 @handle_errors
@@ -28,7 +24,7 @@ def get_url_details(url, headers=None):
     if headers is None:
         headers = OrderedDict()
 
-    if GOOGLE_DRIVE_REGEX.match(url):
+    if GoogleDriveAPI.google_drive_id(url):
         return "application/pdf", 200
 
     headers = add_request_headers(clean_headers(headers))

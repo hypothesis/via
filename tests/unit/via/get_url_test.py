@@ -55,13 +55,15 @@ class TestGetURLDetails:
         add_request_headers.assert_called_once_with(clean_headers.return_value)
         assert kwargs["headers"] == add_request_headers.return_value
 
-    def test_it_assumes_pdf_with_a_google_drive_url(self, requests):
-        result = get_url_details(
-            "https://drive.google.com/uc?id=--FILEID--&export=download"
-        )
+    def test_it_assumes_pdf_with_a_google_drive_url(self, requests, GoogleDriveAPI):
+        GoogleDriveAPI.google_drive_id.return_value = "truthy_value"
+
+        result = get_url_details(sentinel.google_drive_url)
 
         assert result == ("application/pdf", 200)
-
+        GoogleDriveAPI.google_drive_id.assert_called_once_with(
+            sentinel.google_drive_url
+        )
         requests.get.assert_not_called()
 
     @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
@@ -90,6 +92,10 @@ class TestGetURLDetails:
     @pytest.fixture
     def requests(self, patch):
         return patch("via.get_url.requests")
+
+    @pytest.fixture
+    def GoogleDriveAPI(self, patch):
+        return patch("via.get_url.GoogleDriveAPI", return_value={})
 
     @pytest.fixture(autouse=True)
     def add_request_headers(self, patch):

@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from via.services import SecureLinkService, ViaClientService
+from via.services import GoogleDriveAPI, SecureLinkService, ViaClientService
 
 
 @pytest.fixture
@@ -19,6 +19,11 @@ def mock_service(pyramid_config):
 @pytest.fixture
 def via_client_service(mock_service):
     return mock_service(ViaClientService)
+
+
+@pytest.fixture
+def google_drive_api(mock_service):
+    return mock_service(GoogleDriveAPI)
 
 
 @pytest.fixture
