@@ -8,18 +8,41 @@ from via.resources import URLResource
 from via.views.view_pdf import view_pdf
 
 
+@pytest.mark.usefixtures("secure_link_service", "google_drive_api")
 class TestViewPDF:
-    def test_it_passes_through_static_config(self, call_view_pdf, pyramid_settings):
-        response = call_view_pdf()
+    def test_it(self, call_view_pdf, pyramid_request, pyramid_settings, Configuration):
+        response = call_view_pdf("http://example.com/foo.pdf")
 
-        assert response == Any.dict.containing(
-            {
-                "client_embed_url": pyramid_settings["client_embed_url"],
-                "static_url": Any.function(),
-            }
+        Configuration.extract_from_params.assert_called_once_with(
+            pyramid_request.params
+        )
+        pyramid_request.checkmate.raise_if_blocked(sentinel.url)
+
+        assert response == {
+            "pdf_url": "http://example.com/foo.pdf",
+            "proxy_pdf_url": Any(),
+            "client_embed_url": pyramid_settings["client_embed_url"],
+            "static_url": pyramid_request.static_url,
+            "hypothesis_config": sentinel.h_config,
+        }
+
+    @pytest.mark.parametrize(
+        "drive_available,is_google_url", ((True, False), (False, True), (False, False))
+    )
+    def test_it_signs_the_url_if_not_google(
+        self,
+        call_view_pdf,
+        google_drive_api,
+        secure_link_service,
+        drive_available,
+        is_google_url,
+        quantized_expiry,
+    ):
+        google_drive_api.is_available = drive_available
+        google_drive_api.google_drive_id.return_value = (
+            sentinel.file_id if is_google_url else None
         )
 
-    def test_it_signs_the_url(self, call_view_pdf, quantized_expiry):
         response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
 
         quantized_expiry.assert_called_once_with(max_age=timedelta(hours=25))
@@ -30,33 +53,18 @@ class TestViewPDF:
         assert signature == "qTq65RXvm6P2Y4bfzWdPzg"
         assert expiry == "1581183021"
 
-    @pytest.mark.parametrize(
-        "pdf_url",
-        [
-            "http://example.com/foo.pdf",
-            "http://example.com/foo.pdf?a=1&a=2",
-            "http://example.com/foo%2C.pdf?a=1&a=2",
-        ],
-    )
-    def test_it_passes_through_the_url(self, call_view_pdf, pdf_url, pyramid_settings):
-        response = call_view_pdf(pdf_url)
+    def test_it_signs_the_url_if_google(
+        self, call_view_pdf, google_drive_api, secure_link_service
+    ):
+        google_drive_api.is_available = True
+        google_drive_api.google_drive_id.return_value = "FILE_ID"
 
-        assert response["pdf_url"] == pdf_url
-        assert response["proxy_pdf_url"].endswith(f"/{pdf_url}")
+        response = call_view_pdf(sentinel.url)
 
-    def test_it_extracts_config(self, call_view_pdf, Configuration):
-        response = call_view_pdf()
-
-        Configuration.extract_from_params.assert_called_once_with(
-            Any.mapping.containing({"url": Any.string()})
+        secure_link_service.sign_url.assert_called_once_with(
+            "http://example.com/google_drive/FILE_ID?url=sentinel.url"
         )
-
-        assert response["hypothesis_config"] == sentinel.h_config
-
-    def test_it_calls_checkmate(self, call_view_pdf, pyramid_request):
-        call_view_pdf(sentinel.url)
-
-        pyramid_request.checkmate.raise_if_blocked(sentinel.url)
+        assert response["proxy_pdf_url"] == secure_link_service.sign_url.return_value
 
     @pytest.fixture
     def call_view_pdf(self, pyramid_request):
@@ -77,18 +85,23 @@ class TestViewPDF:
 
         return Configuration
 
+    @pytest.fixture(autouse=True)
+    def google_drive_api(self, google_drive_api):
+        google_drive_api.google_drive_id.return_value = None
 
-@pytest.fixture(autouse=True)
-def quantized_expiry(patch):
-    return patch(
-        "via.views.view_pdf.quantized_expiry",
-        return_value=datetime(
-            year=2020,
-            month=2,
-            day=8,
-            hour=17,
-            minute=30,
-            second=21,
-            tzinfo=timezone.utc,
-        ),
-    )
+        return google_drive_api
+
+    @pytest.fixture(autouse=True)
+    def quantized_expiry(self, patch):
+        return patch(
+            "via.views.view_pdf.quantized_expiry",
+            return_value=datetime(
+                year=2020,
+                month=2,
+                day=8,
+                hour=17,
+                minute=30,
+                second=21,
+                tzinfo=timezone.utc,
+            ),
+        )
