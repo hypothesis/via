@@ -29,7 +29,7 @@ def extract(url):
 
 
 def get_raw_ids():
-    for source in glob("data/urls_*.csv"):
+    for source in glob("data/*.csv"):
         with open(source) as handle:
             for row in handle:
                 try:
