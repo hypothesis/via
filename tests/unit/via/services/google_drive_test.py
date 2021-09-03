@@ -54,6 +54,21 @@ class TestGoogleDriveAPI:
         stream_bytes.assert_called_once_with(api._session.get.return_value)
         assert result == [0, 1, 2]
 
+    def test_iter_file_accepts_resource_key(self, api):
+        list(api.iter_file("FILE_ID", "SPECIFIED_RESOURCE_ID"))
+
+        # pylint: disable=no-member,protected-access
+        api._session.get.assert_called_once_with(
+            url=Any(),
+            headers=Any.dict.containing(
+                {
+                    "X-Goog-Drive-Resource-Keys": "FILE_ID/SPECIFIED_RESOURCE_ID",
+                }
+            ),
+            stream=Any(),
+            timeout=Any(),
+        )
+
     def test_iter_file_handles_errors(self, api, stream_bytes):
         # We aren't going to go crazy here as `iter_handle_errors` is better
         # tested elsewhere

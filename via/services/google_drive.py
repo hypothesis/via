@@ -89,10 +89,11 @@ class GoogleDriveAPI:
         return data
 
     @iter_handle_errors
-    def iter_file(self, file_id) -> Iterator[ByteString]:
+    def iter_file(self, file_id, resource_key=None) -> Iterator[ByteString]:
         """Get a generator of chunks of bytes for the specified file.
 
         :param file_id: Google Drive file id to retrieve
+        :param resource_key: Google Drive resources key (if any)
         :returns: A generator of byte strings which taken together form the
             document
 
@@ -109,6 +110,9 @@ class GoogleDriveAPI:
                 "User-Agent": "(gzip)",
             }
         )
+
+        if resource_key:
+            headers["X-Goog-Drive-Resource-Keys"] = f"{file_id}/{resource_key}"
 
         response = self._session.get(url=url, headers=headers, stream=True, timeout=10)
         response.raise_for_status()
