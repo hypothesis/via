@@ -74,14 +74,64 @@ class TestGoogleDriveAPI:
     @pytest.mark.parametrize(
         "url,expected",
         (
-            ("https://drive.google.com/uc?id=FILE_ID&export=download", "FILE_ID"),
-            ("https://drive.google.com/uc?id=FILE_ID&export=download-MORE", None),
-            ("https://drive.google.com/uc?id=FILE_ID", None),
-            ("", None),
+            (
+                "https://drive.google.com/uc?id=FILE_ID",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/uc?Id=FILE_ID",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/uc?id=FILE_ID&export=download",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/uc?id=FILE_ID&export=download&resourceKey=RESOURCE_KEY",
+                {"file_id": "FILE_ID", "resource_key": "RESOURCE_KEY"},
+            ),
+            (
+                "https://drive.google.com/uc?id=FILE_ID&export=download&resourcekey=RESOURCE_KEY",
+                {"file_id": "FILE_ID", "resource_key": "RESOURCE_KEY"},
+            ),
+            (
+                "https://drive.google.com/uc?id=FILE_ID&export=download&via.open_sidebar=1&via.request_config_from_frame=https%3A%2F%2Flms.hypothes.is",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/uc?id=FILE_ID&authuser=0&export=download",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/u/1/uc?id=FILE_ID&export=download",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/open?id=FILE_ID",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/file/d/FILE_ID/view?usp=sharing&resourceKey=RESOURCE_KEY",
+                {"file_id": "FILE_ID", "resource_key": "RESOURCE_KEY"},
+            ),
+            (
+                "https://drive.google.com/file/d/FILE_ID/view",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            (
+                "https://drive.google.com/a/su.edu/file/d/FILE_ID/view?usp=sharing",
+                {"file_id": "FILE_ID", "resource_key": None},
+            ),
+            # Failure conditions
+            ("https://drive.google.com/drive/u/0/folders/FOLDER_ID", None),
+            ("https://drive.google.com/drive/u/0/folders/?id=FOLDER_ID", None),
+            ("https://drive.google.com/drive/my-drive", None),
+            ("https://drive.google.com/drive/priority?ths=true", None),
+            ("https://not.google.com/uc?id=FILE_ID", None),
         ),
     )
-    def test_google_drive_id(self, url, expected):
-        assert GoogleDriveAPI.google_drive_id(url) == expected
+    def test_parse_file_url(self, url, expected):
+        assert GoogleDriveAPI.parse_file_url(url) == expected
 
     @pytest.fixture
     def api(self):
