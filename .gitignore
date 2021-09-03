@@ -5,6 +5,6 @@
 via/static/**/*.gz
 node_modules/
 build.tar
-.devdata.env
+.devdata*
 supervisord.log
 supervisord.pid
