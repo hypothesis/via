@@ -5,7 +5,7 @@ from h_matchers import Any
 from requests import TooManyRedirects
 
 from via.exceptions import ConfigurationError, UpstreamServiceError
-from via.services.google_drive import GoogleDriveAPI, factory
+from via.services.google_drive import GoogleDriveAPI, factory, load_injected_json
 
 
 class TestGoogleDriveAPI:
@@ -26,7 +26,7 @@ class TestGoogleDriveAPI:
         Credentials.from_service_account_info.side_effect = ValueError
 
         with pytest.raises(ConfigurationError):
-            GoogleDriveAPI(sentinel.bad_credentials)
+            GoogleDriveAPI([sentinel.bad_credentials])
 
     def test_iter_file(self, api, stream_bytes):
         # This is all a bit black box, we don't necessarily know what all these
@@ -67,7 +67,7 @@ class TestGoogleDriveAPI:
 
     @pytest.mark.parametrize("with_credentials", (True, False))
     def test_is_available(self, with_credentials):
-        api = GoogleDriveAPI(sentinel.credentials if with_credentials else None)
+        api = GoogleDriveAPI([sentinel.credentials] if with_credentials else None)
 
         assert api.is_available == with_credentials
 
@@ -85,7 +85,7 @@ class TestGoogleDriveAPI:
 
     @pytest.fixture
     def api(self):
-        return GoogleDriveAPI(sentinel.credentials)
+        return GoogleDriveAPI([sentinel.credentials, sentinel.credentials_two])
 
     @pytest.fixture(autouse=True)
     def stream_bytes(self, patch):
@@ -100,38 +100,64 @@ class TestGoogleDriveAPI:
         return patch("via.services.google_drive.Credentials")
 
 
-class TestFactory:
-    def test_it_with_credentials(self, pyramid_request, GoogleDriveAPI):
-        pyramid_request.registry.settings.update(
-            {
-                "google_drive_credentials": '{"some": "json"}',
-                "google_drive_in_python": True,
-            }
+class TestLoadInjectedJSON:
+    def test_it(self, pyramid_request, tmpdir):
+        json_file = tmpdir / "data.json"
+        json_file.write('{"a": 1}')
+
+        data = load_injected_json(pyramid_request, "data.json")
+
+        assert data == {"a": 1}
+
+    @pytest.mark.parametrize("required", (True, False))
+    def test_it_with_malformed_data(self, pyramid_request, tmpdir, required):
+        json_file = tmpdir / "data.json"
+        json_file.write("{malformed ...")
+
+        with pytest.raises(ConfigurationError):
+            load_injected_json(pyramid_request, "data.json", required=required)
+
+    def test_it_with_missing_data(self, pyramid_request):
+        with pytest.raises(ConfigurationError):
+            load_injected_json(pyramid_request, "missing.json")
+
+    def test_it_with_missing_but_not_required_data(self, pyramid_request):
+        assert (
+            load_injected_json(pyramid_request, "missing.json", required=False) is None
         )
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_request, tmpdir):
+        pyramid_request.registry.settings["data_directory"] = tmpdir
+
+        return pyramid_request
+
+
+class TestFactory:
+    def test_it_with_credentials(
+        self, pyramid_request, GoogleDriveAPI, load_injected_json
+    ):
+        pyramid_request.registry.settings["google_drive_in_python"] = True
 
         api = factory(sentinel.context, pyramid_request)
 
-        GoogleDriveAPI.assert_called_once_with({"some": "json"})
+        load_injected_json.assert_called_once_with(
+            pyramid_request, "google_drive_credentials.json"
+        )
+        GoogleDriveAPI.assert_called_once_with(load_injected_json.return_value)
         assert api == GoogleDriveAPI.return_value
 
     def test_it_without_credentials(self, pyramid_request, GoogleDriveAPI):
-        pyramid_request.registry.settings.update(
-            {"google_drive_credentials": None, "google_drive_in_python": False}
-        )
+        pyramid_request.registry.settings["google_drive_in_python"] = False
 
         api = factory(sentinel.context, pyramid_request)
 
-        GoogleDriveAPI.assert_called_once_with(service_account_info=None)
+        GoogleDriveAPI.assert_called_once_with(credentials_list=None)
         assert api == GoogleDriveAPI.return_value
 
-    @pytest.mark.parametrize("credentials", ('{"malformed json....', None))
-    def test_it_with_invalid_credentials(self, pyramid_request, credentials):
-        pyramid_request.registry.settings.update(
-            {"google_drive_credentials": credentials, "google_drive_in_python": True}
-        )
-
-        with pytest.raises(ConfigurationError):
-            factory(sentinel.context, pyramid_request)
+    @pytest.fixture(autouse=True)
+    def load_injected_json(self, patch):
+        return patch("via.services.google_drive.load_injected_json")
 
     @pytest.fixture(autouse=True)
     def GoogleDriveAPI(self, patch):

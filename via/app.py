@@ -1,5 +1,6 @@
 """The main application entrypoint module."""
 import os
+from pathlib import Path
 
 import importlib_resources
 import pyramid.config
@@ -22,7 +23,7 @@ PARAMETERS = {
     # Optional
     "checkmate_ignore_reasons": {},
     "checkmate_allow_all": {"formatter": asbool},
-    "google_drive_credentials": {},
+    "data_directory": {"required": True, "formatter": Path},
     "google_drive_in_python": {"formatter": asbool},
     "signed_urls_required": {"formatter": asbool},
     "enable_front_page": {"formatter": asbool},

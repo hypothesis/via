@@ -1,6 +1,7 @@
 import json
 import re
 from json import JSONDecodeError
+from pathlib import Path
 from typing import ByteString, Iterator
 
 from google.auth.transport.requests import AuthorizedSession
@@ -21,18 +22,18 @@ class GoogleDriveAPI:
         "https://www.googleapis.com/auth/drive.readonly",
     ]
 
-    def __init__(self, service_account_info):
+    def __init__(self, credentials_list=None):
         """Initialise the service.
 
-        :param service_account_info: A dict of credentials info as provided by
-            Google console's JSON format.
+        :param credentials_list: A list of dicts of credentials info as
+            provided by Google console's JSON format.
 
         :raises ConfigurationError: If the credentials are not accepted by Google
         """
-        if service_account_info:
+        if credentials_list:
             try:
                 credentials = Credentials.from_service_account_info(
-                    service_account_info, scopes=self.SCOPES
+                    credentials_list[0], scopes=self.SCOPES
                 )
             except ValueError as exc:
                 raise ConfigurationError(
@@ -90,17 +91,41 @@ class GoogleDriveAPI:
         yield from stream_bytes(response)
 
 
+def load_injected_json(request, file_name, required=True):
+    """Load a JSON file from the env specified `DATA_DIRECTORY`.
+
+    This data is provided to us externally (by S3 at the moment) or any other
+    mechanism which causes files to exist in the directory we expect.
+
+    :param request: Pyramid request object
+    :param file_name: Filename to load
+    :param required: Return None instead of raising if the file is missing
+    :return: Decoded JSON data
+
+    :raises ConfigurationError: If the file is required and not found or
+        malformed
+    """
+
+    data_directory: Path = request.registry.settings.get("data_directory")
+    resource = data_directory / file_name
+
+    if not resource.exists():
+        if not required:
+            return None
+
+        raise ConfigurationError(f"Expected data file '{resource}' not found")
+
+    with resource.open(encoding="utf-8") as handle:
+        try:
+            return json.load(handle)
+        except JSONDecodeError as exc:
+            raise ConfigurationError(f"Invalid data file format: '{resource}'") from exc
+
+
 def factory(_context, request):
     if not request.registry.settings.get("google_drive_in_python"):
-        return GoogleDriveAPI(service_account_info=None)
+        return GoogleDriveAPI(credentials_list=None)
 
-    credentials_json = request.registry.settings.get("google_drive_credentials")
-    if not credentials_json:
-        raise ConfigurationError(
-            "The flag 'google_drive_in_python' is enabled but no credentials found"
-        )
-
-    try:
-        return GoogleDriveAPI(service_account_info=json.loads(credentials_json))
-    except JSONDecodeError as exc:
-        raise ConfigurationError("Invalid Google credentials file format") from exc
+    return GoogleDriveAPI(
+        credentials_list=load_injected_json(request, "google_drive_credentials.json")
+    )
