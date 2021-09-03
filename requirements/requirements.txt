@@ -16,7 +16,7 @@ charset-normalizer==2.0.1
     # via requests
 google-auth==2.0.1
     # via google-auth-oauthlib
-google-auth-oauthlib==0.4.5
+google-auth-oauthlib==0.4.6
     # via -r requirements/requirements.in
 gunicorn==20.1.0
     # via -r requirements/requirements.in
