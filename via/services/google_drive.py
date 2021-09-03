@@ -1,5 +1,6 @@
 import re
 from typing import ByteString, Iterator
+from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
@@ -47,18 +48,45 @@ class GoogleDriveAPI:
 
         return self._session is not None
 
-    _PUBLIC_URL_REGEX = re.compile(
-        r"^https://drive.google.com/uc\?id=(.*)&export=download$", re.IGNORECASE
-    )
+    _FILE_PATH_REGEX = re.compile("/file/d/(?P<file_id>[^/]+)")
 
     @classmethod
     def google_drive_id(cls, public_url):
         """Extract the google drive ID from a URL if there is one."""
 
-        if match := cls._PUBLIC_URL_REGEX.match(public_url):
-            return match.group(1)
+        details = cls.parse_file_url(public_url)
+        if details:
+            return details.get("file_id")
 
         return None
+
+    @classmethod
+    def parse_file_url(cls, public_url):
+        """Extract the Google Drive data from a URL if there is one.
+
+        :param public_url: URL to parse
+        :return: A dict of details if this is a Google Drive file URL or None
+        """
+
+        if not public_url.startswith("https://drive.google.com"):
+            return None
+
+        url = urlparse(public_url)
+        if "/folders" in url.path:
+            return None
+
+        query = {key.lower(): value for key, value in parse_qs(url.query).items()}
+
+        if match := cls._FILE_PATH_REGEX.search(url.path):
+            data = match.groupdict()
+        elif file_id := query.get("id"):
+            data = {"file_id": file_id[0]}
+        else:
+            return None
+
+        data["resource_key"] = query.get("resourcekey", [None])[0]
+
+        return data
 
     @iter_handle_errors
     def iter_file(self, file_id) -> Iterator[ByteString]:
