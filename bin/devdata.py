@@ -15,10 +15,17 @@ def _get_devdata():
         check_call(["git", "clone", "git@github.com:hypothesis/devdata.git", git_dir])
 
         # Copy devdata env file into place.
-        copyfile(
-            os.path.join(git_dir, "via/devdata.env"),
-            os.path.join(Path(__file__).parent.parent, ".devdata.env"),
-        )
+        for source, target in (
+            ("via/devdata.env", ".devdata.env"),
+            (
+                "via/devdata/google_drive_credentials.json",
+                ".devdata/google_drive_credentials.json",
+            ),
+        ):
+            copyfile(
+                os.path.join(git_dir, source),
+                os.path.join(Path(__file__).parent.parent, target),
+            )
 
 
 if __name__ == "__main__":
