@@ -10,6 +10,10 @@ def add_routes(config):
     config.add_route("route_by_content", "/route", factory=URLResource)
     config.add_route("debug_headers", "/debug/headers")
     config.add_route("proxy_google_drive_file", "/google_drive/{file_id}/proxied.pdf")
+    config.add_route(
+        "proxy_google_drive_file:resource_key",
+        "/google_drive/{file_id}/{resource_key}/proxied.pdf",
+    )
     config.add_route("proxy", "/{url:.*}")
 
 

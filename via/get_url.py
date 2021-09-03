@@ -24,7 +24,7 @@ def get_url_details(url, headers=None):
     if headers is None:
         headers = OrderedDict()
 
-    if GoogleDriveAPI.google_drive_id(url):
+    if GoogleDriveAPI.parse_file_url(url):
         return "application/pdf", 200
 
     headers = add_request_headers(clean_headers(headers))
