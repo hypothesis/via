@@ -47,7 +47,7 @@ class TestGoogleDriveAPI:
                 "X-Complaints-To": Any.string(),
             },
             stream=True,
-            timeout=1,
+            timeout=10,
         )
 
         api._session.get.return_value.raise_for_status.assert_called_once_with()

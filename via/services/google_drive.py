@@ -84,7 +84,7 @@ class GoogleDriveAPI:
             }
         )
 
-        response = self._session.get(url=url, headers=headers, stream=True, timeout=1)
+        response = self._session.get(url=url, headers=headers, stream=True, timeout=10)
         response.raise_for_status()
 
         yield from stream_bytes(response)
