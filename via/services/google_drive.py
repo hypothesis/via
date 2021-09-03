@@ -51,16 +51,6 @@ class GoogleDriveAPI:
     _FILE_PATH_REGEX = re.compile("/file/d/(?P<file_id>[^/]+)")
 
     @classmethod
-    def google_drive_id(cls, public_url):
-        """Extract the google drive ID from a URL if there is one."""
-
-        details = cls.parse_file_url(public_url)
-        if details:
-            return details.get("file_id")
-
-        return None
-
-    @classmethod
     def parse_file_url(cls, public_url):
         """Extract the Google Drive data from a URL if there is one.
 

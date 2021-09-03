@@ -7,6 +7,9 @@ from via.services.secure_link import has_secure_url_token
 
 
 @view_config(route_name="proxy_google_drive_file", decorator=(has_secure_url_token,))
+@view_config(
+    route_name="proxy_google_drive_file:resource_key", decorator=(has_secure_url_token,)
+)
 def proxy_google_drive_file(request):
     """Proxy a file from Google Drive."""
 
@@ -23,7 +26,10 @@ def proxy_google_drive_file(request):
     )
     # Add an iterable to stream the content instead of holding it all in memory
     response.app_iter = _reify_first(
-        request.find_service(GoogleDriveAPI).iter_file(request.matchdict["file_id"])
+        request.find_service(GoogleDriveAPI).iter_file(
+            file_id=request.matchdict["file_id"],
+            resource_key=request.matchdict.get("resource_key"),
+        ),
     )
 
     return response

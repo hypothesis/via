@@ -28,21 +28,12 @@ def view_pdf(context, request):
 
     google_drive_api = request.find_service(GoogleDriveAPI)
     if google_drive_api.is_available and (
-        file_id := google_drive_api.google_drive_id(url)
+        file_details := google_drive_api.parse_file_url(url)
     ):
-        proxy_pdf_url = request.find_service(SecureLinkService).sign_url(
-            request.route_url(
-                "proxy_google_drive_file",
-                file_id=file_id,
-                # Pass the original URL along so it will show up nicely in
-                # error messages. This isn't useful for users as they don't
-                # see this directly, but it's handy for us.
-                _query={"url": url},
-            )
-        )
+        proxy_pdf_url = ProxyURLBuilder.google_file_url(request, file_details, url)
 
     else:
-        proxy_pdf_url = _pdf_url(
+        proxy_pdf_url = ProxyURLBuilder.nginx_pdf_url(
             url,
             nginx_server=request.registry.settings["nginx_server"],
             secret=request.registry.settings["nginx_secure_link_secret"],
@@ -62,34 +53,53 @@ def view_pdf(context, request):
     }
 
 
-def _pdf_url(url, nginx_server, secret):
-    """Return the URL from which the PDF viewer should load the PDF."""
+class ProxyURLBuilder:
+    @staticmethod
+    def google_file_url(request, file_details, url):
+        route = "proxy_google_drive_file"
+        if "resource_key" in file_details:
+            route += ":resource_key"
 
-    # Compute the expiry time to put into the URL.
-    exp = int(quantized_expiry(max_age=timedelta(hours=25)).timestamp())
+        return request.find_service(SecureLinkService).sign_url(
+            request.route_url(
+                route,
+                # Pass the original URL along so it will show up nicely in
+                # error messages. This isn't useful for users as they don't
+                # see this directly, but it's handy for us.
+                _query={"url": url},
+                **file_details,
+            )
+        )
 
-    # The expression to be hashed.
-    #
-    # This matches the hash expression that we tell the NGINX secure link
-    # module to use with the secure_link_md5 setting in our NGINX config file.
-    #
-    # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-    hash_expression = f"/proxy/static/{exp}/{url} {secret}"
+    @staticmethod
+    def nginx_pdf_url(url, nginx_server, secret):
+        """Return the URL from which the PDF viewer should load the PDF."""
 
-    # Compute the hash value to put into the URL.
-    #
-    # This implements the NGINX secure link module's hashing algorithm:
-    #
-    # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-    hash_ = hashlib.md5()
-    hash_.update(hash_expression.encode("utf-8"))
-    sec = hash_.digest()
-    sec = b64encode(sec)
-    sec = sec.replace(b"+", b"-")
-    sec = sec.replace(b"/", b"_")
-    sec = sec.replace(b"=", b"")
-    sec = sec.decode()
+        # Compute the expiry time to put into the URL.
+        exp = int(quantized_expiry(max_age=timedelta(hours=25)).timestamp())
 
-    # Construct the URL, inserting sec and exp where our NGINX config file
-    # expects to find them.
-    return f"{nginx_server}/proxy/static/{sec}/{exp}/{url}"
+        # The expression to be hashed.
+        #
+        # This matches the hash expression that we tell the NGINX secure link
+        # module to use with the secure_link_md5 setting in our NGINX config file.
+        #
+        # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
+        hash_expression = f"/proxy/static/{exp}/{url} {secret}"
+
+        # Compute the hash value to put into the URL.
+        #
+        # This implements the NGINX secure link module's hashing algorithm:
+        #
+        # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
+        hash_ = hashlib.md5()
+        hash_.update(hash_expression.encode("utf-8"))
+        sec = hash_.digest()
+        sec = b64encode(sec)
+        sec = sec.replace(b"+", b"-")
+        sec = sec.replace(b"/", b"_")
+        sec = sec.replace(b"=", b"")
+        sec = sec.decode()
+
+        # Construct the URL, inserting sec and exp where our NGINX config file
+        # expects to find them.
+        return f"{nginx_server}/proxy/static/{sec}/{exp}/{url}"

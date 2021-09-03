@@ -39,8 +39,8 @@ class TestViewPDF:
         quantized_expiry,
     ):
         google_drive_api.is_available = drive_available
-        google_drive_api.google_drive_id.return_value = (
-            sentinel.file_id if is_google_url else None
+        google_drive_api.parse_file_url.return_value = (
+            {"file_id": sentinel.file_id} if is_google_url else None
         )
 
         response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
@@ -53,17 +53,28 @@ class TestViewPDF:
         assert signature == "qTq65RXvm6P2Y4bfzWdPzg"
         assert expiry == "1581183021"
 
+    @pytest.mark.parametrize(
+        "file_details,url",
+        (
+            (
+                {"file_id": "FILE_ID"},
+                "http://example.com/google_drive/FILE_ID/proxied.pdf?url=sentinel.url",
+            ),
+            (
+                {"file_id": "FILE_ID", "resource_key": "RESOURCE_KEY"},
+                "http://example.com/google_drive/FILE_ID/RESOURCE_KEY/proxied.pdf?url=sentinel.url",
+            ),
+        ),
+    )
     def test_it_signs_the_url_if_google(
-        self, call_view_pdf, google_drive_api, secure_link_service
+        self, call_view_pdf, google_drive_api, secure_link_service, file_details, url
     ):
         google_drive_api.is_available = True
-        google_drive_api.google_drive_id.return_value = "FILE_ID"
+        google_drive_api.parse_file_url.return_value = file_details
 
         response = call_view_pdf(sentinel.url)
 
-        secure_link_service.sign_url.assert_called_once_with(
-            "http://example.com/google_drive/FILE_ID/proxied.pdf?url=sentinel.url"
-        )
+        secure_link_service.sign_url.assert_called_once_with(url)
         assert response["proxy_pdf_url"] == secure_link_service.sign_url.return_value
 
     @pytest.fixture
@@ -87,7 +98,7 @@ class TestViewPDF:
 
     @pytest.fixture(autouse=True)
     def google_drive_api(self, google_drive_api):
-        google_drive_api.google_drive_id.return_value = None
+        google_drive_api.parse_file_url.return_value = None
 
         return google_drive_api
 
