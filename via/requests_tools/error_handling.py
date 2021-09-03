@@ -20,6 +20,10 @@ REQUESTS_UPSTREAM_SERVICE = (
 )
 
 
+def _get_message(err):
+    return err.args[0] if err.args else None
+
+
 def handle_errors(inner):
     """Translate errors into our application errors."""
 
@@ -29,13 +33,13 @@ def handle_errors(inner):
             return inner(*args, **kwargs)
 
         except REQUESTS_BAD_URL as err:
-            raise BadURL() from err
+            raise BadURL(_get_message(err)) from err
 
         except REQUESTS_UPSTREAM_SERVICE as err:
-            raise UpstreamServiceError() from err
+            raise UpstreamServiceError(_get_message(err)) from err
 
         except RequestException as err:
-            raise UnhandledException() from err
+            raise UnhandledException(_get_message(err)) from err
 
     return deco
 
@@ -49,12 +53,12 @@ def iter_handle_errors(inner):
             yield from inner(*args, **kwargs)
 
         except REQUESTS_BAD_URL as err:
-            raise BadURL(err.args[0]) from None
+            raise BadURL(_get_message(err)) from None
 
         except REQUESTS_UPSTREAM_SERVICE as err:
-            raise UpstreamServiceError(err.args[0]) from None
+            raise UpstreamServiceError(_get_message(err)) from None
 
         except RequestException as err:
-            raise UnhandledException(err.args[0]) from None
+            raise UnhandledException(_get_message(err)) from None
 
     return deco
