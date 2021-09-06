@@ -62,7 +62,7 @@ class TestViewPDF:
         response = call_view_pdf(sentinel.url)
 
         secure_link_service.sign_url.assert_called_once_with(
-            "http://example.com/google_drive/FILE_ID?url=sentinel.url"
+            "http://example.com/google_drive/FILE_ID/proxied.pdf?url=sentinel.url"
         )
         assert response["proxy_pdf_url"] == secure_link_service.sign_url.return_value
 
