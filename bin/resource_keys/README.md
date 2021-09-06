@@ -16,7 +16,7 @@ Getting data
 For `h`:
 
 ```sql
-select distinct(target_uri) from annotation where target_uri like '%:<//drive.google.com/uc?id=%&export=download%>'
+select distinct(target_uri) from annotation where target_uri like '%://drive.google.com/uc?id=%&export=download%'
 ```
 
 For `LMS`:
