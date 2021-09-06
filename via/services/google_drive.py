@@ -1,7 +1,4 @@
-import json
 import re
-from json import JSONDecodeError
-from pathlib import Path
 from typing import ByteString, Iterator
 
 from google.auth.transport.requests import AuthorizedSession
@@ -89,43 +86,3 @@ class GoogleDriveAPI:
         response.raise_for_status()
 
         yield from stream_bytes(response)
-
-
-def load_injected_json(request, file_name, required=True):
-    """Load a JSON file from the env specified `DATA_DIRECTORY`.
-
-    This data is provided to us externally (by S3 at the moment) or any other
-    mechanism which causes files to exist in the directory we expect.
-
-    :param request: Pyramid request object
-    :param file_name: Filename to load
-    :param required: Return None instead of raising if the file is missing
-    :return: Decoded JSON data
-
-    :raises ConfigurationError: If the file is required and not found or
-        malformed
-    """
-
-    data_directory: Path = request.registry.settings.get("data_directory")
-    resource = data_directory / file_name
-
-    if not resource.exists():
-        if not required:
-            return None
-
-        raise ConfigurationError(f"Expected data file '{resource}' not found")
-
-    with resource.open(encoding="utf-8") as handle:
-        try:
-            return json.load(handle)
-        except JSONDecodeError as exc:
-            raise ConfigurationError(f"Invalid data file format: '{resource}'") from exc
-
-
-def factory(_context, request):
-    if not request.registry.settings.get("google_drive_in_python"):
-        return GoogleDriveAPI(credentials_list=None)
-
-    return GoogleDriveAPI(
-        credentials_list=load_injected_json(request, "google_drive_credentials.json")
-    )
