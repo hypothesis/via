@@ -14,10 +14,10 @@ How to use this
 Getting data
 ------------
 
-For `h`:
+For `h` you can get updates using Metabase with:
 
 ```sql
-select distinct(target_uri) from annotation where target_uri like '%://drive.google.com/uc?id=%&export=download%'
+select distinct(target_uri) from annotation where updated > '2021-08-16' and target_uri like '%://drive.google.com/uc?id=%&export=download%' and target_uri not like '%resource%'
 ```
 
 For `LMS`:

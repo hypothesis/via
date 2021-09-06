@@ -10,6 +10,10 @@ DRIVE_REGEX = (
 
 
 def extract(url):
+    # We've already got this in the URL no need to lookup
+    if "resourcekey" in url or "resourceKey" in url:
+        return None
+
     for regex in DRIVE_REGEX:
         if match := regex.search(url):
             return match.group(1)

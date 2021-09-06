@@ -166,7 +166,11 @@ class RefreshReasons:
         return True
 
     @staticmethod
-    def recheck(_file_id, data):
+    def recheck_resource_keys(_file_id, data):
+        return data and data["resource_key"]
+
+    @staticmethod
+    def recheck_all(_file_id, data):
         # Check new things
         if data is None:
             return True
