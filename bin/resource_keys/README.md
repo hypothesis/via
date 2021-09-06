@@ -5,7 +5,8 @@ How to use this
 * Add a `data/credentials.json` file
 * This should be a `list` of credentials (the more you add from different
   accounts the faster it goes)
-* `../../.tox/dev/bin/pip install -r bin/resource_keys/requirements.txt`
+* From the `bin/resource_keys` directory:
+* `../../.tox/dev/bin/pip install -r requirements.txt`
 * Run the scripts in order:
     * `../../.tox/dev/bin/python 01_extract_urls.py`
     * etc.
