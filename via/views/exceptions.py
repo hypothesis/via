@@ -1,5 +1,6 @@
 """Error views to handle when things go wrong in the app."""
 
+import h_pyramid_sentry
 from pyramid.httpexceptions import (
     HTTPClientError,
     HTTPError,
@@ -72,6 +73,8 @@ def _get_meta(exception):
 @exception_view_config(HTTPError, renderer="via:templates/exception.html.jinja2")
 def all_exceptions(exc, request):
     """Catch all errors (Pyramid or Python) and display an HTML page."""
+
+    h_pyramid_sentry.report_exception()
 
     try:
         status_code = exc.status_int
