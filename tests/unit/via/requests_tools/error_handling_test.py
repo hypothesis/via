@@ -41,10 +41,14 @@ class TestHandleErrors:
 class TestIterHandleErrors:
     @pytest.mark.parametrize("request_exception,expected_exception", EXCEPTION_MAP)
     def test_it_catches_requests_exceptions(
-        self, iter_raiser, request_exception, expected_exception
+        self, iter_raiser, request_exception, expected_exception, h_pyramid_sentry
     ):
+        exception = request_exception("Oh noe")
+
         with pytest.raises(expected_exception):
-            list(iter_raiser(request_exception("Oh noe")))
+            list(iter_raiser(exception))
+
+        h_pyramid_sentry.report_exception.assert_called_once_with(exception)
 
     def test_it_does_not_catch_regular_exceptions(self, iter_raiser):
         with pytest.raises(ValueError):
@@ -58,3 +62,7 @@ class TestIterHandleErrors:
             raise exception
 
         return iter_raiser
+
+    @pytest.fixture
+    def h_pyramid_sentry(self, patch):
+        return patch("via.requests_tools.error_handling.h_pyramid_sentry")

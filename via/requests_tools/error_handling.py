@@ -3,6 +3,7 @@
 from functools import wraps
 from logging import getLogger
 
+import h_pyramid_sentry
 from requests import exceptions
 
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
@@ -62,6 +63,7 @@ def _map_exception(exception, log_errors=False):
 
     if log_errors:
         LOG.error(_summarise_requests_exception(exception, error_message))
+        h_pyramid_sentry.report_exception(exception)
 
     return mapped_class(error_message)
 
