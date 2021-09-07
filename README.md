@@ -92,6 +92,7 @@ Expected data:
 The following data is expected to be provided in the `DATA_DIRECTORY`:
 
  * `google_drive_credentials.json` - A list of credential JSON objects provided by the Google API console if using `GOOGLE_DRIVE_IN_PYTHON`
+ * `google_drive_resource_keys.json` - A dict of file ids to resource keys if using `GOOGLE_DRIVE_IN_PYTHON`
 
 Updating the PDF viewer
 -----------------------

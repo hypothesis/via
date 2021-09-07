@@ -1,3 +1,5 @@
+from unittest.mock import call, sentinel
+
 import pytest
 
 from via.exceptions import ConfigurationError
@@ -37,14 +39,25 @@ class TestCreateGoogleAPI:
     def test_it_with_credentials(
         self, pyramid_request, GoogleDriveAPI, load_injected_json
     ):
+        load_injected_json.side_effect = (
+            sentinel.credentials_list,
+            sentinel.resource_keys,
+        )
         settings = {"google_drive_in_python": True, "noise": "other"}
 
         api = create_google_api(settings)
 
-        load_injected_json.assert_called_once_with(
-            settings, "google_drive_credentials.json"
+        load_injected_json.assert_has_calls(
+            [
+                call(settings, "google_drive_credentials.json"),
+                call(settings, "google_drive_resource_keys.json", required=False),
+            ]
         )
-        GoogleDriveAPI.assert_called_once_with(load_injected_json.return_value)
+
+        GoogleDriveAPI.assert_called_once_with(
+            credentials_list=sentinel.credentials_list,
+            resource_keys=sentinel.resource_keys,
+        )
         assert api == GoogleDriveAPI.return_value
 
     def test_it_without_credentials(self, pyramid_request, GoogleDriveAPI):
