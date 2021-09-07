@@ -1,10 +1,11 @@
 import re
 from typing import ByteString, Iterator
 
+from google.auth import exceptions as google_exceptions
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
 
-from via.exceptions import ConfigurationError
+from via.exceptions import ConfigurationError, UnhandledException, UpstreamServiceError
 from via.requests_tools import add_request_headers, stream_bytes
 from via.requests_tools.error_handling import iter_handle_errors
 
@@ -60,7 +61,14 @@ class GoogleDriveAPI:
 
         return None
 
-    @iter_handle_errors
+    @iter_handle_errors(
+        {
+            google_exceptions.ClientCertError: ConfigurationError,
+            google_exceptions.TransportError: UpstreamServiceError,
+            # Default catch all for the rest
+            google_exceptions.GoogleAuthError: UnhandledException,
+        }
+    )
     def iter_file(self, file_id) -> Iterator[ByteString]:
         """Get a generator of chunks of bytes for the specified file.
 

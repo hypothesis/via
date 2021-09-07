@@ -50,13 +50,19 @@ class TestIterHandleErrors:
 
         h_pyramid_sentry.report_exception.assert_called_once_with(exception)
 
+    def test_it_maps_custom_exceptions(self, iter_raiser):
+        exception = FileNotFoundError()
+
+        with pytest.raises(NotADirectoryError):
+            list(iter_raiser(exception))
+
     def test_it_does_not_catch_regular_exceptions(self, iter_raiser):
         with pytest.raises(ValueError):
             list(iter_raiser(ValueError()))
 
     @pytest.fixture
     def iter_raiser(self):
-        @iter_handle_errors
+        @iter_handle_errors({FileNotFoundError: NotADirectoryError})
         def iter_raiser(exception):
             yield 1
             raise exception

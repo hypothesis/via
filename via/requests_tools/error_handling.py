@@ -27,47 +27,6 @@ ERROR_MAP = {
 LOG = getLogger(__name__)
 
 
-def _summarise_requests_exception(
-    exception: exceptions.RequestException, error_message
-):
-    """Create a summary string from details from a `RequestsException`."""
-    url = f"'{exception.request.url}'" if exception.request else "unknown URL"
-    status = (
-        "no response"
-        if exception.response is None
-        else f"{exception.response.status_code}: '{exception.response.reason}'"
-    )
-    return f"Requests exception - {type(exception)} Got {status} from {url} ({error_message})"
-
-
-def _map_exception(exception, log_errors=False):
-    """Map a child of RequestsException to our exceptions.
-
-    :param exception: Exception to map
-    :param log_errors: Also log about this error
-    :return: One of our exceptions or None if we don't want to map it
-    """
-
-    def _map(exception):
-        for exc_class, mapped_class in ERROR_MAP.items():
-            if isinstance(exception, exc_class):
-                return mapped_class
-
-        return None
-
-    mapped_class = _map(exception)
-    if not mapped_class:
-        return None
-
-    error_message = exception.args[0] if exception.args else None
-
-    if log_errors:
-        LOG.error(_summarise_requests_exception(exception, error_message))
-        h_pyramid_sentry.report_exception(exception)
-
-    return mapped_class(error_message)
-
-
 def handle_errors(inner):
     """Translate errors into our application errors."""
 
@@ -77,7 +36,7 @@ def handle_errors(inner):
             return inner(*args, **kwargs)
 
         except Exception as err:
-            if mapped := _map_exception(err):
+            if mapped := _map_error(err):
                 raise mapped from err
 
             raise
@@ -85,18 +44,74 @@ def handle_errors(inner):
     return deco
 
 
-def iter_handle_errors(inner):
+def iter_handle_errors(error_map):
     """Translate errors into our application errors."""
 
-    @wraps(inner)
-    def deco(*args, **kwargs):
-        try:
-            yield from inner(*args, **kwargs)
+    def deco(inner):
+        @wraps(inner)
+        def wrapper(*args, **kwargs):
+            try:
+                yield from inner(*args, **kwargs)
 
-        except Exception as err:
-            if mapped := _map_exception(err, log_errors=True):
-                raise mapped from err
+            except Exception as err:
+                if mapped := _map_error(err, log_errors=True, extra_mapping=error_map):
+                    raise mapped from err
 
-            raise
+                raise
+
+        return wrapper
 
     return deco
+
+
+def _map_error(error, log_errors=False, extra_mapping=None):
+    """Map a child of RequestsException to our exceptions.
+
+    :param error: Error to map
+    :param log_errors: Also log about this error
+    :return: One of our exceptions or None if we don't want to map it
+    """
+
+    error_message = error.args[0] if error.args else None
+
+    if log_errors:
+        if isinstance(error, exceptions.RequestException):
+            LOG.error(_format_requests_error(error, error_message))
+        else:
+            LOG.error("Non-Requests exception - %s (%s)", type(error), error_message)
+
+        h_pyramid_sentry.report_exception(error)
+
+    mapped_class = None
+    if extra_mapping:
+        mapped_class = _map_by_type(error, extra_mapping)
+
+    if not mapped_class:
+        mapped_class = _map_by_type(error, ERROR_MAP)
+
+    if not mapped_class:
+        return None
+
+    return mapped_class(error_message)
+
+
+def _format_requests_error(error: exceptions.RequestException, error_message):
+    """Create a summary string from details from a `RequestsException`."""
+
+    url = f"'{error.request.url}'" if error.request else "unknown URL"
+    status = (
+        "no response"
+        if error.response is None
+        else f"{error.response.status_code}: '{error.response.reason}'"
+    )
+    return (
+        f"Requests exception - {type(error)} Got {status} from {url} ({error_message})"
+    )
+
+
+def _map_by_type(error, mapping):
+    for err_class, mapped_class in mapping.items():
+        if isinstance(error, err_class):
+            return mapped_class
+
+    return None
