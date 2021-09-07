@@ -42,6 +42,8 @@ class TestGoogleDriveAPI:
                 "Accept": "*/*",
                 "Accept-Encoding": "gzip, deflate",
                 "User-Agent": "(gzip)",
+                # This is looked up from the resource mapping
+                "X-Goog-Drive-Resource-Keys": "FILE_ID/RESOURCE_ID",
                 # Quick check to show we use `add_request_headers`
                 "X-Abuse-Policy": Any.string(),
                 "X-Complaints-To": Any.string(),
@@ -110,7 +112,8 @@ class TestGoogleDriveAPI:
                 {"file_id": "FILE_ID", "resource_key": "RESOURCE_KEY"},
             ),
             (
-                "https://drive.google.com/uc?id=FILE_ID&export=download&via.open_sidebar=1&via.request_config_from_frame=https%3A%2F%2Flms.hypothes.is",
+                "https://drive.google.com/uc?id=FILE_ID&export=download&via.open_sidebar=1&"
+                "via.request_config_from_frame=https%3A%2F%2Flms.hypothes.is",
                 {"file_id": "FILE_ID", "resource_key": None},
             ),
             (
@@ -150,7 +153,10 @@ class TestGoogleDriveAPI:
 
     @pytest.fixture
     def api(self):
-        return GoogleDriveAPI([sentinel.credentials, sentinel.credentials_two])
+        return GoogleDriveAPI(
+            credentials_list=[sentinel.credentials, sentinel.credentials_two],
+            resource_keys={"FILE_ID": "RESOURCE_ID"},
+        )
 
     @pytest.fixture(autouse=True)
     def stream_bytes(self, patch):

@@ -31,7 +31,10 @@ def create_google_api(settings):
         return GoogleDriveAPI(credentials_list=None)
 
     return GoogleDriveAPI(
-        credentials_list=load_injected_json(settings, "google_drive_credentials.json")
+        credentials_list=load_injected_json(settings, "google_drive_credentials.json"),
+        resource_keys=load_injected_json(
+            settings, "google_drive_resource_keys.json", required=False
+        ),
     )
 
 

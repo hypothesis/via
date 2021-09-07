@@ -20,14 +20,18 @@ class GoogleDriveAPI:
         "https://www.googleapis.com/auth/drive.readonly",
     ]
 
-    def __init__(self, credentials_list=None):
+    def __init__(self, credentials_list=None, resource_keys=None):
         """Initialise the service.
 
         :param credentials_list: A list of dicts of credentials info as
             provided by Google console's JSON format.
+        :param resource_keys: A dict of file ids to resource keys, to fill out
+            any missing resource keys.
 
         :raises ConfigurationError: If the credentials are not accepted by Google
         """
+        self._resource_keys = resource_keys or {}
+
         if credentials_list:
             try:
                 credentials = Credentials.from_service_account_info(
@@ -100,6 +104,11 @@ class GoogleDriveAPI:
                 "User-Agent": "(gzip)",
             }
         )
+
+        if not resource_key:
+            # If we are being called, we should have been initialised with a
+            # set of resource keys. See the factory below
+            resource_key = self._resource_keys.get(file_id)
 
         if resource_key:
             headers["X-Goog-Drive-Resource-Keys"] = f"{file_id}/{resource_key}"
