@@ -2,26 +2,39 @@
 
 from functools import wraps
 
-from requests import RequestException, exceptions
+from requests import exceptions
 
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
 
-REQUESTS_BAD_URL = (
-    exceptions.MissingSchema,
-    exceptions.InvalidSchema,
-    exceptions.InvalidURL,
-    exceptions.URLRequired,
-)
-REQUESTS_UPSTREAM_SERVICE = (
-    exceptions.ConnectionError,
-    exceptions.Timeout,
-    exceptions.TooManyRedirects,
-    exceptions.SSLError,
-)
+ERROR_MAP = {
+    # The user gave us a goofy URL
+    exceptions.MissingSchema: BadURL,
+    exceptions.InvalidSchema: BadURL,
+    exceptions.InvalidURL: BadURL,
+    exceptions.URLRequired: BadURL,
+    # We got something unexpected from the upstream server
+    exceptions.ConnectionError: UpstreamServiceError,
+    exceptions.Timeout: UpstreamServiceError,
+    exceptions.TooManyRedirects: UpstreamServiceError,
+    exceptions.SSLError: UpstreamServiceError,
+    # Anything else...
+    exceptions.RequestException: UnhandledException,
+}
 
 
-def _get_message(err):
-    return err.args[0] if err.args else None
+def map_exception(exception):
+    def _map_exception(exception):
+        for exc_class, mapped_class in ERROR_MAP.items():
+            if isinstance(exception, exc_class):
+                return mapped_class
+
+        return None
+
+    mapped_class = _map_exception(exception)
+    if not mapped_class:
+        return None
+
+    return mapped_class(exception.args[0] if exception.args else None)
 
 
 def handle_errors(inner):
@@ -32,14 +45,11 @@ def handle_errors(inner):
         try:
             return inner(*args, **kwargs)
 
-        except REQUESTS_BAD_URL as err:
-            raise BadURL(_get_message(err)) from err
+        except Exception as err:
+            if mapped := map_exception(err):
+                raise mapped from err
 
-        except REQUESTS_UPSTREAM_SERVICE as err:
-            raise UpstreamServiceError(_get_message(err)) from err
-
-        except RequestException as err:
-            raise UnhandledException(_get_message(err)) from err
+            raise
 
     return deco
 
@@ -52,13 +62,10 @@ def iter_handle_errors(inner):
         try:
             yield from inner(*args, **kwargs)
 
-        except REQUESTS_BAD_URL as err:
-            raise BadURL(_get_message(err)) from None
+        except Exception as err:
+            if mapped := map_exception(err):
+                raise mapped from err
 
-        except REQUESTS_UPSTREAM_SERVICE as err:
-            raise UpstreamServiceError(_get_message(err)) from None
-
-        except RequestException as err:
-            raise UnhandledException(_get_message(err)) from None
+            raise
 
     return deco
