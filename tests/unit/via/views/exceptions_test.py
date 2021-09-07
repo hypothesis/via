@@ -11,6 +11,13 @@ from via.views.exceptions import EXCEPTION_MAP, all_exceptions
 
 
 class TestErrorView:
+    def test_it_reports_the_exception_to_Sentry(
+        self, h_pyramid_sentry, pyramid_request
+    ):
+        all_exceptions(RuntimeError(), pyramid_request)
+
+        h_pyramid_sentry.report_exception.assert_called_once_with()
+
     @pytest.mark.parametrize(
         "exception_class,status_code",
         (
@@ -71,3 +78,8 @@ class TestErrorView:
     @pytest.fixture
     def pyramid_request(self):
         return DummyRequest()
+
+
+@pytest.fixture(autouse=True)
+def h_pyramid_sentry(patch):
+    return patch("via.views.exceptions.h_pyramid_sentry")
