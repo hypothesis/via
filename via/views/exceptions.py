@@ -1,12 +1,7 @@
 """Error views to handle when things go wrong in the app."""
 
 import h_pyramid_sentry
-from pyramid.httpexceptions import (
-    HTTPClientError,
-    HTTPError,
-    HTTPExpectationFailed,
-    HTTPNotFound,
-)
+from pyramid.httpexceptions import HTTPClientError, HTTPError, HTTPNotFound
 from pyramid.view import exception_view_config
 
 from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
@@ -79,8 +74,7 @@ def all_exceptions(exc, request):
     try:
         status_code = exc.status_int
     except AttributeError:
-        # This is our 501, chosen to not scare Cloudflare.
-        status_code = HTTPExpectationFailed.code  # 417
+        status_code = 500
 
     request.response.status_int = status_code
 
