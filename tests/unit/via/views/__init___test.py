@@ -11,7 +11,6 @@ class TestIncludeMe:
         views.includeme(config)
 
         assert config.add_route.call_args_list == [
-            mock.call("crash", "/crash"),
             mock.call("index", "/"),
             mock.call("get_status", "/_status"),
             mock.call("view_pdf", "/pdf", factory=URLResource),
