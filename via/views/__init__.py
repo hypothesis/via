@@ -4,6 +4,7 @@ from via.resources import URLResource
 
 def add_routes(config):
     """Add routes to pyramid config."""
+    config.add_route("crash", "/crash")
     config.add_route("index", "/")
     config.add_route("get_status", "/_status")
     config.add_route("view_pdf", "/pdf", factory=URLResource)
