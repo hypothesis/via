@@ -5,6 +5,7 @@ h-vialib
 importlib_resources
 newrelic
 pyramid
+pyramid-exclog
 pyramid-jinja2
 pyramid-services
 requests

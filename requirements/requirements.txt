@@ -66,8 +66,11 @@ pyramid==2.0
     # via
     #   -r requirements/requirements.in
     #   h-pyramid-sentry
+    #   pyramid-exclog
     #   pyramid-jinja2
     #   pyramid-services
+pyramid-exclog==1.0
+    # via -r requirements/requirements.in
 pyramid-jinja2==2.8
     # via -r requirements/requirements.in
 pyramid-services==2.2
