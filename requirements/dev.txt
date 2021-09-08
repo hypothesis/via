@@ -150,9 +150,12 @@ pyramid==2.0
     # via
     #   -r requirements/requirements.txt
     #   h-pyramid-sentry
+    #   pyramid-exclog
     #   pyramid-ipython
     #   pyramid-jinja2
     #   pyramid-services
+pyramid-exclog==1.0
+    # via -r requirements/requirements.txt
 pyramid-ipython==0.2
     # via -r requirements/dev.in
 pyramid-jinja2==2.8

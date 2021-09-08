@@ -60,6 +60,7 @@ def create_app(_=None, **settings):
     """Configure and return the WSGI app."""
     config = pyramid.config.Configurator(settings=load_settings(settings))
 
+    config.include("pyramid_exclog")
     config.include("pyramid_jinja2")
     config.include("pyramid_services")
     config.include("h_pyramid_sentry")

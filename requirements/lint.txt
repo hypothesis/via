@@ -178,8 +178,13 @@ pyramid==2.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   h-pyramid-sentry
+    #   pyramid-exclog
     #   pyramid-jinja2
     #   pyramid-services
+pyramid-exclog==1.0
+    # via
+    #   -r requirements/requirements.txt
+    #   -r requirements/tests.txt
 pyramid-jinja2==2.8
     # via
     #   -r requirements/requirements.txt
