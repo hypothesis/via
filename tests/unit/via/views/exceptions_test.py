@@ -26,7 +26,7 @@ class TestErrorView:
                 HTTPUnsupportedMediaType.code,
                 id="Pyramid error",
             ),
-            param(BlockingIOError, 417, id="Unknown python error"),
+            param(BlockingIOError, 500, id="Unknown python error"),
         ),
     )
     def test_values_are_copied_from_the_exception(
