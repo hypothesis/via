@@ -21,6 +21,10 @@ def _get_devdata():
                 "via/devdata/google_drive_credentials.json",
                 ".devdata/google_drive_credentials.json",
             ),
+            (
+                "via/devdata/google_drive_resource_keys.json",
+                ".devdata/google_drive_resource_keys.json",
+            ),
         ):
             copyfile(
                 os.path.join(git_dir, source),
