@@ -1,3 +1,4 @@
+from datetime import timedelta
 from unittest.mock import create_autospec, sentinel
 
 import pytest
@@ -54,7 +55,9 @@ class TestSecureLinkService:
     def test_sign_url(self, service):
         result = service.sign_url(sentinel.url)
 
-        service._via_secure_url.create.assert_called_once_with(sentinel.url)
+        service._via_secure_url.create.assert_called_once_with(
+            sentinel.url, max_age=timedelta(hours=25)
+        )
         assert result == service._via_secure_url.create.return_value
 
     @pytest.mark.usefixtures("with_signed_urls_not_required")

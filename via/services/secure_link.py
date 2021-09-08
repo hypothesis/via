@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from h_vialib.exceptions import TokenException
 from h_vialib.secure import ViaSecureURL
 from pyramid.httpexceptions import HTTPUnauthorized
@@ -46,7 +48,7 @@ class SecureLinkService:
         """Get a signed URL (if URL signing is enabled)."""
 
         if self._signed_urls_required:
-            return self._via_secure_url.create(url)
+            return self._via_secure_url.create(url, max_age=timedelta(hours=25))
 
         return url
 
