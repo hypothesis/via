@@ -57,7 +57,7 @@ class ProxyURLBuilder:
     @staticmethod
     def google_file_url(request, file_details, url):
         route = "proxy_google_drive_file"
-        if "resource_key" in file_details:
+        if file_details.get("resource_key"):
             route += ":resource_key"
 
         return request.find_service(SecureLinkService).sign_url(
