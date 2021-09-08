@@ -1,4 +1,5 @@
 import re
+from logging import getLogger
 from typing import ByteString, Iterator
 from urllib.parse import parse_qs, urlparse
 
@@ -8,6 +9,8 @@ from google.oauth2.service_account import Credentials
 from via.exceptions import ConfigurationError
 from via.requests_tools import add_request_headers, stream_bytes
 from via.requests_tools.error_handling import iter_handle_errors
+
+LOG = getLogger(__name__)
 
 
 class GoogleDriveAPI:
@@ -109,6 +112,12 @@ class GoogleDriveAPI:
             # If we are being called, we should have been initialised with a
             # set of resource keys. See the factory below
             resource_key = self._resource_keys.get(file_id)
+            if resource_key:
+                LOG.info(
+                    "Mapped Google Drive file id '%s' to resource key '%s'",
+                    file_id,
+                    resource_key,
+                )
 
         if resource_key:
             headers["X-Goog-Drive-Resource-Keys"] = f"{file_id}/{resource_key}"
