@@ -61,6 +61,10 @@ class TestViewPDF:
                 "http://example.com/google_drive/FILE_ID/proxied.pdf?url=sentinel.url",
             ),
             (
+                {"file_id": "FILE_ID", "resource_key": None},
+                "http://example.com/google_drive/FILE_ID/proxied.pdf?url=sentinel.url",
+            ),
+            (
                 {"file_id": "FILE_ID", "resource_key": "RESOURCE_KEY"},
                 "http://example.com/google_drive/FILE_ID/RESOURCE_KEY/proxied.pdf?url=sentinel.url",
             ),
