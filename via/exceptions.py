@@ -1,22 +1,20 @@
-"""Application specific exceptions."""
-
-from pyramid.httpexceptions import HTTPBadRequest, HTTPConflict, HTTPExpectationFailed
-
-# pylint: disable=too-many-ancestors
-# It's ok to have a hierarchy of exceptions
-
-
-class BadURL(HTTPBadRequest):
+class BadURL(Exception):
     """An invalid URL was discovered."""
 
+    status_int = 400
 
-class UpstreamServiceError(HTTPConflict):
+
+class UpstreamServiceError(Exception):
     """Something went wrong when calling an upstream service."""
 
+    status_int = 409
 
-class UnhandledException(HTTPExpectationFailed):
+
+class UnhandledException(Exception):
     """Something we did not plan for went wrong."""
 
+    status_int = 417
 
-class ConfigurationError(UnhandledException):
+
+class ConfigurationError(Exception):
     """The application configuration is malformed."""
