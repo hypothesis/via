@@ -77,7 +77,9 @@ def _get_meta(exception):
 def google_drive_exceptions(exc, request):
     """Catch all errors for Google Drive and display an HTML page."""
 
-    h_pyramid_sentry.report_exception(exc)
+    # Don't log 404's as they aren't very interesting
+    if not isinstance(exc, HTTPNotFound):
+        h_pyramid_sentry.report_exception(exc)
 
     return _get_error_body(exc, request)
 
