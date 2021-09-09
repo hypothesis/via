@@ -7,13 +7,57 @@ from urllib.parse import parse_qs, urlparse
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
 from pyramid.httpexceptions import HTTPNotFound
-from requests import HTTPError
+from requests import HTTPError, Timeout
 
 from via.exceptions import ConfigurationError, GoogleDriveServiceError
 from via.requests_tools import add_request_headers, stream_bytes
 from via.requests_tools.error_handling import iter_handle_errors
 
 LOG = getLogger(__name__)
+
+
+def translate_google_error(error):
+    """Get a specific error instance from the provided error or None."""
+
+    if isinstance(error, Timeout):
+        return GoogleDriveServiceError(
+            "Timeout attempting to retrieve file",
+            error_json=None,
+            # 504 - Gateway Timeout is the correct thing to raise, but this
+            # will cause Cloudflare to intercept it:
+            # https://support.cloudflare.com/hc/en-us/articles/115003011431-Troubleshooting-Cloudflare-5XX-errors#502504error
+            # We're using the non standard:
+            # 598 - Network read timeout error
+            status_int=598,
+        )
+
+    if not isinstance(error, HTTPError) or error.response is None:
+        return None
+
+    try:
+        google_error = error.response.json()["error"]["errors"][0]
+    except (JSONDecodeError, KeyError):
+        return None
+
+    # Check carefully to see that this is Google telling us the file isn't
+    # found rather than this being us going to the wrong end-point
+    if error.response.status_code == 404 and google_error.get("reason") == "notFound":
+        return HTTPNotFound("File id not found")
+
+    if (
+        error.response.status_code == 403
+        and google_error.get("reason") == "userRateLimitExceeded"
+    ):
+        return GoogleDriveServiceError(
+            "Too many concurrent requests to the Google Drive API",
+            error_json=google_error,
+            # 429 - Too many requests
+            # Not 100% accurate as the user probably isn't making too many, but
+            # close enough as it conveys the need to back off
+            status_int=429,
+        )
+
+    return None
 
 
 class GoogleDriveAPI:
@@ -92,9 +136,7 @@ class GoogleDriveAPI:
 
         return data
 
-    # Pylint doesn't understand our error translation
-    # pylint:disable=missing-raises-doc
-    @iter_handle_errors({})
+    @iter_handle_errors(translate_google_error)
     def iter_file(self, file_id, resource_key=None) -> Iterator[ByteString]:
         """Get a generator of chunks of bytes for the specified file.
 
@@ -104,6 +146,8 @@ class GoogleDriveAPI:
             document
 
         :raises HTTPNotFound: If the file id is not valid
+        :raises GoogleDriveServiceError: For specifically handled scenarios
+            like timeouts and rate limiting
         :raises UpstreamServiceError: For other errors
         """
         # https://developers.google.com/drive/api/v3/reference/files/get
@@ -138,45 +182,7 @@ class GoogleDriveAPI:
             timeout=self.TIMEOUT,
             max_allowed_time=self.TIMEOUT,
         )
-        try:
-            response.raise_for_status()
 
-        except HTTPError as http_error:
-            # Pylint thinks we are raising None, but the if takes care of it
-            # pylint: disable=raising-bad-type
-            if translated_error := self._translate_http_error(http_error, file_id):
-                raise translated_error from http_error
-
-            raise
+        response.raise_for_status()
 
         yield from stream_bytes(response)
-
-    @classmethod
-    def _translate_http_error(cls, http_error, file_id):
-        if http_error.response is None:
-            return None
-
-        try:
-            google_error = http_error.response.json()["error"]["errors"][0]
-        except (JSONDecodeError, KeyError):
-            return None
-
-        # Check carefully to see that this is Google telling us the file isn't
-        # found rather than this being us going to the wrong end-point
-        if (
-            http_error.response.status_code == 404
-            and google_error.get("reason") == "notFound"
-        ):
-            return HTTPNotFound(f"File id {file_id} not found")
-
-        if (
-            http_error.response.status_code == 403
-            and google_error.get("reason") == "userRateLimitExceeded"
-        ):
-            return GoogleDriveServiceError(
-                "Too many concurrent requests to the Google Drive API",
-                error_json=google_error,
-                status_int=429,
-            )
-
-        return None
