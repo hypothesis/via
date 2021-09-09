@@ -8,7 +8,7 @@ from h_matchers import Any
 from pyramid.httpexceptions import HTTPNotFound
 from pytest import param
 from requests import Response, TooManyRedirects
-from requests.exceptions import HTTPError, InvalidJSONError, Timeout
+from requests.exceptions import HTTPError, InvalidJSONError
 
 from via.exceptions import (
     ConfigurationError,
@@ -131,15 +131,6 @@ class TestGoogleDriveAPI:
             list(api.iter_file(sentinel.file_id))
 
         assert exception.value.status_int == status_code
-
-    def test_iter_file_catches_timeouts(self, api):
-        # pylint: disable=protected-access
-        api._session.get.return_value.raise_for_status.side_effect = Timeout
-
-        with pytest.raises(GoogleDriveServiceError) as exception:
-            list(api.iter_file(sentinel.file_id))
-
-        assert exception.value.status_int == 598
 
     @pytest.mark.parametrize(
         "kwargs",

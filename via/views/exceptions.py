@@ -4,7 +4,12 @@ import h_pyramid_sentry
 from pyramid.httpexceptions import HTTPClientError, HTTPNotFound
 from pyramid.view import exception_view_config
 
-from via.exceptions import BadURL, UnhandledUpstreamException, UpstreamServiceError
+from via.exceptions import (
+    BadURL,
+    UnhandledUpstreamException,
+    UpstreamServiceError,
+    UpstreamTimeout,
+)
 
 EXCEPTION_MAP = {
     BadURL: {
@@ -15,12 +20,9 @@ EXCEPTION_MAP = {
         "stage": "request",
         "retryable": False,
     },
-    UpstreamServiceError: {
-        "title": "Could not get web page",
-        "long_description": [
-            "Something went wrong when we tried to get the web page.",
-            "It might be missing or might have returned an error.",
-        ],
+    UpstreamTimeout: {
+        "title": "Timeout",
+        "long_description": ["The web page we tried to get took too long to respond."],
         "stage": "upstream",
         "retryable": True,
     },
@@ -28,6 +30,15 @@ EXCEPTION_MAP = {
         "title": "Something went wrong",
         "long_description": ["We experienced an unexpected error."],
         "stage": "via",
+        "retryable": True,
+    },
+    UpstreamServiceError: {
+        "title": "Could not get web page",
+        "long_description": [
+            "Something went wrong when we tried to get the web page.",
+            "It might be missing or might have returned an error.",
+        ],
+        "stage": "upstream",
         "retryable": True,
     },
     HTTPNotFound: {
@@ -90,9 +101,7 @@ def other_exceptions(exc, request):
 
     # We don't want to log errors from upstream services or things which are
     # the user goofing about making bad queries.
-    if not isinstance(
-        exc, (UpstreamServiceError, UnhandledUpstreamException, BadURL, HTTPClientError)
-    ):
+    if not isinstance(exc, (UpstreamServiceError, BadURL, HTTPClientError)):
         h_pyramid_sentry.report_exception(exc)
 
     return _get_error_body(exc, request)

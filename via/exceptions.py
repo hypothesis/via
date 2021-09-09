@@ -10,10 +10,21 @@ class UpstreamServiceError(Exception):
     status_int = 409
 
 
-class UnhandledUpstreamException(Exception):
+class UnhandledUpstreamException(UpstreamServiceError):
     """Something we did not plan for went wrong."""
 
     status_int = 417
+
+
+class UpstreamTimeout(UpstreamServiceError):
+    """We timed out waiting for an upstream service."""
+
+    # "504 - Gateway Timeout" is the correct thing to raise, but this
+    # will cause Cloudflare to intercept it:
+    # https://support.cloudflare.com/hc/en-us/articles/115003011431-Troubleshooting-Cloudflare-5XX-errors#502504error
+    # We're using "408 - Request Timeout" which is technically
+    # incorrect as it implies the user took too long, but has good semantics
+    status_int = 408
 
 
 class GoogleDriveServiceError(UpstreamServiceError):

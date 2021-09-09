@@ -7,7 +7,7 @@ from urllib.parse import parse_qs, urlparse
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
 from pyramid.httpexceptions import HTTPNotFound
-from requests import HTTPError, Timeout
+from requests import HTTPError
 
 from via.exceptions import ConfigurationError, GoogleDriveServiceError
 from via.requests_tools import add_request_headers, stream_bytes
@@ -18,19 +18,6 @@ LOG = getLogger(__name__)
 
 def translate_google_error(error):
     """Get a specific error instance from the provided error or None."""
-
-    if isinstance(error, Timeout):
-        return GoogleDriveServiceError(
-            "Timeout attempting to retrieve file",
-            error_json=None,
-            # 504 - Gateway Timeout is the correct thing to raise, but this
-            # will cause Cloudflare to intercept it:
-            # https://support.cloudflare.com/hc/en-us/articles/115003011431-Troubleshooting-Cloudflare-5XX-errors#502504error
-            # We're using the non standard: 598 - Network read timeout error
-            status_int=598,
-            # If we don't want a 5xx error, then 408 - Request Timeout is
-            # technically incorrect, but has good semantics
-        )
 
     # This isn't a requests exception we can get meaningful data from
     if not isinstance(error, HTTPError) or error.response is None:
