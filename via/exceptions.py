@@ -10,7 +10,7 @@ class UpstreamServiceError(Exception):
     status_int = 409
 
 
-class UnhandledException(Exception):
+class UnhandledUpstreamException(Exception):
     """Something we did not plan for went wrong."""
 
     status_int = 417

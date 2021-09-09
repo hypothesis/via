@@ -1,10 +1,10 @@
 """Error views to handle when things go wrong in the app."""
 
 import h_pyramid_sentry
-from pyramid.httpexceptions import HTTPClientError, HTTPError, HTTPNotFound
+from pyramid.httpexceptions import HTTPClientError, HTTPNotFound
 from pyramid.view import exception_view_config
 
-from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
+from via.exceptions import BadURL, UnhandledUpstreamException, UpstreamServiceError
 
 EXCEPTION_MAP = {
     BadURL: {
@@ -24,7 +24,7 @@ EXCEPTION_MAP = {
         "stage": "upstream",
         "retryable": True,
     },
-    UnhandledException: {
+    UnhandledUpstreamException: {
         "title": "Something went wrong",
         "long_description": ["We experienced an unexpected error."],
         "stage": "via",
@@ -61,16 +61,42 @@ def _get_meta(exception):
         if isinstance(exception, exception_type):
             return meta
 
-    return EXCEPTION_MAP.get(UnhandledException)
+    return EXCEPTION_MAP.get(UnhandledUpstreamException)
+
+
+@exception_view_config(
+    Exception,
+    route_name="proxy_google_drive_file",
+    renderer="via:templates/exception.html.jinja2",
+)
+@exception_view_config(
+    Exception,
+    route_name="proxy_google_drive_file:resource_key",
+    renderer="via:templates/exception.html.jinja2",
+)
+def google_drive_exceptions(exc, request):
+    """Catch all errors for Google Drive and display an HTML page."""
+
+    h_pyramid_sentry.report_exception(exc)
+
+    return _get_error_body(exc, request)
 
 
 @exception_view_config(Exception, renderer="via:templates/exception.html.jinja2")
-@exception_view_config(HTTPError, renderer="via:templates/exception.html.jinja2")
-def all_exceptions(exc, request):
+def other_exceptions(exc, request):
     """Catch all errors (Pyramid or Python) and display an HTML page."""
 
-    h_pyramid_sentry.report_exception()
+    # We don't want to log errors from upstream services or things which are
+    # the user goofing about making bad queries.
+    if not isinstance(
+        exc, (UpstreamServiceError, UnhandledUpstreamException, BadURL, HTTPClientError)
+    ):
+        h_pyramid_sentry.report_exception(exc)
 
+    return _get_error_body(exc, request)
+
+
+def _get_error_body(exc, request):
     try:
         status_code = exc.status_int
     except AttributeError:
