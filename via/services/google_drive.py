@@ -1,10 +1,13 @@
 import re
+from json import JSONDecodeError
 from logging import getLogger
 from typing import ByteString, Iterator
 from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
+from pyramid.httpexceptions import HTTPNotFound
+from requests import HTTPError
 
 from via.exceptions import ConfigurationError
 from via.requests_tools import add_request_headers, stream_bytes
@@ -89,6 +92,8 @@ class GoogleDriveAPI:
 
         return data
 
+    # Pylint doesn't understand our error translation
+    # pylint:disable=missing-raises-doc
     @iter_handle_errors
     def iter_file(self, file_id, resource_key=None) -> Iterator[ByteString]:
         """Get a generator of chunks of bytes for the specified file.
@@ -133,6 +138,42 @@ class GoogleDriveAPI:
             timeout=self.TIMEOUT,
             max_allowed_time=self.TIMEOUT,
         )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+
+        except HTTPError as http_error:
+            # Pylint thinks we are raising None here, but the if takes care
+            # of that
+            # pylint: disable=raising-bad-type
+            if translated_error := self._translate_http_error(http_error, file_id):
+                raise translated_error from http_error
+
+            raise
 
         yield from stream_bytes(response)
+
+    @classmethod
+    def _translate_http_error(cls, http_error, file_id):
+        if http_error.response is None:
+            return None
+
+        google_error = cls._get_google_error(http_error)
+
+        # Check carefully to see that this is Google telling us the file isn't
+        # found rather than this being us going to the wrong end-point
+        if (
+            http_error.response.status_code == 404
+            and google_error
+            and google_error.get("reason") == "notFound"
+        ):
+            return HTTPNotFound(f"File id {file_id} not found")
+
+        return None
+
+    @classmethod
+    def _get_google_error(cls, http_error):
+        try:
+            return http_error.response.json()["error"]["errors"][0]
+
+        except (JSONDecodeError, KeyError):
+            return None

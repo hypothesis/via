@@ -1,10 +1,19 @@
+import json
+from io import BytesIO
 from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
-from requests import TooManyRedirects
+from pyramid.httpexceptions import HTTPNotFound
+from pytest import param
+from requests import Response, TooManyRedirects
+from requests.exceptions import HTTPError, InvalidJSONError
 
-from via.exceptions import ConfigurationError, UpstreamServiceError
+from via.exceptions import (
+    ConfigurationError,
+    UnhandledUpstreamException,
+    UpstreamServiceError,
+)
 from via.services.google_drive import GoogleDriveAPI
 
 
@@ -83,6 +92,50 @@ class TestGoogleDriveAPI:
         stream_bytes.side_effect = (explode() for _ in range(1))
 
         with pytest.raises(UpstreamServiceError):
+            list(api.iter_file(sentinel.file_id))
+
+    def test_iter_file_catches_missing_files(self, api):
+        # pylint: disable=protected-access
+        api._session.get.return_value.raise_for_status.side_effect = (
+            make_requests_exception(
+                HTTPError,
+                status_code=404,
+                json_data={"error": {"errors": [{"reason": "notFound"}]}},
+            )
+        )
+
+        with pytest.raises(HTTPNotFound):
+            list(api.iter_file(sentinel.file_id))
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        (
+            param({"error_class": InvalidJSONError}, id="unexpected class"),
+            param({"status_code": 503}, id="unexpected status code"),
+            param({"json_data": None}, id="no json"),
+            param({"json_data": {"hello": 1}}, id="unexpected json"),
+            param({"raw_data": "{... broken}"}, id="malformed json"),
+        ),
+    )
+    def test_iter_file_ignores_other_exceptions(self, api, kwargs):
+        attrs = {
+            "error_class": HTTPError,
+            "status_code": 404,
+            "json_data": {"error": {"errors": [{"reason": "notFound"}]}},
+        }
+        attrs.update(kwargs)
+        exception = make_requests_exception(**attrs)
+        # pylint: disable=protected-access
+        api._session.get.return_value.raise_for_status.side_effect = exception
+
+        with pytest.raises(UnhandledUpstreamException):
+            list(api.iter_file(sentinel.file_id))
+
+    def test_iter_file_has_no_issue_with_errors_without_responses(self, api):
+        # pylint: disable=protected-access
+        api._session.get.return_value.raise_for_status.side_effect = HTTPError()
+
+        with pytest.raises(UnhandledUpstreamException):
             list(api.iter_file(sentinel.file_id))
 
     @pytest.mark.parametrize("with_credentials", (True, False))
@@ -172,3 +225,16 @@ class TestGoogleDriveAPI:
     @pytest.fixture(autouse=True)
     def Credentials(self, patch):
         return patch("via.services.google_drive.Credentials")
+
+
+def make_requests_exception(error_class, status_code, json_data=None, raw_data=None):
+    response = Response()
+    response.status_code = status_code
+
+    if raw_data:
+        response.raw = BytesIO(raw_data.encode("utf-8"))
+
+    elif json_data:
+        response.raw = BytesIO(json.dumps(json_data).encode("utf-8"))
+
+    return error_class(response=response)
