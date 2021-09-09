@@ -142,8 +142,7 @@ class GoogleDriveAPI:
             response.raise_for_status()
 
         except HTTPError as http_error:
-            # Pylint thinks we are raising None here, but the if takes care
-            # of that
+            # Pylint thinks we are raising None, but the if takes care of it
             # pylint: disable=raising-bad-type
             if translated_error := self._translate_http_error(http_error, file_id):
                 raise translated_error from http_error
