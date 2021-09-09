@@ -94,7 +94,7 @@ class GoogleDriveAPI:
 
     # Pylint doesn't understand our error translation
     # pylint:disable=missing-raises-doc
-    @iter_handle_errors
+    @iter_handle_errors({})
     def iter_file(self, file_id, resource_key=None) -> Iterator[ByteString]:
         """Get a generator of chunks of bytes for the specified file.
 
