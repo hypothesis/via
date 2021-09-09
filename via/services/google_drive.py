@@ -26,28 +26,30 @@ def translate_google_error(error):
             # 504 - Gateway Timeout is the correct thing to raise, but this
             # will cause Cloudflare to intercept it:
             # https://support.cloudflare.com/hc/en-us/articles/115003011431-Troubleshooting-Cloudflare-5XX-errors#502504error
-            # We're using the non standard:
-            # 598 - Network read timeout error
+            # We're using the non standard: 598 - Network read timeout error
             status_int=598,
+            # If we don't want a 5xx error, then 408 - Request Timeout is
+            # technically incorrect, but has good semantics
         )
 
+    # This isn't a requests exception we can get meaningful data from
     if not isinstance(error, HTTPError) or error.response is None:
         return None
 
+    # Try and parse out the Google details in the format we've seen
     try:
         google_error = error.response.json()["error"]["errors"][0]
     except (JSONDecodeError, KeyError):
         return None
 
+    status_code, reason = error.response.status_code, google_error.get("reason")
+
     # Check carefully to see that this is Google telling us the file isn't
     # found rather than this being us going to the wrong end-point
-    if error.response.status_code == 404 and google_error.get("reason") == "notFound":
+    if status_code == 404 and reason == "notFound":
         return HTTPNotFound(google_error.get("message", "File id not found"))
 
-    if (
-        error.response.status_code == 403
-        and google_error.get("reason") == "userRateLimitExceeded"
-    ):
+    if status_code == 403 and reason == "userRateLimitExceeded":
         return GoogleDriveServiceError(
             "Too many concurrent requests to the Google Drive API",
             error_json=google_error,
