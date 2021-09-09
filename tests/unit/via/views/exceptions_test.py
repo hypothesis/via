@@ -105,7 +105,7 @@ class TestExceptionViews:
     @pytest.mark.parametrize(
         "exception_class,should_report",
         (
-            (HTTPNotFound, True),
+            (HTTPNotFound, False),
             (UnhandledUpstreamException, True),
             (BadURL, True),
             (HTTPClientError, True),
@@ -120,10 +120,10 @@ class TestExceptionViews:
 
         google_drive_exceptions(exception, pyramid_request)
 
-        # if should_report:
-        h_pyramid_sentry.report_exception.assert_called_once_with(exception)
-        # else:
-        #     h_pyramid_sentry.report_exception.assert_not_called()
+        if should_report:
+            h_pyramid_sentry.report_exception.assert_called_once_with(exception)
+        else:
+            h_pyramid_sentry.report_exception.assert_not_called()
 
     @pytest.fixture(params=[other_exceptions, google_drive_exceptions])
     def exception_view(self, request):
