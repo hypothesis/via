@@ -23,6 +23,10 @@ class GoogleDriveAPI:
         "https://www.googleapis.com/auth/drive.readonly",
     ]
 
+    # Configure all the various types of timeout available to us, with the hope
+    # that the shortest one will kick in first
+    TIMEOUT = 30
+
     def __init__(self, credentials_list=None, resource_keys=None):
         """Initialise the service.
 
@@ -45,7 +49,7 @@ class GoogleDriveAPI:
                     "The Google Drive service account information is invalid"
                 ) from exc
 
-            self._session = AuthorizedSession(credentials)
+            self._session = AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT)
         else:
             self._session = None
 
@@ -122,7 +126,13 @@ class GoogleDriveAPI:
         if resource_key:
             headers["X-Goog-Drive-Resource-Keys"] = f"{file_id}/{resource_key}"
 
-        response = self._session.get(url=url, headers=headers, stream=True, timeout=10)
+        response = self._session.get(
+            url=url,
+            headers=headers,
+            stream=True,
+            timeout=self.TIMEOUT,
+            max_allowed_time=self.TIMEOUT,
+        )
         response.raise_for_status()
 
         yield from stream_bytes(response)

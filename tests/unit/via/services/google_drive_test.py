@@ -17,6 +17,7 @@ class TestGoogleDriveAPI:
         )
         AuthorizedSession.assert_called_once_with(
             Credentials.from_service_account_info.return_value,
+            refresh_timeout=GoogleDriveAPI.TIMEOUT,
         )
         # pylint: disable=protected-access
         assert api._session == AuthorizedSession.return_value
@@ -49,7 +50,8 @@ class TestGoogleDriveAPI:
                 "X-Complaints-To": Any.string(),
             },
             stream=True,
-            timeout=10,
+            timeout=GoogleDriveAPI.TIMEOUT,
+            max_allowed_time=GoogleDriveAPI.TIMEOUT,
         )
 
         api._session.get.return_value.raise_for_status.assert_called_once_with()
@@ -69,6 +71,7 @@ class TestGoogleDriveAPI:
             ),
             stream=Any(),
             timeout=Any(),
+            max_allowed_time=Any(),
         )
 
     def test_iter_file_handles_errors(self, api, stream_bytes):
