@@ -4,15 +4,20 @@ from functools import wraps
 
 from requests import RequestException, exceptions
 
-from via.exceptions import BadURL, UnhandledUpstreamException, UpstreamServiceError
+from via.exceptions import (
+    BadURL,
+    UnhandledUpstreamException,
+    UpstreamServiceError,
+    UpstreamTimeout,
+)
 
 DEFAULT_ERROR_MAP = {
     exceptions.MissingSchema: BadURL,
     exceptions.InvalidSchema: BadURL,
     exceptions.InvalidURL: BadURL,
     exceptions.URLRequired: BadURL,
+    exceptions.Timeout: UpstreamTimeout,
     exceptions.ConnectionError: UpstreamServiceError,
-    exceptions.Timeout: UpstreamServiceError,
     exceptions.TooManyRedirects: UpstreamServiceError,
     exceptions.SSLError: UpstreamServiceError,
     RequestException: UnhandledUpstreamException,

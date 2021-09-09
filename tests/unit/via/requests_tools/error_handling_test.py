@@ -1,7 +1,12 @@
 import pytest
 from requests import exceptions
 
-from via.exceptions import BadURL, UnhandledUpstreamException, UpstreamServiceError
+from via.exceptions import (
+    BadURL,
+    UnhandledUpstreamException,
+    UpstreamServiceError,
+    UpstreamTimeout,
+)
 from via.requests_tools.error_handling import handle_errors, iter_handle_errors
 
 EXCEPTION_MAP = (
@@ -9,8 +14,8 @@ EXCEPTION_MAP = (
     (exceptions.InvalidSchema, BadURL),
     (exceptions.InvalidURL, BadURL),
     (exceptions.URLRequired, BadURL),
+    (exceptions.Timeout, UpstreamTimeout),
     (exceptions.ConnectionError, UpstreamServiceError),
-    (exceptions.Timeout, UpstreamServiceError),
     (exceptions.TooManyRedirects, UpstreamServiceError),
     (exceptions.SSLError, UpstreamServiceError),
     (exceptions.UnrewindableBodyError, UnhandledUpstreamException),
