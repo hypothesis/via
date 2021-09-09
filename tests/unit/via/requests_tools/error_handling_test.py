@@ -46,13 +46,23 @@ class TestIterHandleErrors:
         with pytest.raises(expected_exception):
             list(iter_raiser(request_exception("Oh noe")))
 
+    def test_it_matches_custom_exceptions(self, iter_raiser):
+        with pytest.raises(NotADirectoryError):
+            list(iter_raiser(FileNotFoundError("Oh noe")))
+
     def test_it_does_not_catch_regular_exceptions(self, iter_raiser):
         with pytest.raises(ValueError):
             list(iter_raiser(ValueError()))
 
     @pytest.fixture
     def iter_raiser(self):
-        @iter_handle_errors
+        def error_mapper(err):
+            if isinstance(err, FileNotFoundError):
+                return NotADirectoryError("Translated")
+
+            return None
+
+        @iter_handle_errors(error_mapper)
         def iter_raiser(exception):
             yield 1
             raise exception
