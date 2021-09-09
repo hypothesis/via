@@ -63,7 +63,7 @@ class GoogleDriveAPI:
     # that the shortest one will kick in first
     TIMEOUT = 30
 
-    def __init__(self, credentials_list=None, resource_keys=None):
+    def __init__(self, credentials_list, resource_keys):
         """Initialise the service.
 
         :param credentials_list: A list of dicts of credentials info as
@@ -73,7 +73,7 @@ class GoogleDriveAPI:
 
         :raises ConfigurationError: If the credentials are not accepted by Google
         """
-        self._resource_keys = resource_keys or {}
+        self._resource_keys = resource_keys
 
         if credentials_list:
             try:
