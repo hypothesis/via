@@ -4,7 +4,7 @@ from functools import wraps
 
 from requests import RequestException, exceptions
 
-from via.exceptions import BadURL, UnhandledException, UpstreamServiceError
+from via.exceptions import BadURL, UnhandledUpstreamException, UpstreamServiceError
 
 REQUESTS_BAD_URL = (
     exceptions.MissingSchema,
@@ -39,7 +39,7 @@ def handle_errors(inner):
             raise UpstreamServiceError(_get_message(err)) from err
 
         except RequestException as err:
-            raise UnhandledException(_get_message(err)) from err
+            raise UnhandledUpstreamException(_get_message(err)) from err
 
     return deco
 
@@ -59,6 +59,6 @@ def iter_handle_errors(inner):
             raise UpstreamServiceError(_get_message(err)) from None
 
         except RequestException as err:
-            raise UnhandledException(_get_message(err)) from None
+            raise UnhandledUpstreamException(_get_message(err)) from None
 
     return deco
