@@ -8,7 +8,18 @@
 
 // Listen for `webviewerloaded` event to configure the viewer after its files
 // have been loaded but before it is initialized.
-document.addEventListener('webviewerloaded', function (event) {
+//
+// PDF.js >= v2.10.377 fires this event at the parent document if it is embedded
+// in a same-origin iframe. See https://github.com/mozilla/pdf.js/pull/11837.
+try {
+  parent.document.addEventListener('webviewerloaded', onViewerLoaded);
+} catch (err) {
+  // Parent document is cross-origin. The event will be fired at the current
+  // document instead.
+  document.addEventListener('webviewerloaded', onViewerLoaded);
+}
+
+function onViewerLoaded() {
   var appOptions = window.PDFViewerApplicationOptions;
   var app = window.PDFViewerApplication;
 
@@ -87,4 +98,4 @@ document.addEventListener('webviewerloaded', function (event) {
       originalUrl: pdfUrl,
     });
   });
-});
+}
