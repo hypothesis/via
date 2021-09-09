@@ -46,7 +46,7 @@ class TestGoogleDriveAPI:
         Credentials.from_service_account_info.side_effect = ValueError
 
         with pytest.raises(ConfigurationError):
-            GoogleDriveAPI([sentinel.bad_credentials])
+            GoogleDriveAPI([sentinel.bad_credentials], resource_keys={})
 
     def test_iter_file(self, api, stream_bytes):
         # This is all a bit black box, we don't necessarily know what all these
@@ -165,7 +165,9 @@ class TestGoogleDriveAPI:
 
     @pytest.mark.parametrize("with_credentials", (True, False))
     def test_is_available(self, with_credentials):
-        api = GoogleDriveAPI([sentinel.credentials] if with_credentials else None)
+        api = GoogleDriveAPI(
+            [sentinel.credentials] if with_credentials else None, resource_keys={}
+        )
 
         assert api.is_available == with_credentials
 

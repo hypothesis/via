@@ -27,18 +27,15 @@ def includeme(config):  # pragma: no cover
 def create_google_api(settings):
     """Create from Pyramid settings."""
 
-    if not settings.get("google_drive_in_python"):
-        return GoogleDriveAPI(credentials_list=None)
-
     return GoogleDriveAPI(
-        credentials_list=load_injected_json(settings, "google_drive_credentials.json"),
-        resource_keys=load_injected_json(
-            settings, "google_drive_resource_keys.json", required=False
-        ),
+        credentials_list=load_injected_json(settings, "google_drive_credentials.json")
+        if settings.get("google_drive_in_python")
+        else None,
+        resource_keys=load_injected_json(settings, "google_drive_resource_keys.json"),
     )
 
 
-def load_injected_json(settings, file_name, required=True):
+def load_injected_json(settings, file_name):
     """Load a JSON file from the env specified `DATA_DIRECTORY`.
 
     This data is provided to us externally (by S3 at the moment) or any other
@@ -46,7 +43,6 @@ def load_injected_json(settings, file_name, required=True):
 
     :param settings: A dict of Pyramid settings
     :param file_name: Filename to load
-    :param required: Return None instead of raising if the file is missing
     :return: Decoded JSON data
 
     :raises ConfigurationError: If the file is required and not found or
@@ -57,9 +53,6 @@ def load_injected_json(settings, file_name, required=True):
     resource = data_directory / file_name
 
     if not resource.exists():
-        if not required:
-            return None
-
         raise ConfigurationError(f"Expected data file '{resource}' not found")
 
     with resource.open(encoding="utf-8") as handle:

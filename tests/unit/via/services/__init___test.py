@@ -15,20 +15,16 @@ class TestLoadInjectedJSON:
 
         assert data == {"a": 1}
 
-    @pytest.mark.parametrize("required", (True, False))
-    def test_it_with_malformed_data(self, settings, tmpdir, required):
+    def test_it_with_malformed_data(self, settings, tmpdir):
         json_file = tmpdir / "data.json"
         json_file.write("{malformed ...")
 
         with pytest.raises(ConfigurationError):
-            load_injected_json(settings, "data.json", required=required)
+            load_injected_json(settings, "data.json")
 
     def test_it_with_missing_data(self, settings):
         with pytest.raises(ConfigurationError):
             load_injected_json(settings, "missing.json")
-
-    def test_it_with_missing_but_not_required_data(self, settings):
-        assert load_injected_json(settings, "missing.json", required=False) is None
 
     @pytest.fixture
     def settings(self, tmpdir):
@@ -50,7 +46,7 @@ class TestCreateGoogleAPI:
         load_injected_json.assert_has_calls(
             [
                 call(settings, "google_drive_credentials.json"),
-                call(settings, "google_drive_resource_keys.json", required=False),
+                call(settings, "google_drive_resource_keys.json"),
             ]
         )
 
@@ -60,12 +56,19 @@ class TestCreateGoogleAPI:
         )
         assert api == GoogleDriveAPI.return_value
 
-    def test_it_without_credentials(self, pyramid_request, GoogleDriveAPI):
+    def test_it_without_credentials(
+        self, pyramid_request, GoogleDriveAPI, load_injected_json
+    ):
         settings = {"google_drive_in_python": False, "noise": "other"}
 
         api = create_google_api(settings)
 
-        GoogleDriveAPI.assert_called_once_with(credentials_list=None)
+        load_injected_json.assert_called_once_with(
+            settings, "google_drive_resource_keys.json"
+        )
+        GoogleDriveAPI.assert_called_once_with(
+            credentials_list=None, resource_keys=load_injected_json.return_value
+        )
         assert api == GoogleDriveAPI.return_value
 
     @pytest.fixture(autouse=True)
