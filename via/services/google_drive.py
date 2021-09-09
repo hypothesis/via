@@ -42,7 +42,7 @@ def translate_google_error(error):
     # Check carefully to see that this is Google telling us the file isn't
     # found rather than this being us going to the wrong end-point
     if error.response.status_code == 404 and google_error.get("reason") == "notFound":
-        return HTTPNotFound("File id not found")
+        return HTTPNotFound(google_error.get("message", "File id not found"))
 
     if (
         error.response.status_code == 403
