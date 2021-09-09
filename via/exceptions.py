@@ -16,5 +16,19 @@ class UnhandledUpstreamException(Exception):
     status_int = 417
 
 
+class GoogleDriveServiceError(UpstreamServiceError):
+    """Something interesting happened in Google Drive.
+
+    We often use the more generic versions, but if there's something of
+    particular interest, we might raise this error.
+    """
+
+    def __init__(self, message, error_json, status_int):
+        self.error_json = error_json
+        self.status_int = status_int
+
+        super().__init__(message)
+
+
 class ConfigurationError(Exception):
     """The application configuration is malformed."""
