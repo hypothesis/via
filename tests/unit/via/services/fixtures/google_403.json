@@ -1,0 +1,14 @@
+{
+    "error": {
+        "errors": [
+            {
+                "domain": "usageLimits",
+                "reason": "userRateLimitExceeded",
+                "message": "User Rate Limit Exceeded. Rate of requests for user exceed configured project quota. You may consider re-evaluating expected per-user traffic to the API and adjust project quota limits accordingly. You may monitor aggregate quota usage and adjust limits in the API Console: https://console.developers.google.com/apis/api/drive.googleapis.com/quotas?project=000000000000",
+                "extendedHelp": "https://console.developers.google.com/apis/api/drive.googleapis.com/quotas?project=000000000000"
+            }
+        ],
+        "code": 403,
+        "message": "User Rate Limit Exceeded. Rate of requests for user exceed configured project quota. You may consider re-evaluating expected per-user traffic to the API and adjust project quota limits accordingly. You may monitor aggregate quota usage and adjust limits in the API Console: https://console.developers.google.com/apis/api/drive.googleapis.com/quotas?project=000000000000"
+    }
+}

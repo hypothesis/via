@@ -12,10 +12,19 @@ from requests.exceptions import HTTPError, InvalidJSONError
 
 from via.exceptions import (
     ConfigurationError,
+    GoogleDriveServiceError,
     UnhandledUpstreamException,
     UpstreamServiceError,
 )
 from via.services.google_drive import GoogleDriveAPI
+
+
+def load_fixture(filename):
+    ref = importlib_resources.files("tests.unit.via.services.fixtures").joinpath(
+        filename
+    )
+    with ref.open(encoding="utf-8") as handle:
+        return json.load(handle)
 
 
 class TestGoogleDriveAPI:
@@ -95,18 +104,33 @@ class TestGoogleDriveAPI:
         with pytest.raises(UpstreamServiceError):
             list(api.iter_file(sentinel.file_id))
 
-    def test_iter_file_catches_missing_files(self, api):
+    @pytest.mark.parametrize(
+        "kwargs,error_class,status_code",
+        (
+            (
+                {"status_code": 404, "json_data": load_fixture("google_404.json")},
+                HTTPNotFound,
+                404,
+            ),
+            (
+                {"status_code": 403, "json_data": load_fixture("google_403.json")},
+                GoogleDriveServiceError,
+                429,
+            ),
+        ),
+    )
+    def test_iter_file_catches_specific_google_exceptions(
+        self, api, kwargs, error_class, status_code
+    ):
         # pylint: disable=protected-access
         api._session.get.return_value.raise_for_status.side_effect = (
-            make_requests_exception(
-                HTTPError,
-                status_code=404,
-                json_data=load_fixture("google_404.json"),
-            )
+            make_requests_exception(HTTPError, **kwargs)
         )
 
-        with pytest.raises(HTTPNotFound):
+        with pytest.raises(error_class) as exception:
             list(api.iter_file(sentinel.file_id))
+
+        assert exception.value.status_int == status_code
 
     @pytest.mark.parametrize(
         "kwargs",
@@ -239,11 +263,3 @@ def make_requests_exception(error_class, status_code, json_data=None, raw_data=N
         response.raw = BytesIO(json.dumps(json_data).encode("utf-8"))
 
     return error_class(response=response)
-
-
-def load_fixture(filename):
-    ref = importlib_resources.files("tests.unit.via.services.fixtures").joinpath(
-        filename
-    )
-    with ref.open(encoding="utf-8") as handle:
-        return json.load(handle)

@@ -9,7 +9,7 @@ from google.oauth2.service_account import Credentials
 from pyramid.httpexceptions import HTTPNotFound
 from requests import HTTPError
 
-from via.exceptions import ConfigurationError
+from via.exceptions import ConfigurationError, GoogleDriveServiceError
 from via.requests_tools import add_request_headers, stream_bytes
 from via.requests_tools.error_handling import iter_handle_errors
 
@@ -157,23 +157,27 @@ class GoogleDriveAPI:
         if http_error.response is None:
             return None
 
-        google_error = cls._get_google_error(http_error)
+        try:
+            google_error = http_error.response.json()["error"]["errors"][0]
+        except (JSONDecodeError, KeyError):
+            return None
 
         # Check carefully to see that this is Google telling us the file isn't
         # found rather than this being us going to the wrong end-point
         if (
             http_error.response.status_code == 404
-            and google_error
             and google_error.get("reason") == "notFound"
         ):
             return HTTPNotFound(f"File id {file_id} not found")
 
+        if (
+            http_error.response.status_code == 403
+            and google_error.get("reason") == "userRateLimitExceeded"
+        ):
+            return GoogleDriveServiceError(
+                "Too many concurrent requests to the Google Drive API",
+                error_json=google_error,
+                status_int=429,
+            )
+
         return None
-
-    @classmethod
-    def _get_google_error(cls, http_error):
-        try:
-            return http_error.response.json()["error"]["errors"][0]
-
-        except (JSONDecodeError, KeyError):
-            return None
