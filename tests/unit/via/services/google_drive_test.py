@@ -2,6 +2,7 @@ import json
 from io import BytesIO
 from unittest.mock import sentinel
 
+import importlib_resources
 import pytest
 from h_matchers import Any
 from pyramid.httpexceptions import HTTPNotFound
@@ -100,7 +101,7 @@ class TestGoogleDriveAPI:
             make_requests_exception(
                 HTTPError,
                 status_code=404,
-                json_data={"error": {"errors": [{"reason": "notFound"}]}},
+                json_data=load_fixture("google_404.json"),
             )
         )
 
@@ -238,3 +239,11 @@ def make_requests_exception(error_class, status_code, json_data=None, raw_data=N
         response.raw = BytesIO(json.dumps(json_data).encode("utf-8"))
 
     return error_class(response=response)
+
+
+def load_fixture(filename):
+    ref = importlib_resources.files("tests.unit.via.services.fixtures").joinpath(
+        filename
+    )
+    with ref.open(encoding="utf-8") as handle:
+        return json.load(handle)
