@@ -24,7 +24,6 @@ PARAMETERS = {
     "checkmate_ignore_reasons": {},
     "checkmate_allow_all": {"formatter": asbool},
     "data_directory": {"required": True, "formatter": Path},
-    "google_drive_in_python": {"formatter": asbool},
     "signed_urls_required": {"formatter": asbool},
     "enable_front_page": {"formatter": asbool},
 }

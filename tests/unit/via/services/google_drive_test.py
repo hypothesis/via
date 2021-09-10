@@ -163,14 +163,6 @@ class TestGoogleDriveAPI:
         with pytest.raises(UnhandledUpstreamException):
             list(api.iter_file(sentinel.file_id))
 
-    @pytest.mark.parametrize("with_credentials", (True, False))
-    def test_is_available(self, with_credentials):
-        api = GoogleDriveAPI(
-            [sentinel.credentials] if with_credentials else None, resource_keys={}
-        )
-
-        assert api.is_available == with_credentials
-
     @pytest.mark.parametrize(
         "url,expected",
         (

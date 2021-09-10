@@ -28,9 +28,7 @@ def create_google_api(settings):
     """Create from Pyramid settings."""
 
     return GoogleDriveAPI(
-        credentials_list=load_injected_json(settings, "google_drive_credentials.json")
-        if settings.get("google_drive_in_python")
-        else None,
+        credentials_list=load_injected_json(settings, "google_drive_credentials.json"),
         resource_keys=load_injected_json(settings, "google_drive_resource_keys.json"),
     )
 

@@ -75,25 +75,16 @@ class GoogleDriveAPI:
         """
         self._resource_keys = resource_keys
 
-        if credentials_list:
-            try:
-                credentials = Credentials.from_service_account_info(
-                    credentials_list[0], scopes=self.SCOPES
-                )
-            except ValueError as exc:
-                raise ConfigurationError(
-                    "The Google Drive service account information is invalid"
-                ) from exc
+        try:
+            credentials = Credentials.from_service_account_info(
+                credentials_list[0], scopes=self.SCOPES
+            )
+        except ValueError as exc:
+            raise ConfigurationError(
+                "The Google Drive service account information is invalid"
+            ) from exc
 
-            self._session = AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT)
-        else:
-            self._session = None
-
-    @property
-    def is_available(self):
-        """Get whether the Google Drive API is available."""
-
-        return self._session is not None
+        self._session = AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT)
 
     _FILE_PATH_REGEX = re.compile("/file/d/(?P<file_id>[^/]+)")
 
