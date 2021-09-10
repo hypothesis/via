@@ -1,4 +1,4 @@
-"""Download .devdata.env from github.com:hypothesis/devdata.git."""
+"""Download .devdata from github.com:hypothesis/devdata.git."""
 
 import os
 from pathlib import Path
@@ -16,7 +16,6 @@ def _get_devdata():
 
         # Copy devdata env file into place.
         for source, target in (
-            ("via/devdata.env", ".devdata.env"),
             (
                 "via/devdata/google_drive_credentials.json",
                 ".devdata/google_drive_credentials.json",
