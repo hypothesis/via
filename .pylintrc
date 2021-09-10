@@ -26,3 +26,17 @@ disable=bad-continuation,
 [REPORTS]
 output-format=colorized
 score=no
+
+[SIMILARITIES]
+
+# Ignore comments when computing similarities.
+ignore-comments=no
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=no
+
+# Ignore imports when computing similarities.
+ignore-imports=yes
+
+# Set a slightly higher base for repeated code
+min-similarity-lines=14
