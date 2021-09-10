@@ -73,6 +73,10 @@ class GoogleDriveAPI:
 
         :raises ConfigurationError: If the credentials are not accepted by Google
         """
+        if credentials_list[0].get("disable"):
+            LOG.error("Google Drive credentials have been disabled")
+            return
+
         self._resource_keys = resource_keys
 
         try:
@@ -80,6 +84,7 @@ class GoogleDriveAPI:
                 credentials_list[0], scopes=self.SCOPES
             )
         except ValueError as exc:
+
             raise ConfigurationError(
                 "The Google Drive service account information is invalid"
             ) from exc

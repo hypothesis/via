@@ -32,7 +32,7 @@ class TestGoogleDriveAPI:
         self, api, Credentials, AuthorizedSession
     ):
         Credentials.from_service_account_info.assert_called_once_with(
-            sentinel.credentials, scopes=GoogleDriveAPI.SCOPES
+            {"valid": "credentials"}, scopes=GoogleDriveAPI.SCOPES
         )
         AuthorizedSession.assert_called_once_with(
             Credentials.from_service_account_info.return_value,
@@ -46,7 +46,14 @@ class TestGoogleDriveAPI:
         Credentials.from_service_account_info.side_effect = ValueError
 
         with pytest.raises(ConfigurationError):
-            GoogleDriveAPI([sentinel.bad_credentials], resource_keys={})
+            GoogleDriveAPI([{"invalid": "credentials"}], resource_keys={})
+
+    def test_it_with_functest_credentials(self, api):
+        api = GoogleDriveAPI([{"disable": True}], resource_keys={})
+
+        # In functest mode we don't finish building the object at all. So
+        # attempting to use it should fail in a spectacular and obvious way
+        assert not hasattr(api, "_session")
 
     def test_iter_file(self, api, stream_bytes):
         # This is all a bit black box, we don't necessarily know what all these
@@ -229,7 +236,7 @@ class TestGoogleDriveAPI:
     @pytest.fixture
     def api(self):
         return GoogleDriveAPI(
-            credentials_list=[sentinel.credentials, sentinel.credentials_two],
+            credentials_list=[{"valid": "credentials"}, {"valid": "credentials_2"}],
             resource_keys={"FILE_ID": "RESOURCE_ID"},
         )
 
