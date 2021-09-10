@@ -1,3 +1,5 @@
+import json
+from io import BytesIO
 from unittest.mock import sentinel
 
 import pytest
@@ -10,8 +12,14 @@ from pyramid.httpexceptions import (
 )
 from pyramid.testing import DummyRequest
 from pytest import param
+from requests import HTTPError, Request, Response
 
-from via.exceptions import BadURL, UnhandledUpstreamException, UpstreamServiceError
+from via.exceptions import (
+    BadURL,
+    GoogleDriveServiceError,
+    UnhandledUpstreamException,
+    UpstreamServiceError,
+)
 from via.views.exceptions import (
     EXCEPTION_MAP,
     google_drive_exceptions,
@@ -19,7 +27,7 @@ from via.views.exceptions import (
 )
 
 
-class TestExceptionViews:
+class TestOtherExceptions:
     @pytest.mark.parametrize(
         "exception_class,status_code",
         (
@@ -32,11 +40,11 @@ class TestExceptionViews:
         ),
     )
     def test_values_are_copied_from_the_exception(
-        self, exception_view, exception_class, status_code, pyramid_request
+        self, exception_class, status_code, pyramid_request
     ):
         exception = exception_class("details string")
 
-        values = exception_view(exception, pyramid_request)
+        values = other_exceptions(exception, pyramid_request)
 
         assert values == Any.dict.containing(
             {
@@ -58,24 +66,22 @@ class TestExceptionViews:
         ),
     )
     def test_we_fill_in_other_values_based_on_exception_lookup(
-        self, exception_view, exception_class, mapped_exception, pyramid_request
+        self, exception_class, mapped_exception, pyramid_request
     ):
         exception = exception_class("details string")
 
-        values = exception_view(exception, pyramid_request)
+        values = other_exceptions(exception, pyramid_request)
 
         assert values["exception"] == Any.dict.containing(
             EXCEPTION_MAP[mapped_exception]
         )
 
     @pytest.mark.parametrize("doc_url", (sentinel.doc_url, None))
-    def test_it_reads_the_urls_from_the_request(
-        self, exception_view, pyramid_request, doc_url
-    ):
+    def test_it_reads_the_urls_from_the_request(self, pyramid_request, doc_url):
         pyramid_request.GET["url"] = doc_url
         pyramid_request.url = sentinel.request_url
 
-        values = exception_view(ValueError(), pyramid_request)
+        values = other_exceptions(ValueError(), pyramid_request)
 
         assert values["url"] == {"original": doc_url, "retry": sentinel.request_url}
 
@@ -125,10 +131,6 @@ class TestExceptionViews:
         else:
             h_pyramid_sentry.report_exception.assert_not_called()
 
-    @pytest.fixture(params=[other_exceptions, google_drive_exceptions])
-    def exception_view(self, request):
-        return request.param
-
     @pytest.fixture
     def pyramid_request(self):
         return DummyRequest()
@@ -136,3 +138,61 @@ class TestExceptionViews:
     @pytest.fixture(autouse=True)
     def h_pyramid_sentry(self, patch):
         return patch("via.views.exceptions.h_pyramid_sentry")
+
+
+class TestGoogleDriveExceptions:
+    def test_it(self, pyramid_request):
+        json_body = {"test": "info"}
+
+        # Constructing requests exceptions is no fun...
+        request = Request("GET", "http://example.com")
+        response = Response()
+        response.status_code = 502
+        response.raw = BytesIO(json.dumps(json_body).encode("utf-8"))
+        response.headers["Content-Type"] = "mime/type"
+
+        exception = GoogleDriveServiceError(
+            "message", 419, HTTPError(request=request, response=response)
+        )
+
+        result = google_drive_exceptions(exception, pyramid_request)
+
+        assert result == {
+            "exception": "GoogleDriveServiceError",
+            "message": "message",
+            "upstream": {
+                "content_type": response.headers["Content-Type"],
+                "json": json_body,
+                "status_code": response.status_code,
+                "url": request.url,
+            },
+        }
+
+        assert pyramid_request.response.status_int == 419
+
+    @pytest.mark.parametrize(
+        "raw,expected_text", ((123456, "... cannot retrieve ..."), (None, ""))
+    )
+    def test_it_with_bad_response(self, pyramid_request, raw, expected_text):
+        response = Response()
+        response.raw = raw
+        exception = GoogleDriveServiceError(
+            "message", 419, HTTPError(response=response)
+        )
+
+        result = google_drive_exceptions(exception, pyramid_request)
+
+        assert result == {
+            "exception": "GoogleDriveServiceError",
+            "message": "message",
+            "upstream": {
+                "content_type": None,
+                "status_code": None,
+                "text": expected_text,
+            },
+        }
+
+    def test_it_with_normal_exception(self, pyramid_request):
+        result = google_drive_exceptions(ValueError("message"), pyramid_request)
+
+        assert result == {"exception": "ValueError", "message": "message"}
