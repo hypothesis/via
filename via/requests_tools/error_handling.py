@@ -73,6 +73,9 @@ def _translate_error(err, mapping, custom_mapper=None):
 
     for error_class, target_class in mapping.items():
         if isinstance(err, error_class):
-            return target_class(err.args[0] if err.args else None)
+            return target_class(
+                message=err.args[0] if err.args else None,
+                requests_err=err if hasattr(err, "request") else None,
+            )
 
     return None

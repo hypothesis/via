@@ -1,10 +1,20 @@
-class BadURL(Exception):
+class RequestBasedException(Exception):
+    """An exception based on a requests error."""
+
+    def __init__(self, message, requests_err=None):
+        super().__init__(message)
+
+        self.request = requests_err.request if requests_err else None
+        self.response = requests_err.response if requests_err else None
+
+
+class BadURL(RequestBasedException):
     """An invalid URL was discovered."""
 
     status_int = 400
 
 
-class UpstreamServiceError(Exception):
+class UpstreamServiceError(RequestBasedException):
     """Something went wrong when calling an upstream service."""
 
     status_int = 409
@@ -34,11 +44,10 @@ class GoogleDriveServiceError(UpstreamServiceError):
     particular interest, we might raise this error.
     """
 
-    def __init__(self, message, error_json, status_int):
-        self.error_json = error_json
-        self.status_int = status_int
+    def __init__(self, message, status_int, requests_err=None):
+        super().__init__(message, requests_err=requests_err)
 
-        super().__init__(message)
+        self.status_int = status_int
 
 
 class ConfigurationError(Exception):
