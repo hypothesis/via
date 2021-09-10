@@ -75,15 +75,9 @@ def _get_meta(exception):
     return EXCEPTION_MAP.get(UnhandledUpstreamException)
 
 
+@exception_view_config(Exception, route_name="proxy_google_drive_file", renderer="json")
 @exception_view_config(
-    Exception,
-    route_name="proxy_google_drive_file",
-    renderer="via:templates/exception.html.jinja2",
-)
-@exception_view_config(
-    Exception,
-    route_name="proxy_google_drive_file:resource_key",
-    renderer="via:templates/exception.html.jinja2",
+    Exception, route_name="proxy_google_drive_file:resource_key", renderer="json"
 )
 def google_drive_exceptions(exc, request):
     """Catch all errors for Google Drive and display an HTML page."""
@@ -92,7 +86,41 @@ def google_drive_exceptions(exc, request):
     if not isinstance(exc, HTTPNotFound):
         h_pyramid_sentry.report_exception(exc)
 
-    return _get_error_body(exc, request)
+    _set_status(exc, request)
+
+    data = {
+        "exception": exc.__class__.__name__,
+        "message": exc.args[0] if exc.args else None,
+    }
+
+    if hasattr(exc, "response") and exc.response is not None:
+        data["upstream"] = _serialise_requests_info(exc.request, exc.response)
+
+    return data
+
+
+def _serialise_requests_info(request, response):
+    data = {
+        "status_code": response.status_code,
+        "content_type": response.headers.get("Content-Type"),
+    }
+    if request:
+        data["url"] = request.url
+
+    try:
+        data["json"] = response.json()
+    except (AttributeError, ValueError):
+        pass
+
+    if data.get("json") is None:
+        try:
+            data["text"] = response.text[:5000]
+
+        except Exception:  # pylint: disable=broad-except
+            # Use super broad exceptions so we can't fail here
+            data["text"] = "... cannot retrieve ..."
+
+    return data
 
 
 @exception_view_config(Exception, renderer="via:templates/exception.html.jinja2")
@@ -108,12 +136,7 @@ def other_exceptions(exc, request):
 
 
 def _get_error_body(exc, request):
-    try:
-        status_code = exc.status_int
-    except AttributeError:
-        status_code = 500
-
-    request.response.status_int = status_code
+    status_code = _set_status(exc, request)
 
     exception_meta = _get_meta(exc)
     exception_meta.update({"class": exc.__class__.__name__, "details": str(exc)})
@@ -124,3 +147,14 @@ def _get_error_body(exc, request):
         "url": {"original": request.GET.get("url", None), "retry": request.url},
         "static_url": request.static_url,
     }
+
+
+def _set_status(exc, request):
+    try:
+        status_code = exc.status_int
+    except AttributeError:
+        status_code = 500
+
+    request.response.status_int = status_code
+
+    return status_code
