@@ -39,11 +39,11 @@ def translate_google_error(error):
     if status_code == 403 and reason == "userRateLimitExceeded":
         return GoogleDriveServiceError(
             "Too many concurrent requests to the Google Drive API",
-            error_json=google_error,
             # 429 - Too many requests
             # Not 100% accurate as the user probably isn't making too many, but
             # close enough as it conveys the need to back off
             status_int=429,
+            requests_err=error,
         )
 
     return None
