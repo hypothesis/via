@@ -26,22 +26,14 @@ class TestViewPDF:
             "hypothesis_config": sentinel.h_config,
         }
 
-    @pytest.mark.parametrize(
-        "drive_available,is_google_url", ((True, False), (False, True), (False, False))
-    )
     def test_it_signs_the_url_if_not_google(
         self,
         call_view_pdf,
         google_drive_api,
         secure_link_service,
-        drive_available,
-        is_google_url,
         quantized_expiry,
     ):
-        google_drive_api.is_available = drive_available
-        google_drive_api.parse_file_url.return_value = (
-            {"file_id": sentinel.file_id} if is_google_url else None
-        )
+        google_drive_api.parse_file_url.return_value = None
 
         response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
 
@@ -76,7 +68,6 @@ class TestViewPDF:
     def test_it_signs_the_url_if_google(
         self, call_view_pdf, google_drive_api, secure_link_service, file_details, url
     ):
-        google_drive_api.is_available = True
         google_drive_api.parse_file_url.return_value = file_details
 
         response = call_view_pdf("http://gdrive/document.pdf")

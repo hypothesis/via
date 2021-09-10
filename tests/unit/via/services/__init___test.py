@@ -39,35 +39,19 @@ class TestCreateGoogleAPI:
             sentinel.credentials_list,
             sentinel.resource_keys,
         )
-        settings = {"google_drive_in_python": True, "noise": "other"}
 
-        api = create_google_api(settings)
+        api = create_google_api(sentinel.settings)
 
         load_injected_json.assert_has_calls(
             [
-                call(settings, "google_drive_credentials.json"),
-                call(settings, "google_drive_resource_keys.json"),
+                call(sentinel.settings, "google_drive_credentials.json"),
+                call(sentinel.settings, "google_drive_resource_keys.json"),
             ]
         )
 
         GoogleDriveAPI.assert_called_once_with(
             credentials_list=sentinel.credentials_list,
             resource_keys=sentinel.resource_keys,
-        )
-        assert api == GoogleDriveAPI.return_value
-
-    def test_it_without_credentials(
-        self, pyramid_request, GoogleDriveAPI, load_injected_json
-    ):
-        settings = {"google_drive_in_python": False, "noise": "other"}
-
-        api = create_google_api(settings)
-
-        load_injected_json.assert_called_once_with(
-            settings, "google_drive_resource_keys.json"
-        )
-        GoogleDriveAPI.assert_called_once_with(
-            credentials_list=None, resource_keys=load_injected_json.return_value
         )
         assert api == GoogleDriveAPI.return_value
 

@@ -5,7 +5,6 @@ services:
     ports:
       - '127.0.0.1:9083:9083'
     environment:
-      - GOOGLE_API_KEY
       - NGINX_SECURE_LINK_SECRET
     volumes:
       - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -18,5 +17,5 @@ services:
       - ./conf/nginx/includes.dev/resolver.conf:/etc/nginx/includes/resolver.conf:ro
       - ./conf/nginx/dev_host_bridge.sh:/etc/nginx/dev_host_bridge.sh:ro
       - ./conf/nginx/envsubst.conf.template:/var/lib/hypothesis/nginx_envsubst.conf.template:ro
-    command: /bin/sh -c "/etc/nginx/dev_host_bridge.sh && envsubst '$${GOOGLE_API_KEY}:$${NGINX_SECURE_LINK_SECRET}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && exec nginx"
+    command: /bin/sh -c "/etc/nginx/dev_host_bridge.sh && envsubst '$${NGINX_SECURE_LINK_SECRET}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && exec nginx"
 

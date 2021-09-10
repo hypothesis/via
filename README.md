@@ -77,8 +77,6 @@ Environment variables:
 | `CLIENT_EMBED_URL` | The URL of the client's embed script | `https://hypothes.is/embed.js`
 | `DATA_DIRECTORY` | Directory for externally provided data | `/via-data`
 | `ENABLE_FRONT_PAGE` | Show a front page at the root URL | `true` |
-| `GOOGLE_API_KEY` | The API key to use to authenticate with the Google Drive API |
-| `GOOGLE_DRIVE_IN_PYTHON` | Process Google Drive in Python (feature flag) (requires `google_drive_credentials.json` specified below.) |
 | `NEW_RELIC_*` | Various New Relic settings. See New Relic's docs for details |
 | `NGINX_SECURE_LINK_SECRET` | The NGINX secure links signing secret. This is used by Via's Python endpoints to generate the signed URLs required by its NGINX-implemented `/proxy/static/` endpoint. All instances of Via must have this setting |
 | `NGINX_SERVER` | The URL of Via's NGINX server for proxying PDF files | `https://via.hypothes.is`
@@ -91,8 +89,8 @@ Expected data:
 
 The following data is expected to be provided in the `DATA_DIRECTORY`:
 
- * `google_drive_credentials.json` - A list of credential JSON objects provided by the Google API console if using `GOOGLE_DRIVE_IN_PYTHON`
- * `google_drive_resource_keys.json` - A dict of file ids to resource keys if using `GOOGLE_DRIVE_IN_PYTHON`
+ * `google_drive_credentials.json` - A list of credential JSON objects provided by the Google API console
+ * `google_drive_resource_keys.json` - A dict of file ids to resource keys
 
 Updating the PDF viewer
 -----------------------

@@ -27,11 +27,9 @@ def view_pdf(context, request):
     request.checkmate.raise_if_blocked(url)
 
     google_drive_api = request.find_service(GoogleDriveAPI)
-    if google_drive_api.is_available and (
-        file_details := google_drive_api.parse_file_url(url)
-    ):
-        proxy_pdf_url = ProxyURLBuilder.google_file_url(request, file_details, url)
 
+    if file_details := google_drive_api.parse_file_url(url):
+        proxy_pdf_url = ProxyURLBuilder.google_file_url(request, file_details, url)
     else:
         proxy_pdf_url = ProxyURLBuilder.nginx_pdf_url(
             url,
