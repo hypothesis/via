@@ -1,23 +1,27 @@
-from unittest.mock import sentinel
+from unittest.mock import create_autospec, sentinel
 
 import pytest
 
+from via.resources import URLResource
 from via.views.proxy import proxy
 
 
 class TestProxy:
-    def test_it(self, pyramid_request, get_url_details, via_client_service):
-        pyramid_request.path_qs = "/https://example.org?a=1&via.sec=HEX"
+    def test_it(self, context, pyramid_request, get_url_details, via_client_service):
+        url = context.url_from_path.return_value = "/https://example.org?a=1"
 
-        result = proxy(pyramid_request)
+        result = proxy(context, pyramid_request)
 
-        url = "https://example.org?a=1"
         pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(url)
         get_url_details.assert_called_once_with(url)
         via_client_service.url_for.assert_called_once_with(
             url, sentinel.mime_type, pyramid_request.params
         )
         assert result == {"src": via_client_service.url_for.return_value}
+
+    @pytest.fixture
+    def context(self):
+        return create_autospec(URLResource, spec_set=True, instance=True)
 
     @pytest.fixture(autouse=True)
     def get_url_details(self, patch):

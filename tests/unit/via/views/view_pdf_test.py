@@ -58,15 +58,18 @@ class TestViewPDF:
         (
             (
                 {"file_id": "FILE_ID"},
-                "http://example.com/google_drive/FILE_ID/proxied.pdf?url=sentinel.url",
+                "http://example.com/google_drive/FILE_ID/proxied.pdf"
+                "?url=http%3A%2F%2Fgdrive%2Fdocument.pdf",
             ),
             (
                 {"file_id": "FILE_ID", "resource_key": None},
-                "http://example.com/google_drive/FILE_ID/proxied.pdf?url=sentinel.url",
+                "http://example.com/google_drive/FILE_ID/proxied.pdf"
+                "?url=http%3A%2F%2Fgdrive%2Fdocument.pdf",
             ),
             (
                 {"file_id": "FILE_ID", "resource_key": "RESOURCE_KEY"},
-                "http://example.com/google_drive/FILE_ID/RESOURCE_KEY/proxied.pdf?url=sentinel.url",
+                "http://example.com/google_drive/FILE_ID/RESOURCE_KEY/proxied.pdf"
+                "?url=http%3A%2F%2Fgdrive%2Fdocument.pdf",
             ),
         ),
     )
@@ -76,7 +79,7 @@ class TestViewPDF:
         google_drive_api.is_available = True
         google_drive_api.parse_file_url.return_value = file_details
 
-        response = call_view_pdf(sentinel.url)
+        response = call_view_pdf("http://gdrive/document.pdf")
 
         secure_link_service.sign_url.assert_called_once_with(url)
         assert response["proxy_pdf_url"] == secure_link_service.sign_url.return_value

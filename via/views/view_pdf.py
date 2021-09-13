@@ -22,7 +22,7 @@ from via.services.secure_link import SecureLinkService, has_secure_url_token
 def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
-    url = context.url()
+    url = context.url_from_query()
 
     request.checkmate.raise_if_blocked(url)
 

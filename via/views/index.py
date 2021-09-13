@@ -1,15 +1,15 @@
 from urllib.parse import urlparse
 
-from pyramid.httpexceptions import HTTPFound, HTTPNotFound
+from pyramid.httpexceptions import HTTPBadRequest, HTTPFound, HTTPNotFound
 from pyramid.view import view_config, view_defaults
 
-from via.views._helpers import url_from_user_input
 from via.views.exceptions import BadURL
 
 
 @view_defaults(route_name="index")
 class IndexViews:
-    def __init__(self, request):
+    def __init__(self, context, request):
+        self.context = context
         self.request = request
         self.enabled = request.registry.settings["enable_front_page"]
 
@@ -27,12 +27,23 @@ class IndexViews:
         if not self.enabled:
             return HTTPNotFound()
 
-        # Should this be context.url()?
-        url = url_from_user_input(self.request.params.get("url", ""))
+        try:
+            url = self.context.url_from_query()
+        except HTTPBadRequest:
+            # If we don't get a URL redirect the user to the index page
+            return HTTPFound(self.request.route_url(route_name="index"))
+
+        # In order to replicate the URL structure from original Via we need to
+        # create a path like this:
+        # http://via.host/http://proxied.site?query=1
+        # This means we need to pop off the query string and then add it
+        # separately from the URL, otherwise we'll get the query string encoded
+        # inside the URL portion of the path.
         try:
             parsed = urlparse(url)
-        except ValueError as ex:
-            raise BadURL(url) from ex
+        except ValueError as exc:
+            raise BadURL(url) from exc
+
         url_without_query = parsed._replace(query="", fragment="").geturl()
 
         return HTTPFound(
