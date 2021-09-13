@@ -10,7 +10,7 @@ from via.services import ViaClientService, has_secure_url_token
 @view.view_config(route_name="route_by_content", decorator=(has_secure_url_token,))
 def route_by_content(context, request):
     """Routes the request according to the Content-Type header."""
-    url = context.url()
+    url = context.url_from_query()
 
     request.checkmate.raise_if_blocked(url)
 

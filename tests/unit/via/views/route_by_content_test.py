@@ -37,7 +37,7 @@ class TestRouteByContent:
 
         response = route_by_content(context, pyramid_request)
 
-        url = context.url.return_value
+        url = context.url_from_query.return_value
         pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(url)
         get_url_details.assert_called_once_with(url, pyramid_request.headers)
         via_client_service.is_pdf.assert_called_once_with(sentinel.mime_type)
