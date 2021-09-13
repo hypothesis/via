@@ -3,8 +3,6 @@ from urllib.parse import urlparse
 from pyramid.httpexceptions import HTTPBadRequest, HTTPFound, HTTPNotFound
 from pyramid.view import view_config, view_defaults
 
-from via.views.exceptions import BadURL
-
 
 @view_defaults(route_name="index")
 class IndexViews:
@@ -39,11 +37,9 @@ class IndexViews:
         # This means we need to pop off the query string and then add it
         # separately from the URL, otherwise we'll get the query string encoded
         # inside the URL portion of the path.
-        try:
-            parsed = urlparse(url)
-        except ValueError as exc:
-            raise BadURL(url) from exc
 
+        # `context.url_from_query` protects us from parsing failing
+        parsed = urlparse(url)
         url_without_query = parsed._replace(query="", fragment="").geturl()
 
         return HTTPFound(
