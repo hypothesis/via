@@ -1,6 +1,10 @@
 """Context objects for views."""
+from urllib.parse import urlparse
+
 from h_vialib import Configuration
 from pyramid.httpexceptions import HTTPBadRequest
+
+from via.exceptions import BadURL
 
 
 class URLResource:
@@ -13,7 +17,8 @@ class URLResource:
         """Get the 'url' parameter from the query.
 
         :return: The URL as a string
-        :raise HTTPBadRequest: If the url is missing or empty
+        :raise HTTPBadRequest: If the URL is missing or empty
+        :raise BadURL: If the URL is malformed
         """
         try:
             url = self._request.params["url"].strip()
@@ -29,7 +34,8 @@ class URLResource:
         """Get the 'url' parameter from the path.
 
         :return: The URL as a string
-        :raise HTTPBadRequest: If the url is missing or empty
+        :raise HTTPBadRequest: If the URL is missing or empty
+        :raise BadURL: If the URL is malformed
         """
 
         url = self._request.path_qs[1:].strip()
@@ -45,7 +51,18 @@ class URLResource:
         Take a URL from user input (eg. a URL input field or path parameter) and
         convert it to a normalized form.
         """
-        if not (url.startswith("http://") or url.startswith("https://")):
-            url = "https://" + url
+
+        try:
+            parsed = urlparse(url)
+        except ValueError as exc:
+            raise BadURL(url) from exc
+
+        if not parsed.scheme:
+            if not parsed.netloc:
+                # Without a scheme urlparse often assumes the domain is the
+                # path. To prevent this add a fake scheme and try again
+                return cls._normalise_url("https://" + url)
+
+            url = parsed._replace(scheme="https").geturl()
 
         return Configuration.strip_from_url(url)
