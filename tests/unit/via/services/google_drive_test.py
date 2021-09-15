@@ -115,14 +115,28 @@ class TestGoogleDriveAPI:
         "kwargs,error_class,status_code",
         (
             (
-                {"status_code": 404, "json_data": load_fixture("google_404.json")},
+                {
+                    "status_code": 404,
+                    "json_data": load_fixture("google_404_file_not_found.json"),
+                },
                 HTTPNotFound,
                 404,
             ),
             (
-                {"status_code": 403, "json_data": load_fixture("google_403.json")},
+                {
+                    "status_code": 403,
+                    "json_data": load_fixture("google_403_rate_limited.json"),
+                },
                 GoogleDriveServiceError,
                 429,
+            ),
+            (
+                {
+                    "status_code": 403,
+                    "json_data": load_fixture("google_403_not_shared.json"),
+                },
+                GoogleDriveServiceError,
+                403,
             ),
         ),
     )

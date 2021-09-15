@@ -1,0 +1,13 @@
+{
+    "error": {
+        "errors": [
+            {
+                "domain": "global",
+                "reason": "cannotDownloadFile",
+                "message": "This file cannot be downloaded by the user."
+            }
+        ],
+        "code": 403,
+        "message": "This file cannot be downloaded by the user."
+    }
+}
