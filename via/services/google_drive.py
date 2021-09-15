@@ -46,6 +46,16 @@ def translate_google_error(error):
             requests_err=error,
         )
 
+    if status_code == 403 and reason == "cannotDownloadFile":
+        # This seems to happen if a file is locked down in various ways
+        # rather than for general consumption
+        return GoogleDriveServiceError(
+            "We do not have permission to download the file through the "
+            "Google Drive API",
+            status_int=403,
+            requests_err=error,
+        )
+
     return None
 
 
