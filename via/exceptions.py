@@ -11,6 +11,10 @@ class RequestBasedException(Exception):
 class BadURL(RequestBasedException):
     """An invalid URL was discovered."""
 
+    def __init__(self, message, requests_err=None, url=None):
+        super().__init__(message, requests_err)
+        self.url = url
+
     status_int = 400
 
 
