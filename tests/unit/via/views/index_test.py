@@ -2,7 +2,7 @@ import pytest
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 
 from tests.unit.matchers import temporary_redirect_to
-from via.resources import URLResource
+from via.resources import QueryURLResource
 from via.views.exceptions import BadURL
 from via.views.index import IndexViews
 
@@ -57,4 +57,4 @@ class TestIndexViews:
 
     @pytest.fixture
     def context(self, pyramid_request):
-        return URLResource(pyramid_request)
+        return QueryURLResource(pyramid_request)

@@ -4,7 +4,7 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 
-from via.resources import URLResource
+from via.resources import QueryURLResource
 from via.views.view_pdf import view_pdf
 
 
@@ -79,7 +79,7 @@ class TestViewPDF:
     def call_view_pdf(self, pyramid_request):
         def call_view_pdf(url="http://example.com/name.pdf", params=None):
             pyramid_request.params = dict(params or {}, url=url)
-            context = URLResource(pyramid_request)
+            context = QueryURLResource(pyramid_request)
             return view_pdf(context, pyramid_request)
 
         return call_view_pdf

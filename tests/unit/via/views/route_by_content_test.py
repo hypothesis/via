@@ -4,7 +4,7 @@ import pytest
 
 from tests.conftest import assert_cache_control
 from tests.unit.matchers import temporary_redirect_to
-from via.resources import URLResource
+from via.resources import QueryURLResource
 from via.views.route_by_content import route_by_content
 
 
@@ -53,7 +53,7 @@ class TestRouteByContent:
 
     @pytest.fixture
     def context(self):
-        return create_autospec(URLResource, spec_set=True, instance=True)
+        return create_autospec(QueryURLResource, spec_set=True, instance=True)
 
     @pytest.fixture(autouse=True)
     def get_url_details(self, patch):

@@ -2,7 +2,7 @@ import pytest
 from pyramid.httpexceptions import HTTPBadRequest
 
 from via.exceptions import BadURL
-from via.resources import URLResource
+from via.resources import PathURLResource, QueryURLResource
 
 NORMALISED_URLS = [
     # URLs that should be returned unchanged
@@ -21,51 +21,55 @@ NORMALISED_URLS = [
 ]
 
 
-class TestURLResource:
+class TestQueryURLResource:
     @pytest.mark.parametrize("url,expected", NORMALISED_URLS)
-    def test_url_from_query_returns_url(self, pyramid_request, url, expected):
+    def test_url_from_query_returns_url(self, context, pyramid_request, url, expected):
         pyramid_request.params["url"] = url
-        context = URLResource(pyramid_request)
 
         assert context.url_from_query() == expected
 
     @pytest.mark.parametrize("params", ({}, {"urk": "foo"}, {"url": ""}))
     def test_url_from_query_raises_HTTPBadRequest_for_bad_urls(
-        self, params, pyramid_request
+        self, context, pyramid_request, params
     ):
         pyramid_request.params = params
-        context = URLResource(pyramid_request)
 
         with pytest.raises(HTTPBadRequest):
             context.url_from_query()
 
-    def test_url_from_raises_BadURL_for_malformed_urls(self, pyramid_request):
+    def test_url_from_raises_BadURL_for_malformed_urls(self, context, pyramid_request):
         pyramid_request.params["url"] = "]"
-        context = URLResource(pyramid_request)
 
         with pytest.raises(BadURL):
             context.url_from_query()
 
+    @pytest.fixture
+    def context(self, pyramid_request):
+        return QueryURLResource(pyramid_request)
+
+
+class TestPathURLResource:
     @pytest.mark.parametrize("url,expected", NORMALISED_URLS)
-    def test_url_from_path_returns_url(self, pyramid_request, url, expected):
+    def test_url_from_path_returns_url(self, context, pyramid_request, url, expected):
         pyramid_request.path_qs = f"/{url}"
-        context = URLResource(pyramid_request)
 
         assert context.url_from_path() == expected
 
     @pytest.mark.parametrize("bad_path", ("/", "/  "))
     def test_url_from_path_raises_HTTPBadRequest_for_missing_urls(
-        self, pyramid_request, bad_path
+        self, context, pyramid_request, bad_path
     ):
         pyramid_request.path_qs = bad_path
-        context = URLResource(pyramid_request)
 
         with pytest.raises(HTTPBadRequest):
             context.url_from_path()
 
-    def test_url_from_path_BadURL_for_malformed_urls(self, pyramid_request):
+    def test_url_from_path_BadURL_for_malformed_urls(self, context, pyramid_request):
         pyramid_request.path_qs = "/]"
-        context = URLResource(pyramid_request)
 
         with pytest.raises(BadURL):
             context.url_from_path()
+
+    @pytest.fixture
+    def context(self, pyramid_request):
+        return PathURLResource(pyramid_request)

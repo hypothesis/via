@@ -2,7 +2,7 @@ from unittest.mock import create_autospec, sentinel
 
 import pytest
 
-from via.resources import URLResource
+from via.resources import PathURLResource
 from via.views.proxy import proxy
 
 
@@ -21,7 +21,7 @@ class TestProxy:
 
     @pytest.fixture
     def context(self):
-        return create_autospec(URLResource, spec_set=True, instance=True)
+        return create_autospec(PathURLResource, spec_set=True, instance=True)
 
     @pytest.fixture(autouse=True)
     def get_url_details(self, patch):
