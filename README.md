@@ -92,6 +92,39 @@ The following data is expected to be provided in the `DATA_DIRECTORY`:
  * `google_drive_credentials.json` - A list of credential JSON objects provided by the Google API console
  * `google_drive_resource_keys.json` - A dict of file ids to resource keys
 
+Error codes
+-----------
+
+Most error codes have their natural meanings, but there are some special cases
+that we catch. Those marged with **(error)** are from our point of view 
+something which is worth investigation. Others are a normal part of the 
+day-to-day.
+
+### All end-points:
+
+ * 401 - The user needs a secure token and either they don't have one, or it's 
+   invalid
+
+### General end-points:
+
+ * 400 - The user has make a mistake in calling us or given us a bad URL
+ * 408 - We timed out accessing a website
+ * 409 - A website we have called gave us a conventional error like a 
+   connection error. Trying again could help.
+ * 417 - A website has given us an unexpected response. This could be anything.
+   Trying again could help.
+
+### `/google_drive/*`
+
+ * 403 - The user has given us a URL which doesn't grant us permission to 
+   download it
+ * 404 - The user has given us an invalid URL or one we _really_ don't have 
+   permission to see
+ * **408 (error)** - We timed out trying to make a connection to Google 
+ * **409 (error)** - We had a conventional error like a connection error
+ * **417 (error)** - We got an unexpected response from Google
+ * **429 (error)** - We have been rate limited by Google
+
 Updating the PDF viewer
 -----------------------
 
