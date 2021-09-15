@@ -168,6 +168,8 @@ class TestGoogleDriveExceptions:
             },
         }
 
+        json.dumps(result)  # Check we are serialisable
+
         assert pyramid_request.response.status_int == 419
 
     @pytest.mark.parametrize(
@@ -192,7 +194,16 @@ class TestGoogleDriveExceptions:
             },
         }
 
+        json.dumps(result)  # Check we are serialisable
+
     def test_it_with_normal_exception(self, pyramid_request):
         result = google_drive_exceptions(ValueError("message"), pyramid_request)
 
         assert result == {"exception": "ValueError", "message": "message"}
+
+    def test_it_with_an_exception_with_a_non_string_arg(self, pyramid_request):
+        exception = ValueError(set("a"))
+
+        result = google_drive_exceptions(exception, pyramid_request)
+
+        json.dumps(result)  # Check we are serialisable
