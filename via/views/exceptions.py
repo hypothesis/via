@@ -10,6 +10,7 @@ from via.exceptions import (
     UpstreamServiceError,
     UpstreamTimeout,
 )
+from via.resources import get_original_url
 
 EXCEPTION_MAP = {
     BadURL: {
@@ -144,7 +145,7 @@ def _get_error_body(exc, request):
     return {
         "status_code": status_code,
         "exception": exception_meta,
-        "url": {"original": request.GET.get("url", None), "retry": request.url},
+        "url": {"original": get_original_url(request.context), "retry": request.url},
         "static_url": request.static_url,
     }
 

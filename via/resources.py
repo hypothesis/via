@@ -24,7 +24,7 @@ class _URLResource:
         try:
             parsed = urlparse(url)
         except ValueError as exc:
-            raise BadURL(url) from exc
+            raise BadURL(str(exc), url=url) from exc
 
         if not parsed.scheme:
             if not parsed.netloc:
@@ -74,3 +74,21 @@ class QueryURLResource(_URLResource):
             raise HTTPBadRequest("Required parameter 'url' is blank")
 
         return self._normalise_url(url)
+
+
+def get_original_url(context):
+    """Get the original URL from a provided context object (if any)."""
+
+    if isinstance(context, QueryURLResource):
+        getter = context.url_from_query
+    elif isinstance(context, PathURLResource):
+        getter = context.url_from_path
+    else:
+        return None
+
+    try:
+        return getter()
+    except BadURL as err:
+        return err.url
+    except HTTPBadRequest:
+        return None

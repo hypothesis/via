@@ -1,8 +1,10 @@
+from unittest.mock import create_autospec
+
 import pytest
 from pyramid.httpexceptions import HTTPBadRequest
 
 from via.exceptions import BadURL
-from via.resources import PathURLResource, QueryURLResource
+from via.resources import PathURLResource, QueryURLResource, get_original_url
 
 NORMALISED_URLS = [
     # URLs that should be returned unchanged
@@ -73,3 +75,44 @@ class TestPathURLResource:
     @pytest.fixture
     def context(self, pyramid_request):
         return PathURLResource(pyramid_request)
+
+
+class TestGetOriginalURL:
+    def test_it_with_paths(self, path_url_resource):
+        assert (
+            get_original_url(path_url_resource)
+            == path_url_resource.url_from_path.return_value
+        )
+
+    @pytest.mark.parametrize(
+        "exc,expected", ((HTTPBadRequest, None), (BadURL("message", url="url"), "url"))
+    )
+    def test_it_with_bad_paths(self, path_url_resource, exc, expected):
+        path_url_resource.url_from_path.side_effect = exc
+
+        assert get_original_url(path_url_resource) == expected
+
+    def test_it_with_queries(self, query_url_resource):
+        assert (
+            get_original_url(query_url_resource)
+            == query_url_resource.url_from_query.return_value
+        )
+
+    @pytest.mark.parametrize(
+        "exc,expected", ((HTTPBadRequest, None), (BadURL("message", url="url"), "url"))
+    )
+    def test_it_with_bad_queries(self, query_url_resource, exc, expected):
+        query_url_resource.url_from_query.side_effect = exc
+
+        assert get_original_url(query_url_resource) == expected
+
+    def test_it_with_non_resource(self):
+        assert get_original_url(None) is None
+
+    @pytest.fixture
+    def path_url_resource(self):
+        return create_autospec(PathURLResource, spec_set=True, instance=True)
+
+    @pytest.fixture
+    def query_url_resource(self):
+        return create_autospec(QueryURLResource, spec_set=True, instance=True)

@@ -76,14 +76,18 @@ class TestOtherExceptions:
             EXCEPTION_MAP[mapped_exception]
         )
 
-    @pytest.mark.parametrize("doc_url", (sentinel.doc_url, None))
-    def test_it_reads_the_urls_from_the_request(self, pyramid_request, doc_url):
-        pyramid_request.GET["url"] = doc_url
+    def test_it_reads_the_urls_from_the_request(
+        self, pyramid_request, get_original_url
+    ):
         pyramid_request.url = sentinel.request_url
 
         values = other_exceptions(ValueError(), pyramid_request)
 
-        assert values["url"] == {"original": doc_url, "retry": sentinel.request_url}
+        get_original_url.assert_called_once_with(pyramid_request.context)
+        assert values["url"] == {
+            "original": get_original_url.return_value,
+            "retry": sentinel.request_url,
+        }
 
     @pytest.mark.parametrize(
         "exception_class,should_report",
@@ -134,6 +138,10 @@ class TestOtherExceptions:
     @pytest.fixture
     def pyramid_request(self):
         return DummyRequest()
+
+    @pytest.fixture(autouse=True)
+    def get_original_url(self, patch):
+        return patch("via.views.exceptions.get_original_url")
 
     @pytest.fixture(autouse=True)
     def h_pyramid_sentry(self, patch):
