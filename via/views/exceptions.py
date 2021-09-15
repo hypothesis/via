@@ -90,7 +90,7 @@ def google_drive_exceptions(exc, request):
 
     data = {
         "exception": exc.__class__.__name__,
-        "message": exc.args[0] if exc.args else None,
+        "message": str(exc.args[0]) if exc.args else None,
     }
 
     if hasattr(exc, "response") and exc.response is not None:
