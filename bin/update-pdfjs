@@ -17,7 +17,20 @@ set -eu
 # regenerate the HTML template, run this script with the `--no-download` flag.
 
 DEST_DIR=via/static/vendor/pdfjs-2
-PREFIX=pdf.js-gh-pages
+
+# PDF.js comes in two flavors, one for modern browsers and one for older browsers,
+# known as the "legacy" build.
+#
+# The versions supported by the legacy build are listed at
+# https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#which-browsers-are-supported
+# and as of September 2021 these align closely with what the client supports
+# (see https://github.com/hypothesis/client/issues/3744).
+#
+# In the extracted tarball, the modern version is in pdf.js-gh-pages/ and the
+# legacy version is in pdf.js-gh-pages/legacy/.
+PREFIX=pdf.js-gh-pages/legacy
+PREFIX_DEPTH=2  # Number of path elements in $PREFIX
+
 COMPONENTS="$PREFIX/build $PREFIX/web $PREFIX/LICENSE"
 
 download_pdfjs=1
@@ -35,10 +48,10 @@ if [ $download_pdfjs ]; then
 
   # Get the latest build of the viewer
   curl -L https://github.com/mozilla/pdf.js/archive/gh-pages.tar.gz \
-    | tar -xz --directory $DEST_DIR --strip-components=1 $COMPONENTS
+    | tar -xz --directory $DEST_DIR --strip-components=$PREFIX_DEPTH $COMPONENTS
 
   # Remove example content from viewer
   rm $DEST_DIR/web/*.pdf
 
-    echo $DEST_DIR/web/viewer.js
+  echo $DEST_DIR/web/viewer.js
 fi
