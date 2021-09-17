@@ -145,7 +145,12 @@ def _get_error_body(exc, request):
     return {
         "status_code": status_code,
         "exception": exception_meta,
-        "url": {"original": get_original_url(request.context), "retry": request.url},
+        "url": {
+            "original": get_original_url(request.context)
+            if hasattr(request, "context")
+            else None,
+            "retry": request.url,
+        },
         "static_url": request.static_url,
     }
 

@@ -89,6 +89,18 @@ class TestOtherExceptions:
             "retry": sentinel.request_url,
         }
 
+    def test_it_doesnt_read_the_url_if_the_request_has_no_context(
+        self, pyramid_request, get_original_url
+    ):
+        # It seems we can get in the situation where Pyramid does not provide
+        # a context attribute at all on the object
+        delattr(pyramid_request, "context")
+
+        values = other_exceptions(ValueError(), pyramid_request)
+
+        get_original_url.assert_not_called()
+        assert values["url"]["original"] is None
+
     @pytest.mark.parametrize(
         "exception_class,should_report",
         (
