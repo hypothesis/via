@@ -80,6 +80,9 @@ def create_app(_=None, **settings):
 
     config.add_tween("via.tweens.robots_tween_factory")
 
+    # Add this as near to the end of your config as possible:
+    config.include("pyramid_sanity")
+
     app = WhiteNoise(
         config.make_wsgi_app(),
         index_file=True,

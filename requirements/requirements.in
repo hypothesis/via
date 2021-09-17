@@ -7,6 +7,7 @@ newrelic
 pyramid
 pyramid-exclog
 pyramid-jinja2
+pyramid-sanity
 pyramid-services
 requests
 whitenoise

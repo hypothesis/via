@@ -153,12 +153,15 @@ pyramid==2.0
     #   pyramid-exclog
     #   pyramid-ipython
     #   pyramid-jinja2
+    #   pyramid-sanity
     #   pyramid-services
 pyramid-exclog==1.0
     # via -r requirements/requirements.txt
 pyramid-ipython==0.2
     # via -r requirements/dev.in
 pyramid-jinja2==2.8
+    # via -r requirements/requirements.txt
+pyramid-sanity==1.0.2
     # via -r requirements/requirements.txt
 pyramid-services==2.2
     # via -r requirements/requirements.txt
