@@ -1,4 +1,4 @@
-pylint<2.11
+pylint<2.12
 pydocstyle
 -r tests.txt
 -r requirements.txt
