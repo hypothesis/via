@@ -14,6 +14,7 @@ NORMALISED_URLS = [
     ("http://example.com?a=1", "http://example.com?a=1"),
     # URLs without a protocol that should have `https://` prefixed
     ("example.com", "https://example.com"),
+    (".example.com", "https://example.com"),
     ("//example.com", "https://example.com"),
     # Leading and trailing whitespace that should be stripped
     (" http://example.com", "http://example.com"),
