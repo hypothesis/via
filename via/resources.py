@@ -30,7 +30,7 @@ class _URLResource:
             if not parsed.netloc:
                 # Without a scheme urlparse often assumes the domain is the
                 # path. To prevent this add a fake scheme and try again
-                return cls._normalise_url("https://" + url)
+                return cls._normalise_url("https://" + url.lstrip("."))
 
             url = parsed._replace(scheme="https").geturl()
 
