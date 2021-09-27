@@ -36,6 +36,13 @@ class TestGetFileContent:
         # And we still get everything if we iterate
         assert list(response.app_iter) == [0, 1, 2]
 
+    def test_it_can_stream_an_empty_iterator(self, pyramid_request, google_drive_api):
+        google_drive_api.iter_file.return_value = iter([])
+
+        response = proxy_google_drive_file(pyramid_request)
+
+        assert list(response.app_iter) == []
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
         pyramid_request.matchdict.update(

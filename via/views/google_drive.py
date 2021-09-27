@@ -42,4 +42,7 @@ def _reify_first(iterable):
     called now. This is so any errors or problems that come from starting the
     process happen immediately, rather than whenever the iterable is evaluated.
     """
-    return chain((next(iterable),), iterable)
+    try:
+        return chain((next(iterable),), iterable)
+    except StopIteration:
+        return []
