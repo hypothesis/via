@@ -1,5 +1,5 @@
 """Context objects for views."""
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from h_vialib import Configuration
 from pyramid.httpexceptions import HTTPBadRequest
@@ -21,20 +21,38 @@ class _URLResource:
         convert it to a normalized form.
         """
 
-        try:
-            parsed = urlparse(url)
-        except ValueError as exc:
-            raise BadURL(str(exc), url=url) from exc
+        return Configuration.strip_from_url(cls._parse_url(url).geturl())
+
+    @classmethod
+    def _parse_url(cls, url):
+        parsed = cls._repeated_decode(url)
 
         if not parsed.scheme:
             if not parsed.netloc:
                 # Without a scheme urlparse often assumes the domain is the
                 # path. To prevent this add a fake scheme and try again
-                return cls._normalise_url("https://" + url.lstrip("."))
+                parsed = cls._parse_url("https://" + url.lstrip("."))
+            else:
+                parsed = parsed._replace(scheme="https")
 
-            url = parsed._replace(scheme="https").geturl()
+        return parsed
 
-        return Configuration.strip_from_url(url)
+    @classmethod
+    def _repeated_decode(cls, url):
+        try:
+            parsed = urlparse(url)
+        except ValueError as exc:
+            raise BadURL(str(exc), url=url) from exc
+
+        decoded_url = unquote(url)
+        if decoded_url == url:
+            return parsed
+
+        decoded_parsed = cls._repeated_decode(decoded_url)
+        if decoded_parsed.netloc == parsed.netloc:
+            return parsed
+
+        return decoded_parsed
 
 
 class PathURLResource(_URLResource):
