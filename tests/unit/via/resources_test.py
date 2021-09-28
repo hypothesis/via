@@ -21,7 +21,36 @@ NORMALISED_URLS = [
     ("http://example.com ", "http://example.com"),
     # Check we remove Via stuff
     ("http://example.com?a=1&via.sec=TOKEN", "http://example.com?a=1"),
+    # If we have URLs with unicode in them, then by the time they get to us
+    # they can look like this. A browser will understand and decode this, but
+    # requests can't.%D0%BA%D0%B0%D0%BB%D0%BE%D1%88%D0%B8
+    (
+        "http://%D1%81%D0%BA%D0%B0.%D1%80%D1%84/%D0%BA%D0%B0%D0%BB/%3F%D1%81%3D%D1%8F",
+        "http://ска.рф/кал/?с=я",
+    ),
+    # We can also handle completely URL encoded URLs
+    (
+        "http%3A%2F%2F%D1%81%D0%BA%D0%B0.%D1%80%D1%84%2F%D0%BA%D0%B0%D0%BB%2F%3F%D1%81%3D%D1%8F",
+        "http://ска.рф/кал/?с=я",
+    ),
+    # Our missing scheme defaults should still work
+    (
+        "%D1%81%D0%BA%D0%B0.%D1%80%D1%84/%D0%BA%D0%B0%D0%BB/%3F%D1%81%3D%D1%8F",
+        "https://ска.рф/кал/?с=я",
+    ),
+    # ... or double encoded
+    (
+        "http%253A%252F%252F%25D1%2581%25D0%25BA%25D0%25B0.%25D1%2580%25D1%2584",
+        "http://ска.рф",
+    ),
+    (
+        # If the hostname doesn't change we'll leave in the encoding
+        "http://example.com/%D0%BA%D0%B0%D0%BB%D0%BE%D1%88%D0%B8",
+        "http://example.com/%D0%BA%D0%B0%D0%BB%D0%BE%D1%88%D0%B8",
+    ),
 ]
+
+BAD_URLS = ("https://]", "https://%5D")
 
 
 class TestQueryURLResource:
@@ -40,8 +69,11 @@ class TestQueryURLResource:
         with pytest.raises(HTTPBadRequest):
             context.url_from_query()
 
-    def test_url_from_raises_BadURL_for_malformed_urls(self, context, pyramid_request):
-        pyramid_request.params["url"] = "]"
+    @pytest.mark.parametrize("bad_url", BAD_URLS)
+    def test_url_from_raises_BadURL_for_malformed_urls(
+        self, context, pyramid_request, bad_url
+    ):
+        pyramid_request.params["url"] = bad_url
 
         with pytest.raises(BadURL):
             context.url_from_query()
@@ -67,8 +99,11 @@ class TestPathURLResource:
         with pytest.raises(HTTPBadRequest):
             context.url_from_path()
 
-    def test_url_from_path_BadURL_for_malformed_urls(self, context, pyramid_request):
-        pyramid_request.path_qs = "/]"
+    @pytest.mark.parametrize("bad_url", BAD_URLS)
+    def test_url_from_path_BadURL_for_malformed_urls(
+        self, context, pyramid_request, bad_url
+    ):
+        pyramid_request.path_qs = f"/{bad_url}"
 
         with pytest.raises(BadURL):
             context.url_from_path()
