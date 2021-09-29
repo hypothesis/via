@@ -1,17 +1,19 @@
 from unittest.mock import sentinel
 
 import pytest
+from pyramid.httpexceptions import HTTPNoContent
 
 from via.views.google_drive import proxy_google_drive_file
 
 
 @pytest.mark.usefixtures("secure_link_service", "google_drive_api")
 class TestGetFileContent:
-    def test_it_adds_headers(
+    def test_status_and_headers(
         self, pyramid_request, secure_link_service, google_drive_api
     ):
         response = proxy_google_drive_file(pyramid_request)
 
+        assert response.status_code == 200
         assert response.headers["Content-Disposition"] == "inline"
         assert response.headers["Content-Type"] == "application/pdf"
         assert (
@@ -41,7 +43,7 @@ class TestGetFileContent:
 
         response = proxy_google_drive_file(pyramid_request)
 
-        assert list(response.app_iter) == []
+        assert isinstance(response, HTTPNoContent)
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
