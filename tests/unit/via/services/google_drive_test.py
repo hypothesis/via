@@ -160,6 +160,8 @@ class TestGoogleDriveAPI:
             param({"status_code": 503}, id="unexpected status code"),
             param({"json_data": None}, id="no json"),
             param({"json_data": {"hello": 1}}, id="unexpected json"),
+            param({"json_data": {"error": {"errors": 23}}}, id="unexpected json"),
+            param({"json_data": {"error": {"errors": [23]}}}, id="unexpected json"),
             param({"raw_data": "{... broken}"}, id="malformed json"),
         ),
     )
