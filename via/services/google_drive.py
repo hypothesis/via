@@ -16,27 +16,36 @@ from via.requests_tools.error_handling import iter_handle_errors
 LOG = getLogger(__name__)
 
 
-def translate_google_error(error):
+def translate_google_error(
+    error,
+):  # pylint:disable=too-many-return-statements
     """Get a specific error instance from the provided error or None."""
 
     # This isn't a requests exception we can get meaningful data from
     if not isinstance(error, HTTPError) or error.response is None:
         return None
 
+    status_code = error.response.status_code
+
     # Try and parse out the Google details in the format we've seen
     try:
         google_error = error.response.json()["error"]["errors"][0]
-    except (JSONDecodeError, KeyError):
+    except (JSONDecodeError, KeyError, TypeError):
         return None
 
-    status_code, reason = error.response.status_code, google_error.get("reason")
+    try:
+        google_reason, google_message = google_error.get("reason"), google_error.get(
+            "message"
+        )
+    except AttributeError:
+        return None
 
     # Check carefully to see that this is Google telling us the file isn't
     # found rather than this being us going to the wrong end-point
-    if status_code == 404 and reason == "notFound":
-        return HTTPNotFound(google_error.get("message", "File id not found"))
+    if status_code == 404 and google_reason == "notFound":
+        return HTTPNotFound(google_message or "File id not found")
 
-    if status_code == 403 and reason == "userRateLimitExceeded":
+    if status_code == 403 and google_reason == "userRateLimitExceeded":
         return GoogleDriveServiceError(
             "Too many concurrent requests to the Google Drive API",
             # 429 - Too many requests
@@ -46,7 +55,7 @@ def translate_google_error(error):
             requests_err=error,
         )
 
-    if status_code == 403 and reason == "cannotDownloadFile":
+    if status_code == 403 and google_reason == "cannotDownloadFile":
         # This seems to happen if a file is locked down in various ways
         # rather than for general consumption
         return GoogleDriveServiceError(
