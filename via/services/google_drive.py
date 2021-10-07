@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
+from marshmallow import INCLUDE, Schema, ValidationError, fields, pre_load, validate
 from pyramid.httpexceptions import HTTPNotFound
 from requests import HTTPError
 
@@ -16,29 +17,48 @@ from via.requests_tools.error_handling import iter_handle_errors
 LOG = getLogger(__name__)
 
 
-def translate_google_error(
-    error,
-):  # pylint:disable=too-many-return-statements
+class GoogleDriveErrorSchema(Schema):
+    """Schema for the JSON bodies of Google Drive error responses."""
+
+    class Meta:
+        unknown = INCLUDE
+
+    class Errors(Schema):
+        class Error(Schema):
+            message = fields.String()
+            reason = fields.String()
+
+        errors = fields.List(
+            fields.Nested(Error(unknown=INCLUDE)),
+            required=True,
+            validate=validate.Length(min=1),
+        )
+
+    @pre_load
+    def pre_load(self, data, **_kwargs):  # pylint:disable=no-self-use
+        try:
+            return data.response.json()
+        except JSONDecodeError as err:
+            raise ValidationError("Invalid JSON") from err
+
+    error = fields.Nested(Errors(unknown=INCLUDE), required=True)
+
+
+def translate_google_error(error):
     """Get a specific error instance from the provided error or None."""
 
-    # This isn't a requests exception we can get meaningful data from
     if not isinstance(error, HTTPError) or error.response is None:
         return None
 
     status_code = error.response.status_code
 
-    # Try and parse out the Google details in the format we've seen
     try:
-        google_error = error.response.json()["error"]["errors"][0]
-    except (JSONDecodeError, KeyError, TypeError):
+        validated_data = GoogleDriveErrorSchema().load(error)
+    except ValidationError:
         return None
 
-    try:
-        google_reason, google_message = google_error.get("reason"), google_error.get(
-            "message"
-        )
-    except AttributeError:
-        return None
+    google_message = validated_data["error"]["errors"][0].get("message")
+    google_reason = validated_data["error"]["errors"][0].get("reason")
 
     # Check carefully to see that this is Google telling us the file isn't
     # found rather than this being us going to the wrong end-point

@@ -5,6 +5,7 @@ from unittest.mock import sentinel
 import importlib_resources
 import pytest
 from h_matchers import Any
+from marshmallow import ValidationError
 from pyramid.httpexceptions import HTTPNotFound
 from pytest import param
 from requests import Response, TooManyRedirects
@@ -16,7 +17,7 @@ from via.exceptions import (
     UnhandledUpstreamException,
     UpstreamServiceError,
 )
-from via.services.google_drive import GoogleDriveAPI
+from via.services.google_drive import GoogleDriveAPI, GoogleDriveErrorSchema
 
 
 def load_fixture(filename):
@@ -25,6 +26,73 @@ def load_fixture(filename):
     )
     with ref.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+class TestGoogleErrorBodySchema:
+    @pytest.mark.parametrize(
+        "json_data",
+        [
+            {"error": {"errors": [{"reason": "notFound", "message": "test_message"}]}},
+            # "message" can be missing:
+            {"error": {"errors": [{"reason": "notFound"}]}},
+            # "reason" can be missing:
+            {"error": {"errors": [{"message": "test_message"}]}},
+            # Both "message" and "reason" can be missing at once.
+            {"error": {"errors": [{}]}},
+            # Other data can be present throughout.
+            {
+                "error": {
+                    "errors": [
+                        {
+                            "reason": "notFound",
+                            "message": "test_message",
+                            "other": "foo",
+                        },
+                        {"another": "error"},
+                    ],
+                    "other": "foo",
+                },
+                "other": "foo",
+            },
+        ],
+    )
+    def test_it_returns_the_validated_data(self, json_data):
+        error = make_requests_exception(
+            error_class=HTTPError, status_code=400, json_data=json_data
+        )
+
+        validated_data = GoogleDriveErrorSchema().load(error)
+
+        assert validated_data == json_data
+
+    @pytest.mark.parametrize(
+        "json_data",
+        [
+            # "message" not a string.
+            {"error": {"errors": [{"message": 23}]}},
+            # "reason" not a string.
+            {"error": {"errors": [{"reason": 23}]}},
+            # The first error in the "errors" list not a dict.
+            {"error": {"errors": [None]}},
+            # No errors in the "errors" list.
+            {"error": {"errors": []}},
+            # The "errors" list not a list.
+            {"error": {"errors": None}},
+            # The "errors" list missing.
+            {"error": {}},
+            # The top-level "error" dict not a dict.
+            {"error": 23},
+            # The top-level "error" dict missing.
+            {},
+        ],
+    )
+    def test_it_raises_ValidationError_if_the_json_data_is_invalid(self, json_data):
+        error = make_requests_exception(
+            error_class=HTTPError, status_code=400, json_data=json_data
+        )
+
+        with pytest.raises(ValidationError):
+            GoogleDriveErrorSchema().load(error)
 
 
 class TestGoogleDriveAPI:
