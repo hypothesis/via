@@ -5,7 +5,6 @@ from unittest.mock import sentinel
 import importlib_resources
 import pytest
 from h_matchers import Any
-from marshmallow import ValidationError
 from pyramid.httpexceptions import HTTPNotFound
 from pytest import param
 from requests import Response, TooManyRedirects
@@ -56,14 +55,8 @@ class TestGoogleErrorBodySchema:
             },
         ],
     )
-    def test_it_returns_the_validated_data(self, json_data):
-        error = make_requests_exception(
-            error_class=HTTPError, status_code=400, json_data=json_data
-        )
-
-        validated_data = GoogleDriveErrorSchema().load(error)
-
-        assert validated_data == json_data
+    def test_it_returns_no_errors_for_valid_data(self, json_data):
+        assert not GoogleDriveErrorSchema().validate(json_data)
 
     @pytest.mark.parametrize(
         "json_data",
@@ -86,13 +79,8 @@ class TestGoogleErrorBodySchema:
             {},
         ],
     )
-    def test_it_raises_ValidationError_if_the_json_data_is_invalid(self, json_data):
-        error = make_requests_exception(
-            error_class=HTTPError, status_code=400, json_data=json_data
-        )
-
-        with pytest.raises(ValidationError):
-            GoogleDriveErrorSchema().load(error)
+    def test_it_returns_errors_for_invalid_data(self, json_data):
+        assert GoogleDriveErrorSchema().validate(json_data)
 
 
 class TestGoogleDriveAPI:

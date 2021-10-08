@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2.service_account import Credentials
-from marshmallow import INCLUDE, Schema, ValidationError, fields, pre_load, validate
+from marshmallow import INCLUDE, Schema, fields, validate
 from pyramid.httpexceptions import HTTPNotFound
 from requests import HTTPError
 
@@ -34,13 +34,6 @@ class GoogleDriveErrorSchema(Schema):
             validate=validate.Length(min=1),
         )
 
-    @pre_load
-    def pre_load(self, data, **_kwargs):  # pylint:disable=no-self-use
-        try:
-            return data.response.json()
-        except JSONDecodeError as err:
-            raise ValidationError("Invalid JSON") from err
-
     error = fields.Nested(Errors(unknown=INCLUDE), required=True)
 
 
@@ -53,12 +46,17 @@ def translate_google_error(error):
     status_code = error.response.status_code
 
     try:
-        validated_data = GoogleDriveErrorSchema().load(error)
-    except ValidationError:
+        data = error.response.json()
+    except JSONDecodeError:
         return None
 
-    google_message = validated_data["error"]["errors"][0].get("message")
-    google_reason = validated_data["error"]["errors"][0].get("reason")
+    # Check the data for errors. If we get any bail out
+    if GoogleDriveErrorSchema().validate(data):
+        return None
+
+    # Now it's safe to access the data without checking it
+    google_message = data["error"]["errors"][0].get("message")
+    google_reason = data["error"]["errors"][0].get("reason")
 
     # Check carefully to see that this is Google telling us the file isn't
     # found rather than this being us going to the wrong end-point
