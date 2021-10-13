@@ -4,6 +4,7 @@ from unittest.mock import sentinel
 import importlib_resources
 import pytest
 from h_matchers import Any
+from marshmallow import ValidationError
 from pyramid.httpexceptions import HTTPNotFound
 from pytest import param
 from requests import TooManyRedirects
@@ -16,7 +17,7 @@ from via.exceptions import (
     UnhandledUpstreamException,
     UpstreamServiceError,
 )
-from via.services.google_drive import GoogleDriveAPI
+from via.services.google_drive import GoogleDriveAPI, GoogleDriveErrorSchema
 
 
 def load_fixture(filename):
@@ -25,6 +26,47 @@ def load_fixture(filename):
     )
     with ref.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+class TestGoogleErrorBodySchema:
+    def test_it_returns_the_validated_data(self):
+        json_data = {
+            "error": {
+                "errors": [
+                    {
+                        "reason": "notFound",
+                        "message": "test_message",
+                        "other": "foo",
+                    },
+                    {"another": "error"},
+                ],
+                "other": "foo",
+            },
+            "other": "foo",
+        }
+
+        assert GoogleDriveErrorSchema().load(json_data) == json_data
+
+    @pytest.mark.parametrize(
+        "json_data",
+        [
+            # The first error in the "errors" list not a dict.
+            {"error": {"errors": [None]}},
+            # No errors in the "errors" list.
+            {"error": {"errors": []}},
+            # The "errors" list not a list.
+            {"error": {"errors": None}},
+            # The "errors" list missing.
+            {"error": {}},
+            # The top-level "error" dict not a dict.
+            {"error": 23},
+            # The top-level "error" dict missing.
+            {},
+        ],
+    )
+    def test_it_raises_ValidationError_if_the_json_data_is_invalid(self, json_data):
+        with pytest.raises(ValidationError):
+            GoogleDriveErrorSchema().load(json_data)
 
 
 class TestGoogleDriveAPI:
@@ -159,9 +201,6 @@ class TestGoogleDriveAPI:
             param({"error_class": InvalidJSONError}, id="unexpected class"),
             param({"status_code": 503}, id="unexpected status code"),
             param({"json_data": None}, id="no json"),
-            param({"json_data": {"hello": 1}}, id="unexpected json"),
-            param({"json_data": {"error": {"errors": 23}}}, id="unexpected json"),
-            param({"json_data": {"error": {"errors": [23]}}}, id="unexpected json"),
             param({"raw_data": "{... broken}"}, id="malformed json"),
         ),
     )

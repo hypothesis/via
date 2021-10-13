@@ -12,3 +12,4 @@ pyramid-services
 requests
 whitenoise
 google-auth-oauthlib
+marshmallow
