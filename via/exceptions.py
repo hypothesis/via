@@ -7,6 +7,29 @@ class RequestBasedException(Exception):
         self.request = requests_err.request if requests_err else None
         self.response = requests_err.response if requests_err else None
 
+    def __str__(self):
+        string = super().__str__()
+
+        if self.response is None:
+            return string
+
+        # Log the details of the response. This goes to both Sentry and the
+        # application's logs. It's helpful for debugging to know how the
+        # external service responded.
+
+        return " ".join(
+            [
+                part
+                for part in [
+                    f"{string}:",
+                    str(self.response.status_code or ""),
+                    self.response.reason,
+                    self.response.text,
+                ]
+                if part
+            ]
+        )
+
 
 class BadURL(RequestBasedException):
     """An invalid URL was discovered."""
