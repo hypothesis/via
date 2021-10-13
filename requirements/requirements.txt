@@ -42,7 +42,7 @@ markupsafe==1.1.1
     # via
     #   jinja2
     #   pyramid-jinja2
-newrelic==7.0.0.166
+newrelic==7.2.1.168
     # via -r requirements/requirements.in
 oauthlib==3.1.1
     # via requests-oauthlib
