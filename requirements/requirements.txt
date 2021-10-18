@@ -30,7 +30,7 @@ hupper==1.10.2
     # via pyramid
 idna==2.10
     # via requests
-importlib_resources==5.2.3
+importlib-resources==5.2.3
     # via
     #   -r requirements/requirements.in
     #   h-checkmatelib
@@ -42,7 +42,7 @@ markupsafe==1.1.1
     # via
     #   jinja2
     #   pyramid-jinja2
-marshmallow==3.13.0
+marshmallow==3.14.0
     # via -r requirements/requirements.in
 newrelic==7.2.2.169
     # via -r requirements/requirements.in
