@@ -1,5 +1,5 @@
 import json
-from unittest.mock import sentinel
+from unittest.mock import call, sentinel
 
 import importlib_resources
 import pytest
@@ -17,7 +17,12 @@ from via.exceptions import (
     UnhandledUpstreamException,
     UpstreamServiceError,
 )
-from via.services.google_drive import GoogleDriveAPI, GoogleDriveErrorSchema
+from via.services.google_drive import (
+    GoogleDriveAPI,
+    GoogleDriveErrorSchema,
+    _load_injected_json,
+    factory,
+)
 
 
 def load_fixture(filename):
@@ -69,6 +74,69 @@ class TestGoogleErrorBodySchema:
             GoogleDriveErrorSchema().load(json_data)
 
 
+class TestLoadInjectedJSON:
+    def test_it(self, settings, tmpdir):
+        json_file = tmpdir / "data.json"
+        json_file.write('{"a": 1}')
+
+        data = _load_injected_json(settings, "data.json")
+
+        assert data == {"a": 1}
+
+    def test_it_with_malformed_data(self, settings, tmpdir):
+        json_file = tmpdir / "data.json"
+        json_file.write("{malformed ...")
+
+        with pytest.raises(ConfigurationError):
+            _load_injected_json(settings, "data.json")
+
+    def test_it_with_missing_data(self, settings):
+        with pytest.raises(ConfigurationError):
+            _load_injected_json(settings, "missing.json")
+
+    @pytest.fixture
+    def settings(self, tmpdir):
+        return {"data_directory": tmpdir}
+
+
+class TestFactory:
+    def test_it_with_credentials(
+        self, pyramid_request, GoogleDriveAPI, load_injected_json, proxy_pdf_service
+    ):
+        load_injected_json.side_effect = (
+            sentinel.credentials_list,
+            sentinel.resource_keys,
+        )
+
+        api = factory(sentinel.context, pyramid_request)
+
+        load_injected_json.assert_has_calls(
+            [
+                call(
+                    pyramid_request.registry.settings, "google_drive_credentials.json"
+                ),
+                call(
+                    pyramid_request.registry.settings, "google_drive_resource_keys.json"
+                ),
+            ]
+        )
+
+        GoogleDriveAPI.assert_called_once_with(
+            credentials_list=sentinel.credentials_list,
+            resource_keys=sentinel.resource_keys,
+            proxy_pdf_service=proxy_pdf_service,
+        )
+        assert api == GoogleDriveAPI.return_value
+
+    @pytest.fixture(autouse=True)
+    def load_injected_json(self, patch):
+        return patch("via.services.google_drive._load_injected_json")
+
+    @pytest.fixture(autouse=True)
+    def GoogleDriveAPI(self, patch):
+        return patch("via.services.google_drive.GoogleDriveAPI")
+
+
 class TestGoogleDriveAPI:
     def test_it_builds_a_session_as_we_expect(
         self, api, Credentials, AuthorizedSession
@@ -88,16 +156,20 @@ class TestGoogleDriveAPI:
         Credentials.from_service_account_info.side_effect = ValueError
 
         with pytest.raises(ConfigurationError):
-            GoogleDriveAPI([{"invalid": "credentials"}], resource_keys={})
+            GoogleDriveAPI(
+                [{"invalid": "credentials"}], resource_keys={}, proxy_pdf_service=None
+            )
 
     def test_it_with_functest_credentials(self, api):
-        api = GoogleDriveAPI([{"disable": True}], resource_keys={})
+        api = GoogleDriveAPI(
+            [{"disable": True}], resource_keys={}, proxy_pdf_service=None
+        )
 
         # In functest mode we don't finish building the object at all. So
         # attempting to use it should fail in a spectacular and obvious way
         assert not hasattr(api, "_session")
 
-    def test_iter_file(self, api, stream_bytes):
+    def test_iter_file(self, api, stream_bytes, proxy_pdf_service):
         # This is all a bit black box, we don't necessarily know what all these
         # Google objects do, so we'll just check we call them in the right way
         stream_bytes.return_value = range(3)
@@ -107,16 +179,7 @@ class TestGoogleDriveAPI:
         # pylint: disable=no-member,protected-access
         api._session.get.assert_called_once_with(
             url="https://www.googleapis.com/drive/v3/files/FILE_ID?alt=media",
-            headers={
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate",
-                "User-Agent": "(gzip)",
-                # This is looked up from the resource mapping
-                "X-Goog-Drive-Resource-Keys": "FILE_ID/RESOURCE_ID",
-                # Quick check to show we use `add_request_headers`
-                "X-Abuse-Policy": Any.string(),
-                "X-Complaints-To": Any.string(),
-            },
+            headers=proxy_pdf_service.request_headers.return_value,
             stream=True,
             timeout=GoogleDriveAPI.TIMEOUT,
             max_allowed_time=GoogleDriveAPI.TIMEOUT,
@@ -126,17 +189,19 @@ class TestGoogleDriveAPI:
         stream_bytes.assert_called_once_with(api._session.get.return_value)
         assert result == [0, 1, 2]
 
-    def test_iter_file_accepts_resource_key(self, api):
+    def test_iter_file_accepts_resource_key(self, api, proxy_pdf_service):
         list(api.iter_file("FILE_ID", "SPECIFIED_RESOURCE_ID"))
+
+        proxy_pdf_service.request_headers.assert_called_once_with(
+            {
+                "X-Goog-Drive-Resource-Keys": "FILE_ID/SPECIFIED_RESOURCE_ID",
+            }
+        )
 
         # pylint: disable=no-member,protected-access
         api._session.get.assert_called_once_with(
             url=Any(),
-            headers=Any.dict.containing(
-                {
-                    "X-Goog-Drive-Resource-Keys": "FILE_ID/SPECIFIED_RESOURCE_ID",
-                }
-            ),
+            headers=proxy_pdf_service.request_headers.return_value,
             stream=Any(),
             timeout=Any(),
             max_allowed_time=Any(),
@@ -289,10 +354,11 @@ class TestGoogleDriveAPI:
         assert GoogleDriveAPI.parse_file_url(url) == expected
 
     @pytest.fixture
-    def api(self):
+    def api(self, proxy_pdf_service):
         return GoogleDriveAPI(
             credentials_list=[{"valid": "credentials"}, {"valid": "credentials_2"}],
             resource_keys={"FILE_ID": "RESOURCE_ID"},
+            proxy_pdf_service=proxy_pdf_service,
         )
 
     @pytest.fixture(autouse=True)
