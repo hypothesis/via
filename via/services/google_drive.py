@@ -1,6 +1,8 @@
+import json
 import re
 from json import JSONDecodeError
 from logging import getLogger
+from pathlib import Path
 from typing import ByteString, Iterator
 from urllib.parse import parse_qs, urlparse
 
@@ -11,8 +13,9 @@ from pyramid.httpexceptions import HTTPNotFound
 from requests import HTTPError
 
 from via.exceptions import ConfigurationError, GoogleDriveServiceError
-from via.requests_tools import add_request_headers, stream_bytes
+from via.requests_tools import stream_bytes
 from via.requests_tools.error_handling import iter_handle_errors
+from via.services.proxy_pdf import ProxyPDFService
 
 LOG = getLogger(__name__)
 
@@ -89,7 +92,7 @@ class GoogleDriveAPI:
     # that the shortest one will kick in first
     TIMEOUT = 30
 
-    def __init__(self, credentials_list, resource_keys):
+    def __init__(self, credentials_list, resource_keys, proxy_pdf_service):
         """Initialise the service.
 
         :param credentials_list: A list of dicts of credentials info as
@@ -116,6 +119,7 @@ class GoogleDriveAPI:
             ) from exc
 
         self._session = AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT)
+        self._proxy_pdf_service = proxy_pdf_service
 
     _FILE_PATH_REGEX = re.compile("/file/d/(?P<file_id>[^/]+)")
 
@@ -164,14 +168,6 @@ class GoogleDriveAPI:
         # https://developers.google.com/drive/api/v3/reference/files/get
         url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media"
 
-        headers = add_request_headers(
-            {
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate",
-                "User-Agent": "(gzip)",
-            }
-        )
-
         if not resource_key:
             # If we are being called, we should have been initialised with a
             # set of resource keys. See the factory below
@@ -183,17 +179,55 @@ class GoogleDriveAPI:
                     resource_key,
                 )
 
+        headers = {}
         if resource_key:
             headers["X-Goog-Drive-Resource-Keys"] = f"{file_id}/{resource_key}"
 
         response = self._session.get(
             url=url,
-            headers=headers,
+            headers=self._proxy_pdf_service.request_headers(headers),
             stream=True,
             timeout=self.TIMEOUT,
             max_allowed_time=self.TIMEOUT,
         )
-
         response.raise_for_status()
-
         yield from stream_bytes(response)
+
+
+def _load_injected_json(settings, file_name):
+    """Load a JSON file from the env specified `DATA_DIRECTORY`.
+
+    This data is provided to us externally (by S3 at the moment) or any other
+    mechanism which causes files to exist in the directory we expect.
+
+    :param settings: A dict of Pyramid settings
+    :param file_name: Filename to load
+    :return: Decoded JSON data
+
+    :raises ConfigurationError: If the file is required and not found or
+        malformed
+    """
+
+    data_directory: Path = settings.get("data_directory")
+    resource = data_directory / file_name
+
+    if not resource.exists():
+        raise ConfigurationError(f"Expected data file '{resource}' not found")
+
+    with resource.open(encoding="utf-8") as handle:
+        try:
+            return json.load(handle)
+        except JSONDecodeError as exc:
+            raise ConfigurationError(f"Invalid data file format: '{resource}'") from exc
+
+
+def factory(_context, request):
+    return GoogleDriveAPI(
+        credentials_list=_load_injected_json(
+            request.registry.settings, "google_drive_credentials.json"
+        ),
+        resource_keys=_load_injected_json(
+            request.registry.settings, "google_drive_resource_keys.json"
+        ),
+        proxy_pdf_service=request.find_service(ProxyPDFService),
+    )
