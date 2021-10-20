@@ -4,6 +4,7 @@ import pytest
 
 from via.services import (
     GoogleDriveAPI,
+    MSOneDriveService,
     ProxyPDFService,
     SecureLinkService,
     ViaClientService,
@@ -29,6 +30,11 @@ def via_client_service(mock_service):
 @pytest.fixture
 def proxy_pdf_service(mock_service):
     return mock_service(ProxyPDFService)
+
+
+@pytest.fixture
+def ms_one_drive_service(mock_service):
+    return mock_service(MSOneDriveService)
 
 
 @pytest.fixture

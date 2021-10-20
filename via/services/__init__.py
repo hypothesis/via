@@ -1,6 +1,7 @@
 """Services for Via."""
 
 from via.services.google_drive import GoogleDriveAPI
+from via.services.ms_one_drive import MSOneDriveService
 from via.services.proxy_pdf import ProxyPDFService
 from via.services.secure_link import SecureLinkService, has_secure_url_token
 from via.services.via_client import ViaClientService
@@ -8,6 +9,9 @@ from via.services.via_client import ViaClientService
 
 def includeme(config):  # pragma: no cover
     """Add services to pyramid config."""
+    config.register_service_factory(
+        "via.services.ms_one_drive.factory", iface=MSOneDriveService
+    )
 
     config.register_service_factory(
         "via.services.proxy_pdf.factory", iface=ProxyPDFService
