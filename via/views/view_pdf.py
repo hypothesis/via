@@ -6,8 +6,9 @@ from datetime import timedelta
 from h_vialib import Configuration
 from h_vialib.secure import quantized_expiry
 from pyramid import view
+from pyramid.httpexceptions import HTTPNoContent
 
-from via.services import GoogleDriveAPI
+from via.services import GoogleDriveAPI, MSOneDriveService, ProxyPDFService
 from via.services.secure_link import SecureLinkService, has_secure_url_token
 
 
@@ -27,9 +28,12 @@ def view_pdf(context, request):
     request.checkmate.raise_if_blocked(url)
 
     google_drive_api = request.find_service(GoogleDriveAPI)
+    ms_one_drive_service = request.find_service(MSOneDriveService)
 
     if file_details := google_drive_api.parse_file_url(url):
         proxy_pdf_url = ProxyURLBuilder.google_file_url(request, file_details, url)
+    elif ms_one_drive_service.is_one_drive_url(url):
+        proxy_pdf_url = ProxyURLBuilder.python_proxy_pdf(request, url)
     else:
         proxy_pdf_url = ProxyURLBuilder.nginx_pdf_url(
             url,
@@ -51,6 +55,28 @@ def view_pdf(context, request):
     }
 
 
+@view.view_config(
+    route_name="python_proxy_pdf",
+    decorator=(has_secure_url_token,),
+)
+def python_proxy_pdf_view(context, request):
+    proxy_pdf_service = request.find_service(ProxyPDFService)
+    url = context.url_from_query()
+
+    content_iterable = proxy_pdf_service.iter_url(url)
+
+    if content_iterable is None:
+        # Respond with 204 no content for empty files. This means they won't be
+        # cached by Cloudflare and gives the user a chance to fix the problem.
+        return HTTPNoContent()
+
+    response = request.response
+    response.headers.update(ProxyPDFService.response_headers())
+
+    response.app_iter = content_iterable
+    return response
+
+
 class ProxyURLBuilder:
     @staticmethod
     def google_file_url(request, file_details, url):
@@ -66,6 +92,15 @@ class ProxyURLBuilder:
                 # see this directly, but it's handy for us.
                 _query={"url": url},
                 **file_details,
+            )
+        )
+
+    @staticmethod
+    def python_proxy_pdf(request, url):
+        return request.find_service(SecureLinkService).sign_url(
+            request.route_url(
+                "python_proxy_pdf",
+                _query={"url": url},
             )
         )
 
