@@ -20,6 +20,12 @@ def add_routes(config):  # pragma: no cover
         "/google_drive/{file_id}/{resource_key}/proxied.pdf",
         factory=QueryURLResource,
     )
+    config.add_route(
+        "python_proxy_pdf",
+        "/proxy_pdf/proxied.pdf",
+        factory=QueryURLResource,
+    )
+
     config.add_route("proxy", "/{url:.*}", factory=PathURLResource)
 
 

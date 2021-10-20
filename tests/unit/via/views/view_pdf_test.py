@@ -3,15 +3,21 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
+from pyramid.httpexceptions import HTTPNoContent
 
 from via.resources import QueryURLResource
-from via.views.view_pdf import view_pdf
+from via.views.view_pdf import python_proxy_pdf, view_pdf
 
 
-@pytest.mark.usefixtures("secure_link_service", "google_drive_api")
+@pytest.mark.usefixtures(
+    "secure_link_service",
+    "google_drive_api",
+    "proxy_pdf_service",
+    "ms_one_drive_service",
+)
 class TestViewPDF:
-    def test_it(self, call_view_pdf, pyramid_request, pyramid_settings, Configuration):
-        response = call_view_pdf("http://example.com/foo.pdf")
+    def test_it(self, call_view, pyramid_request, pyramid_settings, Configuration):
+        response = call_view("http://example.com/foo.pdf")
 
         Configuration.extract_from_params.assert_called_once_with(
             pyramid_request.params
@@ -28,14 +34,13 @@ class TestViewPDF:
 
     def test_it_signs_the_url_if_not_google(
         self,
-        call_view_pdf,
+        call_view,
         google_drive_api,
-        secure_link_service,
         quantized_expiry,
     ):
         google_drive_api.parse_file_url.return_value = None
 
-        response = call_view_pdf("https://example.com/foo/bar.pdf?q=s")
+        response = call_view("https://example.com/foo/bar.pdf?q=s")
 
         quantized_expiry.assert_called_once_with(max_age=timedelta(hours=25))
         signed_url = response["proxy_pdf_url"]
@@ -66,23 +71,31 @@ class TestViewPDF:
         ),
     )
     def test_it_signs_the_url_if_google(
-        self, call_view_pdf, google_drive_api, secure_link_service, file_details, url
+        self, call_view, google_drive_api, secure_link_service, file_details, url
     ):
         google_drive_api.parse_file_url.return_value = file_details
 
-        response = call_view_pdf("http://gdrive/document.pdf")
+        response = call_view("http://gdrive/document.pdf")
 
         secure_link_service.sign_url.assert_called_once_with(url)
         assert response["proxy_pdf_url"] == secure_link_service.sign_url.return_value
 
-    @pytest.fixture
-    def call_view_pdf(self, pyramid_request):
-        def call_view_pdf(url="http://example.com/name.pdf", params=None):
-            pyramid_request.params = dict(params or {}, url=url)
-            context = QueryURLResource(pyramid_request)
-            return view_pdf(context, pyramid_request)
+    def test_it_signs_the_url_if_ms_one_drive(
+        self,
+        call_view,
+        pyramid_request,
+        ms_one_drive_service,
+        secure_link_service,
+    ):
+        url = "http://ms_one_drive_url/document.pdf"
+        ms_one_drive_service.is_one_drive_url.return_value = True
 
-        return call_view_pdf
+        response = call_view(url)
+
+        secure_link_service.sign_url.assert_called_once_with(
+            pyramid_request.route_url("python_proxy_pdf", _query={"url": url})
+        )
+        assert response["proxy_pdf_url"] == secure_link_service.sign_url.return_value
 
     @pytest.fixture
     def Configuration(self, patch):
@@ -101,6 +114,12 @@ class TestViewPDF:
         return google_drive_api
 
     @pytest.fixture(autouse=True)
+    def ms_one_drive_service(self, ms_one_drive_service):
+        ms_one_drive_service.is_one_drive_url.return_value = False
+
+        return ms_one_drive_service
+
+    @pytest.fixture(autouse=True)
     def quantized_expiry(self, patch):
         return patch(
             "via.views.view_pdf.quantized_expiry",
@@ -114,3 +133,31 @@ class TestViewPDF:
                 tzinfo=timezone.utc,
             ),
         )
+
+
+class TestPythonProxyPdf:
+    def test_it(self, call_view, proxy_pdf_service):
+        url = "https://onedriveurl.com"
+        proxy_pdf_service.iter_url.return_value = range(5)
+
+        response = call_view(url, view=python_proxy_pdf)
+
+        assert response.app_iter == range(5)
+
+    def test_empty_pdf(self, call_view, proxy_pdf_service):
+        url = "https://onedriveurl.com"
+        proxy_pdf_service.iter_url.return_value = None
+
+        response = call_view(url, view=python_proxy_pdf)
+
+        assert isinstance(response, HTTPNoContent)
+
+
+@pytest.fixture
+def call_view(pyramid_request):
+    def call_view(url="http://example.com/name.pdf", params=None, view=view_pdf):
+        pyramid_request.params = dict(params or {}, url=url)
+        context = QueryURLResource(pyramid_request)
+        return view(context, pyramid_request)
+
+    return call_view
