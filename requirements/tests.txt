@@ -38,7 +38,7 @@ google-auth-oauthlib==0.4.6
     # via -r requirements/requirements.txt
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
-h-checkmatelib==1.0.9
+h-checkmatelib==1.0.10
     # via -r requirements/requirements.txt
 h-matchers==1.2.12
     # via -r requirements/tests.in
@@ -56,7 +56,7 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
-importlib_resources==5.3.0
+importlib-resources==5.3.0
     # via
     #   -r requirements/requirements.txt
     #   h-checkmatelib

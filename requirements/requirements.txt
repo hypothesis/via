@@ -20,7 +20,7 @@ google-auth-oauthlib==0.4.6
     # via -r requirements/requirements.in
 gunicorn==20.1.0
     # via -r requirements/requirements.in
-h-checkmatelib==1.0.9
+h-checkmatelib==1.0.10
     # via -r requirements/requirements.in
 h-pyramid-sentry==1.2.3
     # via -r requirements/requirements.in
@@ -30,7 +30,7 @@ hupper==1.10.2
     # via pyramid
 idna==2.10
     # via requests
-importlib_resources==5.3.0
+importlib-resources==5.3.0
     # via
     #   -r requirements/requirements.in
     #   h-checkmatelib
