@@ -2,17 +2,16 @@
 import cgi
 from collections import OrderedDict
 
-import requests
-
 from via.requests_tools.error_handling import handle_errors
 from via.requests_tools.headers import add_request_headers, clean_headers
 from via.services.google_drive import GoogleDriveAPI
 
 
 @handle_errors
-def get_url_details(url, headers=None):
+def get_url_details(http_service, url, headers=None):
     """Get the content type and status code for a given URL.
 
+    :param http_service: Instance of HTTPService to make the request with
     :param url: URL to retrieve
     :param headers: The original headers the request was made with
     :return: 2-tuple of (mime type, status code)
@@ -29,7 +28,7 @@ def get_url_details(url, headers=None):
 
     headers = add_request_headers(clean_headers(headers))
 
-    with requests.get(
+    with http_service.get(
         url,
         stream=True,
         allow_redirects=True,

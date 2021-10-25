@@ -13,8 +13,8 @@ from pyramid.httpexceptions import HTTPNotFound
 from requests import HTTPError
 
 from via.exceptions import ConfigurationError, GoogleDriveServiceError
-from via.requests_tools import add_request_headers, stream_bytes
-from via.requests_tools.error_handling import iter_handle_errors
+from via.requests_tools import add_request_headers
+from via.services.http import HTTPService
 
 LOG = getLogger(__name__)
 
@@ -117,7 +117,10 @@ class GoogleDriveAPI:
                 "The Google Drive service account information is invalid"
             ) from exc
 
-        self._session = AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT)
+        self._http_service = HTTPService(
+            session=AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT),
+            error_mapping=translate_google_error,
+        )
 
     _FILE_PATH_REGEX = re.compile("/file/d/(?P<file_id>[^/]+)")
 
@@ -149,7 +152,6 @@ class GoogleDriveAPI:
 
         return data
 
-    @iter_handle_errors(translate_google_error)
     def iter_file(self, file_id, resource_key=None) -> Iterator[ByteString]:
         """Get a generator of chunks of bytes for the specified file.
 
@@ -177,25 +179,22 @@ class GoogleDriveAPI:
                     resource_key,
                 )
 
-        headers = {}
+        headers = add_request_headers(
+            {
+                "Accept": "*/*",
+                "Accept-Encoding": "gzip, deflate",
+                "User-Agent": "(gzip)",
+            }
+        )
         if resource_key:
             headers["X-Goog-Drive-Resource-Keys"] = f"{file_id}/{resource_key}"
 
-        response = self._session.get(
+        yield from self._http_service.stream(
             url=url,
-            headers=add_request_headers(
-                {
-                    "Accept": "*/*",
-                    "Accept-Encoding": "gzip, deflate",
-                    "User-Agent": "(gzip)",
-                }
-            ),
-            stream=True,
+            headers=headers,
             timeout=self.TIMEOUT,
             max_allowed_time=self.TIMEOUT,
         )
-        response.raise_for_status()
-        yield from stream_bytes(response)
 
 
 def _load_injected_json(settings, file_name):

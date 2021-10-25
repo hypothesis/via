@@ -6,7 +6,7 @@ from h_vialib import Configuration
 from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
-from via.services import GoogleDriveAPI, ProxyPDFService
+from via.services import GoogleDriveAPI, HTTPService
 from via.services.pdf_url import PDFURLBuilder
 from via.services.secure_link import has_secure_url_token
 
@@ -41,10 +41,9 @@ def view_pdf(context, request):
 
 @view_config(route_name="proxy_one_drive_pdf", decorator=(has_secure_url_token,))
 def proxy_one_drive_pdf(context, request):
-    proxy_pdf_service = request.find_service(ProxyPDFService)
     url = context.url_from_query()
 
-    content_iterable = proxy_pdf_service.iter_url(url)
+    content_iterable = request.find_service(HTTPService).stream(url)
 
     return _iter_pdf_response(request.response, content_iterable)
 
@@ -66,7 +65,13 @@ def proxy_google_drive_file(request):
 
 
 def _iter_pdf_response(response, content_iterable):
+
     try:
+        # Get an iterable where the first item only has already been reified.
+        # Return None if there is no content to return.
+        # This takes a potentially lazy generator, and ensures the first item is
+        # called now. This is so any errors or problems that come from starting the
+        # process happen immediately, rather than whenever the iterable is evaluated.
         content_iterable = chain((next(content_iterable),), content_iterable)
     except StopIteration:
         # Respond with 204 no content for empty files. This means they won't be

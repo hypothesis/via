@@ -4,8 +4,9 @@ import pytest
 
 from via.services import (
     GoogleDriveAPI,
-    MSOneDriveService,
-    ProxyPDFService,
+    HTTPService,
+    NGINXSigner,
+    PDFURLBuilder,
     SecureLinkService,
     ViaClientService,
 )
@@ -28,13 +29,8 @@ def via_client_service(mock_service):
 
 
 @pytest.fixture
-def proxy_pdf_service(mock_service):
-    return mock_service(ProxyPDFService)
-
-
-@pytest.fixture
-def ms_one_drive_service(mock_service):
-    return mock_service(MSOneDriveService)
+def http_service(mock_service):
+    return mock_service(HTTPService)
 
 
 @pytest.fixture
@@ -45,3 +41,13 @@ def google_drive_api(mock_service):
 @pytest.fixture
 def secure_link_service(mock_service):
     return mock_service(SecureLinkService)
+
+
+@pytest.fixture
+def nginx_signer_service(mock_service):
+    return mock_service(NGINXSigner)
+
+
+@pytest.fixture
+def pdf_url_builder_service(mock_service):
+    return mock_service(PDFURLBuilder)

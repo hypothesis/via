@@ -6,7 +6,7 @@ from h_matchers import Any
 from requests import Response
 from requests.exceptions import SSLError
 
-from via.exceptions import BadURL, UpstreamServiceError
+from via.exceptions import UpstreamServiceError
 from via.get_url import get_url_details
 
 
@@ -23,11 +23,11 @@ class TestGetURLDetails:
     def test_it_calls_get_for_normal_urls(
         # pylint: disable=too-many-arguments
         self,
-        requests,
         response,
         content_type,
         mime_type,
         status_code,
+        http_service,
     ):
         if content_type:
             response.headers = {"Content-Type": content_type}
@@ -38,58 +38,53 @@ class TestGetURLDetails:
 
         url = "http://example.com"
 
-        result = get_url_details(url, headers=sentinel.headers)
+        result = get_url_details(http_service, url, headers=sentinel.headers)
 
         assert result == (mime_type, status_code)
-        requests.get.assert_called_once_with(
+        http_service.get.assert_called_once_with(
             url, allow_redirects=True, stream=True, headers=Any(), timeout=10
         )
 
     @pytest.mark.usefixtures("response")
-    def test_it_modifies_headers(self, requests, clean_headers, add_request_headers):
-        get_url_details(url="http://example.com", headers={"X-Pre-Existing": 1})
+    def test_it_modifies_headers(
+        self, clean_headers, add_request_headers, http_service
+    ):
+        get_url_details(
+            http_service, url="http://example.com", headers={"X-Pre-Existing": 1}
+        )
 
-        _args, kwargs = requests.get.call_args
+        _args, kwargs = http_service.get.call_args
 
         clean_headers.assert_called_once_with({"X-Pre-Existing": 1})
         add_request_headers.assert_called_once_with(clean_headers.return_value)
         assert kwargs["headers"] == add_request_headers.return_value
 
-    def test_it_assumes_pdf_with_a_google_drive_url(self, requests, GoogleDriveAPI):
+    def test_it_assumes_pdf_with_a_google_drive_url(self, http_service, GoogleDriveAPI):
         GoogleDriveAPI.parse_file_url.return_value = {"file_id": "FILE_ID"}
 
-        result = get_url_details(sentinel.google_drive_url)
+        result = get_url_details(http_service, sentinel.google_drive_url)
 
         assert result == ("application/pdf", 200)
         GoogleDriveAPI.parse_file_url.assert_called_once_with(sentinel.google_drive_url)
-        requests.get.assert_not_called()
+        http_service.get.assert_not_called()
 
-    @pytest.mark.parametrize("bad_url", ("no-schema", "glub://example.com", "http://"))
-    def test_it_raises_BadURL_for_invalid_urls(self, bad_url):
-        with pytest.raises(BadURL):
-            get_url_details(bad_url)
-
-    def test_it_catches_requests_exceptions(self, requests):
+    def test_it_catches_requests_exceptions(self, http_service):
         # We'll test one (of the many) error translations that `@handle_errors`
         # does for us to prove it's in use on the method.
-        requests.get.side_effect = SSLError("Oh noe")
+        http_service.get.side_effect = SSLError("Oh noe")
 
         with pytest.raises(UpstreamServiceError):
-            get_url_details("http://example.com")
+            get_url_details(http_service, "http://example.com")
 
     @pytest.fixture
-    def response(self, requests):
+    def response(self, http_service):
         response = Response()
         response.raw = BytesIO(b"")
         response.headers = {"Content-Type": "dummy"}
         response.status_code = 200
-        requests.get.return_value = response
+        http_service.get.return_value = response
 
         return response
-
-    @pytest.fixture
-    def requests(self, patch):
-        return patch("via.get_url.requests")
 
     @pytest.fixture
     def GoogleDriveAPI(self, patch):

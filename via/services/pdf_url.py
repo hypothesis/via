@@ -7,7 +7,8 @@ from typing import Callable
 
 from h_vialib.secure import quantized_expiry
 
-from via.services import GoogleDriveAPI, SecureLinkService
+from via.services.google_drive import GoogleDriveAPI
+from via.services.secure_link import SecureLinkService
 
 
 @dataclass
@@ -102,7 +103,7 @@ def factory(_context, request):
     return PDFURLBuilder(
         google_drive_api=request.find_service(GoogleDriveAPI),
         secure_link_service=request.find_service(SecureLinkService),
-        route_url=Callable,
+        route_url=request.route_url,
         nginx_signer=NGINXSigner(
             nginx_server=request.registry.settings["nginx_server"],
             secret=request.registry.settings["nginx_secure_link_secret"],
