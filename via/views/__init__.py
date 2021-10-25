@@ -21,8 +21,8 @@ def add_routes(config):  # pragma: no cover
         factory=QueryURLResource,
     )
     config.add_route(
-        "python_proxy_pdf",
-        "/proxy_pdf/proxied.pdf",
+        "proxy_one_drive_pdf",
+        "/one_drive/proxied.pdf",
         factory=QueryURLResource,
     )
 

@@ -13,9 +13,8 @@ from pyramid.httpexceptions import HTTPNotFound
 from requests import HTTPError
 
 from via.exceptions import ConfigurationError, GoogleDriveServiceError
-from via.requests_tools import stream_bytes
+from via.requests_tools import add_request_headers, stream_bytes
 from via.requests_tools.error_handling import iter_handle_errors
-from via.services.proxy_pdf import ProxyPDFService
 
 LOG = getLogger(__name__)
 
@@ -92,7 +91,7 @@ class GoogleDriveAPI:
     # that the shortest one will kick in first
     TIMEOUT = 30
 
-    def __init__(self, credentials_list, resource_keys, proxy_pdf_service):
+    def __init__(self, credentials_list, resource_keys):
         """Initialise the service.
 
         :param credentials_list: A list of dicts of credentials info as
@@ -119,7 +118,6 @@ class GoogleDriveAPI:
             ) from exc
 
         self._session = AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT)
-        self._proxy_pdf_service = proxy_pdf_service
 
     _FILE_PATH_REGEX = re.compile("/file/d/(?P<file_id>[^/]+)")
 
@@ -185,7 +183,13 @@ class GoogleDriveAPI:
 
         response = self._session.get(
             url=url,
-            headers=self._proxy_pdf_service.request_headers(headers),
+            headers=add_request_headers(
+                {
+                    "Accept": "*/*",
+                    "Accept-Encoding": "gzip, deflate",
+                    "User-Agent": "(gzip)",
+                }
+            ),
             stream=True,
             timeout=self.TIMEOUT,
             max_allowed_time=self.TIMEOUT,
@@ -229,5 +233,4 @@ def factory(_context, request):
         resource_keys=_load_injected_json(
             request.registry.settings, "google_drive_resource_keys.json"
         ),
-        proxy_pdf_service=request.find_service(ProxyPDFService),
     )
