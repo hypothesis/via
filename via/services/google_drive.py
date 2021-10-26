@@ -117,7 +117,7 @@ class GoogleDriveAPI:
 
         self._http_service = HTTPService(
             session=AuthorizedSession(credentials, refresh_timeout=self.TIMEOUT),
-            error_mapping=translate_google_error,
+            error_translator=translate_google_error,
         )
 
     _FILE_PATH_REGEX = re.compile("/file/d/(?P<file_id>[^/]+)")

@@ -24,7 +24,7 @@ DEFAULT_ERROR_MAP = {
 class HTTPService:
     """Send HTTP requests with `requests` and receive the responses."""
 
-    def __init__(self, session=None, error_mapping=None):
+    def __init__(self, session=None, error_translator=None):
         # A requests session is used so that cookies are persisted across
         # requests and urllib3 connection pooling is used (which means that
         # underlying TCP connections are re-used when making multiple requests
@@ -32,7 +32,7 @@ class HTTPService:
         #
         # See https://docs.python-requests.org/en/latest/user/advanced/#session-objects
         self._session = session or requests.Session()
-        self._error_mapping = error_mapping
+        self._error_translator = error_translator
 
     def get(self, *args, **kwargs):
         return self.request("GET", *args, **kwargs)
@@ -70,6 +70,7 @@ class HTTPService:
             https://docs.python-requests.org/en/latest/api/#requests.Session.request
         :raise request.exceptions are mapped to via's exception on DEFAULT_ERROR_MAP
         :raise UnhandledUpstreamException: For any non mapped exception raised by requests
+        :raise Exception: For any non requests exception raised
         :returns: a request.Response
         """
         response = None
@@ -82,12 +83,19 @@ class HTTPService:
                 **kwargs,
             )
             response.raise_for_status()
-        except RequestException as err:
-            if self._error_mapping and (mapped := self._error_mapping(err)):
+        except Exception as err:
+            if self._error_translator and (mapped := self._error_translator(err)):
                 raise mapped from err
 
+            if not isinstance(err, RequestException):
+                # If the error_translator didn't handle a non request exception, raise it directly
+                raise err
+
             translated_class = UnhandledUpstreamException
-            for error_class, target_class in DEFAULT_ERROR_MAP.items():
+            for (  # pragma: no branch
+                error_class,
+                target_class,
+            ) in DEFAULT_ERROR_MAP.items():
                 if isinstance(err, error_class):
                     translated_class = target_class
                     break
@@ -102,10 +110,10 @@ class HTTPService:
     def stream(self, url, method="GET", **kwargs):
         response = self.request(method=method, url=url, stream=True, **kwargs)
 
-        yield from self.stream_bytes(response)
+        yield from self._stream_bytes(response)
 
     @staticmethod
-    def stream_bytes(response, min_chunk_size=64000):
+    def _stream_bytes(response, min_chunk_size=64000):
         """Stream content from a `requests.Response` object.
 
         The response must have been called with `stream=True` for this to be

@@ -4,7 +4,7 @@ from pyramid import httpexceptions as exc
 from pyramid import view
 
 from via.get_url import get_url_details
-from via.services import ViaClientService, has_secure_url_token
+from via.services import HTTPService, ViaClientService, has_secure_url_token
 
 
 @view.view_config(route_name="route_by_content", decorator=(has_secure_url_token,))
@@ -14,7 +14,9 @@ def route_by_content(context, request):
 
     request.checkmate.raise_if_blocked(url)
 
-    mime_type, status_code = get_url_details(url, request.headers)
+    mime_type, status_code = get_url_details(
+        request.find_service(HTTPService), url, request.headers
+    )
     via_client_svc = request.find_service(ViaClientService)
 
     if via_client_svc.is_pdf(mime_type):
