@@ -1,5 +1,5 @@
 import json
-from unittest.mock import call, sentinel
+from unittest.mock import sentinel
 
 import importlib_resources
 import pytest
