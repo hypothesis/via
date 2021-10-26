@@ -1,5 +1,5 @@
 import json
-from unittest.mock import sentinel
+from unittest.mock import call, sentinel
 
 import importlib_resources
 import pytest
@@ -80,8 +80,6 @@ class TestGoogleDriveAPI:
             Credentials.from_service_account_info.return_value,
             refresh_timeout=GoogleDriveAPI.TIMEOUT,
         )
-        # pylint: disable=protected-access
-        assert api._session == AuthorizedSession.return_value
 
     def test_it_with_bad_credentials(self, Credentials):
         # Google seems to raise plain ValueError's for bad config
@@ -90,23 +88,22 @@ class TestGoogleDriveAPI:
         with pytest.raises(ConfigurationError):
             GoogleDriveAPI([{"invalid": "credentials"}], resource_keys={})
 
-    def test_it_with_functest_credentials(self, api):
-        api = GoogleDriveAPI([{"disable": True}], resource_keys={})
+    def test_it_with_functest_credentials(self, AuthorizedSession):
+        GoogleDriveAPI([{"disable": True}], resource_keys={})
 
         # In functest mode we don't finish building the object at all. So
         # attempting to use it should fail in a spectacular and obvious way
-        assert not hasattr(api, "_session")
+        AuthorizedSession.assert_not_called()
 
-    def test_iter_file(self, api, stream_bytes):
+    def test_iter_file(self, api, AuthorizedSession):
         # This is all a bit black box, we don't necessarily know what all these
         # Google objects do, so we'll just check we call them in the right way
-        stream_bytes.return_value = range(3)
-
-        result = list(api.iter_file("FILE_ID"))
+        list(api.iter_file("FILE_ID"))
 
         # pylint: disable=no-member,protected-access
-        api._session.get.assert_called_once_with(
-            url="https://www.googleapis.com/drive/v3/files/FILE_ID?alt=media",
+        AuthorizedSession.return_value.request.assert_called_once_with(
+            "GET",
+            "https://www.googleapis.com/drive/v3/files/FILE_ID?alt=media",
             headers={
                 "Accept": "*/*",
                 "Accept-Encoding": "gzip, deflate",
@@ -122,16 +119,13 @@ class TestGoogleDriveAPI:
             max_allowed_time=GoogleDriveAPI.TIMEOUT,
         )
 
-        api._session.get.return_value.raise_for_status.assert_called_once_with()
-        stream_bytes.assert_called_once_with(api._session.get.return_value)
-        assert result == [0, 1, 2]
-
-    def test_iter_file_accepts_resource_key(self, api):
+    def test_iter_file_accepts_resource_key(self, api, AuthorizedSession):
         list(api.iter_file("FILE_ID", "SPECIFIED_RESOURCE_ID"))
 
         # pylint: disable=no-member,protected-access
-        api._session.get.assert_called_once_with(
-            url=Any(),
+        AuthorizedSession.return_value.request.assert_called_once_with(
+            "GET",
+            Any(),
             headers=Any.dict.containing(
                 {
                     "X-Goog-Drive-Resource-Keys": "FILE_ID/SPECIFIED_RESOURCE_ID",
@@ -142,13 +136,15 @@ class TestGoogleDriveAPI:
             max_allowed_time=Any(),
         )
 
-    def test_iter_file_handles_errors(self, api, stream_bytes):
+    def test_iter_file_handles_errors(self, api, AuthorizedSession):
         # We aren't going to go crazy here as `iter_handle_errors` is better
         # tested elsewhere
         def explode():
             raise TooManyRedirects("Request went wrong")
 
-        stream_bytes.side_effect = (explode() for _ in range(1))
+        AuthorizedSession.return_value.request.side_effect = (
+            explode() for _ in range(1)
+        )
 
         with pytest.raises(UpstreamServiceError):
             list(api.iter_file(sentinel.file_id))
@@ -183,11 +179,11 @@ class TestGoogleDriveAPI:
         ),
     )
     def test_iter_file_catches_specific_google_exceptions(
-        self, api, kwargs, error_class, status_code
+        self, api, kwargs, error_class, status_code, AuthorizedSession
     ):
-        # pylint: disable=protected-access
-        api._session.get.return_value.raise_for_status.side_effect = (
-            make_requests_exception(HTTPError, **kwargs)
+        # pylint: disable=protected-access,line-too-long
+        AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = make_requests_exception(
+            HTTPError, **kwargs
         )
 
         with pytest.raises(error_class) as exception:
@@ -204,7 +200,7 @@ class TestGoogleDriveAPI:
             param({"raw_data": "{... broken}"}, id="malformed json"),
         ),
     )
-    def test_iter_file_ignores_other_exceptions(self, api, kwargs):
+    def test_iter_file_ignores_other_exceptions(self, api, AuthorizedSession, kwargs):
         attrs = {
             "error_class": HTTPError,
             "status_code": 404,
@@ -213,15 +209,20 @@ class TestGoogleDriveAPI:
         attrs.update(kwargs)
         exception = make_requests_exception(**attrs)
         # pylint: disable=protected-access
-        api._session.get.return_value.raise_for_status.side_effect = exception
+        AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = (
+            exception
+        )
 
         with pytest.raises(UnhandledUpstreamException):
             list(api.iter_file(sentinel.file_id))
 
-    def test_iter_file_has_no_issue_with_errors_without_responses(self, api):
+    def test_iter_file_has_no_issue_with_errors_without_responses(
+        self, api, AuthorizedSession
+    ):
         # pylint: disable=protected-access
-        api._session.get.return_value.raise_for_status.side_effect = HTTPError()
-
+        AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = (
+            HTTPError()
+        )
         with pytest.raises(UnhandledUpstreamException):
             list(api.iter_file(sentinel.file_id))
 
@@ -294,10 +295,6 @@ class TestGoogleDriveAPI:
             credentials_list=[{"valid": "credentials"}, {"valid": "credentials_2"}],
             resource_keys={"FILE_ID": "RESOURCE_ID"},
         )
-
-    @pytest.fixture(autouse=True)
-    def stream_bytes(self, patch):
-        return patch("via.services.google_drive.stream_bytes")
 
     @pytest.fixture(autouse=True)
     def AuthorizedSession(self, patch):
