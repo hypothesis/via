@@ -5,6 +5,7 @@ from pathlib import Path
 
 from via.exceptions import ConfigurationError
 from via.services.google_drive import GoogleDriveAPI
+from via.services.http import HTTPService
 from via.services.secure_link import SecureLinkService, has_secure_url_token
 from via.services.via_client import ViaClientService
 
@@ -22,6 +23,7 @@ def includeme(config):  # pragma: no cover
     config.register_service_factory(
         "via.services.secure_link.factory", iface=SecureLinkService
     )
+    config.register_service_factory("via.services.http.factory", iface=HTTPService)
 
 
 def create_google_api(settings):

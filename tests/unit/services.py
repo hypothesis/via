@@ -2,7 +2,12 @@ from unittest import mock
 
 import pytest
 
-from via.services import GoogleDriveAPI, SecureLinkService, ViaClientService
+from via.services import (
+    GoogleDriveAPI,
+    HTTPService,
+    SecureLinkService,
+    ViaClientService,
+)
 
 
 @pytest.fixture
@@ -29,3 +34,8 @@ def google_drive_api(mock_service):
 @pytest.fixture
 def secure_link_service(mock_service):
     return mock_service(SecureLinkService)
+
+
+@pytest.fixture
+def http_service(mock_service):
+    return mock_service(HTTPService)
