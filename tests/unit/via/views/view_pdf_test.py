@@ -5,7 +5,7 @@ from h_matchers import Any
 from pyramid.httpexceptions import HTTPNoContent
 
 from via.resources import QueryURLResource
-from via.views.view_pdf import proxy_google_drive_file, view_pdf
+from via.views.view_pdf import proxy_google_drive_file, proxy_onedrive_pdf, view_pdf
 
 
 @pytest.mark.usefixtures(
@@ -31,7 +31,7 @@ class TestViewPDF:
             "hypothesis_config": sentinel.h_config,
         }
 
-    def test_it_builds_the_url_if_not_google(
+    def test_it_builds_the_url(
         self, call_view, google_drive_api, pdf_url_builder_service
     ):
         google_drive_api.parse_file_url.return_value = None
@@ -40,21 +40,6 @@ class TestViewPDF:
 
         pdf_url_builder_service.get_pdf_url.assert_called_once_with(
             "https://example.com/foo/bar.pdf?q=s"
-        )
-
-    def test_it_builds_the_url_if_google(
-        self,
-        call_view,
-        pdf_url_builder_service,
-    ):
-        url = "http://gdrive/document.pdf"
-
-        response = call_view(url)
-
-        pdf_url_builder_service.get_pdf_url.assert_called_once_with(url)
-        assert (
-            response["proxy_pdf_url"]
-            == pdf_url_builder_service.get_pdf_url.return_value
         )
 
     @pytest.fixture
@@ -67,20 +52,12 @@ class TestViewPDF:
 
         return Configuration
 
-    @pytest.fixture(autouse=True)
-    def google_drive_api(self, google_drive_api):
-        google_drive_api.parse_file_url.return_value = None
-
-        return google_drive_api
-
 
 @pytest.mark.usefixtures(
     "secure_link_service", "google_drive_api", "pdf_url_builder_service"
 )
 class TestProxyGoogleDriveFile:
-    def test_status_and_headers(
-        self, pyramid_request, secure_link_service, google_drive_api
-    ):
+    def test_status_and_headers(self, pyramid_request):
         response = proxy_google_drive_file(pyramid_request)
 
         assert response.status_code == 200
@@ -91,7 +68,7 @@ class TestProxyGoogleDriveFile:
             == "public, max-age=43200, stale-while-revalidate=86400"
         )
 
-    def test_it_steams_content(self, pyramid_request, google_drive_api):
+    def test_it_streams_content(self, pyramid_request, google_drive_api):
         # Create a generator and a counter of how many times it's been accessed
         def count_access(i):
             count_access.value += 1
@@ -122,6 +99,45 @@ class TestProxyGoogleDriveFile:
         )
 
         return pyramid_request
+
+
+@pytest.mark.usefixtures("secure_link_service", "pdf_url_builder_service")
+class TestProxyOneDrivePDF:
+    @pytest.mark.usefixtures("http_service")
+    def test_status_and_headers(self, call_view):
+        response = call_view("https://one-drive.com", view=proxy_onedrive_pdf)
+
+        assert response.status_code == 200
+        assert response.headers["Content-Disposition"] == "inline"
+        assert response.headers["Content-Type"] == "application/pdf"
+        assert (
+            response.headers["Cache-Control"]
+            == "public, max-age=43200, stale-while-revalidate=86400"
+        )
+
+    def test_it_streams_content(self, http_service, call_view):
+        # Create a generator and a counter of how many times it's been accessed
+        def count_access(i):
+            count_access.value += 1
+            return i
+
+        count_access.value = 0
+
+        http_service.stream.return_value = (count_access(i) for i in range(3))
+
+        response = call_view("https://one-drive.com", view=proxy_onedrive_pdf)
+
+        # The first and only the first item has been reified from the generator
+        assert count_access.value == 1
+        # And we still get everything if we iterate
+        assert list(response.app_iter) == [0, 1, 2]
+
+    def test_it_can_stream_an_empty_iterator(self, http_service, call_view):
+        http_service.stream.return_value = iter([])
+
+        response = call_view("https://one-drive.com", view=proxy_onedrive_pdf)
+
+        assert isinstance(response, HTTPNoContent)
 
 
 @pytest.fixture

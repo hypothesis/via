@@ -77,6 +77,30 @@ class TestPDFURLBuilder:
         secure_link_service.sign_url.assert_called_once_with(url)
         assert pdf_url == secure_link_service.sign_url.return_value
 
+    @pytest.mark.parametrize(
+        "url,endpoint_url",
+        (
+            # pylint:disable=line-too-long
+            (
+                "https://my-sharepoint.sharepoint.com/FILE_ID/?download=1",
+                "http://example.com/onedrive/proxied.pdf?url=https%3A%2F%2Fmy-sharepoint.sharepoint.com%2FFILE_ID%2F%3Fdownload%3D1",
+            ),
+            (
+                "https://api.onedrive.com/v1.0/FILE_ID/root/content",
+                "http://example.com/onedrive/proxied.pdf?url=https%3A%2F%2Fapi.onedrive.com%2Fv1.0%2FFILE_ID%2Froot%2Fcontent",
+            ),
+        ),
+    )
+    def test_onedrive_url(
+        self, svc, secure_link_service, google_drive_api, url, endpoint_url
+    ):
+        google_drive_api.parse_file_url.return_value = None
+
+        pdf_url = svc.get_pdf_url(url)
+
+        secure_link_service.sign_url.assert_called_once_with(endpoint_url)
+        assert pdf_url == secure_link_service.sign_url.return_value
+
     def test_nginx_file_url(self, google_drive_api, svc):
         google_drive_api.parse_file_url.return_value = None
 
