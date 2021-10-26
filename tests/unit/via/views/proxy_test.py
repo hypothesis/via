@@ -7,13 +7,20 @@ from via.views.proxy import proxy
 
 
 class TestProxy:
-    def test_it(self, context, pyramid_request, get_url_details, via_client_service):
+    def test_it(
+        self,
+        context,
+        pyramid_request,
+        get_url_details,
+        via_client_service,
+        http_service,
+    ):
         url = context.url_from_path.return_value = "/https://example.org?a=1"
 
         result = proxy(context, pyramid_request)
 
         pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(url)
-        get_url_details.assert_called_once_with(url)
+        get_url_details.assert_called_once_with(http_service, url)
         via_client_service.url_for.assert_called_once_with(
             url, sentinel.mime_type, pyramid_request.params
         )
