@@ -4,9 +4,7 @@ from unittest.mock import sentinel
 import pytest
 from h_matchers import Any
 from requests import Response
-from requests.exceptions import SSLError
 
-from via.exceptions import UpstreamServiceError
 from via.get_url import get_url_details
 
 
@@ -41,8 +39,8 @@ class TestGetURLDetails:
         result = get_url_details(http_service, url, headers=sentinel.headers)
 
         assert result == (mime_type, status_code)
-        http_service.stream.assert_called_once_with(
-            url, allow_redirects=True, headers=Any()
+        http_service.get.assert_called_once_with(
+            url, allow_redirects=True, stream=True, headers=Any(), timeout=10
         )
 
     @pytest.mark.usefixtures("response")
@@ -53,7 +51,7 @@ class TestGetURLDetails:
             http_service, url="http://example.com", headers={"X-Pre-Existing": 1}
         )
 
-        _args, kwargs = http_service.stream.call_args
+        _args, kwargs = http_service.get.call_args
 
         clean_headers.assert_called_once_with({"X-Pre-Existing": 1})
         add_request_headers.assert_called_once_with(clean_headers.return_value)
@@ -66,15 +64,7 @@ class TestGetURLDetails:
 
         assert result == ("application/pdf", 200)
         GoogleDriveAPI.parse_file_url.assert_called_once_with(sentinel.google_drive_url)
-        http_service.stream.assert_not_called()
-
-    def test_it_catches_requests_exceptions(self, http_service):
-        # We'll test one (of the many) error translations that `@handle_errors`
-        # does for us to prove it's in use on the method.
-        http_service.get.side_effect = SSLError("Oh noe")
-
-        with pytest.raises(UpstreamServiceError):
-            get_url_details(http_service, "http://example.com")
+        http_service.get.assert_not_called()
 
     @pytest.fixture
     def response(self, http_service):
@@ -82,7 +72,7 @@ class TestGetURLDetails:
         response.raw = BytesIO(b"")
         response.headers = {"Content-Type": "dummy"}
         response.status_code = 200
-        http_service.stream.return_value = response
+        http_service.get.return_value = response
 
         return response
 

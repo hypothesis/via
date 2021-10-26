@@ -2,12 +2,10 @@
 import cgi
 from collections import OrderedDict
 
-from via.requests_tools.error_handling import handle_errors
 from via.requests_tools.headers import add_request_headers, clean_headers
 from via.services.google_drive import GoogleDriveAPI
 
 
-@handle_errors
 def get_url_details(http_service, url, headers=None):
     """Get the content type and status code for a given URL.
 
@@ -28,10 +26,12 @@ def get_url_details(http_service, url, headers=None):
 
     headers = add_request_headers(clean_headers(headers))
 
-    with http_service.stream(
+    with http_service.get(
         url,
+        stream=True,
         allow_redirects=True,
         headers=headers,
+        timeout=10,
     ) as rsp:
         content_type = rsp.headers.get("Content-Type")
         if content_type:

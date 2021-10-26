@@ -30,6 +30,7 @@ class TestRouteByContent:
         pyramid_request,
         status_code,
         via_client_service,
+        http_service,
     ):
         pyramid_request.params = {"url": sentinel.url, "foo": "bar"}
         get_url_details.return_value = (sentinel.mime_type, status_code)
@@ -39,7 +40,9 @@ class TestRouteByContent:
 
         url = context.url_from_query.return_value
         pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(url)
-        get_url_details.assert_called_once_with(url, pyramid_request.headers)
+        get_url_details.assert_called_once_with(
+            http_service, url, pyramid_request.headers
+        )
         via_client_service.is_pdf.assert_called_once_with(sentinel.mime_type)
         via_client_service.url_for.assert_called_once_with(
             url, sentinel.mime_type, {"foo": "bar"}
