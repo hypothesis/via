@@ -1,17 +1,17 @@
 """View presenting the PDF viewer."""
-import hashlib
-from base64 import b64encode
-from datetime import timedelta
+
+from itertools import chain
 
 from h_vialib import Configuration
-from h_vialib.secure import quantized_expiry
-from pyramid import view
+from pyramid.httpexceptions import HTTPNoContent
+from pyramid.view import view_config
 
 from via.services import GoogleDriveAPI
-from via.services.secure_link import SecureLinkService, has_secure_url_token
+from via.services.pdf_url import PDFURLBuilder
+from via.services.secure_link import has_secure_url_token
 
 
-@view.view_config(
+@view_config(
     renderer="via:templates/pdf_viewer.html.jinja2",
     route_name="view_pdf",
     # We have to keep the leash short here for caching so we can pick up new
@@ -23,19 +23,7 @@ def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
     url = context.url_from_query()
-
     request.checkmate.raise_if_blocked(url)
-
-    google_drive_api = request.find_service(GoogleDriveAPI)
-
-    if file_details := google_drive_api.parse_file_url(url):
-        proxy_pdf_url = ProxyURLBuilder.google_file_url(request, file_details, url)
-    else:
-        proxy_pdf_url = ProxyURLBuilder.nginx_pdf_url(
-            url,
-            nginx_server=request.registry.settings["nginx_server"],
-            secret=request.registry.settings["nginx_secure_link_secret"],
-        )
 
     _, h_config = Configuration.extract_from_params(request.params)
 
@@ -44,60 +32,49 @@ def view_pdf(context, request):
         "pdf_url": url,
         # The CORS-proxied PDF URL which the viewer should actually load the
         # PDF from.
-        "proxy_pdf_url": proxy_pdf_url,
+        "proxy_pdf_url": request.find_service(PDFURLBuilder).get_pdf_url(url),
         "client_embed_url": request.registry.settings["client_embed_url"],
         "static_url": request.static_url,
         "hypothesis_config": h_config,
     }
 
 
-class ProxyURLBuilder:
-    @staticmethod
-    def google_file_url(request, file_details, url):
-        route = "proxy_google_drive_file"
-        if file_details.get("resource_key"):
-            route += ":resource_key"
+@view_config(route_name="proxy_google_drive_file", decorator=(has_secure_url_token,))
+@view_config(
+    route_name="proxy_google_drive_file:resource_key", decorator=(has_secure_url_token,)
+)
+def proxy_google_drive_file(request):
+    """Proxy a file from Google Drive."""
 
-        return request.find_service(SecureLinkService).sign_url(
-            request.route_url(
-                route,
-                # Pass the original URL along so it will show up nicely in
-                # error messages. This isn't useful for users as they don't
-                # see this directly, but it's handy for us.
-                _query={"url": url},
-                **file_details,
-            )
-        )
+    # Add an iterable to stream the content instead of holding it all in memory
+    content_iterable = request.find_service(GoogleDriveAPI).iter_file(
+        file_id=request.matchdict["file_id"],
+        resource_key=request.matchdict.get("resource_key"),
+    )
 
-    @staticmethod
-    def nginx_pdf_url(url, nginx_server, secret):
-        """Return the URL from which the PDF viewer should load the PDF."""
+    return _iter_pdf_response(request.response, content_iterable)
 
-        # Compute the expiry time to put into the URL.
-        exp = int(quantized_expiry(max_age=timedelta(hours=25)).timestamp())
 
-        # The expression to be hashed.
-        #
-        # This matches the hash expression that we tell the NGINX secure link
-        # module to use with the secure_link_md5 setting in our NGINX config file.
-        #
-        # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-        hash_expression = f"/proxy/static/{exp}/{url} {secret}"
+def _iter_pdf_response(response, content_iterable):
+    try:
+        # This takes a potentially lazy generator, and ensures the first item is
+        # called now. This is so any errors or problems that come from starting the
+        # process happen immediately, rather than whenever the iterable is evaluated.
+        content_iterable = chain((next(content_iterable),), content_iterable)
+    except StopIteration:
+        # Respond with 204 no content for empty files. This means they won't be
+        # cached by Cloudflare and gives the user a chance to fix the problem.
+        return HTTPNoContent()
 
-        # Compute the hash value to put into the URL.
-        #
-        # This implements the NGINX secure link module's hashing algorithm:
-        #
-        # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-        hash_ = hashlib.md5()
-        hash_.update(hash_expression.encode("utf-8"))
-        sec = hash_.digest()
-        sec = b64encode(sec)
-        sec = sec.replace(b"+", b"-")
-        sec = sec.replace(b"/", b"_")
-        sec = sec.replace(b"=", b"")
-        sec = sec.decode()
+    response.headers.update(
+        {
+            "Content-Disposition": "inline",
+            "Content-Type": "application/pdf",
+            # Add a very generous caching policy of half a day max-age, full
+            # day stale while revalidate.
+            "Cache-Control": "public, max-age=43200, stale-while-revalidate=86400",
+        }
+    )
 
-        # Construct the URL, inserting sec and exp where our NGINX config file
-        # expects to find them.
-        return f"{nginx_server}/proxy/static/{sec}/{exp}/{url}"
+    response.app_iter = content_iterable
+    return response

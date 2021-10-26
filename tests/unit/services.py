@@ -5,6 +5,7 @@ import pytest
 from via.services import (
     GoogleDriveAPI,
     HTTPService,
+    PDFURLBuilder,
     SecureLinkService,
     ViaClientService,
 )
@@ -39,3 +40,8 @@ def secure_link_service(mock_service):
 @pytest.fixture
 def http_service(mock_service):
     return mock_service(HTTPService)
+
+
+@pytest.fixture
+def pdf_url_builder_service(mock_service):
+    return mock_service(PDFURLBuilder)
