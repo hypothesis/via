@@ -1,4 +1,5 @@
 import hashlib
+import re
 from base64 import b64encode
 from dataclasses import dataclass
 from datetime import timedelta
@@ -55,6 +56,11 @@ class PDFURLBuilder:
     route_url: Callable
     nginx_signer: _NGINXSigner
 
+    _MS_ONEDRIVE_URL = (
+        re.compile(r"^https://.*\.sharepoint.com/.*download=1"),
+        re.compile(r"^https://api.onedrive.com/v1.0/.*/root/content"),
+    )
+
     def get_pdf_url(self, url):
         """Build a signed URL to the corresponding Via route for proxing the PDF at `url`.
 
@@ -64,7 +70,23 @@ class PDFURLBuilder:
         if file_details := self.google_drive_api.parse_file_url(url):
             return self._google_file_url(file_details, url)
 
+        if self._is_onedrive_url(url):
+            return self._proxy_onedrive_pdf(url)
+
         return self.nginx_signer.sign_url(url, nginx_path="/proxy/static/")
+
+    @classmethod
+    def _is_onedrive_url(cls, url):
+        return any(regexp.match(url) for regexp in cls._MS_ONEDRIVE_URL)
+
+    def _proxy_onedrive_pdf(self, url):
+        url = self.secure_link_service.sign_url(
+            self.route_url(
+                "proxy_onedrive_pdf",
+                _query={"url": url},
+            )
+        )
+        return url
 
     def _google_file_url(self, file_details, url):
         route = "proxy_google_drive_file"

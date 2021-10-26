@@ -6,7 +6,8 @@ from h_vialib import Configuration
 from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
-from via.services import GoogleDriveAPI
+from via.requests_tools.headers import add_request_headers
+from via.services import GoogleDriveAPI, HTTPService
 from via.services.pdf_url import PDFURLBuilder
 from via.services.secure_link import has_secure_url_token
 
@@ -37,6 +38,17 @@ def view_pdf(context, request):
         "static_url": request.static_url,
         "hypothesis_config": h_config,
     }
+
+
+@view_config(route_name="proxy_onedrive_pdf", decorator=(has_secure_url_token,))
+def proxy_onedrive_pdf(context, request):
+    url = context.url_from_query()
+
+    content_iterable = request.find_service(HTTPService).stream(
+        url, headers=add_request_headers({})
+    )
+
+    return _iter_pdf_response(request.response, content_iterable)
 
 
 @view_config(route_name="proxy_google_drive_file", decorator=(has_secure_url_token,))
