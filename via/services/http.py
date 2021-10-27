@@ -83,34 +83,37 @@ class HTTPService:
                 **kwargs,
             )
             response.raise_for_status()
+
         except Exception as err:
-            if self._error_translator and (mapped := self._error_translator(err)):
-                raise mapped from err
+            if mapped_err := self._translate_exception(err):
+                raise mapped_err from err  # pylint: disable=raising-bad-type
 
-            if not isinstance(err, RequestException):
-                # If the error_translator didn't handle a non request exception, raise it directly
-                raise err
-
-            translated_class = UnhandledUpstreamException
-            for (  # pragma: no branch
-                error_class,
-                target_class,
-            ) in DEFAULT_ERROR_MAP.items():
-                if isinstance(err, error_class):
-                    translated_class = target_class
-                    break
-
-            raise translated_class(
-                message=err.args[0] if err.args else None,
-                requests_err=err if hasattr(err, "request") else None,
-            ) from err
+            raise
 
         return response
 
     def stream(self, url, method="GET", **kwargs):
         response = self.request(method=method, url=url, stream=True, **kwargs)
+        try:
+            yield from self._stream_bytes(response)
+        except Exception as err:
+            if mapped_err := self._translate_exception(err):
+                raise mapped_err from err  # pylint: disable=raising-bad-type
 
-        yield from self._stream_bytes(response)
+            raise
+
+    def _translate_exception(self, err):
+        if self._error_translator and (mapped := self._error_translator(err)):
+            return mapped
+
+        for (error_class, target_class) in DEFAULT_ERROR_MAP.items():
+            if isinstance(err, error_class):
+                return target_class(
+                    message=err.args[0] if err.args else None,
+                    requests_err=err if hasattr(err, "request") else None,
+                )
+
+        return None
 
     @staticmethod
     def _stream_bytes(response, min_chunk_size=64000):

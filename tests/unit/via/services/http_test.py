@@ -128,7 +128,7 @@ class TestHTTPService:
         )
 
     @pytest.mark.parametrize("request_exception,expected_exception", EXCEPTION_MAP)
-    def test_with_error_translator_defaults(
+    def test_request_with_error_translator_defaults(
         self,
         error_translator,
         session,
@@ -143,6 +143,26 @@ class TestHTTPService:
         with pytest.raises(expected_exception):
             svc.request("GET", url)
 
+    @pytest.mark.parametrize("generator_exception,expected_exception", EXCEPTION_MAP)
+    def test_stream_with_error_translator_defaults(
+        self,
+        error_translator,
+        session,
+        generator_exception,
+        expected_exception,
+        url,
+    ):
+        svc = HTTPService(session, error_translator)
+
+        def explode():
+            yield b"response-part-1"
+            raise generator_exception
+
+        session.request.return_value.iter_content.return_value = explode()
+
+        with pytest.raises(expected_exception):
+            list(svc.stream("GET", url))
+
     def test_with_custom_exceptions(self, error_translator, session, url):
         svc = HTTPService(session, error_translator)
 
@@ -151,13 +171,21 @@ class TestHTTPService:
         with pytest.raises(NotADirectoryError):
             svc.request("GET", url)
 
-    def test_with_regular_exceptions(self, error_translator, session, url):
+    def test_request_with_regular_exceptions(self, error_translator, session, url):
         svc = HTTPService(session, error_translator)
 
         session.request.side_effect = ValueError
 
         with pytest.raises(ValueError):
             svc.request("GET", url)
+
+    def test_stream_with_regular_exceptions(self, error_translator, session, url):
+        svc = HTTPService(session, error_translator)
+
+        session.request.return_value.iter_content.side_effect = ValueError
+
+        with pytest.raises(ValueError):
+            list(svc.stream("GET", url))
 
     @pytest.mark.parametrize(
         "input_bytes,output",
