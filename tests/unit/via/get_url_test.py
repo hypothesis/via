@@ -40,7 +40,12 @@ class TestGetURLDetails:
 
         assert result == (mime_type, status_code)
         http_service.get.assert_called_once_with(
-            url, allow_redirects=True, stream=True, headers=Any(), timeout=10
+            url,
+            allow_redirects=True,
+            stream=True,
+            headers=Any(),
+            timeout=10,
+            raise_for_status=False,
         )
 
     @pytest.mark.usefixtures("response")

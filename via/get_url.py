@@ -32,6 +32,7 @@ def get_url_details(http_service, url, headers=None):
         allow_redirects=True,
         headers=headers,
         timeout=10,
+        raise_for_status=False,
     ) as rsp:
         content_type = rsp.headers.get("Content-Type")
         if content_type:

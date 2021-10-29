@@ -127,6 +127,18 @@ class TestHTTPService:
             {"status_code": status}
         )
 
+    @pytest.mark.parametrize("status", [400, 401, 403, 404, 500])
+    def test_it_doesnt_raise_if_the_response_is_an_error_when_disabled(
+        self, svc, url, status
+    ):
+        httpretty.register_uri("GET", url, status=status)
+
+        response = svc.request("GET", url, raise_for_status=False)
+
+        assert response == Any.instance_of(requests.Response).with_attrs(
+            {"status_code": status}
+        )
+
     @pytest.mark.parametrize("request_exception,expected_exception", EXCEPTION_MAP)
     def test_request_with_error_translator_defaults(
         self,
