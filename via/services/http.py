@@ -49,7 +49,7 @@ class HTTPService:
     def delete(self, *args, **kwargs):
         return self.request("DELETE", *args, **kwargs)
 
-    def request(self, method, url, timeout=(10, 10), **kwargs):
+    def request(self, method, url, timeout=(10, 10), raise_for_status=True, **kwargs):
         """Send a request with `requests` and return the requests.Response object.
 
         :param method: The HTTP method to use, one of "GET", "PUT", "POST",
@@ -65,6 +65,7 @@ class HTTPService:
             Note that the read_timeout is *not* a time limit on the entire
             response download. It's a time limit on how long to wait *between
             bytes from the server*. The entire download can take much longer.
+        :param raise_for_status: Optionally raise for 4xx & 5xx response statuses.
         :param kwargs: Any other keyword arguments will be passed directly to
             requests.Session().request():
             https://docs.python-requests.org/en/latest/api/#requests.Session.request
@@ -82,7 +83,8 @@ class HTTPService:
                 timeout=timeout,
                 **kwargs,
             )
-            response.raise_for_status()
+            if raise_for_status:
+                response.raise_for_status()
 
         except Exception as err:
             if mapped_err := self._translate_exception(err):
