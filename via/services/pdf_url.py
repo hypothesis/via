@@ -11,10 +11,13 @@ from via.services.google_drive import GoogleDriveAPI
 from via.services.secure_link import SecureLinkService
 
 
+
 @dataclass
 class _NGINXSigner:
     nginx_server: str
     secret: str
+
+    _SCHEME_PATTERN = re.compile('^https?:/+')
 
     def sign_url(self, url, nginx_path):
         """Return the URL from which the PDF viewer should load the PDF."""
@@ -28,7 +31,9 @@ class _NGINXSigner:
         # module to use with the secure_link_md5 setting in our NGINX config file.
         #
         # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-        hash_expression = f"{nginx_path}{exp}/{url} {self.secret}"
+
+        scheme_less_url = self._SCHEME_PATTERN.sub('', url)
+        hash_expression = f"{nginx_path}{exp}/{scheme_less_url} {self.secret}"
 
         # Compute the hash value to put into the URL.
         #
