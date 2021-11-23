@@ -42,7 +42,7 @@ markupsafe==1.1.1
     # via
     #   jinja2
     #   pyramid-jinja2
-marshmallow==3.14.0
+marshmallow==3.14.1
     # via -r requirements/requirements.in
 newrelic==7.2.4.171
     # via -r requirements/requirements.in
