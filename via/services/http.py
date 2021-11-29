@@ -66,7 +66,7 @@ class HTTPService:
             response download. It's a time limit on how long to wait *between
             bytes from the server*. The entire download can take much longer.
         :param raise_for_status: Optionally raise for 4xx & 5xx response statuses.
-        :param kwargs: Any other keyword arguments will be passed directly to
+        :param **kwargs: Any other keyword arguments will be passed directly to
             requests.Session().request():
             https://docs.python-requests.org/en/latest/api/#requests.Session.request
         :raise request.exceptions are mapped to via's exception on DEFAULT_ERROR_MAP
