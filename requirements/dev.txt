@@ -202,7 +202,7 @@ six==1.15.0
     #   jsonschema
     #   pynacl
     #   websocket-client
-supervisor==4.2.2
+supervisor==4.2.4
     # via -r requirements/dev.in
 texttable==1.6.3
     # via docker-compose
