@@ -213,7 +213,7 @@ python-dateutil==2.8.1
     # via
     #   -r requirements/tests.txt
     #   faker
-requests==2.26.0
+requests==2.27.1
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
