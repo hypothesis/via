@@ -77,7 +77,7 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 marshmallow==3.14.1
     # via -r requirements/requirements.txt
-newrelic==7.2.4.171
+newrelic==7.4.0.172
     # via -r requirements/requirements.txt
 oauthlib==3.1.1
     # via
