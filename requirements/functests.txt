@@ -131,7 +131,7 @@ pyrsistent==0.17.3
     # via
     #   -r requirements/requirements.txt
     #   jsonschema
-pytest==6.2.5
+pytest==7.0.0
     # via -r requirements/functests.in
 requests==2.27.1
     # via
@@ -156,7 +156,7 @@ six==1.15.0
     #   jsonschema
 soupsieve==2.1
     # via beautifulsoup4
-toml==0.10.2
+tomli==2.0.0
     # via pytest
 translationstring==1.4
     # via
