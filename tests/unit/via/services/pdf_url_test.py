@@ -101,6 +101,19 @@ class TestPDFURLBuilder:
         secure_link_service.sign_url.assert_called_once_with(endpoint_url)
         assert pdf_url == secure_link_service.sign_url.return_value
 
+    def test_jstor_url(
+        self, svc, secure_link_service, google_drive_api, pyramid_request
+    ):
+        google_drive_api.parse_file_url.return_value = None
+        pyramid_request.params["jstor.ip"] = "1.1.1.1"
+
+        pdf_url = svc.get_pdf_url("jstor://DOI")
+
+        secure_link_service.sign_url.assert_called_once_with(
+            "http://example.com/jstor/proxied.pdf?url=jstor%3A%2F%2FDOI&jstor.ip=1.1.1.1"
+        )
+        assert pdf_url == secure_link_service.sign_url.return_value
+
     def test_nginx_file_url(self, google_drive_api, svc):
         google_drive_api.parse_file_url.return_value = None
 
@@ -118,9 +131,12 @@ class TestPDFURLBuilder:
         secure_link_service,
         pyramid_request,
         PatchedNGINXSigner,
+        jstor_api,
     ):
         return PDFURLBuilder(
+            pyramid_request,
             google_drive_api,
+            jstor_api,
             secure_link_service,
             pyramid_request.route_url,
             PatchedNGINXSigner.return_value,
@@ -136,6 +152,7 @@ class TestFactory:
         PatchedNGINXSigner,
         google_drive_api,
         secure_link_service,
+        jstor_api,
     ):
         svc = factory(sentinel.context, pyramid_request)
 
@@ -144,7 +161,9 @@ class TestFactory:
             secret=pyramid_settings["nginx_secure_link_secret"],
         )
         PDFURLBuilder.assert_called_once_with(
+            request=pyramid_request,
             google_drive_api=google_drive_api,
+            jstor_api=jstor_api,
             secure_link_service=secure_link_service,
             route_url=pyramid_request.route_url,
             nginx_signer=PatchedNGINXSigner.return_value,
