@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
 from via.requests_tools.headers import add_request_headers
-from via.services import GoogleDriveAPI, HTTPService
+from via.services import JSTORAPI, GoogleDriveAPI, HTTPService
 from via.services.pdf_url import PDFURLBuilder
 from via.services.secure_link import has_secure_url_token
 
@@ -64,6 +64,14 @@ def proxy_google_drive_file(request):
         resource_key=request.matchdict.get("resource_key"),
     )
 
+    return _iter_pdf_response(request.response, content_iterable)
+
+
+@view_config(route_name="proxy_jstor_pdf", decorator=(has_secure_url_token,))
+def proxy_jstor_pdf(request):
+    content_iterable = request.find_service(JSTORAPI).jstor_pdf_stream(
+        request.params["doi"]
+    )
     return _iter_pdf_response(request.response, content_iterable)
 
 

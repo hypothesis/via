@@ -118,9 +118,11 @@ class TestPDFURLBuilder:
         secure_link_service,
         pyramid_request,
         PatchedNGINXSigner,
+        jstor_api,
     ):
         return PDFURLBuilder(
             google_drive_api,
+            jstor_api,
             secure_link_service,
             pyramid_request.route_url,
             PatchedNGINXSigner.return_value,
@@ -136,6 +138,7 @@ class TestFactory:
         PatchedNGINXSigner,
         google_drive_api,
         secure_link_service,
+        jstor_api,
     ):
         svc = factory(sentinel.context, pyramid_request)
 
@@ -148,6 +151,7 @@ class TestFactory:
             secure_link_service=secure_link_service,
             route_url=pyramid_request.route_url,
             nginx_signer=PatchedNGINXSigner.return_value,
+            jstor_api=jstor_api,
         )
         assert svc == PDFURLBuilder.return_value
 

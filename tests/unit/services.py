@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 from via.services import (
+    JSTORAPI,
     GoogleDriveAPI,
     HTTPService,
     PDFURLBuilder,
@@ -45,3 +46,11 @@ def http_service(mock_service):
 @pytest.fixture
 def pdf_url_builder_service(mock_service):
     return mock_service(PDFURLBuilder)
+
+
+@pytest.fixture
+def jstor_api(mock_service):
+    jstor_api = mock_service(JSTORAPI)
+    jstor_api.doi_from_url.return_value = None
+
+    return jstor_api

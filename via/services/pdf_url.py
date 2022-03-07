@@ -8,6 +8,7 @@ from typing import Callable
 from h_vialib.secure import quantized_expiry
 
 from via.services.google_drive import GoogleDriveAPI
+from via.services.jstor import JSTORAPI
 from via.services.secure_link import SecureLinkService
 
 
@@ -52,6 +53,7 @@ class _NGINXSigner:
 @dataclass
 class PDFURLBuilder:
     google_drive_api: GoogleDriveAPI
+    jstor_api: JSTORAPI
     secure_link_service: SecureLinkService
     route_url: Callable
     nginx_signer: _NGINXSigner
@@ -73,6 +75,9 @@ class PDFURLBuilder:
         if self._is_onedrive_url(url):
             return self._proxy_onedrive_pdf(url)
 
+        if doi := self.jstor_api.doi_from_url(url):
+            return self._proxy_jstor_pdf(url, doi)
+
         return self.nginx_signer.sign_url(url, nginx_path="/proxy/static/")
 
     @classmethod
@@ -87,6 +92,17 @@ class PDFURLBuilder:
             )
         )
         return url
+
+    def _proxy_jstor_pdf(self, url, doi):
+        return self.secure_link_service.sign_url(
+            self.route_url(
+                "proxy_jstor_pdf",
+                # Pass the original URL along so it will show up nicely in
+                # error messages. This isn't useful for users as they don't
+                # see this directly, but it's handy for us.
+                _query={"url": url, "doi": doi},
+            )
+        )
 
     def _google_file_url(self, file_details, url):
         route = "proxy_google_drive_file"
@@ -108,6 +124,7 @@ class PDFURLBuilder:
 def factory(_context, request):
     return PDFURLBuilder(
         google_drive_api=request.find_service(GoogleDriveAPI),
+        jstor_api=request.find_service(JSTORAPI),
         secure_link_service=request.find_service(SecureLinkService),
         route_url=request.route_url,
         nginx_signer=_NGINXSigner(

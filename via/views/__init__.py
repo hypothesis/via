@@ -26,6 +26,11 @@ def add_routes(config):  # pragma: no cover
         factory=QueryURLResource,
     )
 
+    config.add_route(
+        "proxy_jstor_pdf",
+        "/jstor/proxied.pdf",
+    )
+
     config.add_route("proxy", "/{url:.*}", factory=PathURLResource)
 
 
