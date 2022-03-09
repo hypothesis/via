@@ -77,6 +77,7 @@ Environment variables:
 | `CLIENT_EMBED_URL` | The URL of the client's embed script | `https://hypothes.is/embed.js`
 | `DATA_DIRECTORY` | Directory for externally provided data | `/via-data`
 | `ENABLE_FRONT_PAGE` | Show a front page at the root URL | `true` |
+| `JSTOR_PDF_URL` | URL of JSTOR API for retrieving article PDFs. Used to support jstor://{article_id} URIs. |
 | `NEW_RELIC_*` | Various New Relic settings. See New Relic's docs for details |
 | `NGINX_SECURE_LINK_SECRET` | The NGINX secure links signing secret. This is used by Via's Python endpoints to generate the signed URLs required by its NGINX-implemented `/proxy/static/` endpoint. All instances of Via must have this setting |
 | `NGINX_SERVER` | The URL of Via's NGINX server for proxying PDF files | `https://via.hypothes.is`
