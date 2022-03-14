@@ -42,12 +42,14 @@ markupsafe==1.1.1
     # via
     #   jinja2
     #   pyramid-jinja2
-marshmallow==3.14.1
+marshmallow==3.15.0
     # via -r requirements/requirements.in
 newrelic==7.6.0.173
     # via -r requirements/requirements.in
 oauthlib==3.1.1
     # via requests-oauthlib
+packaging==21.3
+    # via marshmallow
 pastedeploy==2.1.1
     # via plaster-pastedeploy
 plaster==1.0
@@ -64,6 +66,8 @@ pyasn1-modules==0.2.8
     # via google-auth
 pyjwt==2.0.1
     # via h-vialib
+pyparsing==3.0.7
+    # via packaging
 pyramid==2.0
     # via
     #   -r requirements/requirements.in
