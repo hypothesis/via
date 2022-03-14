@@ -47,6 +47,10 @@ class TestViewPDF:
             "https://example.com/foo/bar.pdf?q=s"
         )
 
+    def test_enables_partner_banner(self, call_view, jstor_api):
+        response = call_view("jstor://DOI", params={"jstor.ip": "1.1.1.1"})
+        assert response["hypothesis_config"].get("contentPartner") == "jstor"
+
     @pytest.fixture
     def Configuration(self, patch):
         Configuration = patch("via.views.view_pdf.Configuration")
