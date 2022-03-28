@@ -171,7 +171,7 @@ pyramid-exclog==1.1
     # via -r requirements/requirements.txt
 pyramid-ipython==0.2
     # via -r requirements/dev.in
-pyramid-jinja2==2.9.2
+pyramid-jinja2==2.10
     # via -r requirements/requirements.txt
 pyramid-sanity==1.0.2
     # via -r requirements/requirements.txt
