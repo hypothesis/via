@@ -9,9 +9,10 @@ set -eu
 #
 # To update PDF.js to the latest version:
 #
-# 1. Create a new branch and run this script.
-# 2. Verify that PDFs work as expected in py-server.
-# 3. Commit the changes to the `vendor/` and `templates/` directories.
+# 1. Create a new branch and run `make update-pdfjs`. This will download the
+#    newest release of PDF.js, update the HTML template for the viewer and
+#    commit the changes.
+# 2. Verify that PDF annotation works as expected
 #
 # If you make changes to the PDF.js viewer template generator only and want to
 # regenerate the HTML template, run this script with the `--no-download` flag.
@@ -55,3 +56,14 @@ if [ $download_pdfjs ]; then
 
   echo $DEST_DIR/web/viewer.js
 fi
+
+# Update the HTML templates.
+python bin/create_pdf_template.py
+
+# Look for `const pdfjsVersion = '<VERSION>'` line in source and extract VERSION.
+PDFJS_VERSION=$(grep pdfjsVersion $DEST_DIR/web/viewer.js | egrep -o '[0-9.]+')
+git add via/static/vendor/
+git add via/templates/
+git commit -m "Update PDF.js to v$PDFJS_VERSION
+
+Update PDF.js using $0."
