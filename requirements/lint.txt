@@ -116,7 +116,7 @@ marshmallow==3.15.0
     #   -r requirements/tests.txt
 mccabe==0.6.1
     # via pylint
-newrelic==7.8.0.174
+newrelic==7.10.0.175
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
