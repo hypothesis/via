@@ -17,6 +17,11 @@ set -eu
 # If you make changes to the PDF.js viewer template generator only and want to
 # regenerate the HTML template, run this script with the `--no-download` flag.
 
+if [[ -z "${TOX_ENV_NAME:-}" ]]; then
+  echo "This script should be run inside tox via \`make update-pdfjs\`."
+  exit 1
+fi
+
 DEST_DIR=via/static/vendor/pdfjs-2
 
 # PDF.js comes in two flavors, one for modern browsers and one for older browsers,
