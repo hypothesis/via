@@ -68,7 +68,7 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
-importlib-resources==5.6.0
+importlib-resources==5.7.1
     # via
     #   -r requirements/requirements.txt
     #   h-checkmatelib
