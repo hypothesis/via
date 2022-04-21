@@ -1,11 +1,13 @@
 from unittest.mock import create_autospec, patch, sentinel
 
 import pytest
+from checkmatelib import BadURL as CheckmateBadURL
 from checkmatelib import CheckmateException
 from checkmatelib.client import BlockResponse
 from pyramid.httpexceptions import HTTPTemporaryRedirect
 
 from via.checkmate import ViaCheckmateClient
+from via.exceptions import BadURL
 
 
 class TestViaCheckmateClient:
@@ -37,6 +39,14 @@ class TestViaCheckmateClient:
             client.raise_if_blocked(sentinel.url)
 
         assert exc.value.location == block_response.presentation_url
+
+    def test_raise_if_blocked_reraises_BadURL(self, client, check_url):
+        check_url.side_effect = CheckmateBadURL
+
+        with pytest.raises(BadURL) as exc:
+            client.raise_if_blocked(sentinel.url)
+
+        assert exc.value.url == sentinel.url
 
     def test_raise_if_blocked_ignores_CheckmateExceptions(self, client, check_url):
         check_url.side_effect = CheckmateException

@@ -1,5 +1,8 @@
+from checkmatelib import BadURL as CheckmateBadURL
 from checkmatelib import CheckmateClient, CheckmateException
 from pyramid.httpexceptions import HTTPTemporaryRedirect
+
+from via.exceptions import BadURL
 
 
 class ViaCheckmateClient(CheckmateClient):
@@ -17,7 +20,8 @@ class ViaCheckmateClient(CheckmateClient):
         Checkmate.
 
         :param url: The URL to check
-        :raise HTTPTemporaryRedirect: If the URL is blocked
+        :raises HTTPTemporaryRedirect: If the URL is blocked
+        :raises BadURL: For malformed or private URLs
         """
         try:
             blocked = self.check_url(
@@ -28,6 +32,9 @@ class ViaCheckmateClient(CheckmateClient):
                     "checkmate_ignore_reasons"
                 ],
             )
+
+        except CheckmateBadURL as exc:
+            raise BadURL(exc, url=url) from exc
 
         except CheckmateException:
             blocked = None
