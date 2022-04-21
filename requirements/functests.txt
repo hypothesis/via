@@ -32,7 +32,7 @@ google-auth-oauthlib==0.5.1
     # via -r requirements/requirements.txt
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
-h-checkmatelib==1.0.10
+h-checkmatelib==1.0.11
     # via -r requirements/requirements.txt
 h-matchers==1.2.13
     # via -r requirements/functests.in
@@ -71,6 +71,10 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 marshmallow==3.15.0
     # via -r requirements/requirements.txt
+netaddr==0.8.0
+    # via
+    #   -r requirements/requirements.txt
+    #   h-checkmatelib
 newrelic==7.10.0.175
     # via -r requirements/requirements.txt
 oauthlib==3.1.1
