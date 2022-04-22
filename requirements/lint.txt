@@ -55,7 +55,7 @@ gunicorn==20.1.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
-h-checkmatelib==1.0.12
+h-checkmatelib==1.0.13
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
