@@ -29,7 +29,7 @@ class HTTPService:
         # requests and urllib3 connection pooling is used (which means that
         # underlying TCP connections are re-used when making multiple requests
         # to the same host, e.g. pagination).
-        #
+
         # See https://docs.python-requests.org/en/latest/user/advanced/#session-objects
         self._session = session or requests.Session()
         self._error_translator = error_translator
@@ -50,7 +50,7 @@ class HTTPService:
         return self.request("DELETE", *args, **kwargs)
 
     def request(self, method, url, timeout=(10, 10), raise_for_status=True, **kwargs):
-        r"""Send a request with `requests` and return the requests.Response object.
+        r"""Send a request with `requests`.
 
         :param method: The HTTP method to use, one of "GET", "PUT", "POST",
             "PATCH", "DELETE", "OPTIONS" or "HEAD"
@@ -65,12 +65,15 @@ class HTTPService:
             Note that the read_timeout is *not* a time limit on the entire
             response download. It's a time limit on how long to wait *between
             bytes from the server*. The entire download can take much longer.
-        :param raise_for_status: Optionally raise for 4xx & 5xx response statuses.
-        :param \**kwargs: Any other keyword arguments will be passed directly to
-            requests.Session().request():
+        :param raise_for_status: Optionally raise for 4xx & 5xx response
+            statuses.
+        :param \**kwargs: Any other keyword arguments will be passed directly
+            to requests.Session().request():
             https://docs.python-requests.org/en/latest/api/#requests.Session.request
-        :raise request.exceptions are mapped to via's exception on DEFAULT_ERROR_MAP
-        :raise UnhandledUpstreamException: For any non mapped exception raised by requests
+        :raise request.exceptions are mapped to via's exception on
+            DEFAULT_ERROR_MAP
+        :raise UnhandledUpstreamException: For any non mapped exception raised
+            by requests
         :raise Exception: For any non requests exception raised
         :returns: a request.Response
         """
@@ -88,7 +91,7 @@ class HTTPService:
 
         except Exception as err:
             if mapped_err := self._translate_exception(err):
-                raise mapped_err from err  # pylint: disable=raising-bad-type
+                raise mapped_err from err
 
             raise
 
@@ -100,7 +103,7 @@ class HTTPService:
             yield from self._stream_bytes(response)
         except Exception as err:
             if mapped_err := self._translate_exception(err):
-                raise mapped_err from err  # pylint: disable=raising-bad-type
+                raise mapped_err from err
 
             raise
 
@@ -122,14 +125,14 @@ class HTTPService:
         """Stream content from a `requests.Response` object.
 
         The response must have been called with `stream=True` for this to be
-        effective. This will attempt to smooth over some of the variation of block
-        size to give a smoother output for upstream services calling us.
+        effective. This will attempt to smooth over some of the variation of
+        block size to give a smoother output for upstream services calling us.
         """
         buffer = b""
 
         # The chunk_size appears to be a guide value at best. We often get more
-        # or just about 9 bytes, so we'll do some smoothing for our callers so we
-        # don't incur overhead with very short iterations of content
+        # or just about 9 bytes, so we'll do some smoothing for our callers so
+        # we don't incur overhead with very short iterations of content
         for chunk in response.iter_content(chunk_size=min_chunk_size):
             buffer += chunk
             if len(buffer) >= min_chunk_size:
