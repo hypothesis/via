@@ -164,7 +164,7 @@ class TestJSTORPDF:
             response.headers["Cache-Control"]
             == "public, max-age=43200, stale-while-revalidate=86400"
         )
-        jstor_api.jstor_pdf_stream.assert_called_once_with(
+        jstor_api.stream_pdf.assert_called_once_with(
             "jstor://DOI", pyramid_request.params["jstor.ip"]
         )
 

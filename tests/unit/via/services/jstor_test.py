@@ -8,30 +8,44 @@ from via.services.jstor import JSTORAPI, factory
 
 class TestJSTORAPI:
     @pytest.mark.parametrize(
-        "url,expected", [(None, False), ("http://jstor-api.com", True)]
+        "api_url,expected", [(None, False), ("http://jstor-api.com", True)]
     )
-    def test_enabled(self, url, expected):
-        assert JSTORAPI(sentinel.http, url).enabled == expected
+    def test_enabled(self, api_url, expected):
+        svc = JSTORAPI(api_url=api_url, http_service=sentinel.http)
+
+        assert svc.enabled == expected
 
     @pytest.mark.parametrize(
         "url,expected",
         [
-            ("jstor://ARTICLE_ID", "http://jstor-api.com/10.2307/ARTICLE_ID?ip=IP"),
-            ("jstor://PREFIX/SUFFIX", "http://jstor-api.com/PREFIX/SUFFIX?ip=IP"),
+            ("jstor://ARTICLE_ID", "http://jstor.example.com/10.2307/ARTICLE_ID?ip=IP"),
+            ("jstor://PREFIX/SUFFIX", "http://jstor.example.com/PREFIX/SUFFIX?ip=IP"),
         ],
     )
-    def test_pdf_stream(self, http_service, url, expected):
-        stream = JSTORAPI(http_service, "http://jstor-api.com").jstor_pdf_stream(
-            url, "IP"
-        )
+    def test_stream_pdf(self, svc, http_service, url, expected):
+        stream = svc.stream_pdf(url, "IP")
 
         http_service.stream.assert_called_once_with(
             expected, headers=add_request_headers({"Accept": "application/pdf"})
         )
         assert stream == http_service.stream.return_value
 
+    @pytest.fixture
+    def svc(self, http_service):
+        return JSTORAPI(api_url="http://jstor.example.com", http_service=http_service)
+
 
 class TestFactory:
-    @pytest.mark.usefixtures("http_service")
-    def test_it(self, pyramid_request):
-        assert isinstance(factory(sentinel.context, pyramid_request), JSTORAPI)
+    def test_it(self, pyramid_request, JSTORAPI, http_service):
+        pyramid_request.registry.settings["jstor_pdf_url"] = sentinel.jstor_pdf_url
+
+        svc = factory(sentinel.context, pyramid_request)
+
+        JSTORAPI.assert_called_once_with(
+            http_service=http_service, api_url=sentinel.jstor_pdf_url
+        )
+        assert svc == JSTORAPI.return_value
+
+    @pytest.fixture
+    def JSTORAPI(self, patch):
+        return patch("via.services.jstor.JSTORAPI")

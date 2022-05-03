@@ -3,23 +3,33 @@ from via.services import HTTPService
 
 
 class JSTORAPI:
-    DEFAULT_DOI_PREFIX = "10.2307"
-    """Main DOI prefix. Used for real DOIs and non registered pseudo-DOIs with the same format"""
+    """An interface for dealing with JSTOR documents."""
 
-    def __init__(self, http_service: HTTPService, url):
-        self._jstor_pdf_url = url
+    DEFAULT_DOI_PREFIX = "10.2307"
+    """Used when no DOI prefix can be found."""
+
+    def __init__(self, api_url, http_service: HTTPService):
+        self._api_url = api_url
         self._http = http_service
 
     @property
     def enabled(self):
-        return bool(self._jstor_pdf_url)
+        """Get whether the service is enabled for this instance."""
 
-    def jstor_pdf_stream(self, jstor_url: str, jstor_ip: str):
-        doi = jstor_url.replace("jstor://", "")
-        if not "/" in doi:
+        return bool(self._api_url)
+
+    def stream_pdf(self, url, jstor_ip):
+        """Get a stream for the given JSTOR url.
+
+        :param url: The URL to stream
+        :param jstor_ip: The IP we use to authenticate ourselves with
+        """
+
+        doi = url.replace("jstor://", "")
+        if "/" not in doi:
             doi = f"{self.DEFAULT_DOI_PREFIX}/{doi}"
 
-        url = f"{self._jstor_pdf_url}/{doi}?ip={jstor_ip}"
+        url = f"{self._api_url}/{doi}?ip={jstor_ip}"
         return self._http.stream(
             url, headers=add_request_headers({"Accept": "application/pdf"})
         )
@@ -28,5 +38,5 @@ class JSTORAPI:
 def factory(_context, request):
     return JSTORAPI(
         http_service=request.find_service(HTTPService),
-        url=request.registry.settings.get("jstor_pdf_url", None),
+        api_url=request.registry.settings.get("jstor_pdf_url", None),
     )
