@@ -16,6 +16,7 @@ from via.views.view_pdf import (
 @pytest.mark.usefixtures(
     "secure_link_service",
     "google_drive_api",
+    "jstor_api",
     "http_service",
     "pdf_url_builder_service",
 )
@@ -48,7 +49,10 @@ class TestViewPDF:
         )
 
     def test_enables_partner_banner(self, call_view, jstor_api):
+        jstor_api.is_jstor_url.return_value = True
+
         response = call_view("jstor://DOI", params={"jstor.ip": "1.1.1.1"})
+
         assert response["hypothesis_config"].get("contentPartner") == "jstor"
 
     @pytest.fixture

@@ -29,7 +29,7 @@ def view_pdf(context, request):
     _, h_config = Configuration.extract_from_params(request.params)
 
     # Show content partner banner in client for JSTOR.
-    if url.startswith("jstor://"):
+    if request.find_service(JSTORAPI).is_jstor_url(url):
         h_config["contentPartner"] = "jstor"
 
     return {

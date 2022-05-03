@@ -50,4 +50,7 @@ def pdf_url_builder_service(mock_service):
 
 @pytest.fixture
 def jstor_api(mock_service):
-    return mock_service(JSTORAPI)
+    jstor_api = mock_service(JSTORAPI)
+
+    jstor_api.is_jstor_url.return_value = False
+    return jstor_api
