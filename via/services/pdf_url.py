@@ -77,7 +77,7 @@ class PDFURLBuilder:
         if self._is_onedrive_url(url):
             return self._proxy_onedrive_pdf(url)
 
-        if url.startswith("jstor://"):
+        if self.jstor_api.is_jstor_url(url):
             return self._proxy_jstor_pdf(url)
 
         return self.nginx_signer.sign_url(url, nginx_path="/proxy/static/")

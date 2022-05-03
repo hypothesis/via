@@ -18,6 +18,12 @@ class JSTORAPI:
 
         return bool(self._api_url)
 
+    @classmethod
+    def is_jstor_url(cls, url):
+        """Get whether a URL is a JSTOR url."""
+
+        return url.startswith("jstor://")
+
     def stream_pdf(self, url, jstor_ip):
         """Get a stream for the given JSTOR url.
 

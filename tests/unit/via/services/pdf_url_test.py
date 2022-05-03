@@ -91,32 +91,25 @@ class TestPDFURLBuilder:
             ),
         ),
     )
-    def test_onedrive_url(
-        self, svc, secure_link_service, google_drive_api, url, endpoint_url
-    ):
-        google_drive_api.parse_file_url.return_value = None
-
+    def test_onedrive_url(self, svc, secure_link_service, url, endpoint_url):
         pdf_url = svc.get_pdf_url(url)
 
         secure_link_service.sign_url.assert_called_once_with(endpoint_url)
         assert pdf_url == secure_link_service.sign_url.return_value
 
-    def test_jstor_url(
-        self, svc, secure_link_service, google_drive_api, pyramid_request
-    ):
-        google_drive_api.parse_file_url.return_value = None
+    def test_jstor_url(self, svc, secure_link_service, pyramid_request, jstor_api):
+        jstor_api.is_jstor_url.return_value = True
         pyramid_request.params["jstor.ip"] = "1.1.1.1"
 
         pdf_url = svc.get_pdf_url("jstor://DOI")
 
+        jstor_api.is_jstor_url.assert_called_once_with("jstor://DOI")
         secure_link_service.sign_url.assert_called_once_with(
             "http://example.com/jstor/proxied.pdf?url=jstor%3A%2F%2FDOI&jstor.ip=1.1.1.1"
         )
         assert pdf_url == secure_link_service.sign_url.return_value
 
-    def test_nginx_file_url(self, google_drive_api, svc):
-        google_drive_api.parse_file_url.return_value = None
-
+    def test_nginx_file_url(self, svc):
         pdf_url = svc.get_pdf_url("http://nginx/document.pdf")
 
         svc.nginx_signer.sign_url.assert_called_once_with(
@@ -141,6 +134,12 @@ class TestPDFURLBuilder:
             pyramid_request.route_url,
             PatchedNGINXSigner.return_value,
         )
+
+    @pytest.fixture
+    def google_drive_api(self, google_drive_api):
+        google_drive_api.parse_file_url.return_value = None
+
+        return google_drive_api
 
 
 class TestFactory:
