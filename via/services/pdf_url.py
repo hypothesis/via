@@ -99,7 +99,10 @@ class PDFURLBuilder:
         return self.secure_link_service.sign_url(
             self.route_url(
                 "proxy_jstor_pdf",
-                _query={"url": url, "jstor.ip": self.request.params.get("jstor.ip")},
+                _query={
+                    "url": url,
+                    "site_code": self.request.params.get("via.jstor.site_code"),
+                },
             )
         )
 

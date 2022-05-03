@@ -68,23 +68,23 @@ Configuration
 
 Environment variables:
 
-| Name             | Purpose | Example |
-|------------------|---------|---------|
-| `CHECKMATE_URL` | The URL of the URL Checkmate instance to use | `https://checkmate.example.com` |
-| `CHECKMATE_API_KEY` | API key to authenticate with Checkmate |
-| `CHECKMATE_ALLOW_ALL` | Whether to bypass Checkmate's allow-list (and use only the blocklist) | `true`
-| `CHECKMATE_IGNORE_REASONS` | Comma-separated list of Checkmate block reasons to ignore | `publisher-blocked,high-io` |
-| `CLIENT_EMBED_URL` | The URL of the client's embed script | `https://hypothes.is/embed.js`
-| `DATA_DIRECTORY` | Directory for externally provided data | `/via-data`
-| `ENABLE_FRONT_PAGE` | Show a front page at the root URL | `true` |
-| `JSTOR_PDF_URL` | URL of JSTOR API for retrieving article PDFs. Used to support jstor://{article_id} URIs. |
-| `NEW_RELIC_*` | Various New Relic settings. See New Relic's docs for details |
-| `NGINX_SECURE_LINK_SECRET` | The NGINX secure links signing secret. This is used by Via's Python endpoints to generate the signed URLs required by its NGINX-implemented `/proxy/static/` endpoint. All instances of Via must have this setting |
-| `NGINX_SERVER` | The URL of Via's NGINX server for proxying PDF files | `https://via.hypothes.is`
-| `SENTRY_*` | Various Sentry settings. See Sentry's docs for details |
-| `SIGNED_URLS_REQUIRED` | Require URLs to Via's Python endpoints to be signed so that Via can only be used by something that has the URL signing secret. Public instances of Via should _not_ enable this. Private instances of Via (e.g. the LMS app's instance of Via) _should_ enable this | `true`
-| `VIA_HTML_URL` | The URL of the Via HTML instance to redirect to for proxying HTML pages | `https://viahtml.hypothes.is/proxy`
-| `VIA_SECRET` | The secret that must be used to sign URLs to Via's Python endpoints if `SIGNED_URLS_REQUIRED` is on |
+| Name                       | Purpose                                                                                                                                                                                                                                                             | Example |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| `CHECKMATE_URL`            | The URL of the URL Checkmate instance to use                                                                                                                                                                                                                        | `https://checkmate.example.com` |
+| `CHECKMATE_API_KEY`        | API key to authenticate with Checkmate                                                                                                                                                                                                                              |
+| `CHECKMATE_ALLOW_ALL`      | Whether to bypass Checkmate's allow-list (and use only the blocklist)                                                                                                                                                                                               | `true`
+| `CHECKMATE_IGNORE_REASONS` | Comma-separated list of Checkmate block reasons to ignore                                                                                                                                                                                                           | `publisher-blocked,high-io` |
+| `CLIENT_EMBED_URL`         | The URL of the client's embed script                                                                                                                                                                                                                                | `https://hypothes.is/embed.js`
+| `DATA_DIRECTORY`           | Directory for externally provided data                                                                                                                                                                                                                              | `/via-data`
+| `ENABLE_FRONT_PAGE`        | Show a front page at the root URL                                                                                                                                                                                                                                   | `true` |
+| `JSTOR_API_URL`            | URL of JSTOR API base url. Used to support jstor://{article_id} URIs.                                                                                                                                                                                               |
+| `NEW_RELIC_*`              | Various New Relic settings. See New Relic's docs for details                                                                                                                                                                                                        |
+| `NGINX_SECURE_LINK_SECRET` | The NGINX secure links signing secret. This is used by Via's Python endpoints to generate the signed URLs required by its NGINX-implemented `/proxy/static/` endpoint. All instances of Via must have this setting                                                  |
+| `NGINX_SERVER`             | The URL of Via's NGINX server for proxying PDF files                                                                                                                                                                                                                | `https://via.hypothes.is`
+| `SENTRY_*`                 | Various Sentry settings. See Sentry's docs for details                                                                                                                                                                                                              |
+| `SIGNED_URLS_REQUIRED`     | Require URLs to Via's Python endpoints to be signed so that Via can only be used by something that has the URL signing secret. Public instances of Via should _not_ enable this. Private instances of Via (e.g. the LMS app's instance of Via) _should_ enable this | `true`
+| `VIA_HTML_URL`             | The URL of the Via HTML instance to redirect to for proxying HTML pages                                                                                                                                                                                             | `https://viahtml.hypothes.is/proxy`
+| `VIA_SECRET`               | The secret that must be used to sign URLs to Via's Python endpoints if `SIGNED_URLS_REQUIRED` is on                                                                                                                                                                 |
 
 Expected data:
 

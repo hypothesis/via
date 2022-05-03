@@ -78,7 +78,7 @@ def proxy_jstor_pdf(context, request):
         raise HTTPUnauthorized("JSTOR integration not enabled in Via")
 
     content_iterable = jstor_api.stream_pdf(
-        context.url_from_query(), request.params["jstor.ip"]
+        url=context.url_from_query(), site_code=request.params["site_code"]
     )
     return _iter_pdf_response(request.response, content_iterable)
 

@@ -3,6 +3,7 @@ from unittest.mock import sentinel
 
 import pytest
 from faker import Faker
+from freezegun import freeze_time
 
 from via.requests_tools.headers import add_request_headers
 from via.services.jstor import JSTORAPI, decode_base64_stream, factory
@@ -13,7 +14,9 @@ class TestJSTORAPI:
         "api_url,expected", [(None, False), ("http://jstor-api.com", True)]
     )
     def test_enabled(self, api_url, expected):
-        svc = JSTORAPI(api_url=api_url, http_service=sentinel.http)
+        svc = JSTORAPI(
+            api_url=api_url, http_service=sentinel.http, secret=sentinel.secret
+        )
 
         assert svc.enabled == expected
 
@@ -26,26 +29,47 @@ class TestJSTORAPI:
     @pytest.mark.parametrize(
         "url,expected",
         [
-            ("jstor://ARTICLE_ID", "http://jstor.example.com/10.2307/ARTICLE_ID?ip=IP"),
-            ("jstor://PREFIX/SUFFIX", "http://jstor.example.com/PREFIX/SUFFIX?ip=IP"),
+            ("jstor://ARTICLE_ID", "http://jstor.example.com/pdf/10.2307/ARTICLE_ID"),
+            ("jstor://PREFIX/SUFFIX", "http://jstor.example.com/pdf/PREFIX/SUFFIX"),
         ],
     )
-    def test_stream_pdf(self, svc, decode_base64_stream, http_service, url, expected):
-        stream = svc.stream_pdf(url, "IP")
+    @freeze_time("2022-01-14")
+    def test_stream_pdf(
+        self, svc, decode_base64_stream, jwt, http_service, url, expected
+    ):
+        jwt.encode.return_value = "TOKEN"
 
+        stream = svc.stream_pdf(url=url, site_code=sentinel.site_code)
+
+        jwt.encode.assert_called_once_with(
+            {"exp": 1642122000, "site_code": sentinel.site_code},
+            sentinel.secret,
+            algorithm="HS256",
+        )
         http_service.stream.assert_called_once_with(
-            expected, headers=add_request_headers({"Accept": "application/pdf"})
+            expected,
+            headers=add_request_headers(
+                {"Accept": "application/pdf", "Authorization": "Bearer TOKEN"}
+            ),
         )
         decode_base64_stream.assert_called_once_with(http_service.stream.return_value)
         assert stream == decode_base64_stream.return_value
 
     @pytest.fixture
+    def svc(self, http_service):
+        return JSTORAPI(
+            api_url="http://jstor.example.com",
+            http_service=http_service,
+            secret=sentinel.secret,
+        )
+
+    @pytest.fixture(autouse=True)
     def decode_base64_stream(self, patch):
         return patch("via.services.jstor.decode_base64_stream")
 
-    @pytest.fixture
-    def svc(self, http_service):
-        return JSTORAPI(api_url="http://jstor.example.com", http_service=http_service)
+    @pytest.fixture(autouse=True)
+    def jwt(self, patch):
+        return patch("via.services.jstor.jwt")
 
 
 class TestDecodeBase64Stream:
@@ -91,12 +115,17 @@ class TestDecodeBase64Stream:
 
 class TestFactory:
     def test_it(self, pyramid_request, JSTORAPI, http_service):
-        pyramid_request.registry.settings["jstor_pdf_url"] = sentinel.jstor_pdf_url
+        pyramid_request.registry.settings["jstor_api_url"] = sentinel.jstor_api_url
+        pyramid_request.registry.settings[
+            "jstor_api_secret"
+        ] = sentinel.jstor_api_secret
 
         svc = factory(sentinel.context, pyramid_request)
 
         JSTORAPI.assert_called_once_with(
-            http_service=http_service, api_url=sentinel.jstor_pdf_url
+            http_service=http_service,
+            api_url=sentinel.jstor_api_url,
+            secret=sentinel.jstor_api_secret,
         )
         assert svc == JSTORAPI.return_value
 
