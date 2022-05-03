@@ -158,7 +158,9 @@ class TestJSTORPDF:
     @pytest.mark.usefixtures("http_service")
     def test_it(self, call_view, jstor_api, pyramid_request):
         response = call_view(
-            "jstor://DOI", view=proxy_jstor_pdf, params={"jstor.ip": "1.1.1.1"}
+            "jstor://DOI",
+            view=proxy_jstor_pdf,
+            params={"site_code": sentinel.site_code},
         )
 
         assert response.status_code == 200
@@ -169,7 +171,7 @@ class TestJSTORPDF:
             == "public, max-age=43200, stale-while-revalidate=86400"
         )
         jstor_api.stream_pdf.assert_called_once_with(
-            "jstor://DOI", pyramid_request.params["jstor.ip"]
+            url="jstor://DOI", site_code=pyramid_request.params["site_code"]
         )
 
     def test_when_not_enabled(self, call_view, jstor_api):
@@ -177,7 +179,7 @@ class TestJSTORPDF:
 
         with pytest.raises(HTTPUnauthorized):
             call_view(
-                "jstor://DOI", view=proxy_jstor_pdf, params={"jstor.ip": "1.1.1.1"}
+                "jstor://DOI", view=proxy_jstor_pdf, params={"side_code": "SITE_CODE"}
             )
 
 

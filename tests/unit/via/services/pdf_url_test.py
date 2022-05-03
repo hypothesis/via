@@ -99,13 +99,13 @@ class TestPDFURLBuilder:
 
     def test_jstor_url(self, svc, secure_link_service, pyramid_request, jstor_api):
         jstor_api.is_jstor_url.return_value = True
-        pyramid_request.params["jstor.ip"] = "1.1.1.1"
+        pyramid_request.params["via.jstor.site_code"] = "SITE_CODE"
 
         pdf_url = svc.get_pdf_url("jstor://DOI")
 
         jstor_api.is_jstor_url.assert_called_once_with("jstor://DOI")
         secure_link_service.sign_url.assert_called_once_with(
-            "http://example.com/jstor/proxied.pdf?url=jstor%3A%2F%2FDOI&jstor.ip=1.1.1.1"
+            "http://example.com/jstor/proxied.pdf?url=jstor%3A%2F%2FDOI&site_code=SITE_CODE"
         )
         assert pdf_url == secure_link_service.sign_url.return_value
 

@@ -1,4 +1,7 @@
 import base64
+from datetime import datetime, timedelta
+
+from jose import jwt
 
 from via.requests_tools.headers import add_request_headers
 from via.services import HTTPService
@@ -10,15 +13,16 @@ class JSTORAPI:
     DEFAULT_DOI_PREFIX = "10.2307"
     """Used when no DOI prefix can be found."""
 
-    def __init__(self, api_url, http_service: HTTPService):
+    def __init__(self, api_url, secret, http_service: HTTPService):
         self._api_url = api_url
         self._http = http_service
+        self._secret = secret
 
     @property
     def enabled(self):
         """Get whether the service is enabled for this instance."""
 
-        return bool(self._api_url)
+        return bool(self._api_url and self._secret)
 
     @classmethod
     def is_jstor_url(cls, url):
@@ -26,20 +30,24 @@ class JSTORAPI:
 
         return url.startswith("jstor://")
 
-    def stream_pdf(self, url, jstor_ip):
+    def stream_pdf(self, url, site_code):
         """Get a stream for the given JSTOR url.
 
         :param url: The URL to stream
-        :param jstor_ip: The IP we use to authenticate ourselves with
+        :param site_code: The code we use to authenticate ourselves to JSTOR
         """
 
         doi = url.replace("jstor://", "")
         if "/" not in doi:
             doi = f"{self.DEFAULT_DOI_PREFIX}/{doi}"
 
-        url = f"{self._api_url}/{doi}?ip={jstor_ip}"
+        token = self._get_access_token(site_code)
+
         stream = self._http.stream(
-            url, headers=add_request_headers({"Accept": "application/pdf"})
+            url=f"{self._api_url}/pdf/{doi}",
+            headers=add_request_headers(
+                {"Accept": "application/pdf", "Authorization": f"Bearer {token}"}
+            ),
         )
 
         # Currently, JSTOR is sending us a stream of base 64 encoded data. This
@@ -48,6 +56,16 @@ class JSTORAPI:
         # gives the user a better time to first byte, but also because the
         # machinery that consumes this expects a stream, not a string.
         return decode_base64_stream(stream)
+
+    def _get_access_token(self, site_code):
+        return jwt.encode(
+            {
+                "exp": int((datetime.now() + timedelta(hours=1)).timestamp()),
+                "site_code": site_code,
+            },
+            self._secret,
+            algorithm="HS256",
+        )
 
 
 def decode_base64_stream(b64_stream):
@@ -87,5 +105,6 @@ def decode_base64_stream(b64_stream):
 def factory(_context, request):
     return JSTORAPI(
         http_service=request.find_service(HTTPService),
-        api_url=request.registry.settings.get("jstor_pdf_url", None),
+        api_url=request.registry.settings.get("jstor_api_url", None),
+        secret=request.registry.settings.get("jstor_api_secret", None),
     )
