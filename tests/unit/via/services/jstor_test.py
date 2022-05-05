@@ -16,10 +16,10 @@ class TestJSTORAPI:
         assert svc.enabled == expected
 
     @pytest.mark.parametrize(
-        "url,is_jstor", (("jstor://anything", True), ("http://other", False))
+        "url,is_jstor", (("jstor://anything", True), ("http://example.com", False))
     )
-    def test_is_jstor_url(self, svc, url, is_jstor):
-        assert svc.is_jstor_url(url) == is_jstor
+    def test_is_jstor_url(self, url, is_jstor):
+        assert JSTORAPI.is_jstor_url(url) == is_jstor
 
     @pytest.mark.parametrize(
         "url,expected",

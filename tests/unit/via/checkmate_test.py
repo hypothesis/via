@@ -32,6 +32,13 @@ class TestViaCheckmateClient:
             ignore_reasons=sentinel.checkmate_ignore_reasons,
         )
 
+    def test_we_do_not_check_jstor_urls(self, client, check_url, JSTORAPI):
+        JSTORAPI.is_jstor_url.return_value = True
+
+        assert not client.raise_if_blocked(sentinel.url)
+
+        check_url.assert_not_called()
+
     def test_raise_if_blocked_can_block(self, client, check_url, block_response):
         check_url.return_value = block_response
 
@@ -57,12 +64,18 @@ class TestViaCheckmateClient:
     def client(self, pyramid_request):
         return ViaCheckmateClient(pyramid_request)
 
+    @pytest.fixture
+    def block_response(self):
+        return create_autospec(BlockResponse, instance=True, spec_set=True)
+
     @pytest.fixture(autouse=True)
     def check_url(self, client):
         with patch.object(client, "check_url") as check_url:
             check_url.return_value = None
             yield check_url
 
-    @pytest.fixture
-    def block_response(self):
-        return create_autospec(BlockResponse, instance=True, spec_set=True)
+    @pytest.fixture(autouse=True)
+    def JSTORAPI(self, patch):
+        JSTORAPI = patch("via.checkmate.JSTORAPI")
+        JSTORAPI.is_jstor_url.return_value = False
+        return JSTORAPI
