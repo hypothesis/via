@@ -1,4 +1,4 @@
-"""Download .devdata from github.com:hypothesis/devdata.git."""
+"""Download dev data from github.com:hypothesis/devdata.git."""
 
 import os
 from pathlib import Path
@@ -14,8 +14,9 @@ def _get_devdata():
 
         check_call(["git", "clone", "git@github.com:hypothesis/devdata.git", git_dir])
 
-        # Copy devdata env file into place.
+        # Copy devdata files into place.
         for source, target in (
+            ("via/devdata.env", ".devdata.env"),
             (
                 "via/devdata/google_drive_credentials.json",
                 ".devdata/google_drive_credentials.json",
@@ -25,6 +26,7 @@ def _get_devdata():
                 ".devdata/google_drive_resource_keys.json",
             ),
         ):
+            print(f"Creating {target}...")
             copyfile(
                 os.path.join(git_dir, source),
                 os.path.join(Path(__file__).parent.parent, target),
