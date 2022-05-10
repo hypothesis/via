@@ -9,7 +9,6 @@ pyramid-exclog
 pyramid-jinja2
 pyramid-sanity
 pyramid-services
-python-jose[crypto]
 requests
 whitenoise
 google-auth-oauthlib

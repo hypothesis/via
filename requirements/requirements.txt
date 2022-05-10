@@ -14,8 +14,6 @@ certifi==2020.12.5
     #   sentry-sdk
 charset-normalizer==2.0.1
     # via requests
-ecdsa==0.17.0
-    # via python-jose
 google-auth==2.0.1
     # via google-auth-oauthlib
 google-auth-oauthlib==0.5.1
@@ -65,7 +63,6 @@ plaster-pastedeploy==0.7
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
-    #   python-jose
     #   rsa
 pyasn1-modules==0.2.8
     # via google-auth
@@ -91,8 +88,6 @@ pyramid-services==2.2
     # via -r requirements/requirements.in
 pyrsistent==0.17.3
     # via jsonschema
-python-jose[crypto]==3.3.0
-    # via -r requirements/requirements.in
 requests==2.27.1
     # via
     #   -r requirements/requirements.in
@@ -101,15 +96,11 @@ requests==2.27.1
 requests-oauthlib==1.3.0
     # via google-auth-oauthlib
 rsa==4.7.2
-    # via
-    #   google-auth
-    #   python-jose
+    # via google-auth
 sentry-sdk==1.3.1
     # via h-pyramid-sentry
 six==1.15.0
-    # via
-    #   ecdsa
-    #   jsonschema
+    # via jsonschema
 translationstring==1.4
     # via pyramid
 urllib3==1.26.5
