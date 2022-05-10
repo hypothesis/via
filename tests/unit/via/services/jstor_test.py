@@ -1,12 +1,11 @@
-import base64
 from unittest.mock import sentinel
 
 import pytest
-from faker import Faker
 from freezegun import freeze_time
 
+from via.exceptions import UpstreamServiceError
 from via.requests_tools.headers import add_request_headers
-from via.services.jstor import JSTORAPI, decode_base64_stream, factory
+from via.services.jstor import JSTORAPI, factory
 
 
 class TestJSTORAPI:
@@ -29,14 +28,15 @@ class TestJSTORAPI:
     @pytest.mark.parametrize(
         "url,expected",
         [
-            ("jstor://ARTICLE_ID", "http://jstor.example.com/pdf/10.2307/ARTICLE_ID"),
-            ("jstor://PREFIX/SUFFIX", "http://jstor.example.com/pdf/PREFIX/SUFFIX"),
+            (
+                "jstor://ARTICLE_ID",
+                "http://jstor.example.com/pdf-url/10.2307/ARTICLE_ID",
+            ),
+            ("jstor://PREFIX/SUFFIX", "http://jstor.example.com/pdf-url/PREFIX/SUFFIX"),
         ],
     )
     @freeze_time("2022-01-14")
-    def test_stream_pdf(
-        self, svc, decode_base64_stream, jwt, http_service, url, expected
-    ):
+    def test_stream_pdf(self, svc, jwt, http_service, url, expected):
         jwt.encode.return_value = "TOKEN"
 
         stream = svc.stream_pdf(url=url, site_code=sentinel.site_code)
@@ -46,14 +46,22 @@ class TestJSTORAPI:
             sentinel.secret,
             algorithm="HS256",
         )
-        http_service.stream.assert_called_once_with(
-            expected,
-            headers=add_request_headers(
-                {"Accept": "application/pdf", "Authorization": "Bearer TOKEN"}
-            ),
+
+        http_service.request.assert_called_once_with(
+            method="GET",
+            url=expected,
+            headers=add_request_headers({"Authorization": "Bearer TOKEN"}),
         )
-        decode_base64_stream.assert_called_once_with(http_service.stream.return_value)
-        assert stream == decode_base64_stream.return_value
+        http_service.stream.assert_called_once_with(
+            url=http_service.request.return_value.text
+        )
+        assert stream == http_service.stream.return_value
+
+    def test_stream_pdf_with_bad_return_value_from_s3(self, svc, http_service):
+        http_service.request.return_value.text = "NOT A URL"
+
+        with pytest.raises(UpstreamServiceError):
+            svc.stream_pdf(url="jstor://ANY", site_code=sentinel.site_code)
 
     @pytest.fixture
     def svc(self, http_service):
@@ -64,53 +72,8 @@ class TestJSTORAPI:
         )
 
     @pytest.fixture(autouse=True)
-    def decode_base64_stream(self, patch):
-        return patch("via.services.jstor.decode_base64_stream")
-
-    @pytest.fixture(autouse=True)
     def jwt(self, patch):
         return patch("via.services.jstor.jwt")
-
-
-class TestDecodeBase64Stream:
-    def test_it(self, content_string, base64_stream):
-        content_iter = decode_base64_stream(base64_stream)
-
-        decoded_content = b"".join(content_iter).decode("utf-8")
-        assert decoded_content == content_string
-
-    def test_it_with_non_padded_strings(self):
-        # Non padded strings could leave us with left overs when we are
-        # finished iterating.
-        string = "Hello"
-        b64 = base64.b64encode(string.encode("utf-8")).rstrip(b"=")
-        assert len(b64) % 4, "Sanity check we are not divisible by 4"
-
-        content_iter = decode_base64_stream([b64])
-
-        decoded_content = b"".join(content_iter).decode("utf-8")
-        assert decoded_content == string
-
-    @pytest.fixture
-    def content_string(self):
-        random_text = Faker().paragraph(nb_sentences=100)
-        # Replace lots of chars with the UTF-8 snowman to prove we can handle
-        # high valued chars as well as ASCII
-        random_text = random_text.replace("e", "☃")
-
-        return random_text
-
-    @pytest.fixture
-    def base64_stream(self, content_string):
-        # We can't yield directly from this method as pytest will think we
-        # are creating a context manager like situation. So use a sub-function
-        def _chunk(raw_bytes, chunk_size=129):
-            for i in range(len(raw_bytes) // chunk_size + 1):
-                # Yield random empty bits to test our handling of that
-                yield b""
-                yield raw_bytes[i * chunk_size : (i + 1) * chunk_size]
-
-        return _chunk(base64.b64encode(content_string.encode("utf-8")))
 
 
 class TestFactory:
