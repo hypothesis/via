@@ -30,19 +30,15 @@ class JSTORAPI:
 
         return url.startswith("jstor://")
 
-    def stream_pdf(self, url, site_code):
-        """Get a stream for the given JSTOR url.
+    def get_public_url(self, url, site_code):
+        """Get a signed S3 URL for the given JSTOR URL.
 
         :param url: The URL to stream
         :param site_code: The code we use to authenticate ourselves to JSTOR
+        :return: A public URL
         :raises UpstreamServiceError: If we get bad data back from the service
         """
 
-        # Get a signed S3 URL from JSTOR which expires after 10 minutes, and
-        # start a new request to stream that content
-        return self._http.stream(url=self._get_signed_s3_url(url, site_code))
-
-    def _get_signed_s3_url(self, url, site_code):
         doi = url.replace("jstor://", "")
         if "/" not in doi:
             doi = f"{self.DEFAULT_DOI_PREFIX}/{doi}"
