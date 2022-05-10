@@ -6,11 +6,9 @@ from datetime import timedelta
 from typing import Callable
 
 from h_vialib.secure import quantized_expiry
-from pyramid.httpexceptions import HTTPUnauthorized
 from requests import Request
 
 from via.services.google_drive import GoogleDriveAPI
-from via.services.jstor import JSTORAPI
 from via.services.secure_link import SecureLinkService
 
 
@@ -56,7 +54,6 @@ class _NGINXSigner:
 class PDFURLBuilder:
     request: Request
     google_drive_api: GoogleDriveAPI
-    jstor_api: JSTORAPI
     secure_link_service: SecureLinkService
     route_url: Callable
     nginx_signer: _NGINXSigner
@@ -78,11 +75,6 @@ class PDFURLBuilder:
         if self._is_onedrive_url(url):
             return self._proxy_onedrive_pdf(url)
 
-        if self.jstor_api.is_jstor_url(url):
-            # JSTOR can return a normal URL from S3 we can access without
-            # authentication.
-            url = self._get_jstor_public_url(url)
-
         return self.nginx_signer.sign_url(url, nginx_path="/proxy/static/")
 
     @classmethod
@@ -97,14 +89,6 @@ class PDFURLBuilder:
             )
         )
         return url
-
-    def _get_jstor_public_url(self, url):
-        if not self.jstor_api.enabled:
-            raise HTTPUnauthorized("JSTOR integration not enabled in Via")
-
-        return self.jstor_api.get_public_url(
-            url=url, site_code=self.request.params.get("via.jstor.site_code")
-        )
 
     def _google_file_url(self, file_details, url):
         route = "proxy_google_drive_file"
@@ -127,7 +111,6 @@ def factory(_context, request):
     return PDFURLBuilder(
         request=request,
         google_drive_api=request.find_service(GoogleDriveAPI),
-        jstor_api=request.find_service(JSTORAPI),
         secure_link_service=request.find_service(SecureLinkService),
         route_url=request.route_url,
         nginx_signer=_NGINXSigner(

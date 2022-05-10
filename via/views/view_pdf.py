@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
 from via.requests_tools.headers import add_request_headers
-from via.services import JSTORAPI, GoogleDriveAPI, HTTPService
+from via.services import GoogleDriveAPI, HTTPService
 from via.services.pdf_url import PDFURLBuilder
 from via.services.secure_link import has_secure_url_token
 
@@ -27,10 +27,6 @@ def view_pdf(context, request):
     request.checkmate.raise_if_blocked(url)
 
     _, h_config = Configuration.extract_from_params(request.params)
-
-    # Show content partner banner in client for JSTOR.
-    if request.find_service(JSTORAPI).is_jstor_url(url):
-        h_config["contentPartner"] = "jstor"
 
     return {
         # The upstream PDF URL that should be associated with any annotations.

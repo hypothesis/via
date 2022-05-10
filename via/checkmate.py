@@ -3,7 +3,6 @@ from checkmatelib import CheckmateClient, CheckmateException
 from pyramid.httpexceptions import HTTPTemporaryRedirect
 
 from via.exceptions import BadURL
-from via.services import JSTORAPI
 
 
 class ViaCheckmateClient(CheckmateClient):
@@ -24,10 +23,6 @@ class ViaCheckmateClient(CheckmateClient):
         :raises HTTPTemporaryRedirect: If the URL is blocked
         :raises BadURL: For malformed or private URLs
         """
-        if JSTORAPI.is_jstor_url(url):
-            # Nothing much we can do to check JSTOR urls
-            return
-
         try:
             blocked = self.check_url(
                 url,

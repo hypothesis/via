@@ -18,8 +18,6 @@ def pyramid_settings():
         "checkmate_allow_all": False,
         "enable_front_page": True,
         "data_directory": "tests/data_directory",
-        "jstor_api_url": None,
-        "jstor_api_secret": None,
     }
 
 
