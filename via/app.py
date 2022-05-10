@@ -26,8 +26,6 @@ PARAMETERS = {
     "data_directory": {"required": True, "formatter": Path},
     "signed_urls_required": {"formatter": asbool},
     "enable_front_page": {"formatter": asbool},
-    "jstor_api_url": {},
-    "jstor_api_secret": {},
 }
 
 

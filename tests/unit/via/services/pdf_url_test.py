@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import sentinel
 
 import pytest
-from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.services.pdf_url import PDFURLBuilder, _NGINXSigner, factory
 
@@ -98,29 +97,6 @@ class TestPDFURLBuilder:
         secure_link_service.sign_url.assert_called_once_with(endpoint_url)
         assert pdf_url == secure_link_service.sign_url.return_value
 
-    def test_jstor_url(self, svc, pyramid_request, jstor_api):
-        jstor_api.is_jstor_url.return_value = True
-        pyramid_request.params["via.jstor.site_code"] = sentinel.site_code
-
-        pdf_url = svc.get_pdf_url("jstor://DOI")
-
-        jstor_api.get_public_url.assert_called_once_with(
-            url="jstor://DOI", site_code=sentinel.site_code
-        )
-
-        svc.nginx_signer.sign_url.assert_called_once_with(
-            jstor_api.get_public_url.return_value, nginx_path="/proxy/static/"
-        )
-
-        assert pdf_url == svc.nginx_signer.sign_url.return_value
-
-    def test_jstor_url_with_jstor_disabled(self, svc, jstor_api):
-        jstor_api.is_jstor_url.return_value = True
-        jstor_api.enabled = False
-
-        with pytest.raises(HTTPUnauthorized):
-            svc.get_pdf_url("jstor://DOI")
-
     def test_nginx_file_url(self, svc):
         pdf_url = svc.get_pdf_url("http://nginx/document.pdf")
 
@@ -136,12 +112,10 @@ class TestPDFURLBuilder:
         secure_link_service,
         pyramid_request,
         PatchedNGINXSigner,
-        jstor_api,
     ):
         return PDFURLBuilder(
             pyramid_request,
             google_drive_api,
-            jstor_api,
             secure_link_service,
             pyramid_request.route_url,
             PatchedNGINXSigner.return_value,
@@ -163,7 +137,6 @@ class TestFactory:
         PatchedNGINXSigner,
         google_drive_api,
         secure_link_service,
-        jstor_api,
     ):
         svc = factory(sentinel.context, pyramid_request)
 
@@ -174,7 +147,6 @@ class TestFactory:
         PDFURLBuilder.assert_called_once_with(
             request=pyramid_request,
             google_drive_api=google_drive_api,
-            jstor_api=jstor_api,
             secure_link_service=secure_link_service,
             route_url=pyramid_request.route_url,
             nginx_signer=PatchedNGINXSigner.return_value,

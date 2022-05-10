@@ -11,7 +11,6 @@ from via.views.view_pdf import proxy_google_drive_file, proxy_onedrive_pdf, view
 @pytest.mark.usefixtures(
     "secure_link_service",
     "google_drive_api",
-    "jstor_api",
     "http_service",
     "pdf_url_builder_service",
 )
@@ -42,13 +41,6 @@ class TestViewPDF:
         pdf_url_builder_service.get_pdf_url.assert_called_once_with(
             "https://example.com/foo/bar.pdf?q=s"
         )
-
-    def test_enables_partner_banner(self, call_view, jstor_api):
-        jstor_api.is_jstor_url.return_value = True
-
-        response = call_view("jstor://DOI", params={"jstor.ip": "1.1.1.1"})
-
-        assert response["hypothesis_config"].get("contentPartner") == "jstor"
 
     @pytest.fixture
     def Configuration(self, patch):
