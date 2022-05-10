@@ -3,7 +3,7 @@
 from itertools import chain
 
 from h_vialib import Configuration
-from pyramid.httpexceptions import HTTPNoContent, HTTPUnauthorized
+from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
 from via.requests_tools.headers import add_request_headers
@@ -68,18 +68,6 @@ def proxy_google_drive_file(request):
         resource_key=request.matchdict.get("resource_key"),
     )
 
-    return _iter_pdf_response(request.response, content_iterable)
-
-
-@view_config(route_name="proxy_jstor_pdf", decorator=(has_secure_url_token,))
-def proxy_jstor_pdf(context, request):
-    jstor_api = request.find_service(JSTORAPI)
-    if not jstor_api.enabled:
-        raise HTTPUnauthorized("JSTOR integration not enabled in Via")
-
-    content_iterable = jstor_api.stream_pdf(
-        url=context.url_from_query(), site_code=request.params["site_code"]
-    )
     return _iter_pdf_response(request.response, content_iterable)
 
 

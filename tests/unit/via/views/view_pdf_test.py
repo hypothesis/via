@@ -2,15 +2,10 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
-from pyramid.httpexceptions import HTTPNoContent, HTTPUnauthorized
+from pyramid.httpexceptions import HTTPNoContent
 
 from via.resources import QueryURLResource
-from via.views.view_pdf import (
-    proxy_google_drive_file,
-    proxy_jstor_pdf,
-    proxy_onedrive_pdf,
-    view_pdf,
-)
+from via.views.view_pdf import proxy_google_drive_file, proxy_onedrive_pdf, view_pdf
 
 
 @pytest.mark.usefixtures(
@@ -151,36 +146,6 @@ class TestProxyOneDrivePDF:
         response = call_view("https://one-drive.com", view=proxy_onedrive_pdf)
 
         assert isinstance(response, HTTPNoContent)
-
-
-@pytest.mark.usefixtures("secure_link_service", "pdf_url_builder_service")
-class TestJSTORPDF:
-    @pytest.mark.usefixtures("http_service")
-    def test_it(self, call_view, jstor_api, pyramid_request):
-        response = call_view(
-            "jstor://DOI",
-            view=proxy_jstor_pdf,
-            params={"site_code": sentinel.site_code},
-        )
-
-        assert response.status_code == 200
-        assert response.headers["Content-Disposition"] == "inline"
-        assert response.headers["Content-Type"] == "application/pdf"
-        assert (
-            response.headers["Cache-Control"]
-            == "public, max-age=43200, stale-while-revalidate=86400"
-        )
-        jstor_api.stream_pdf.assert_called_once_with(
-            url="jstor://DOI", site_code=pyramid_request.params["site_code"]
-        )
-
-    def test_when_not_enabled(self, call_view, jstor_api):
-        jstor_api.enabled = False
-
-        with pytest.raises(HTTPUnauthorized):
-            call_view(
-                "jstor://DOI", view=proxy_jstor_pdf, params={"side_code": "SITE_CODE"}
-            )
 
 
 @pytest.fixture

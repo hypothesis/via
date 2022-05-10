@@ -36,10 +36,10 @@ class TestJSTORAPI:
         ],
     )
     @freeze_time("2022-01-14")
-    def test_stream_pdf(self, svc, jwt, http_service, url, expected):
+    def test_get_public_url(self, svc, jwt, http_service, url, expected):
         jwt.encode.return_value = "TOKEN"
 
-        stream = svc.stream_pdf(url=url, site_code=sentinel.site_code)
+        public_url = svc.get_public_url(url=url, site_code=sentinel.site_code)
 
         jwt.encode.assert_called_once_with(
             {"exp": 1642122000, "site_code": sentinel.site_code},
@@ -52,16 +52,14 @@ class TestJSTORAPI:
             url=expected,
             headers=add_request_headers({"Authorization": "Bearer TOKEN"}),
         )
-        http_service.stream.assert_called_once_with(
-            url=http_service.request.return_value.text
-        )
-        assert stream == http_service.stream.return_value
 
-    def test_stream_pdf_with_bad_return_value_from_s3(self, svc, http_service):
+        assert public_url == http_service.request.return_value.text
+
+    def test_get_public_url_with_bad_return_value_from_s3(self, svc, http_service):
         http_service.request.return_value.text = "NOT A URL"
 
         with pytest.raises(UpstreamServiceError):
-            svc.stream_pdf(url="jstor://ANY", site_code=sentinel.site_code)
+            svc.get_public_url(url="jstor://ANY", site_code=sentinel.site_code)
 
     @pytest.fixture
     def svc(self, http_service):

@@ -6,6 +6,7 @@ from datetime import timedelta
 from typing import Callable
 
 from h_vialib.secure import quantized_expiry
+from pyramid.httpexceptions import HTTPUnauthorized
 from requests import Request
 
 from via.services.google_drive import GoogleDriveAPI
@@ -78,7 +79,9 @@ class PDFURLBuilder:
             return self._proxy_onedrive_pdf(url)
 
         if self.jstor_api.is_jstor_url(url):
-            return self._proxy_jstor_pdf(url)
+            # JSTOR can return a normal URL from S3 we can access without
+            # authentication.
+            url = self._get_jstor_public_url(url)
 
         return self.nginx_signer.sign_url(url, nginx_path="/proxy/static/")
 
@@ -95,15 +98,12 @@ class PDFURLBuilder:
         )
         return url
 
-    def _proxy_jstor_pdf(self, url):
-        return self.secure_link_service.sign_url(
-            self.route_url(
-                "proxy_jstor_pdf",
-                _query={
-                    "url": url,
-                    "site_code": self.request.params.get("via.jstor.site_code"),
-                },
-            )
+    def _get_jstor_public_url(self, url):
+        if not self.jstor_api.enabled:
+            raise HTTPUnauthorized("JSTOR integration not enabled in Via")
+
+        return self.jstor_api.get_public_url(
+            url=url, site_code=self.request.params.get("via.jstor.site_code")
         )
 
     def _google_file_url(self, file_details, url):
