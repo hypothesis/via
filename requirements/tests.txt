@@ -214,7 +214,7 @@ webob==1.8.6
     #   webtest
 webtest==3.0.0
     # via -r requirements/tests.in
-whitenoise==6.0.0
+whitenoise==6.1.0
     # via -r requirements/requirements.txt
 wired==0.3
     # via
