@@ -72,7 +72,7 @@ h-pyramid-sentry==1.2.3
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
-h-vialib==1.0.18
+h-vialib==1.0.19
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
