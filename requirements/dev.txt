@@ -260,7 +260,7 @@ websocket-client==0.58.0
     # via
     #   docker
     #   docker-compose
-whitenoise==6.0.0
+whitenoise==6.1.0
     # via -r requirements/requirements.txt
 wired==0.3
     # via
