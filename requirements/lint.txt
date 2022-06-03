@@ -180,7 +180,7 @@ pyjwt==2.4.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   h-vialib
-pylint==2.13.9
+pylint==2.14.0
     # via -r requirements/lint.in
 pyparsing==3.0.7
     # via
@@ -265,6 +265,8 @@ tomli==2.0.0
     #   -r requirements/tests.txt
     #   pylint
     #   pytest
+tomlkit==0.11.0
+    # via pylint
 translationstring==1.4
     # via
     #   -r requirements/requirements.txt
