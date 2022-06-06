@@ -113,7 +113,7 @@ webob==1.8.6
     # via
     #   h-vialib
     #   pyramid
-whitenoise==6.1.0
+whitenoise==6.2.0
     # via -r requirements/requirements.in
 wired==0.3
     # via pyramid-services
