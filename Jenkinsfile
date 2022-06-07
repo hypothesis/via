@@ -32,14 +32,14 @@ node {
         }
     }
 
-    onlyOnMaster {
+    onlyOnMain {
         stage("release") {
             releaseApp(image: img)
         }
     }
 }
 
-onlyOnMaster {
+onlyOnMain {
     milestone()
     stage("Deploy (qa)") {
 	lock("qa deploy") {
