@@ -1,4 +1,4 @@
-[MASTER]
+[MAIN]
 jobs=0  # Speed up PyLint by using one process per CPU core.
 load-plugins=pylint.extensions.bad_builtin,
              pylint.extensions.broad_try_clause,
