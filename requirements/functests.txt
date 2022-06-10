@@ -28,7 +28,7 @@ google-auth==2.0.1
     # via
     #   -r requirements/requirements.txt
     #   google-auth-oauthlib
-google-auth-oauthlib==0.5.1
+google-auth-oauthlib==0.5.2
     # via -r requirements/requirements.txt
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
