@@ -16,14 +16,12 @@ load-plugins=pylint.extensions.bad_builtin,
 fail-on=C,E,F,I,R,W
 
 [MESSAGES CONTROL]
-disable=bad-continuation,
-        invalid-name,
+disable=invalid-name,
         missing-function-docstring,
         missing-module-docstring,
         missing-class-docstring,
         missing-type-doc,
         missing-return-type-doc,
-        no-self-use,
         no-value-for-parameter,
         redefined-outer-name,
         too-few-public-methods,
