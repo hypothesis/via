@@ -1,4 +1,3 @@
-# pylint: disable=no-self-use
 """A place to put fixture functions that are useful application-wide."""
 import functools
 from unittest.mock import create_autospec
