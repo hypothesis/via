@@ -69,7 +69,7 @@ markupsafe==1.1.1
     #   -r requirements/requirements.txt
     #   jinja2
     #   pyramid-jinja2
-marshmallow==3.15.0
+marshmallow==3.16.0
     # via -r requirements/requirements.txt
 netaddr==0.8.0
     # via
