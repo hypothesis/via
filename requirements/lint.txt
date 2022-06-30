@@ -180,7 +180,7 @@ pyjwt==2.4.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   h-vialib
-pylint==2.14.3
+pylint==2.14.4
     # via -r requirements/lint.in
 pyparsing==3.0.7
     # via
