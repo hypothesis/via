@@ -176,6 +176,14 @@ class TestGoogleDriveAPI:
                 GoogleDriveServiceError,
                 403,
             ),
+            (
+                {
+                    "status_code": 403,
+                    "json_data": load_fixture("google_403_malicious.json"),
+                },
+                GoogleDriveServiceError,
+                423,
+            ),
         ),
     )
     def test_iter_file_catches_specific_google_exceptions(
