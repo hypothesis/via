@@ -31,6 +31,31 @@ class GoogleDriveErrorSchema(Schema):
     error = fields.Nested(Errors(unknown=INCLUDE), required=True)
 
 
+_GOOGLE_ERROR_MAP = {
+    (403, "userRateLimitExceeded"): {
+        "message": "Too many concurrent requests to the Google Drive API",
+        # 429 - Too many requests
+        # Not 100% accurate as the user probably isn't making too many, but
+        # close enough as it conveys the need to back off
+        "status_int": 429,
+    },
+    (403, "cannotDownloadFile"): {
+        # This seems to happen if a file is locked down in various ways
+        # rather than for general consumption
+        "message": "We do not have permission to download the file through the"
+        " Google Drive API",
+        "status_int": 403,
+    },
+    (403, "cannotDownloadAbusiveFile"): {
+        "message": "Google has identified this file as malicious and has "
+        "denied access to it",
+        # 423 - Locked
+        # 'The resource that is being accessed is locked' - kinda?
+        "status_int": 423,
+    },
+}
+
+
 def translate_google_error(error):
     """Get a specific error instance from the provided error or None."""
 
@@ -52,36 +77,8 @@ def translate_google_error(error):
     if status_code == 404 and google_reason == "notFound":
         return HTTPNotFound(str(google_message) or "File id not found")
 
-    if status_code == 403 and google_reason == "userRateLimitExceeded":
-        return GoogleDriveServiceError(
-            "Too many concurrent requests to the Google Drive API",
-            # 429 - Too many requests
-            # Not 100% accurate as the user probably isn't making too many, but
-            # close enough as it conveys the need to back off
-            status_int=429,
-            requests_err=error,
-        )
-
-    if status_code == 403 and google_reason == "cannotDownloadFile":
-        # This seems to happen if a file is locked down in various ways
-        # rather than for general consumption
-        return GoogleDriveServiceError(
-            "We do not have permission to download the file through the "
-            "Google Drive API",
-            status_int=403,
-            requests_err=error,
-        )
-
-    if status_code == 403 and google_reason == "cannotDownloadAbusiveFile":
-        # This file is blocked because Google thinks it is malware of some kind
-        return GoogleDriveServiceError(
-            "Google has identified this file as malicious and has denied "
-            "access to it",
-            # 423 - Locked
-            # 'The resource that is being accessed is locked' - kinda?
-            status_int=423,
-            requests_err=error,
-        )
+    if settings := _GOOGLE_ERROR_MAP.get((status_code, google_reason)):
+        return GoogleDriveServiceError(**settings, requests_err=error)
 
     return None
 
