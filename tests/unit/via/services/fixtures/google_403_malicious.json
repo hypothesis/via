@@ -1,0 +1,13 @@
+{
+    "error": {
+        "errors": [
+            {
+                "domain": "global",
+                "reason": "cannotDownloadAbusiveFile",
+                "message": "This file has been identified as malware or spam and cannot be downloaded."
+            }
+        ],
+        "code": 403,
+        "message": "This file has been identified as malware or spam and cannot be downloaded."
+    }
+}

@@ -72,6 +72,17 @@ def translate_google_error(error):
             requests_err=error,
         )
 
+    if status_code == 403 and google_reason == "cannotDownloadAbusiveFile":
+        # This file is blocked because Google thinks it is malware of some kind
+        return GoogleDriveServiceError(
+            "Google has identified this file as malicious and has denied "
+            "access to it",
+            # 423 - Locked
+            # 'The resource that is being accessed is locked' - kinda?
+            status_int=423,
+            requests_err=error,
+        )
+
     return None
 
 
