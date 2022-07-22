@@ -121,7 +121,7 @@ netaddr==0.8.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   h-checkmatelib
-newrelic==7.14.0.177
+newrelic==7.16.0.178
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt

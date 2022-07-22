@@ -75,7 +75,7 @@ netaddr==0.8.0
     # via
     #   -r requirements/requirements.txt
     #   h-checkmatelib
-newrelic==7.14.0.177
+newrelic==7.16.0.178
     # via -r requirements/requirements.txt
 oauthlib==3.1.1
     # via
