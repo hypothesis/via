@@ -1,3 +1,4 @@
+pip-tools
 pytest
 webtest
 h_matchers
