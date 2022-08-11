@@ -82,7 +82,7 @@ pyramid-exclog==1.1
     # via -r requirements/requirements.in
 pyramid-jinja2==2.10
     # via -r requirements/requirements.in
-pyramid-sanity==1.0.2
+pyramid-sanity==1.0.3
     # via -r requirements/requirements.in
 pyramid-services==2.2
     # via -r requirements/requirements.in
