@@ -35,7 +35,7 @@ jobs:
 
   qa-lms-via:
     needs: create-image
-    name: ${{ github.event.repository.name }}
+    name: lms-via
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
       Application: lms-via
@@ -59,7 +59,7 @@ jobs:
 
   prod-lms-via:
     needs: qa-lms-via
-    name: ${{ github.event.repository.name }}
+    name: lms-via
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
       Application: lms-via
