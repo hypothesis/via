@@ -1,5 +1,5 @@
 pip-tools
-pylint<2.15
+pylint
 pydocstyle
 -r tests.txt
 -r requirements.txt
