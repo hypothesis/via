@@ -1,5 +1,6 @@
 -r requirements.txt
 pip-tools
+pip-sync-faster
 pyramid_ipython
 ipdb
 supervisor

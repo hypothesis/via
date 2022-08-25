@@ -154,10 +154,15 @@ pep517==0.13.0
     # via
     #   -r requirements/tests.txt
     #   build
+pip-sync-faster==0.0.2
+    # via
+    #   -r requirements/lint.in
+    #   -r requirements/tests.txt
 pip-tools==6.8.0
     # via
     #   -r requirements/lint.in
     #   -r requirements/tests.txt
+    #   pip-sync-faster
 plaster==1.0
     # via
     #   -r requirements/requirements.txt
