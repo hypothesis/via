@@ -257,3 +257,4 @@ request is for a static file) or proxies to Pyramid.
 ### See also
 
 * [Caching strategy](docs/caching-strategy.md)
+
