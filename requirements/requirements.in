@@ -1,5 +1,5 @@
 gunicorn
-h-checkmatelib
+checkmatelib
 h-pyramid-sentry
 h-vialib
 importlib_resources
