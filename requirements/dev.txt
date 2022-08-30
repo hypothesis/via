@@ -60,7 +60,7 @@ google-auth-oauthlib==0.5.2
     # via -r requirements/requirements.txt
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
-h-pyramid-sentry==1.2.3
+h-pyramid-sentry==1.2.4
     # via -r requirements/requirements.txt
 h-vialib==1.0.19
     # via -r requirements/requirements.txt
