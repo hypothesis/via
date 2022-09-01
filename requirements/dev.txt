@@ -72,6 +72,8 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
+importlib-metadata==4.12.0
+    # via pip-sync-faster
 importlib-resources==5.9.0
     # via
     #   -r requirements/requirements.txt
@@ -133,7 +135,7 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pip-sync-faster==0.0.2
+pip-sync-faster==0.0.3
     # via -r requirements/dev.in
 pip-tools==6.8.0
     # via
@@ -279,6 +281,7 @@ wired==0.3
 zipp==3.4.1
     # via
     #   -r requirements/requirements.txt
+    #   importlib-metadata
     #   importlib-resources
 zope-deprecation==4.4.0
     # via
