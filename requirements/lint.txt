@@ -89,6 +89,10 @@ idna==2.10
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   requests
+importlib-metadata==4.12.0
+    # via
+    #   -r requirements/tests.txt
+    #   pip-sync-faster
 importlib-resources==5.9.0
     # via
     #   -r requirements/requirements.txt
@@ -154,7 +158,7 @@ pep517==0.13.0
     # via
     #   -r requirements/tests.txt
     #   build
-pip-sync-faster==0.0.2
+pip-sync-faster==0.0.3
     # via
     #   -r requirements/lint.in
     #   -r requirements/tests.txt
@@ -343,6 +347,7 @@ zipp==3.4.1
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
+    #   importlib-metadata
     #   importlib-resources
 zope-deprecation==4.4.0
     # via

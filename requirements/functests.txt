@@ -54,6 +54,8 @@ idna==2.10
     # via
     #   -r requirements/requirements.txt
     #   requests
+importlib-metadata==4.12.0
+    # via pip-sync-faster
 importlib-resources==5.9.0
     # via
     #   -r requirements/requirements.txt
@@ -97,7 +99,7 @@ pastedeploy==2.1.1
     #   plaster-pastedeploy
 pep517==0.13.0
     # via build
-pip-sync-faster==0.0.2
+pip-sync-faster==0.0.3
     # via -r requirements/functests.in
 pip-tools==6.8.0
     # via
@@ -217,6 +219,7 @@ wired==0.3
 zipp==3.4.1
     # via
     #   -r requirements/requirements.txt
+    #   importlib-metadata
     #   importlib-resources
 zope-deprecation==4.4.0
     # via
