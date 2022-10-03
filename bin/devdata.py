@@ -12,7 +12,9 @@ def _get_devdata():
     with TemporaryDirectory() as tmp_dir_name:
         git_dir = os.path.join(tmp_dir_name, "devdata")
 
-        check_call(["git", "clone", "git@github.com:hypothesis/devdata.git", git_dir])
+        check_call(
+            ["git", "clone", "https://github.com/hypothesis/devdata.git", git_dir]
+        )
 
         # Copy devdata files into place.
         for source, target in (
