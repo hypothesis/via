@@ -42,7 +42,7 @@ markupsafe==1.1.1
     # via
     #   jinja2
     #   pyramid-jinja2
-marshmallow==3.17.1
+marshmallow==3.18.0
     # via -r requirements/requirements.in
 netaddr==0.8.0
     # via checkmatelib
