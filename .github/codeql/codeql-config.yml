@@ -2,3 +2,5 @@ paths-ignore:
   - 'tests/**/**/**/*.py'
   - 'tests/**/**/*.py'
   - 'tests/**/*.py'
+  - 'via/static/vendor/pdfjs-2/web/viewer.js'
+  - 'via/static/vendor/pdfjs-2/build/pdf.worker.js'
