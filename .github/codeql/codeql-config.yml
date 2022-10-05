@@ -1,0 +1,4 @@
+paths-ignore:
+  - 'tests/**/**/**/*.py'
+  - 'tests/**/**/*.py'
+  - 'tests/**/*.py'
