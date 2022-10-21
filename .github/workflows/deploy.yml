@@ -40,7 +40,7 @@ jobs:
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
       Application: lms-via
-      Environment: qa
+      Environment: qa-lms
       Region: us-west-1
       Operation: deploy
       Version: latest
@@ -64,7 +64,7 @@ jobs:
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
       Application: lms-via
-      Environment: prod
+      Environment: prod-lms
       Region: us-west-1
       Operation: deploy
       Version: latest
