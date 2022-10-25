@@ -63,7 +63,7 @@ google-auth==2.0.1
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   google-auth-oauthlib
-google-auth-oauthlib==0.5.3
+google-auth-oauthlib==0.6.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
