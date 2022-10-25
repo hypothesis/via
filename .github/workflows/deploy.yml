@@ -31,7 +31,7 @@ jobs:
       Environment: qa
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
   qa-lms-via:
@@ -43,11 +43,11 @@ jobs:
       Environment: qa
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
   prod-via:
-    needs: qa-via
+    needs: [create-image, qa-via]
     name: ${{ github.event.repository.name }}
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
@@ -55,11 +55,11 @@ jobs:
       Environment: prod
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
 
   prod-lms-via:
-    needs: qa-lms-via
+    needs: [create-image, qa-lms-via]
     name: lms-via
     uses: hypothesis/workflows/.github/workflows/eb-update.yml@main
     with:
@@ -67,5 +67,5 @@ jobs:
       Environment: prod
       Region: us-west-1
       Operation: deploy
-      Version: latest
+      Version: ${{ needs.create-image.outputs.docker_tag }}
     secrets: inherit
