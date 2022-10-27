@@ -52,11 +52,11 @@ dockerpty==0.4.1
     # via docker-compose
 docopt==0.6.2
     # via docker-compose
-google-auth==2.0.1
+google-auth==2.13.0
     # via
     #   -r requirements/requirements.txt
     #   google-auth-oauthlib
-google-auth-oauthlib==0.6.0
+google-auth-oauthlib==0.7.0
     # via -r requirements/requirements.txt
 gunicorn==20.1.0
     # via -r requirements/requirements.txt
@@ -228,6 +228,7 @@ six==1.15.0
     #   -r requirements/requirements.txt
     #   bcrypt
     #   dockerpty
+    #   google-auth
     #   jsonschema
     #   paramiko
     #   pynacl
@@ -301,7 +302,6 @@ pip==22.2.1
 setuptools==63.2.0
     # via
     #   -r requirements/requirements.txt
-    #   google-auth
     #   gunicorn
     #   ipdb
     #   ipython

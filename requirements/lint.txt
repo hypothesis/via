@@ -58,12 +58,12 @@ faker==5.8.0
     # via
     #   -r requirements/tests.txt
     #   factory-boy
-google-auth==2.0.1
+google-auth==2.13.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   google-auth-oauthlib
-google-auth-oauthlib==0.6.0
+google-auth-oauthlib==0.7.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
@@ -274,6 +274,7 @@ six==1.15.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
+    #   google-auth
     #   jsonschema
     #   python-dateutil
 snowballstemmer==2.1.0
@@ -373,7 +374,6 @@ setuptools==63.2.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   astroid
-    #   google-auth
     #   gunicorn
     #   jsonschema
     #   pastedeploy
