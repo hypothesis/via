@@ -1,0 +1,67 @@
+# Redeploy the currently deployed version of Via, a.k.a "turn if off and on again".
+name: Redeploy
+concurrency:
+  group: ${{ github.event.repository.name }}-deploy
+  cancel-in-progress: true
+on:
+  workflow_dispatch:
+    inputs:
+      QA:
+        type: boolean
+        description: Redeploy QA
+      QA_Edu:
+        type: boolean
+        description: Redeploy QA (Edu)
+      Production:
+        type: boolean
+        description: Redeploy Production
+      Production_Edu:
+        type: boolean
+        description: Redeploy Production (Edu)
+jobs:
+  QA:
+    if: inputs.QA
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: QA
+      github_environment_url: https://qa-via.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek
+      aws_region: us-west-1
+      elasticbeanstalk_application: via
+      elasticbeanstalk_environment: qa
+    secrets: inherit
+  QA_Edu:
+    name: QA (Edu)
+    if: inputs.QA_Edu
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: QA (Edu)
+      github_environment_url: https://hypothesis.instructure.com/courses/125/assignments/878
+      aws_region: us-west-1
+      elasticbeanstalk_application: lms-via
+      elasticbeanstalk_environment: qa
+    secrets: inherit
+  Production:
+    if: inputs.Production
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: Production
+      github_environment_url: https://via.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek
+      aws_region: us-west-1
+      elasticbeanstalk_application: via
+      elasticbeanstalk_environment: prod
+    secrets: inherit
+  Production_Edu:
+    name: Production (Edu)
+    if: inputs.Production_Edu
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: Production (Edu)
+      github_environment_url: https://hypothesis.instructure.com/courses/125/assignments/882
+      aws_region: us-west-1
+      elasticbeanstalk_application: lms-via
+      elasticbeanstalk_environment: prod
+    secrets: inherit
