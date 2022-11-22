@@ -1,26 +1,26 @@
-# Redeploy the currently deployed version of Via, a.k.a "turn if off and on again".
 name: Redeploy
 concurrency:
-  group: ${{ github.event.repository.name }}-deploy
+  group: deploy
   cancel-in-progress: true
 on:
   workflow_dispatch:
     inputs:
-      QA:
+      qa:
         type: boolean
         description: Redeploy QA
       QA_Edu:
         type: boolean
         description: Redeploy QA (Edu)
-      Production:
+      production:
         type: boolean
         description: Redeploy Production
-      Production_Edu:
+      production_edu:
         type: boolean
         description: Redeploy Production (Edu)
 jobs:
-  QA:
-    if: inputs.QA
+  qa:
+    name: QA
+    if: inputs.qa
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: redeploy
@@ -42,8 +42,9 @@ jobs:
       elasticbeanstalk_application: lms-via
       elasticbeanstalk_environment: qa
     secrets: inherit
-  Production:
-    if: inputs.Production
+  production:
+    name: Production
+    if: inputs.production
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: redeploy
@@ -53,9 +54,9 @@ jobs:
       elasticbeanstalk_application: via
       elasticbeanstalk_environment: prod
     secrets: inherit
-  Production_Edu:
+  production_edu:
     name: Production (Edu)
-    if: inputs.Production_Edu
+    if: inputs.production_edu
     uses: hypothesis/workflows/.github/workflows/deploy.yml@main
     with:
       operation: redeploy
