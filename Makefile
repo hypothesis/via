@@ -137,3 +137,17 @@ python:
 	@./bin/install-python
 
 DOCKER_TAG = dev
+
+.PHONY: run-docker
+run-docker:
+	docker run --rm \
+		-v $(PWD)/.devdata/:/via-data/:ro \
+		-e "CHECKMATE_API_KEY=dummy" \
+		-e "CHECKMATE_URL=http://dummy-checkmate-service" \
+		-e "CLIENT_EMBED_URL=http://localhost:5000/embed.js" \
+		-e "DATA_DIRECTORY=/via-data/" \
+		-e "NGINX_SECURE_LINK_SECRET=dummy" \
+		-e "NGINX_SERVER=http://localhost:9083" \
+		-e "VIA_HTML_URL=http://localhost:9085" \
+		-e "VIA_SECRET=dummy" \
+		-p 9083:9083 docker.io/hypothesis/via:dev
