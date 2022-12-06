@@ -7,8 +7,7 @@ FROM python:3.8.15-slim-bullseye
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install nginx & supervisor
-RUN apt-get update && apt-get install --yes nginx nginx-extras gettext-base \
-  && pip install --no-cache-dir supervisor \
+RUN apt-get update && apt-get install --yes nginx nginx-extras gettext-base supervisor \
   && apt-get clean
 
 # Create the hypothesis user, group, home directory and package directory.
@@ -33,4 +32,4 @@ COPY . .
 
 USER hypothesis
 
-CMD /usr/bin/envsubst '$${NGINX_SECURE_LINK_SECRET}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/local/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
+CMD /usr/bin/envsubst '$${NGINX_SECURE_LINK_SECRET}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
