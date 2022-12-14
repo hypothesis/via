@@ -78,7 +78,7 @@ importlib-resources==5.10.1
     # via
     #   -r requirements/requirements.txt
     #   checkmatelib
-ipdb==0.13.9
+ipdb==0.13.11
     # via -r requirements/dev.in
 ipython==7.31.1
     # via
@@ -237,11 +237,10 @@ supervisor==4.2.4
     # via -r requirements/dev.in
 texttable==1.6.3
     # via docker-compose
-toml==0.10.2
-    # via ipdb
 tomli==2.0.1
     # via
     #   build
+    #   ipdb
     #   pep517
 traitlets==5.0.5
     # via
@@ -303,7 +302,6 @@ setuptools==63.2.0
     # via
     #   -r requirements/requirements.txt
     #   gunicorn
-    #   ipdb
     #   ipython
     #   jsonschema
     #   pastedeploy
