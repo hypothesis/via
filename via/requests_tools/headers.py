@@ -2,6 +2,8 @@
 
 from collections import OrderedDict
 
+from h_vialib.secure import SecureSecrets
+
 # A mix of headers we don't want to pass on for one reason or another
 BANNED_HEADERS = {
     # Requests needs to set Host to the right thing for us
@@ -75,11 +77,22 @@ def clean_headers(headers):
     return clean
 
 
-def add_request_headers(headers):
+def add_request_headers(headers, request=None):
     """Add headers for 3rd party providers which we access data from."""
 
     # Pass our abuse policy in request headers for third-party site admins.
     headers["X-Abuse-Policy"] = "https://web.hypothes.is/abuse-policy/"
     headers["X-Complaints-To"] = "https://web.hypothes.is/report-abuse/"
+
+    if request and "via.secret.headers" in request.params:
+        # Pass along any headers sent in the original request
+        secure_secrets = SecureSecrets(
+            request.registry.settings["via_secret"].encode("utf-8")
+        )
+
+        secret_headers = secure_secrets.decrypt_dict(
+            request.params["via.secret.headers"]
+        )
+        headers.update(secret_headers)
 
     return headers

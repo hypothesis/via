@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from unittest.mock import sentinel
 
 import pytest
 
@@ -60,3 +61,27 @@ class TestAddHeaders:
             "X-Complaints-To": "https://web.hypothes.is/report-abuse/",
             "X-Existing": "existing",
         }
+
+    def test_with_request_secret_headers(self, pyramid_request, SecureSecrets):
+        pyramid_request.params["via.secret.headers"] = sentinel.headers
+        SecureSecrets.return_value.decrypt_dict.return_value = {
+            "SECRET-HEADER": "VALUE"
+        }
+
+        headers = add_request_headers({}, request=pyramid_request)
+
+        SecureSecrets.assert_called_once_with(
+            pyramid_request.registry.settings["via_secret"].encode("utf-8")
+        )
+        SecureSecrets.return_value.decrypt_dict.assert_called_once_with(
+            sentinel.headers
+        )
+        assert headers == {
+            "X-Abuse-Policy": "https://web.hypothes.is/abuse-policy/",
+            "X-Complaints-To": "https://web.hypothes.is/report-abuse/",
+            "SECRET-HEADER": "VALUE",
+        }
+
+    @pytest.fixture
+    def SecureSecrets(self, patch):
+        return patch("via.requests_tools.headers.SecureSecrets")

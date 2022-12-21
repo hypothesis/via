@@ -45,7 +45,7 @@ def proxy_onedrive_pdf(context, request):
     url = context.url_from_query()
 
     content_iterable = request.find_service(HTTPService).stream(
-        url, headers=add_request_headers({})
+        url, headers=add_request_headers({}, request=request)
     )
 
     return _iter_pdf_response(request.response, content_iterable)
