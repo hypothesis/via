@@ -41,7 +41,13 @@ def view_pdf(context, request):
 
 
 @view_config(route_name="proxy_onedrive_pdf", decorator=(has_secure_url_token,))
-def proxy_onedrive_pdf(context, request):
+@view_config(route_name="proxy_d2l_pdf", decorator=(has_secure_url_token,))
+@view_config(route_name="proxy_python_pdf", decorator=(has_secure_url_token,))
+def proxy_python_pdf(context, request):
+    """Proxy a pdf with python (as opposed to nginx).
+
+    Multiple routes point to this view to allow having separate access logs for each of them.
+    """
     url = context.url_from_query()
 
     content_iterable = request.find_service(HTTPService).stream(

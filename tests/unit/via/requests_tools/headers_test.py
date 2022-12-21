@@ -62,20 +62,16 @@ class TestAddHeaders:
             "X-Existing": "existing",
         }
 
-    def test_with_request_secret_headers(self, pyramid_request, SecureSecrets):
+    def test_with_request_secret_headers(self, pyramid_request, Encryption):
         pyramid_request.params["via.secret.headers"] = sentinel.headers
-        SecureSecrets.return_value.decrypt_dict.return_value = {
-            "SECRET-HEADER": "VALUE"
-        }
+        Encryption.return_value.decrypt_dict.return_value = {"SECRET-HEADER": "VALUE"}
 
         headers = add_request_headers({}, request=pyramid_request)
 
-        SecureSecrets.assert_called_once_with(
+        Encryption.assert_called_once_with(
             pyramid_request.registry.settings["via_secret"].encode("utf-8")
         )
-        SecureSecrets.return_value.decrypt_dict.assert_called_once_with(
-            sentinel.headers
-        )
+        Encryption.return_value.decrypt_dict.assert_called_once_with(sentinel.headers)
         assert headers == {
             "X-Abuse-Policy": "https://web.hypothes.is/abuse-policy/",
             "X-Complaints-To": "https://web.hypothes.is/report-abuse/",
@@ -83,5 +79,5 @@ class TestAddHeaders:
         }
 
     @pytest.fixture
-    def SecureSecrets(self, patch):
-        return patch("via.requests_tools.headers.SecureSecrets")
+    def Encryption(self, patch):
+        return patch("via.requests_tools.headers.Encryption")
