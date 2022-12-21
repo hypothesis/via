@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 
-from h_vialib.secure import SecureSecrets
+from h_vialib.secure import Encryption
 
 # A mix of headers we don't want to pass on for one reason or another
 BANNED_HEADERS = {
@@ -86,7 +86,7 @@ def add_request_headers(headers, request=None):
 
     if request and "via.secret.headers" in request.params:
         # Pass along any headers sent in the original request
-        secure_secrets = SecureSecrets(
+        secure_secrets = Encryption(
             request.registry.settings["via_secret"].encode("utf-8")
         )
 

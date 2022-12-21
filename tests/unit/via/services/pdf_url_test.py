@@ -81,6 +81,7 @@ class TestPDFURLBuilder:
         "url,endpoint_url",
         (
             # pylint:disable=line-too-long
+            # One Drive
             (
                 "https://my-sharepoint.sharepoint.com/FILE_ID/?download=1",
                 "http://example.com/onedrive/proxied.pdf?url=https%3A%2F%2Fmy-sharepoint.sharepoint.com%2FFILE_ID%2F%3Fdownload%3D1",
@@ -89,13 +90,32 @@ class TestPDFURLBuilder:
                 "https://api.onedrive.com/v1.0/FILE_ID/root/content",
                 "http://example.com/onedrive/proxied.pdf?url=https%3A%2F%2Fapi.onedrive.com%2Fv1.0%2FFILE_ID%2Froot%2Fcontent",
             ),
+            # D2L
+            (
+                "http//d2l-instance.com/content/topics/FILEID/file?stream=1",
+                "http://example.com/d2l/proxied.pdf?url=http%2F%2Fd2l-instance.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1",
+            ),
+            (
+                "http//some-other-d2l-instance.com/content/topics/FILEID/file?stream=1",
+                "http://example.com/d2l/proxied.pdf?url=http%2F%2Fsome-other-d2l-instance.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1",
+            ),
         ),
     )
-    def test_onedrive_url(self, svc, secure_link_service, url, endpoint_url):
+    def test_python_pdf_urls(self, svc, secure_link_service, url, endpoint_url):
         pdf_url = svc.get_pdf_url(url)
 
         secure_link_service.sign_url.assert_called_once_with(endpoint_url)
         assert pdf_url == secure_link_service.sign_url.return_value
+
+    def test_python_pdf_with_headers(self, svc, pyramid_request, secure_link_service):
+        pyramid_request.params["via.secret.headers"] = "SECRET-HEADERS"
+
+        svc.get_pdf_url("http//d2l.com/content/topics/FILEID/file?stream=1")
+
+        secure_link_service.sign_url.assert_called_once_with(
+            # pylint:disable=line-too-long
+            "http://example.com/d2l/proxied.pdf?url=http%2F%2Fd2l.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1&via.secret.headers=SECRET-HEADERS"
+        )
 
     def test_nginx_file_url(self, svc):
         pdf_url = svc.get_pdf_url("http://nginx/document.pdf")

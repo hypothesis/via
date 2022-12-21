@@ -5,7 +5,7 @@ from h_matchers import Any
 from pyramid.httpexceptions import HTTPNoContent
 
 from via.resources import QueryURLResource
-from via.views.view_pdf import proxy_google_drive_file, proxy_onedrive_pdf, view_pdf
+from via.views.view_pdf import proxy_google_drive_file, proxy_python_pdf, view_pdf
 
 
 @pytest.mark.usefixtures(
@@ -102,10 +102,10 @@ class TestProxyGoogleDriveFile:
 
 
 @pytest.mark.usefixtures("secure_link_service", "pdf_url_builder_service")
-class TestProxyOneDrivePDF:
+class TestProxyPythonPDF:
     @pytest.mark.usefixtures("http_service")
     def test_status_and_headers(self, call_view):
-        response = call_view("https://one-drive.com", view=proxy_onedrive_pdf)
+        response = call_view("https://one-drive.com", view=proxy_python_pdf)
 
         assert response.status_code == 200
         assert response.headers["Content-Disposition"] == "inline"
@@ -125,7 +125,7 @@ class TestProxyOneDrivePDF:
 
         http_service.stream.return_value = (count_access(i) for i in range(3))
 
-        response = call_view("https://one-drive.com", view=proxy_onedrive_pdf)
+        response = call_view("https://one-drive.com", view=proxy_python_pdf)
 
         # The first and only the first item has been reified from the generator
         assert count_access.value == 1
@@ -135,7 +135,7 @@ class TestProxyOneDrivePDF:
     def test_it_can_stream_an_empty_iterator(self, http_service, call_view):
         http_service.stream.return_value = iter([])
 
-        response = call_view("https://one-drive.com", view=proxy_onedrive_pdf)
+        response = call_view("https://one-drive.com", view=proxy_python_pdf)
 
         assert isinstance(response, HTTPNoContent)
 

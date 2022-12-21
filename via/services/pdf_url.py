@@ -63,6 +63,8 @@ class PDFURLBuilder:
         re.compile(r"^https://api.onedrive.com/v1.0/.*/root/content"),
     )
 
+    _D2L_URL = (re.compile(r".*\/content\/topics\/\w+\/file\?stream=1$"),)
+
     def get_pdf_url(self, url):
         """Build a signed URL to the corresponding Via route for proxing the PDF at `url`.
 
@@ -73,7 +75,10 @@ class PDFURLBuilder:
             return self._google_file_url(file_details, url)
 
         if self._is_onedrive_url(url):
-            return self._proxy_onedrive_pdf(url)
+            return self._proxy_python_pdf(url, route="proxy_onedrive_pdf")
+
+        if self._is_d2l_url(url):
+            return self._proxy_python_pdf(url, route="proxy_d2l_pdf")
 
         return self.nginx_signer.sign_url(url, nginx_path="/proxy/static/")
 
@@ -81,12 +86,24 @@ class PDFURLBuilder:
     def _is_onedrive_url(cls, url):
         return any(regexp.match(url) for regexp in cls._MS_ONEDRIVE_URL)
 
-    def _proxy_onedrive_pdf(self, url):
+    @classmethod
+    def _is_d2l_url(cls, url):
+        return any(regexp.match(url) for regexp in cls._D2L_URL)
+
+    def _proxy_python_pdf(self, url, route="proxy_python_pdf"):
+        """Return the URL to proxy the pdf in `url` with python instead of nginx.
+
+        Use the generic route `proxy_python_pdf` by default or the one passed as `route` if
+        a different URL is needed (for different caching requirements, stats gathering...)
+        """
+        query_params = {"url": url}
+
+        if headers := self.request.params.get("via.secret.headers"):
+            # Pass headers of the original request back to the PDF endpoint
+            query_params["via.secret.headers"] = headers
+
         url = self.secure_link_service.sign_url(
-            self.route_url(
-                "proxy_onedrive_pdf",
-                _query={"url": url},
-            )
+            self.route_url(route, _query=query_params)
         )
         return url
 
