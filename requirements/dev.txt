@@ -233,7 +233,7 @@ six==1.15.0
     #   paramiko
     #   pynacl
     #   websocket-client
-supervisor==4.2.4
+supervisor==4.2.5
     # via -r requirements/dev.in
 texttable==1.6.3
     # via docker-compose
