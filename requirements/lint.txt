@@ -369,7 +369,7 @@ pip==22.2.1
     # via
     #   -r tests.txt
     #   pip-tools
-setuptools==63.2.0
+setuptools==65.5.1
     # via
     #   -r requirements.txt
     #   -r tests.txt
