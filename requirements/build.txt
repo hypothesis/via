@@ -15,10 +15,10 @@ packaging==21.3
 pep517==0.13.0
     # via build
 pip-sync-faster==0.0.3
-    # via -r requirements/build.in
+    # via -r build.in
 pip-tools==6.12.1
     # via
-    #   -r requirements/build.in
+    #   -r build.in
     #   pip-sync-faster
 pyparsing==3.0.9
     # via packaging
@@ -26,10 +26,10 @@ tomli==2.0.1
     # via
     #   build
     #   pep517
-wheel==0.37.1
+wheel==0.38.1
     # via pip-tools
 whitenoise==6.2.0
-    # via -r requirements/build.in
+    # via -r build.in
 zipp==3.8.1
     # via importlib-metadata
 
