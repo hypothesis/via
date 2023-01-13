@@ -220,7 +220,7 @@ python-jose[cryptography]==3.3.0
     #   h-vialib
 pyyaml==5.4.1
     # via docker-compose
-requests==2.28.1
+requests==2.28.2
     # via
     #   -r requirements/requirements.txt
     #   checkmatelib
