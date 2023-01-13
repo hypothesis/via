@@ -276,7 +276,7 @@ python-jose[cryptography]==3.3.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   h-vialib
-requests==2.28.1
+requests==2.28.2
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
