@@ -50,11 +50,11 @@ factory-boy==3.2.1
     # via -r requirements/tests.in
 faker==5.8.0
     # via factory-boy
-google-auth==2.13.0
+google-auth==2.16.0
     # via
     #   -r requirements/requirements.txt
     #   google-auth-oauthlib
-google-auth-oauthlib==0.7.0
+google-auth-oauthlib==0.8.0
     # via -r requirements/requirements.txt
 gunicorn==20.1.0
     # via -r requirements/requirements.txt

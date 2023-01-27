@@ -22,9 +22,9 @@ cryptography==39.0.0
     # via python-jose
 ecdsa==0.18.0
     # via python-jose
-google-auth==2.13.0
+google-auth==2.16.0
     # via google-auth-oauthlib
-google-auth-oauthlib==0.7.0
+google-auth-oauthlib==0.8.0
     # via -r requirements/requirements.in
 gunicorn==20.1.0
     # via -r requirements/requirements.in
