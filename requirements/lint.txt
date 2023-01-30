@@ -226,7 +226,7 @@ pycparser==2.21
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   cffi
-pydocstyle==6.1.1
+pydocstyle==6.3.0
     # via -r requirements/lint.in
 pylint==2.15.10
     # via -r requirements/lint.in
@@ -318,7 +318,7 @@ six==1.15.0
     #   google-auth
     #   jsonschema
     #   python-dateutil
-snowballstemmer==2.1.0
+snowballstemmer==2.2.0
     # via pydocstyle
 soupsieve==2.1
     # via
