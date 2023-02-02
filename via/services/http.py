@@ -111,7 +111,7 @@ class HTTPService:
         if self._error_translator and (mapped := self._error_translator(err)):
             return mapped
 
-        for (error_class, target_class) in DEFAULT_ERROR_MAP.items():
+        for error_class, target_class in DEFAULT_ERROR_MAP.items():
             if isinstance(err, error_class):
                 return target_class(
                     message=err.args[0] if err.args else None,

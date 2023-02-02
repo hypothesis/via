@@ -29,7 +29,6 @@ class TestStaticContent:
 
     @pytest.mark.usefixtures("checkmate_pass")
     def test_immutable_contents(self, test_app):
-
         salt = self.get_salt(test_app)
 
         response = test_app.get(f"/static/{salt}/favicon.ico")
