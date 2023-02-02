@@ -118,7 +118,6 @@ class GoogleDriveAPI:
                 credentials_list[0], scopes=self.SCOPES
             )
         except ValueError as exc:
-
             raise ConfigurationError(
                 "The Google Drive service account information is invalid"
             ) from exc
