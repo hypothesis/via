@@ -78,7 +78,7 @@ google-auth==2.16.0
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
     #   google-auth-oauthlib
-google-auth-oauthlib==0.8.0
+google-auth-oauthlib==1.0.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
