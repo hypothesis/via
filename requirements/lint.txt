@@ -114,7 +114,7 @@ importlib-metadata==6.0.0
     #   -r requirements/tests.txt
     #   h-vialib
     #   pip-sync-faster
-importlib-resources==5.10.2
+importlib-resources==5.12.0
     # via
     #   -r requirements/requirements.txt
     #   -r requirements/tests.txt
