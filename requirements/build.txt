@@ -28,7 +28,7 @@ tomli==2.0.1
     #   pep517
 wheel==0.38.1
     # via pip-tools
-whitenoise==6.3.0
+whitenoise==6.4.0
     # via -r requirements/build.in
 zipp==3.8.1
     # via importlib-metadata
