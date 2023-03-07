@@ -224,7 +224,7 @@ pycparser==2.21
     #   cffi
 pydocstyle==6.3.0
     # via -r requirements/lint.in
-pylint==2.16.3
+pylint==2.16.4
     # via -r requirements/lint.in
 pyparsing==3.0.7
     # via
