@@ -54,7 +54,7 @@ marshmallow==3.19.0
     # via -r requirements/requirements.in
 netaddr==0.8.0
     # via checkmatelib
-newrelic==8.7.1
+newrelic==8.8.0
     # via -r requirements/requirements.in
 oauthlib==3.2.2
     # via requests-oauthlib
