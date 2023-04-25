@@ -13,13 +13,23 @@ class ViaClientService:
         """Return True if the given MIME type is a PDF one."""
         return mime_type in ("application/x-pdf", "application/pdf")
 
+    @staticmethod
+    def is_video(mime_type):
+        """Return True if the given MIME type is a PDF one."""
+        return mime_type == "video/youtube"
+
     def url_for(self, url, mime_type, params):
         """Return a Via URL for the given `url`."""
-        return self.via_client.url_for(
-            url,
-            content_type="pdf" if self.is_pdf(mime_type) else "html",
-            options=params,
-        )
+
+        # TODO we use regular mimetypes over get_url_details and just switch to strings here for content_type.
+        # I reckon we could include an Enum on ViaClient and use that everywhere instead
+        content_type = "html"
+        if self.is_pdf(mime_type):
+            content_type = "pdf"
+        elif self.is_video(mime_type):
+            content_type = "video"
+
+        return self.via_client.url_for(url, content_type, options=params)
 
 
 def factory(_context, request):
