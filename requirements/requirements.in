@@ -13,3 +13,5 @@ requests
 whitenoise
 google-auth-oauthlib
 marshmallow
+
+youtube-transcript-api
