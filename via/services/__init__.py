@@ -5,6 +5,7 @@ from pathlib import Path
 
 from via.exceptions import ConfigurationError
 from via.services.google_drive import GoogleDriveAPI
+from via.services.youtube import YoutubeAPI
 from via.services.http import HTTPService
 from via.services.pdf_url import PDFURLBuilder
 from via.services.secure_link import SecureLinkService, has_secure_url_token
@@ -18,6 +19,10 @@ def includeme(config):  # pragma: no cover
         create_google_api(config.registry.settings), iface=GoogleDriveAPI
     )
 
+    config.register_service(
+        create_youtube_api(config.registry.settings), iface=YoutubeAPI
+    )
+
     config.register_service_factory(
         "via.services.via_client.factory", iface=ViaClientService
     )
@@ -29,12 +34,23 @@ def includeme(config):  # pragma: no cover
     config.register_service_factory("via.services.pdf_url.factory", iface=PDFURLBuilder)
 
 
+# TODO rename google_drive_api
+# TODO maybe move this to Service.factory like in LMS
 def create_google_api(settings):
     """Create from Pyramid settings."""
 
     return GoogleDriveAPI(
         credentials_list=load_injected_json(settings, "google_drive_credentials.json"),
         resource_keys=load_injected_json(settings, "google_drive_resource_keys.json"),
+    )
+
+
+def create_youtube_api(settings):
+    """Create from Pyramid settings."""
+
+    # Should we reuse credentials between drive and youtube? Maybe we should keep them isolated
+    return YoutubeAPI(
+        credentials_list=load_injected_json(settings, "google_drive_credentials.json"),
     )
 
 
