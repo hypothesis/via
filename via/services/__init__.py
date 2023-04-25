@@ -48,10 +48,7 @@ def create_google_api(settings):
 def create_youtube_api(settings):
     """Create from Pyramid settings."""
 
-    # Should we reuse credentials between drive and youtube? Maybe we should keep them isolated
-    return YoutubeAPI(
-        credentials_list=load_injected_json(settings, "google_drive_credentials.json"),
-    )
+    return YoutubeAPI()
 
 
 def load_injected_json(settings, file_name):
