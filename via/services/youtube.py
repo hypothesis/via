@@ -1,4 +1,5 @@
 # TODO we probably should abstract part of this to GoolgleAPI with the common bits from GoogleDrive
+import re
 from logging import getLogger
 
 from google.oauth2.service_account import Credentials
@@ -30,11 +31,8 @@ class YoutubeAPI:
         return transcript
 
     def _get_transcripts(self, video_id):
-
         # https://github.com/jdepoix/youtube-transcript-api#list-available-transcripts
         transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
-
-        print(transcripts)
 
         return [
             YoutubeTranscript(transcript=transcript, language=transcript.language_code)
@@ -43,5 +41,10 @@ class YoutubeAPI:
 
     @classmethod
     def parse_file_url(cls, public_url):
-        # Actually parse the URLs
-        return public_url.startswith("https://youtube.com")
+        # TODO this needs to accept more formats
+        if match := re.match(
+            r"^https://www.youtube.com/watch\?v=([\w_&]+)$", public_url
+        ):
+            return match.group(1)
+
+        return None

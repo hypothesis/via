@@ -9,14 +9,14 @@ from via.services.secure_link import has_secure_url_token
     renderer="via:templates/video_viewer.html.jinja2",
 )
 def proxy_video(context, request):
+
     youtube_svc = request.find_service(YoutubeAPI)
 
-    # TODO GET from service
-    video_id = "WQn_W8drKmk"
+    video_id = youtube_svc.parse_file_url(context.url_from_query())
+    if not video_id:
+        raise ValueError("Not youtube url we can parse")
 
     transcript = youtube_svc.get_transcript(video_id)
-
-    print([e["start"] for e in transcript])
 
     return {
         "transcript": transcript,
