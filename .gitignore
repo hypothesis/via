@@ -3,6 +3,7 @@
 *.pyc
 *.egg-info/
 via/static/**/*.gz
+build/
 node_modules/
 build.tar
 .devdata*
