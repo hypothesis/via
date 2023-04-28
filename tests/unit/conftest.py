@@ -28,6 +28,7 @@ def patch(request):
 @pytest.fixture
 def pyramid_config(pyramid_settings):
     with testing.testConfig(settings=pyramid_settings) as config:
+        config.include("pyramid_jinja2")
         config.include("pyramid_services")
         add_routes(config)
         yield config
