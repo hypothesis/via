@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <title>Hypothesis Video Player</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="application/json" class="js-config">
+      {
+        "client_config": {{ client_config | tojson }},
+        "client_src": "{{ client_embed_url }}",
+        "video_id": "{{ video_id }}",
+        "transcript": {{ transcript | tojson }}
+      }
+    </script>
+
+    {% for url in asset_urls("video_player_js") %}
+    <script type="module" src="{{ url }}"></script>
+    {% endfor %}
+  </body>
+</html>
