@@ -11,7 +11,44 @@
     "url": "https://github.com/hypothesis/via/issues"
   },
   "dependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.21.4",
+    "@hypothesis/frontend-build": "^1.2.0",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-terser": "^0.4.1",
+    "@rollup/plugin-virtual": "^3.0.1",
+    "autoprefixer": "^10.4.14",
+    "classnames": "^2.3.2",
+    "focus-visible": "^5.2.0",
+    "gulp": "^4.0.2",
+    "postcss": "^8.4.23",
+    "preact": "^10.13.2",
+    "rollup": "^3.21.0",
     "sass": "^1.32.11",
     "terser": "^5.14.2"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "singleQuote": true,
+    "importOrder": [
+      "^[./]"
+    ],
+    "importOrderSeparation": true
+  },
+  "browserslist": "chrome 70, firefox 70, safari 11.1",
+  "scripts": {
+    "build": "gulp build",
+    "checkformatting": "prettier --cache --check via/**/*.{ts,tsx}",
+    "format": "prettier --cache --list-different --write via/**/*.{ts,tsx}",
+    "typecheck": "tsc --build via/static/scripts/tsconfig.json"
   }
 }
