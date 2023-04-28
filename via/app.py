@@ -30,6 +30,12 @@ PARAMETERS = {
 }
 
 
+def configure_jinja2_assets(config):
+    jinja2_env = config.get_jinja2_environment()
+    jinja2_env.globals["asset_url"] = config.registry["assets_env"].url
+    jinja2_env.globals["asset_urls"] = config.registry["assets_env"].urls
+
+
 def load_settings(settings):
     """Load application settings from a dict or environment variables.
 
@@ -65,6 +71,7 @@ def create_app(_=None, **settings):
     config.include("pyramid_services")
     config.include("h_pyramid_sentry")
 
+    config.include("via.assets")
     config.include("via.views")
     config.include("via.services")
 
@@ -83,6 +90,8 @@ def create_app(_=None, **settings):
 
     # Add this as near to the end of your config as possible:
     config.include("pyramid_sanity")
+
+    config.action(None, configure_jinja2_assets, args=(config,))
 
     app = WhiteNoise(
         config.make_wsgi_app(),

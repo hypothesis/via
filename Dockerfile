@@ -1,3 +1,15 @@
+# Stage 1: Build frontend assets
+FROM node:19.8.1-alpine as frontend-build
+
+ENV NODE_ENV production
+COPY .babelrc rollup.config.mjs gulpfile.mjs package.json yarn.lock ./
+COPY via/static ./via/static
+
+RUN yarn install --frozen-lockfile
+RUN yarn build
+
+# Stage 2: Build the rest of the app using build output from Stage 1.
+
 # Unlike most Hypothesis projects this Docker image is based on Debian,
 # so it can use glibc's DNS resolver which supports TCP retries. It can be
 # reverted back to Alpine when Musl v1.2.4 is released.
@@ -23,6 +35,9 @@ COPY requirements/requirements.txt ./
 # Install build deps, build, and then clean up.
 RUN pip install --no-cache-dir -U pip \
   && pip install --no-cache-dir -r requirements.txt
+
+# Copy frontend assets.
+COPY --from=frontend-build /build build
 
 COPY ./conf/supervisord.conf ./conf/supervisord.conf
 COPY ./conf/nginx/nginx.conf /etc/nginx/nginx.conf

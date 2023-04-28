@@ -5,6 +5,7 @@ from via.resources import PathURLResource, QueryURLResource
 def add_routes(config):  # pragma: no cover
     """Add routes to pyramid config."""
 
+    config.add_route("assets", "/assets/*subpath")
     config.add_route("index", "/", factory=QueryURLResource)
     config.add_route("get_status", "/_status")
     config.add_route("view_pdf", "/pdf", factory=QueryURLResource)
