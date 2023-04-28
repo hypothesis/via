@@ -37,8 +37,8 @@ shell: python
 build: python node_modules/.uptodate
 	@tox -qe build
 
-node_modules/.uptodate: package.json package-lock.json
-	npm install
+node_modules/.uptodate: package.json yarn.lock
+	yarn install
 	@touch $@
 
 .PHONY: services
