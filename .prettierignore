@@ -1,2 +1,4 @@
+# Ignore minified JS assets - these should be moved to `build/scripts/` in future.
 via/static/js/
+
 via/static/vendor/
