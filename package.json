@@ -64,6 +64,7 @@
   "scripts": {
     "build": "gulp build",
     "checkformatting": "prettier --cache --check via/**/*.{js,ts,tsx}",
+    "lint": "echo TODO - Linting is not yet set up",
     "format": "prettier --cache --list-different --write via/**/*.{js,ts,tsx}",
     "typecheck": "tsc --build via/static/scripts/tsconfig.json"
   }
