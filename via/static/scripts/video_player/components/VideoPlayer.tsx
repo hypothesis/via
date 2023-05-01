@@ -18,18 +18,13 @@ export type VideoPlayerProps = {
 /**
  * Component that wraps the YouTube video player.
  */
-export default function VideoPlayer({
-  videoId,
-  time,
-  onTimeChanged,
-  onPlayingChanged,
-}: VideoPlayerProps) {
+export default function VideoPlayer({ videoId }: VideoPlayerProps) {
   const encodedId = encodeURIComponent(videoId);
   const playerURL = `https://www.youtube.com/embed/${encodedId}?enablejsapi=1`;
 
   return (
     <div>
-      <iframe src={playerURL} />
+      <iframe title="Video player" src={playerURL} />
     </div>
   );
 }

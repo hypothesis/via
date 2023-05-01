@@ -34,11 +34,19 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.1.0",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
     "babel-plugin-istanbul": "^6.1.1",
     "babel-plugin-mockable-imports": "^2.0.1",
     "chai": "^4.3.7",
     "enzyme": "^3.11.0",
     "enzyme-adapter-preact-pure": "^4.1.0",
+    "eslint": "^8.39.0",
+    "eslint-config-hypothesis": "^2.6.0",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-mocha": "^10.1.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "karma": "^6.4.2",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.2.0",
@@ -64,7 +72,7 @@
   "scripts": {
     "build": "gulp build",
     "checkformatting": "prettier --cache --check via/**/*.{js,ts,tsx}",
-    "lint": "echo TODO - Linting is not yet set up",
+    "lint": "eslint --cache --ignore-pattern build --ignore-pattern 'via/static/js/**' --ignore-pattern 'via/static/vendor/**' .",
     "format": "prettier --cache --list-different --write via/**/*.{js,ts,tsx}",
     "typecheck": "tsc --build via/static/scripts/tsconfig.json"
   }
