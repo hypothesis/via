@@ -54,6 +54,7 @@ export default function Transcript({
     <div>
       {transcript.segments.map((segment, index) => (
         <TranscriptSegment
+          key={index}
           isCurrent={
             currentTime >= segment.time &&
             (index === transcript.segments.length - 1 ||

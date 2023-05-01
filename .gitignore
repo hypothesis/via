@@ -1,5 +1,6 @@
 .coverage*
 coverage/
+.eslintcache
 .tox
 *.pyc
 *.egg-info/
