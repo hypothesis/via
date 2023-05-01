@@ -32,8 +32,24 @@
     "terser": "^5.14.2"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.1.0",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "babel-plugin-istanbul": "^6.1.1",
+    "babel-plugin-mockable-imports": "^2.0.1",
+    "chai": "^4.3.7",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-preact-pure": "^4.1.0",
+    "karma": "^6.4.2",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-coverage-istanbul-reporter": "^3.0.3",
+    "karma-mocha": "^2.0.1",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-sinon": "^1.0.5",
+    "karma-source-map-support": "^1.4.0",
+    "mocha": "^10.2.0",
     "prettier": "^2.8.8",
+    "sinon": "^15.0.4",
     "typescript": "^5.0.4"
   },
   "prettier": {
@@ -47,8 +63,8 @@
   "browserslist": "chrome 70, firefox 70, safari 11.1",
   "scripts": {
     "build": "gulp build",
-    "checkformatting": "prettier --cache --check via/**/*.{ts,tsx}",
-    "format": "prettier --cache --list-different --write via/**/*.{ts,tsx}",
+    "checkformatting": "prettier --cache --check via/**/*.{js,ts,tsx}",
+    "format": "prettier --cache --list-different --write via/**/*.{js,ts,tsx}",
     "typecheck": "tsc --build via/static/scripts/tsconfig.json"
   }
 }

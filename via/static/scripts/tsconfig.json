@@ -16,7 +16,7 @@
   "exclude": [
     // Tests and test infrastructure
     "**/test/*.js",
-    "bootstrap.js",
+    "setup-tests.js",
     "karma.config.js",
     "test-util/*.js"
   ]

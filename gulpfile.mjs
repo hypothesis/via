@@ -54,14 +54,15 @@ gulp.task(
 //
 // Some (eg. a11y) tests rely on CSS bundles. We assume that JS will always take
 // longer to build than CSS, so build in parallel.
-// gulp.task(
-//   'test',
-//   gulp.parallel('build-css', () =>
-//     runTests({
-//       bootstrapFile: 'lms/static/scripts/bootstrap.js',
-//       karmaConfig: 'lms/static/scripts/karma.config.js',
-//       rollupConfig: 'rollup-tests.config.mjs',
-//       testsPattern: 'lms/static/scripts/**/*-test.js',
-//     })
-//   )
-// );
+gulp.task(
+  'test',
+  gulp.parallel(
+    /*'build-css', */ () =>
+      runTests({
+        bootstrapFile: 'via/static/scripts/setup-tests.js',
+        karmaConfig: 'via/static/scripts/karma.config.js',
+        rollupConfig: 'rollup-tests.config.mjs',
+        testsPattern: 'via/static/scripts/**/*-test.js',
+      })
+  )
+);

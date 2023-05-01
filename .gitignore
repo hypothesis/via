@@ -1,4 +1,5 @@
 .coverage*
+coverage/
 .tox
 *.pyc
 *.egg-info/
