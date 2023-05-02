@@ -2,7 +2,7 @@
 FROM node:19.8.1-alpine as frontend-build
 
 ENV NODE_ENV production
-COPY .babelrc rollup.config.mjs gulpfile.mjs package.json yarn.lock ./
+COPY .babelrc rollup.config.mjs gulpfile.mjs package.json tailwind.config.mjs yarn.lock ./
 COPY via/static ./via/static
 
 RUN yarn install --frozen-lockfile
