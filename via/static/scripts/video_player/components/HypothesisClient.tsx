@@ -19,7 +19,9 @@ export default function HypothesisClient({
   const clientConfig = JSON.stringify(config);
   return (
     <>
-      <script className="js-hypothesis-config">{clientConfig}</script>
+      <script type="application/json" className="js-hypothesis-config">
+        {clientConfig}
+      </script>
       <script src={src} />
     </>
   );
