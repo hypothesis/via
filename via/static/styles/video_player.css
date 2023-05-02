@@ -1,0 +1,7 @@
+/*
+CSS entry point for the video player app.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

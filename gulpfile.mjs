@@ -1,5 +1,5 @@
 import {
-  // buildCSS,
+  buildCSS,
   buildJS,
   generateManifest,
   runTests,
@@ -7,48 +7,32 @@ import {
 } from '@hypothesis/frontend-build';
 import gulp from 'gulp';
 
-// import tailwindConfig from './tailwind.config.mjs';
+import tailwindConfig from './tailwind.config.mjs';
 
 gulp.task('build-js', () => buildJS('./rollup.config.mjs'));
 gulp.task('watch-js', () => watchJS('./rollup.config.mjs'));
 
-// gulp.task('build-css', () =>
-//   buildCSS(
-//     [
-//       './lms/static/styles/lms.scss',
-//       './lms/static/styles/frontend_apps.scss',
-//       './lms/static/styles/ui-playground.scss',
-//     ],
-//     { tailwindConfig }
-//   )
-// );
+gulp.task('build-css', () =>
+  buildCSS(['./via/static/styles/video_player.css'], { tailwindConfig })
+);
 
-// gulp.task('watch-css', () => {
-//   gulp.watch(
-//     [
-//       './lms/static/styles/**/*.{css,scss}',
-//       './lms/static/scripts/frontend_apps/**/*.js',
-//       './lms/static/scripts/frontend_apps/**/*.ts',
-//       './lms/static/scripts/frontend_apps/**/*.tsx',
-//       './lms/static/scripts/ui-playground/**/*.js',
-//     ],
-//     { ignoreInitial: false },
-//     gulp.series('build-css')
-//   );
-// });
+gulp.task('watch-css', () => {
+  gulp.watch(
+    [
+      './via/static/styles/**/*.{css,scss}',
+      './via/static/scripts/**/*.{js,ts,tsx}',
+    ],
+    { ignoreInitial: false },
+    gulp.series('build-css')
+  );
+});
 
 gulp.task('watch-manifest', () => {
   gulp.watch('build/**/*.{css,js,map}', generateManifest);
 });
 
-gulp.task(
-  'build',
-  gulp.series(['build-js' /*, 'build-css'*/], generateManifest)
-);
-gulp.task(
-  'watch',
-  gulp.parallel(['watch-js', /* 'watch-css', */ 'watch-manifest'])
-);
+gulp.task('build', gulp.series(['build-js', 'build-css'], generateManifest));
+gulp.task('watch', gulp.parallel(['watch-js', 'watch-css', 'watch-manifest']));
 
 // Unit and integration testing tasks.
 //
@@ -56,13 +40,12 @@ gulp.task(
 // longer to build than CSS, so build in parallel.
 gulp.task(
   'test',
-  gulp.parallel(
-    /*'build-css', */ () =>
-      runTests({
-        bootstrapFile: 'via/static/scripts/setup-tests.js',
-        karmaConfig: 'via/static/scripts/karma.config.js',
-        rollupConfig: 'rollup-tests.config.mjs',
-        testsPattern: 'via/static/scripts/**/*-test.js',
-      })
+  gulp.parallel('build-css', () =>
+    runTests({
+      bootstrapFile: 'via/static/scripts/setup-tests.js',
+      karmaConfig: 'via/static/scripts/karma.config.js',
+      rollupConfig: 'rollup-tests.config.mjs',
+      testsPattern: 'via/static/scripts/**/*-test.js',
+    })
   )
 );
