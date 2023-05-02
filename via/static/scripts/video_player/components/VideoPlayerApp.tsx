@@ -28,7 +28,7 @@ export default function VideoPlayerApp({
   const [timestamp, setTimestamp] = useState(0);
 
   return (
-    <div>
+    <div className="w-full">
       <VideoPlayer
         videoId={videoId}
         time={timestamp}
