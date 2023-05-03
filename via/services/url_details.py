@@ -9,8 +9,9 @@ from via.services.youtube import YoutubeService
 
 
 class URLDetailsService:
-    def __init__(self, http_service: HTTPService):
+    def __init__(self, http_service: HTTPService, youtube_service: YoutubeService):
         self._http = http_service
+        self._youtube = youtube_service
 
     def get_url_details(self, url, headers=None):
         """Get the content type and status code for a given URL.
@@ -29,7 +30,7 @@ class URLDetailsService:
         if GoogleDriveAPI.parse_file_url(url):
             return "application/pdf", 200
 
-        if YoutubeService.parse_url(url):
+        if self._youtube.enabled and self._youtube.parse_url(url):
             return "video/x-youtube", 200
 
         headers = add_request_headers(clean_headers(headers))
@@ -52,4 +53,7 @@ class URLDetailsService:
 
 
 def factory(_context, request):
-    return URLDetailsService(request.find_service(HTTPService))
+    return URLDetailsService(
+        http_service=request.find_service(HTTPService),
+        youtube_service=request.find_service(YoutubeService),
+    )

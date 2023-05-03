@@ -1,4 +1,5 @@
 from h_vialib import Configuration
+from pyramid.httpexceptions import HTTPUnauthorized
 from pyramid.view import view_config
 
 from via.services import YoutubeService
@@ -10,7 +11,12 @@ from via.services import YoutubeService
 )
 def view_video(context, request):
     _, h_config = Configuration.extract_from_params(request.params)
-    video_id = request.find_service(YoutubeService).parse_url(context.url_from_query())
+    youtube_service = request.find_service(YoutubeService)
+
+    if not youtube_service.enabled:
+        return HTTPUnauthorized()
+
+    video_id = youtube_service.parse_url(context.url_from_query())
     request.checkmate.raise_if_blocked(context.url_from_query())
 
     transcript = {

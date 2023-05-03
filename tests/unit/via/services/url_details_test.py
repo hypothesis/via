@@ -73,20 +73,30 @@ class TestGetURLDetails:
         http_service.get.assert_not_called()
 
     def test_it_returns_video_for_youtube_url(
-        self, http_service, YoutubeService, GoogleDriveAPI, svc
+        self, http_service, youtube_service, GoogleDriveAPI, svc
     ):
         GoogleDriveAPI.parse_file_url.return_value = {}
-        YoutubeService.parse_url.return_value = "VIDEO_ID"
+        youtube_service.parse_url.return_value = "VIDEO_ID"
+        youtube_service.enabled = True
 
         result = svc.get_url_details(sentinel.youtube_url)
 
         assert result == ("video/x-youtube", 200)
-        YoutubeService.parse_url.assert_called_once_with(sentinel.youtube_url)
+        youtube_service.parse_url.assert_called_once_with(sentinel.youtube_url)
         http_service.get.assert_not_called()
 
+    @pytest.mark.usefixtures("response")
+    def test_it_when_youtube_disabled(self, youtube_service, GoogleDriveAPI, svc):
+        GoogleDriveAPI.parse_file_url.return_value = {}
+        youtube_service.enabled = False
+
+        svc.get_url_details(sentinel.youtube_url)
+
+        youtube_service.parse_url.assert_not_called()
+
     @pytest.fixture
-    def svc(self, http_service):
-        return URLDetailsService(http_service)
+    def svc(self, http_service, youtube_service):
+        return URLDetailsService(http_service, youtube_service)
 
     @pytest.fixture
     def response(self, http_service):
@@ -102,9 +112,10 @@ class TestGetURLDetails:
     def GoogleDriveAPI(self, patch):
         return patch("via.services.url_details.GoogleDriveAPI", return_value={})
 
-    @pytest.fixture
-    def YoutubeService(self, patch):
-        return patch("via.services.url_details.YoutubeService", return_value=None)
+    @pytest.fixture(autouse=True)
+    def youtube_service(self, youtube_service):
+        youtube_service.enabled = False
+        return youtube_service
 
     @pytest.fixture(autouse=True)
     def add_request_headers(self, patch):
@@ -115,7 +126,7 @@ class TestGetURLDetails:
         return patch("via.services.url_details.clean_headers", return_value={})
 
 
-@pytest.mark.usefixtures("http_service")
+@pytest.mark.usefixtures("http_service", "youtube_service")
 def test_factory(pyramid_request):
     svc = factory(sentinel.context, pyramid_request)
 

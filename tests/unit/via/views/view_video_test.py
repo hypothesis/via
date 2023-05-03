@@ -1,6 +1,7 @@
 from unittest.mock import sentinel
 
 import pytest
+from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.views.view_video import view_video
 
@@ -28,6 +29,13 @@ class TestViewVideo:
         }
         youtube_service.parse_url.assert_called_once_with("https://youtube.com")
         assert response["video_id"] == youtube_service.parse_url.return_value
+
+    def test_it_when_disabled(self, youtube_service, call_view):
+        youtube_service.enabled = False
+
+        response = call_view(view=view_video, url="https://youtube.com")
+
+        assert isinstance(response, HTTPUnauthorized)
 
     @pytest.fixture
     def Configuration(self, patch):
