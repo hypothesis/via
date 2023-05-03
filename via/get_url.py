@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from via.requests_tools.headers import add_request_headers, clean_headers
 from via.services.google_drive import GoogleDriveAPI
+from via.services.youtube import YoutubeService
 
 
 def get_url_details(http_service, url, headers=None):
@@ -23,6 +24,9 @@ def get_url_details(http_service, url, headers=None):
 
     if GoogleDriveAPI.parse_file_url(url):
         return "application/pdf", 200
+
+    if YoutubeService.parse_url(url):
+        return "video/x-youtube", 200
 
     headers = add_request_headers(clean_headers(headers))
 

@@ -71,6 +71,18 @@ class TestGetURLDetails:
         GoogleDriveAPI.parse_file_url.assert_called_once_with(sentinel.google_drive_url)
         http_service.get.assert_not_called()
 
+    def test_it_returns_video_for_youtube_url(
+        self, http_service, YoutubeService, GoogleDriveAPI
+    ):
+        GoogleDriveAPI.parse_file_url.return_value = {}
+        YoutubeService.parse_url.return_value = "VIDEO_ID"
+
+        result = get_url_details(http_service, sentinel.youtube_url)
+
+        assert result == ("video/x-youtube", 200)
+        YoutubeService.parse_url.assert_called_once_with(sentinel.youtube_url)
+        http_service.get.assert_not_called()
+
     @pytest.fixture
     def response(self, http_service):
         response = Response()
@@ -84,6 +96,10 @@ class TestGetURLDetails:
     @pytest.fixture
     def GoogleDriveAPI(self, patch):
         return patch("via.get_url.GoogleDriveAPI", return_value={})
+
+    @pytest.fixture
+    def YoutubeService(self, patch):
+        return patch("via.get_url.YoutubeService", return_value=None)
 
     @pytest.fixture(autouse=True)
     def add_request_headers(self, patch):
