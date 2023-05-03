@@ -19,22 +19,9 @@ def view_video(context, request):
     video_id = youtube_service.parse_url(context.url_from_query())
     request.checkmate.raise_if_blocked(context.url_from_query())
 
-    transcript = {
-        "segments": [
-            {
-                "time": 0,
-                "text": "First segment of transcript",
-            },
-            {
-                "time": 30,
-                "text": "Second segment of transcript",
-            },
-        ],
-    }
-
     return {
         "client_embed_url": request.registry.settings["client_embed_url"],
         "client_config": h_config,
-        "transcript": transcript,
+        "transcript": {"segments": youtube_service.get_transcript(video_id)},
         "video_id": video_id,
     }
