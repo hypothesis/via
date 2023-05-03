@@ -3,8 +3,7 @@
 from pyramid import httpexceptions as exc
 from pyramid import view
 
-from via.get_url import get_url_details
-from via.services import HTTPService, ViaClientService, has_secure_url_token
+from via.services import URLDetailsService, ViaClientService, has_secure_url_token
 
 
 @view.view_config(route_name="route_by_content", decorator=(has_secure_url_token,))
@@ -14,12 +13,13 @@ def route_by_content(context, request):
 
     request.checkmate.raise_if_blocked(url)
 
-    mime_type, status_code = get_url_details(
-        request.find_service(HTTPService), url, request.headers
+    mime_type, status_code = request.find_service(URLDetailsService).get_url_details(
+        url, request.headers
     )
     via_client_svc = request.find_service(ViaClientService)
+    content_type = via_client_svc.content_type(mime_type)
 
-    if via_client_svc.is_pdf(mime_type):
+    if content_type in ["pdf", "video"]:
         caching_headers = _caching_headers(max_age=300)
     else:
         caching_headers = _cache_headers_for_http(status_code)

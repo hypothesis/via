@@ -5,7 +5,7 @@ import pytest
 from h_matchers import Any
 from requests import Response
 
-from via.get_url import get_url_details
+from via.services.url_details import URLDetailsService, factory
 
 
 class TestGetURLDetails:
@@ -26,6 +26,7 @@ class TestGetURLDetails:
         mime_type,
         status_code,
         http_service,
+        svc,
     ):
         if content_type:
             response.headers = {"Content-Type": content_type}
@@ -36,7 +37,7 @@ class TestGetURLDetails:
 
         url = "http://example.com"
 
-        result = get_url_details(http_service, url, headers=sentinel.headers)
+        result = svc.get_url_details(url, headers=sentinel.headers)
 
         assert result == (mime_type, status_code)
         http_service.get.assert_called_once_with(
@@ -50,11 +51,9 @@ class TestGetURLDetails:
 
     @pytest.mark.usefixtures("response")
     def test_it_modifies_headers(
-        self, clean_headers, add_request_headers, http_service
+        self, clean_headers, add_request_headers, http_service, svc
     ):
-        get_url_details(
-            http_service, url="http://example.com", headers={"X-Pre-Existing": 1}
-        )
+        svc.get_url_details(url="http://example.com", headers={"X-Pre-Existing": 1})
 
         _args, kwargs = http_service.get.call_args
 
@@ -62,14 +61,42 @@ class TestGetURLDetails:
         add_request_headers.assert_called_once_with(clean_headers.return_value)
         assert kwargs["headers"] == add_request_headers.return_value
 
-    def test_it_assumes_pdf_with_a_google_drive_url(self, http_service, GoogleDriveAPI):
+    def test_it_assumes_pdf_with_a_google_drive_url(
+        self, http_service, GoogleDriveAPI, svc
+    ):
         GoogleDriveAPI.parse_file_url.return_value = {"file_id": "FILE_ID"}
 
-        result = get_url_details(http_service, sentinel.google_drive_url)
+        result = svc.get_url_details(sentinel.google_drive_url)
 
         assert result == ("application/pdf", 200)
         GoogleDriveAPI.parse_file_url.assert_called_once_with(sentinel.google_drive_url)
         http_service.get.assert_not_called()
+
+    def test_it_returns_video_for_youtube_url(
+        self, http_service, youtube_service, GoogleDriveAPI, svc
+    ):
+        GoogleDriveAPI.parse_file_url.return_value = {}
+        youtube_service.parse_url.return_value = "VIDEO_ID"
+        youtube_service.enabled = True
+
+        result = svc.get_url_details(sentinel.youtube_url)
+
+        assert result == ("video/x-youtube", 200)
+        youtube_service.parse_url.assert_called_once_with(sentinel.youtube_url)
+        http_service.get.assert_not_called()
+
+    @pytest.mark.usefixtures("response")
+    def test_it_when_youtube_disabled(self, youtube_service, GoogleDriveAPI, svc):
+        GoogleDriveAPI.parse_file_url.return_value = {}
+        youtube_service.enabled = False
+
+        svc.get_url_details(sentinel.youtube_url)
+
+        youtube_service.parse_url.assert_not_called()
+
+    @pytest.fixture
+    def svc(self, http_service, youtube_service):
+        return URLDetailsService(http_service, youtube_service)
 
     @pytest.fixture
     def response(self, http_service):
@@ -83,12 +110,24 @@ class TestGetURLDetails:
 
     @pytest.fixture
     def GoogleDriveAPI(self, patch):
-        return patch("via.get_url.GoogleDriveAPI", return_value={})
+        return patch("via.services.url_details.GoogleDriveAPI", return_value={})
+
+    @pytest.fixture(autouse=True)
+    def youtube_service(self, youtube_service):
+        youtube_service.enabled = False
+        return youtube_service
 
     @pytest.fixture(autouse=True)
     def add_request_headers(self, patch):
-        return patch("via.get_url.add_request_headers", return_value={})
+        return patch("via.services.url_details.add_request_headers", return_value={})
 
     @pytest.fixture(autouse=True)
     def clean_headers(self, patch):
-        return patch("via.get_url.clean_headers", return_value={})
+        return patch("via.services.url_details.clean_headers", return_value={})
+
+
+@pytest.mark.usefixtures("http_service", "youtube_service")
+def test_factory(pyramid_request):
+    svc = factory(sentinel.context, pyramid_request)
+
+    assert isinstance(svc, URLDetailsService)

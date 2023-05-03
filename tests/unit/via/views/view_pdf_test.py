@@ -4,7 +4,6 @@ import pytest
 from h_matchers import Any
 from pyramid.httpexceptions import HTTPNoContent
 
-from via.resources import QueryURLResource
 from via.views.view_pdf import proxy_google_drive_file, proxy_python_pdf, view_pdf
 
 
@@ -16,7 +15,7 @@ from via.views.view_pdf import proxy_google_drive_file, proxy_python_pdf, view_p
 )
 class TestViewPDF:
     def test_it(self, call_view, pyramid_request, pyramid_settings, Configuration):
-        response = call_view("http://example.com/foo.pdf")
+        response = call_view("http://example.com/foo.pdf", view=view_pdf)
 
         Configuration.extract_from_params.assert_called_once_with(
             pyramid_request.params
@@ -36,7 +35,7 @@ class TestViewPDF:
     ):
         google_drive_api.parse_file_url.return_value = None
 
-        call_view("https://example.com/foo/bar.pdf?q=s")
+        call_view("https://example.com/foo/bar.pdf?q=s", view=view_pdf)
 
         pdf_url_builder_service.get_pdf_url.assert_called_once_with(
             "https://example.com/foo/bar.pdf?q=s"
@@ -138,13 +137,3 @@ class TestProxyPythonPDF:
         response = call_view("https://one-drive.com", view=proxy_python_pdf)
 
         assert isinstance(response, HTTPNoContent)
-
-
-@pytest.fixture
-def call_view(pyramid_request):
-    def call_view(url="http://example.com/name.pdf", params=None, view=view_pdf):
-        pyramid_request.params = dict(params or {}, url=url)
-        context = QueryURLResource(pyramid_request)
-        return view(context, pyramid_request)
-
-    return call_view
