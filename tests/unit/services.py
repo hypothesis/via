@@ -8,6 +8,7 @@ from via.services import (
     PDFURLBuilder,
     SecureLinkService,
     ViaClientService,
+    YoutubeService,
 )
 
 
@@ -25,6 +26,11 @@ def mock_service(pyramid_config):
 @pytest.fixture
 def via_client_service(mock_service):
     return mock_service(ViaClientService)
+
+
+@pytest.fixture
+def youtube_service(mock_service):
+    return mock_service(YoutubeService)
 
 
 @pytest.fixture
