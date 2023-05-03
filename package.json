@@ -18,6 +18,7 @@
     "@hypothesis/frontend-build": "^1.2.0",
     "@hypothesis/frontend-shared": "^6.1.1",
     "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-replace": "^5.0.2",
     "@rollup/plugin-terser": "^0.4.1",
@@ -34,7 +35,6 @@
     "terser": "^5.14.2"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^24.1.0",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@typescript-eslint/eslint-plugin": "^5.59.1",
     "@typescript-eslint/parser": "^5.59.1",
