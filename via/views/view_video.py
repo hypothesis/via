@@ -1,15 +1,18 @@
 from h_vialib import Configuration
 from pyramid.view import view_config
 
+from via.services import YoutubeService
+
 
 @view_config(
     renderer="via:templates/video_player.html.jinja2",
     route_name="view_video",
 )
-def view_video(request):
+def view_video(context, request):
     _, h_config = Configuration.extract_from_params(request.params)
+    video_id = request.find_service(YoutubeService).parse_url(context.url_from_query())
+    request.checkmate.raise_if_blocked(context.url_from_query())
 
-    video_id = request.matchdict["id"]
     transcript = {
         "segments": [
             {
