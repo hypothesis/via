@@ -1,9 +1,10 @@
+import { Button, Input } from '@hypothesis/frontend-shared';
 import { useState } from 'preact/hooks';
 
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptData } from './Transcript';
-import VideoPlayer from './VideoPlayer';
+import YouTubeVideoPlayer from './YouTubeVideoPlayer';
 
 export type VideoPlayerAppProps = {
   videoId: string;
@@ -24,15 +25,27 @@ export default function VideoPlayerApp({
   clientConfig,
   transcript,
 }: VideoPlayerAppProps) {
-  // Current play time of the video
+  // Current play time of the video, in seconds since the start.
   const [timestamp, setTimestamp] = useState(0);
+  const [playing, setPlaying] = useState(false);
 
   return (
     <div className="w-full">
-      <VideoPlayer
+      <YouTubeVideoPlayer
         videoId={videoId}
+        play={playing}
         time={timestamp}
+        onPlayingChanged={setPlaying}
         onTimeChanged={setTimestamp}
+      />
+      <Button onClick={() => setPlaying(playing => !playing)}>
+        {playing ? 'Pause' : 'Play'}
+      </Button>
+      <Input
+        value={timestamp}
+        onChange={e =>
+          setTimestamp(parseInt((e.target as HTMLInputElement).value))
+        }
       />
       <Transcript transcript={transcript} currentTime={timestamp} />
       <HypothesisClient src={clientSrc} config={clientConfig} />
