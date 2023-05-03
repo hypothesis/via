@@ -13,12 +13,14 @@ def view_video(request):
     transcript = {
         "segments": [
             {
-                "time": 0,
                 "text": "First segment of transcript",
+                "start": 0.12,
+                "duration": 5.219,
             },
             {
-                "time": 30,
                 "text": "Second segment of transcript",
+                "start": 3.0,
+                "duration": 3.48,
             },
         ],
     }
