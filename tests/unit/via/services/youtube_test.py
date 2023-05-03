@@ -22,6 +22,10 @@ class TestYoutubeService:
     def test_parse_file_url(self, url, video_id):
         assert video_id == YoutubeService.parse_url(url)
 
+    @pytest.mark.parametrize("enabled,expected", [(True, True), (False, False)])
+    def test_enabled(self, enabled, expected):
+        assert YoutubeService(enabled).enabled == expected
+
 
 def test_factory(pyramid_request):
     svc = factory(sentinel.context, pyramid_request)

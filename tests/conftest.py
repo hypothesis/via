@@ -17,6 +17,7 @@ def pyramid_settings():
         "checkmate_ignore_reasons": None,
         "checkmate_allow_all": False,
         "enable_front_page": True,
+        "youtube_captions": True,
         "data_directory": "tests/data_directory",
         "dev": False,
     }

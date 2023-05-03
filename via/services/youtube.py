@@ -2,6 +2,13 @@ from urllib.parse import parse_qs, urlparse
 
 
 class YoutubeService:
+    def __init__(self, enabled: bool):
+        self._enabled = enabled
+
+    @property
+    def enabled(self):
+        return self._enabled
+
     @classmethod
     def parse_url(cls, public_url):
         """Get the youtube video ID from an URL."""
@@ -19,5 +26,5 @@ class YoutubeService:
         return query_params["v"][0]
 
 
-def factory(_context, _request):
-    return YoutubeService()
+def factory(_context, request):
+    return YoutubeService(enabled=request.registry.settings["youtube_captions"])
