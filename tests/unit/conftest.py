@@ -7,6 +7,7 @@ from pyramid.request import apply_request_extensions
 
 from tests.unit.services import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from via.checkmate import ViaCheckmateClient
+from via.resources import QueryURLResource
 from via.views import add_routes
 
 
@@ -48,3 +49,13 @@ def pyramid_request(
     pyramid_request.checkmate.check_url.return_value = None
 
     return pyramid_request
+
+
+@pytest.fixture
+def call_view(pyramid_request):
+    def call_view(url="http://example.com/name.pdf", params=None, view=None):
+        pyramid_request.params = dict(params or {}, url=url)
+        context = QueryURLResource(pyramid_request)
+        return view(context, pyramid_request)
+
+    return call_view
