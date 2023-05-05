@@ -1,4 +1,4 @@
-import { Button, Input } from '@hypothesis/frontend-shared';
+import { Button } from '@hypothesis/frontend-shared';
 import { useState } from 'preact/hooks';
 
 import HypothesisClient from './HypothesisClient';
@@ -30,24 +30,32 @@ export default function VideoPlayerApp({
   const [playing, setPlaying] = useState(false);
 
   return (
-    <div className="w-full">
-      <YouTubeVideoPlayer
-        videoId={videoId}
-        play={playing}
-        time={timestamp}
-        onPlayingChanged={setPlaying}
-        onTimeChanged={setTimestamp}
-      />
-      <Button onClick={() => setPlaying(playing => !playing)}>
-        {playing ? 'Pause' : 'Play'}
-      </Button>
-      <Input
-        value={timestamp}
-        onChange={e =>
-          setTimestamp(parseInt((e.target as HTMLInputElement).value))
-        }
-      />
-      <Transcript transcript={transcript} currentTime={timestamp} />
+    <div className="w-full flex flex-row m-2">
+      <div className="mr-2">
+        <YouTubeVideoPlayer
+          videoId={videoId}
+          play={playing}
+          time={timestamp}
+          onPlayingChanged={setPlaying}
+          onTimeChanged={setTimestamp}
+        />
+      </div>
+      <div className="w-2/5 h-[80vh] bg-grey-0 border border-grey-3">
+        <div className="p-1 bg-grey-1 border-b border-grey-3">
+          <Button
+            classes="text-xl"
+            onClick={() => setPlaying(playing => !playing)}
+            data-testid="play-button"
+          >
+            {playing ? '⏸' : '⏵'}
+          </Button>
+        </div>
+        <Transcript
+          transcript={transcript}
+          currentTime={timestamp}
+          onSelectSegment={segment => setTimestamp(segment.time)}
+        />
+      </div>
       <HypothesisClient src={clientSrc} config={clientConfig} />
     </div>
   );
