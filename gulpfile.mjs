@@ -1,3 +1,5 @@
+import { mkdirSync } from 'fs';
+
 import {
   buildCSS,
   buildJS,
@@ -28,6 +30,8 @@ gulp.task('watch-css', () => {
 });
 
 gulp.task('watch-manifest', () => {
+  // Ensure build dir exists, otherwise `gulp.watch` may not work.
+  mkdirSync('build', { recursive: true });
   gulp.watch('build/**/*.{css,js,map}', generateManifest);
 });
 
