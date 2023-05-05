@@ -70,6 +70,8 @@ export default function YouTubeVideoPlayer({
   const [loadError, setLoadError] = useState(null);
   const encodedId = encodeURIComponent(videoId);
   const encodedOrigin = encodeURIComponent(window.origin);
+
+  // See https://developers.google.com/youtube/player_parameters#Manual_IFrame_Embeds
   const playerURL = `https://www.youtube.com/embed/${encodedId}?enablejsapi=1&origin=${encodedOrigin}`;
 
   const playerController = useRef<YT.Player>();
