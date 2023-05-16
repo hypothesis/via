@@ -66,7 +66,7 @@ function TranscriptSegment({
       data-is-current={isCurrent}
       data-testid="segment"
     >
-      <button className="pr-5 hover:underline" onClick={() => onSelect()}>
+      <button className="pr-5 hover:underline" onClick={onSelect}>
         {formatTimestamp(time)}
       </button>
       <p className="basis-64 grow" data-testid="transcript-text">
