@@ -59,11 +59,10 @@ function TranscriptSegment({
 }: TranscriptSegmentProps) {
   return (
     <li
-      className={classnames(
-        'flex flex-row p-1 hover:text-black',
-        isCurrent && 'bg-grey-2',
-        !isCurrent && 'text-grey-6'
-      )}
+      className={classnames('flex flex-row p-1 hover:text-black', {
+        'bg-grey-2': isCurrent,
+        'text-grey-6': !isCurrent,
+      })}
       data-is-current={isCurrent}
       data-testid="segment"
     >
