@@ -1,9 +1,9 @@
 import { Button } from '@hypothesis/frontend-shared';
-import { useState } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
-import type { TranscriptData } from './Transcript';
+import type { TranscriptControls, TranscriptData } from './Transcript';
 import YouTubeVideoPlayer from './YouTubeVideoPlayer';
 
 export type VideoPlayerAppProps = {
@@ -28,6 +28,7 @@ export default function VideoPlayerApp({
   // Current play time of the video, in seconds since the start.
   const [timestamp, setTimestamp] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const transcriptControls = useRef<TranscriptControls | null>(null);
 
   return (
     <div className="w-full flex flex-row m-2">
@@ -41,7 +42,7 @@ export default function VideoPlayerApp({
         />
       </div>
       <div className="w-2/5 h-[80vh] bg-grey-0 border border-grey-3">
-        <div className="p-1 bg-grey-1 border-b border-grey-3">
+        <div className="p-1 bg-grey-1 border-b border-grey-3 flex flex-row">
           <Button
             classes="text-xl"
             onClick={() => setPlaying(playing => !playing)}
@@ -49,9 +50,16 @@ export default function VideoPlayerApp({
           >
             {playing ? '⏸' : '⏵'}
           </Button>
+          <Button
+            onClick={() => transcriptControls.current!.scrollToCurrentSegment()}
+            data-testid="sync-button"
+          >
+            Sync
+          </Button>
         </div>
         <Transcript
           transcript={transcript}
+          controlsRef={transcriptControls}
           currentTime={timestamp}
           onSelectSegment={segment => setTimestamp(segment.time)}
         />
