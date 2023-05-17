@@ -10,7 +10,7 @@ describe('loadYouTubeIFrameAPI', () => {
       ready: callback => setTimeout(() => callback(), 0),
       Player: sinon.stub(),
     };
-    return window.PT;
+    return window.YT;
   }
 
   it('adds YouTube IFrame API script to page', async () => {
