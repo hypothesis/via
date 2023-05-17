@@ -103,4 +103,26 @@ describe('Transcript', () => {
       wrapper.unmount();
     }
   });
+
+  it("scrolls transcript when controller's `scrollToCurrentSegment` method is called", () => {
+    const controlsRef = { current: null };
+    const wrapper = mount(
+      <Transcript
+        controlsRef={controlsRef}
+        transcript={transcript}
+        currentTime={5}
+      />
+    );
+    const scrollContainer = wrapper.find('div[data-testid="scroll-container"]');
+    const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
+
+    assert.ok(controlsRef.current);
+    controlsRef.current.scrollToCurrentSegment();
+
+    assert.calledWith(scrollTo, {
+      left: 0,
+      top: 0,
+      behavior: 'smooth',
+    });
+  });
 });

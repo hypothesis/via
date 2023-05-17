@@ -4,7 +4,13 @@ import {
   ScrollContent,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import { useEffect, useRef } from 'preact/hooks';
+import type { Ref } from 'preact';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'preact/hooks';
 
 import { formatTimestamp } from '../utils/time';
 
@@ -29,12 +35,33 @@ export type TranscriptData = {
   segments: Segment[];
 };
 
+/**
+ * Interface for interacting with the transcript view, beyond what is available
+ * by setting props.
+ */
+export type TranscriptControls = {
+  /**
+   * Scroll the view so the segment corresponding to {@link TranscriptProps.currentTime}
+   * is visible.
+   */
+  scrollToCurrentSegment: () => void;
+};
+
 export type TranscriptProps = {
   transcript: TranscriptData;
 
   /**
+   * Ref that is set to a controller for the transcript component after it
+   * mounts.
+   */
+  controlsRef?: Ref<TranscriptControls>;
+
+  /**
    * The current timestamp of the video player, as an offset in seconds from
    * the start of the video.
+   *
+   * When the current time's associated transcript segment changes, the new
+   * segment will automatically be scrolled into view.
    */
   currentTime: number;
 
@@ -91,6 +118,7 @@ function offsetRelativeTo(element: HTMLElement, parent: HTMLElement): number {
 }
 
 export default function Transcript({
+  controlsRef,
   currentTime,
   onSelectSegment,
   transcript,
@@ -104,7 +132,7 @@ export default function Transcript({
         currentTime < transcript.segments[index + 1].time)
   );
 
-  useEffect(() => {
+  const scrollToCurrentSegment = useCallback(() => {
     const scrollContainer = scrollRef.current!;
     const currentSegment = scrollContainer.querySelector(
       '[data-is-current=true]'
@@ -145,7 +173,19 @@ export default function Transcript({
       top: scrollTarget,
       behavior: 'smooth',
     });
-  }, [currentIndex, transcript]);
+  }, []);
+
+  useEffect(() => {
+    scrollToCurrentSegment();
+  }, [currentIndex, transcript, scrollToCurrentSegment]);
+
+  useImperativeHandle(
+    controlsRef || { current: null },
+    () => ({
+      scrollToCurrentSegment,
+    }),
+    [scrollToCurrentSegment]
+  );
 
   return (
     <ScrollContainer borderless>

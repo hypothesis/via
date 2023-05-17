@@ -100,4 +100,22 @@ describe('VideoPlayerApp', () => {
     const player = wrapper.find('YouTubeVideoPlayer');
     assert.equal(player.prop('time'), transcriptData.segments[1].time);
   });
+
+  it('scrolls current transcript segment into view when "Sync" button is clicked', () => {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+      />
+    );
+    const transcriptController = wrapper.find('Transcript').prop('controlsRef');
+    assert.ok(transcriptController.current);
+    sinon.spy(transcriptController.current, 'scrollToCurrentSegment');
+
+    wrapper.find('button[data-testid="sync-button"]').simulate('click');
+
+    assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
+  });
 });
