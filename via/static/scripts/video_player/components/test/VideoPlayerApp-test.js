@@ -1,7 +1,9 @@
 import { mount } from 'enzyme';
+import { useImperativeHandle } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 
-import VideoPlayerApp from '../VideoPlayerApp';
+import { mockImportedComponents } from '../../../test-util/mock-imported-components';
+import VideoPlayerApp, { $imports } from '../VideoPlayerApp';
 
 describe('VideoPlayerApp', () => {
   const transcriptData = {
@@ -16,6 +18,29 @@ describe('VideoPlayerApp', () => {
       },
     ],
   };
+
+  function FakeTranscript({ controlsRef }) {
+    useImperativeHandle(
+      controlsRef,
+      () => ({
+        scrollToCurrentSegment: sinon.stub(),
+      }),
+      []
+    );
+    return <div />;
+  }
+  FakeTranscript.displayName = 'Transcript';
+
+  beforeEach(() => {
+    $imports.$mock(mockImportedComponents());
+    $imports.$mock({
+      './Transcript': FakeTranscript,
+    });
+  });
+
+  afterEach(() => {
+    $imports.$restore();
+  });
 
   it('plays and pauses video', () => {
     const wrapper = mount(
@@ -112,7 +137,6 @@ describe('VideoPlayerApp', () => {
     );
     const transcriptController = wrapper.find('Transcript').prop('controlsRef');
     assert.ok(transcriptController.current);
-    sinon.spy(transcriptController.current, 'scrollToCurrentSegment');
 
     wrapper.find('button[data-testid="sync-button"]').simulate('click');
 
