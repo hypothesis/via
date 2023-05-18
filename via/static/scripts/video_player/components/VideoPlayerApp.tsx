@@ -41,7 +41,7 @@ export default function VideoPlayerApp({
           onTimeChanged={setTimestamp}
         />
       </div>
-      <div className="w-2/5 h-[80vh] flex flex-col bg-grey-0 border">
+      <div className="w-2/5 h-[90vh] flex flex-col bg-grey-0 border">
         <div className="p-1 bg-grey-1 border-b flex flex-row">
           <Button
             classes="text-xl"
