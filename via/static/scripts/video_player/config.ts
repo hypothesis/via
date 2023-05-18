@@ -1,4 +1,4 @@
-import type { TranscriptData } from './components/Transcript';
+import type { TranscriptData } from './utils/transcript';
 
 export type ConfigObject = {
   /** ID of the YouTube video to load. */

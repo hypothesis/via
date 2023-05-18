@@ -3,9 +3,10 @@ import { render } from 'preact';
 // Enable debugging checks and devtools. Removed in prod builds by Rollup config.
 import 'preact/debug';
 
-import type { TranscriptData } from './components/Transcript';
 import VideoPlayerApp from './components/VideoPlayerApp';
 import { readConfig } from './config';
+import { sampleTranscript } from './sample-transcript';
+import type { TranscriptData } from './utils/transcript';
 
 export function init() {
   const rootEl = document.querySelector('#app');
@@ -23,15 +24,9 @@ export function init() {
     video_id: videoId,
   } = readConfig();
 
-  // Generate fake transcript for testing.
-  const transcript: TranscriptData = { segments: [] };
-  for (let i = 0; i < 20; i++) {
-    transcript.segments.push({
-      isCurrent: false,
-      time: i * 15,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    });
-  }
+  // Pre-fetched transcript for testing. Use the video ID
+  // https://www.youtube.com/watch?v=x8TO-nrUtSI.
+  const transcript: TranscriptData = { segments: sampleTranscript };
 
   render(
     <VideoPlayerApp

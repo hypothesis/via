@@ -1,9 +1,10 @@
 import { Button } from '@hypothesis/frontend-shared';
 import { useRef, useState } from 'preact/hooks';
 
+import type { TranscriptData } from '../utils/transcript';
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
-import type { TranscriptControls, TranscriptData } from './Transcript';
+import type { TranscriptControls } from './Transcript';
 import YouTubeVideoPlayer from './YouTubeVideoPlayer';
 
 export type VideoPlayerAppProps = {
@@ -61,7 +62,7 @@ export default function VideoPlayerApp({
           transcript={transcript}
           controlsRef={transcriptControls}
           currentTime={timestamp}
-          onSelectSegment={segment => setTimestamp(segment.time)}
+          onSelectSegment={segment => setTimestamp(segment.start)}
         />
       </div>
       <HypothesisClient src={clientSrc} config={clientConfig} />

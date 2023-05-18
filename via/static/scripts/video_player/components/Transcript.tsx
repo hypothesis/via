@@ -13,27 +13,7 @@ import {
 } from 'preact/hooks';
 
 import { formatTimestamp } from '../utils/time';
-
-export type Segment = {
-  /**
-   * True if this segment corresponds to the section of the video that is
-   * currently playing.
-   */
-  isCurrent: boolean;
-
-  /**
-   * Time at which this segment starts, as an offset in seconds from the start
-   * of the video.
-   */
-  time: number;
-
-  /** Text of this part of the video. */
-  text: string;
-};
-
-export type TranscriptData = {
-  segments: Segment[];
-};
+import type { Segment, TranscriptData } from '../utils/transcript';
 
 /**
  * Interface for interacting with the transcript view, beyond what is available
@@ -127,9 +107,9 @@ export default function Transcript({
 
   const currentIndex = transcript.segments.findIndex(
     (segment, index) =>
-      currentTime >= segment.time &&
+      currentTime >= segment.start &&
       (index === transcript.segments.length - 1 ||
-        currentTime < transcript.segments[index + 1].time)
+        currentTime < transcript.segments[index + 1].start)
   );
 
   const scrollToCurrentSegment = useCallback(() => {
@@ -204,7 +184,7 @@ export default function Transcript({
                 key={index}
                 isCurrent={index === currentIndex}
                 onSelect={() => onSelectSegment?.(segment)}
-                time={segment.time}
+                time={segment.start}
                 text={segment.text}
               />
             ))}
