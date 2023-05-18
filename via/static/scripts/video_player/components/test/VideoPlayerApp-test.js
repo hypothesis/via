@@ -9,11 +9,11 @@ describe('VideoPlayerApp', () => {
   const transcriptData = {
     segments: [
       {
-        time: 0,
+        start: 0,
         text: 'Hello',
       },
       {
-        time: 5,
+        start: 5,
         text: 'World',
       },
     ],
@@ -123,7 +123,7 @@ describe('VideoPlayerApp', () => {
     wrapper.update();
 
     const player = wrapper.find('YouTubeVideoPlayer');
-    assert.equal(player.prop('time'), transcriptData.segments[1].time);
+    assert.equal(player.prop('time'), transcriptData.segments[1].start);
   });
 
   it('scrolls current transcript segment into view when "Sync" button is clicked', () => {

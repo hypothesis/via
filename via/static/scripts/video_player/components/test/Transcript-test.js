@@ -6,15 +6,15 @@ describe('Transcript', () => {
   const transcript = {
     segments: [
       {
-        time: 5,
+        start: 5,
         text: 'Hello and welcome',
       },
       {
-        time: 10,
+        start: 10,
         text: 'To this video about',
       },
       {
-        time: 20,
+        start: 20,
         text: 'how to use Hypothesis',
       },
     ],
