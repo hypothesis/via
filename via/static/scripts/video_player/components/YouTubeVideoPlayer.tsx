@@ -92,6 +92,8 @@ export default function YouTubeVideoPlayer({
 
   const playerController = useRef<YT.Player>();
 
+  // Capture last-seen values of props so we can invoke callbacks without
+  // re-running effects when they change.
   const onPlayingChangedCallback = useRef<(playing: boolean) => void>();
   onPlayingChangedCallback.current = onPlayingChanged;
 
