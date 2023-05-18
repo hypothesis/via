@@ -1,3 +1,4 @@
+/* global Highlight */
 import { mount } from 'enzyme';
 
 import Transcript from '../Transcript';
@@ -125,4 +126,69 @@ describe('Transcript', () => {
       behavior: 'smooth',
     });
   });
+
+  it('does not hide segments when there is no filter', () => {
+    const wrapper = mount(
+      <Transcript transcript={transcript} currentTime={0} />
+    );
+    const segments = wrapper.find('li[data-testid="segment"]');
+    assert.equal(segments.length, 3);
+    segments.forEach(s => assert.isFalse(s.hasClass('hidden')));
+  });
+
+  it('hides segments that do not match current filter', () => {
+    const wrapper = mount(
+      <Transcript transcript={transcript} currentTime={5} filter="video" />
+    );
+    const segments = wrapper.find('li[data-testid="segment"]');
+
+    // First segment is not hidden because it matches the current time.
+    assert.isFalse(segments.at(0).hasClass('hidden'));
+
+    // Second segment is not hidden because it matches the filter.
+    assert.isFalse(segments.at(1).hasClass('hidden'));
+
+    // Third segment is hidden because it does not match the filter.
+    assert.isTrue(segments.at(2).hasClass('hidden'));
+  });
+
+  if (typeof Highlight === 'function') {
+    it('registers and unregisters custom highlight', () => {
+      sinon.stub(CSS.highlights, 'set');
+      sinon.stub(CSS.highlights, 'delete');
+
+      try {
+        const wrapper = mount(
+          <Transcript transcript={transcript} currentTime={5} filter="video" />
+        );
+        assert.calledWith(
+          CSS.highlights.set,
+          'transcript-filter-match',
+          sinon.match.instanceOf(Highlight)
+        );
+
+        wrapper.unmount();
+
+        assert.calledOnce(CSS.highlights.delete);
+        assert.calledWith(CSS.highlights.delete, 'transcript-filter-match');
+      } finally {
+        CSS.highlights.set.restore();
+        CSS.highlights.delete.restore();
+      }
+    });
+
+    it("works in browsers that don't support CSS Custom Highlights", () => {
+      const highlightStub = sinon
+        .stub(window, 'Highlight')
+        .get(() => undefined);
+      try {
+        const wrapper = mount(
+          <Transcript transcript={transcript} currentTime={5} filter="video" />
+        );
+        wrapper.unmount();
+      } finally {
+        highlightStub.restore();
+      }
+    });
+  }
 });
