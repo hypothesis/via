@@ -9,11 +9,13 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
 } from 'preact/hooks';
 
 import { formatTimestamp } from '../utils/time';
-import type { Segment, TranscriptData } from '../utils/transcript';
+import type { MatchOffset, Segment, TranscriptData } from '../utils/transcript';
+import { filterTranscript } from '../utils/transcript';
 
 /**
  * Interface for interacting with the transcript view, beyond what is available
@@ -45,6 +47,9 @@ export type TranscriptProps = {
    */
   currentTime: number;
 
+  /** Query string to filter the transcript. */
+  filter?: string;
+
   /**
    * Callback invoked when the user selects a segment from the transcript.
    */
@@ -52,6 +57,23 @@ export type TranscriptProps = {
 };
 
 type TranscriptSegmentProps = {
+  /**
+   * Mark the segment as hidden.
+   *
+   * When segments do not match the current filter, we continue to render
+   * them but hidden with CSS. This avoids losing highlights created by the
+   * Hypothesis client.
+   */
+  hidden?: boolean;
+
+  /**
+   * CSS highlight used to highlight spans of text specified by {@link matches}.
+   */
+  highlight?: Highlight;
+
+  /** Offsets within the segment text to highlight. */
+  matches?: MatchOffset[];
+
   isCurrent: boolean;
   onSelect: () => void;
   time: number;
@@ -59,16 +81,49 @@ type TranscriptSegmentProps = {
 };
 
 function TranscriptSegment({
+  hidden = false,
+  highlight,
+  matches,
   isCurrent,
   onSelect,
   time,
   text,
 }: TranscriptSegmentProps) {
+  const contentRef = useRef<HTMLParagraphElement>(null);
+
+  // Highlight the text within the segment that matches the current filter
+  // query.
+  useEffect(() => {
+    if (!highlight || !matches) {
+      return () => {};
+    }
+
+    const ranges = matches.map(({ start, end }) => {
+      const textNode = contentRef.current!.childNodes[0];
+      const range = new Range();
+
+      // FIXME - If the Hypothesis client has inserted highlights, these will
+      // break up the single text node child into multiple children.
+      if (textNode instanceof Text && textNode.length >= end) {
+        range.setStart(contentRef.current!.childNodes[0], start);
+        range.setEnd(contentRef.current!.childNodes[0], end);
+      }
+
+      return range;
+    });
+    ranges.forEach(r => highlight.add(r));
+
+    return () => {
+      ranges.forEach(r => highlight.delete(r));
+    };
+  }, [highlight, matches]);
+
   return (
     <li
       className={classnames('flex flex-row p-1 hover:text-black', {
         'bg-grey-2': isCurrent,
         'text-grey-6': !isCurrent,
+        hidden,
       })}
       data-is-current={isCurrent}
       data-testid="segment"
@@ -76,7 +131,11 @@ function TranscriptSegment({
       <button className="pr-5 hover:underline" onClick={onSelect}>
         {formatTimestamp(time)}
       </button>
-      <p className="basis-64 grow" data-testid="transcript-text">
+      <p
+        className="basis-64 grow"
+        data-testid="transcript-text"
+        ref={contentRef}
+      >
         {text}
       </p>
     </li>
@@ -100,6 +159,7 @@ function offsetRelativeTo(element: HTMLElement, parent: HTMLElement): number {
 export default function Transcript({
   controlsRef,
   currentTime,
+  filter = '',
   onSelectSegment,
   transcript,
 }: TranscriptProps) {
@@ -167,6 +227,38 @@ export default function Transcript({
     [scrollToCurrentSegment]
   );
 
+  // Use CSS highlights to highlight text in segments that matches the current
+  // filter query.
+  const highlight = useMemo(() => {
+    if (typeof Highlight !== 'function') {
+      return undefined;
+    }
+    return new Highlight();
+  }, []);
+
+  useEffect(() => {
+    if (!highlight) {
+      return () => {};
+    }
+
+    // nb. This assumes there is only one `Transcript` component mounted
+    // at a time.
+    CSS.highlights.set('transcript-filter-match', highlight);
+    return () => {
+      CSS.highlights.delete('transcript-filter-match');
+    };
+  }, [highlight]);
+
+  const filterMatches = useMemo(() => {
+    // Ignore filter unless it is at least 2 chars long. Single-char filters
+    // are ignored to delay filtering until user has typed enough chars to
+    // usefully filter the transcript.
+    if (filter.length < 2) {
+      return null;
+    }
+    return filterTranscript(transcript.segments, filter);
+  }, [filter, transcript]);
+
   return (
     <ScrollContainer borderless>
       <Scroll
@@ -182,7 +274,14 @@ export default function Transcript({
             {transcript.segments.map((segment, index) => (
               <TranscriptSegment
                 key={index}
+                hidden={
+                  filterMatches
+                    ? !filterMatches.has(index) && index !== currentIndex
+                    : false
+                }
+                highlight={highlight}
                 isCurrent={index === currentIndex}
+                matches={filterMatches?.get(index)}
                 onSelect={() => onSelectSegment?.(segment)}
                 time={segment.start}
                 text={segment.text}

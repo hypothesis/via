@@ -1,4 +1,4 @@
-import { Button } from '@hypothesis/frontend-shared';
+import { Button, Input } from '@hypothesis/frontend-shared';
 import { useRef, useState } from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
@@ -31,6 +31,8 @@ export default function VideoPlayerApp({
   const [playing, setPlaying] = useState(false);
   const transcriptControls = useRef<TranscriptControls | null>(null);
 
+  const [filter, setFilter] = useState('');
+
   return (
     <div className="w-full flex flex-row m-2">
       <div className="mr-2">
@@ -57,11 +59,21 @@ export default function VideoPlayerApp({
           >
             Sync
           </Button>
+          <div className="flex-grow" />
+          <Input
+            aria-label="Filter transcript"
+            data-testid="filter-input"
+            onInput={e =>
+              setFilter((e.target as HTMLInputElement).value.trim())
+            }
+            placeholder="Search..."
+          />
         </div>
         <Transcript
           transcript={transcript}
           controlsRef={transcriptControls}
           currentTime={timestamp}
+          filter={filter}
           onSelectSegment={segment => setTimestamp(segment.start)}
         />
       </div>

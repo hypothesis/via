@@ -142,4 +142,22 @@ describe('VideoPlayerApp', () => {
 
     assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
   });
+
+  it('filters transcript when typing in search field', () => {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+      />
+    );
+    const input = wrapper.find('input[data-testid="filter-input"]');
+
+    input.getDOMNode().value = 'foobar';
+    input.simulate('input');
+
+    const transcript = wrapper.find('Transcript');
+    assert.equal(transcript.prop('filter'), 'foobar');
+  });
 });
