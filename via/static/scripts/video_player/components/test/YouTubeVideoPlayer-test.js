@@ -69,6 +69,19 @@ describe('YouTubeVideoPlayer', () => {
     events.onStateChange({ data: state });
   }
 
+  /**
+   * Simulate the video time changing as a result of the video playing or
+   * the user seeking the video.
+   *
+   * See https://issuetracker.google.com/issues/283097094.
+   *
+   * @param {number} timestamp
+   */
+  function emitPlayerProgressChange(timestamp) {
+    const { events } = fakeYT.Player.args[0][1];
+    events.onVideoProgress({ data: timestamp });
+  }
+
   it('creates video player iframe', () => {
     const wrapper = mount(<YouTubeVideoPlayer videoId="abcdef" />);
     const iframe = wrapper.find('iframe');
@@ -128,24 +141,18 @@ describe('YouTubeVideoPlayer', () => {
     assert.calledWith(onPlayingChanged, false);
   });
 
-  it('calls `onTimeChanged` callback every second when playing', async () => {
+  it('calls `onTimeChanged` callback when video progress changes', async () => {
     const onTimeChanged = sinon.stub();
     mount(
       <YouTubeVideoPlayer videoId="abcdef" onTimeChanged={onTimeChanged} />
     );
     await initPlayer();
 
-    fakePlayer.getCurrentTime.returns(30);
-    clock.tick(1000);
+    emitPlayerProgressChange(30);
     assert.calledWith(onTimeChanged, 30);
 
-    onTimeChanged.resetHistory();
-    clock.tick(500);
-    assert.notCalled(onTimeChanged);
-
-    fakePlayer.getCurrentTime.returns(35);
-    clock.tick(1000);
-    assert.calledWith(onTimeChanged, 35);
+    emitPlayerProgressChange(40);
+    assert.calledWith(onTimeChanged, 40);
   });
 
   it('does not attempt to report play time if `onTimeChanged` not passed', async () => {

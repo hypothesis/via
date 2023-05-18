@@ -56,6 +56,22 @@ function isPlaying(state: YT.PlayerState) {
 }
 
 /**
+ * Additional events that the YouTube player supports, which are missing from
+ * {@link YT.Events}.
+ */
+interface PlayerEvents extends YT.Events {
+  /**
+   * Undocumented event that is emitted when the video progress changes,
+   * either as a result of the video playing or the user seeking the video.
+   *
+   * The `data` payload is the current timestamp of the video.
+   *
+   * See https://issuetracker.google.com/issues/283097094
+   */
+  onVideoProgress: (event: { data: number }) => void;
+}
+
+/**
  * Component that wraps the YouTube video player.
  *
  * See https://developers.google.com/youtube/iframe_api_reference.
@@ -78,6 +94,9 @@ export default function YouTubeVideoPlayer({
 
   const onPlayingChangedCallback = useRef<(playing: boolean) => void>();
   onPlayingChangedCallback.current = onPlayingChanged;
+
+  const onTimeChangedCallback = useRef<(timestamp: number) => void>();
+  onTimeChangedCallback.current = onTimeChanged;
 
   const videoFrame = useRef(null);
 
@@ -104,7 +123,11 @@ export default function YouTubeVideoPlayer({
               }
               onPlayingChangedCallback.current?.(isPlaying(event.data));
             },
-          },
+
+            onVideoProgress: event => {
+              onTimeChangedCallback.current?.(event.data);
+            },
+          } as PlayerEvents,
         });
       })
       .catch(err => {
@@ -139,23 +162,6 @@ export default function YouTubeVideoPlayer({
     }
     player.seekTo(time, true /* allowSeekahead */);
   }, [time]);
-
-  // Report current video position periodically.
-  useEffect(() => {
-    if (!play) {
-      return () => {};
-    }
-    const poller = setInterval(() => {
-      const player = playerController.current;
-      if (!player || !onTimeChanged) {
-        return;
-      }
-      onTimeChanged(Math.round(player.getCurrentTime()));
-    }, 1000);
-    return () => {
-      clearInterval(poller);
-    };
-  }, [onTimeChanged, play]);
 
   return (
     <div>
