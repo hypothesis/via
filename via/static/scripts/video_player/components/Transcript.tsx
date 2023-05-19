@@ -105,8 +105,8 @@ function TranscriptSegment({
       // FIXME - If the Hypothesis client has inserted highlights, these will
       // break up the single text node child into multiple children.
       if (textNode instanceof Text && textNode.length >= end) {
-        range.setStart(contentRef.current!.childNodes[0], start);
-        range.setEnd(contentRef.current!.childNodes[0], end);
+        range.setStart(textNode, start);
+        range.setEnd(textNode, end);
       }
 
       return range;
