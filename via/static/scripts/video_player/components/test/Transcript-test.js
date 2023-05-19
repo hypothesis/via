@@ -28,13 +28,13 @@ describe('Transcript', () => {
     const segments = wrapper.find('[data-testid="segment"]');
     assert.equal(segments.length, 3);
 
-    assert.equal(segments.at(0).text(), '0:05Hello and welcome');
+    assert.equal(segments.at(0).text(), 'Hello and welcome ');
     assert.isTrue(segments.at(0).prop('data-is-current'));
 
-    assert.equal(segments.at(1).text(), '0:10To this video about');
+    assert.equal(segments.at(1).text(), 'To this video about ');
     assert.isFalse(segments.at(1).prop('data-is-current'));
 
-    assert.equal(segments.at(2).text(), '0:20how to use Hypothesis');
+    assert.equal(segments.at(2).text(), 'how to use Hypothesis ');
     assert.isFalse(segments.at(2).prop('data-is-current'));
   });
 

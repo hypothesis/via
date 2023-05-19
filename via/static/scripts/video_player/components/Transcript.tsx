@@ -118,6 +118,8 @@ function TranscriptSegment({
     };
   }, [highlight, matches]);
 
+  const timestamp = formatTimestamp(time);
+
   return (
     <li
       className={classnames('flex flex-row p-1 hover:text-black', {
@@ -129,8 +131,10 @@ function TranscriptSegment({
       data-testid="segment"
     >
       <button
+        aria-label={timestamp}
+        onClick={onSelect}
         className={classnames(
-          'pr-5 hover:underline',
+          'pr-2 mr-3 hover:underline',
 
           // Workaround for a Firefox issue that prevented annotating across
           // multiple segments [1]. Buttons have a default `user-select: none`
@@ -140,18 +144,33 @@ function TranscriptSegment({
           //
           // [1] https://github.com/hypothesis/via/issues/930
           // [2] https://github.com/hypothesis/client/issues/5485
-          'select-text'
+          'select-text',
+
+          // The timestamp is rendered using a CSS ::before pseudo-element
+          // so that it does not appear in the selection captured by the Hypothesis
+          // client, when creating an annotation that spans multiple segments.
+          //
+          // We use a combination of padding and margin to create the space
+          // between the timestamp and transcript. The padding region enlarges
+          // the clickable area of the timestamp button. The margin region enlarges
+          // the area in which a user can start a selection of the transcript text.
+          // Without it selecting the left edge of the transcript is fiddly.
+          'before:content-[attr(data-timestamp)]'
         )}
-        onClick={onSelect}
-      >
-        {formatTimestamp(time)}
-      </button>
+        data-timestamp={timestamp}
+      />
       <p
         className="basis-64 grow"
         data-testid="transcript-text"
         ref={contentRef}
       >
         {text}
+        {
+          // Add a trailing space at the end of each segment to avoid the last
+          // word of a segment being joined with the first word of the next
+          // segment in annotation quotes.
+          ' '
+        }
       </p>
     </li>
   );
