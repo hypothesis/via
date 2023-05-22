@@ -50,6 +50,7 @@ export default function VideoPlayerApp({
             classes="text-xl"
             onClick={() => setPlaying(playing => !playing)}
             data-testid="play-button"
+            title={playing ? 'Pause' : 'Play'}
           >
             {playing ? '⏸' : '⏵'}
           </Button>

@@ -54,14 +54,18 @@ describe('VideoPlayerApp', () => {
     let player = wrapper.find('YouTubeVideoPlayer');
     assert.isFalse(player.prop('play'));
 
-    const playButton = wrapper.find('button[data-testid="play-button"]');
+    let playButton = wrapper.find('button[data-testid="play-button"]');
     assert.equal(playButton.text(), '⏵');
+    assert.equal(playButton.prop('title'), 'Play');
 
     playButton.simulate('click');
 
     player = wrapper.find('YouTubeVideoPlayer');
     assert.isTrue(player.prop('play'));
+
+    playButton = wrapper.find('button[data-testid="play-button"]');
     assert.equal(playButton.text(), '⏸');
+    assert.equal(playButton.prop('title'), 'Pause');
   });
 
   it('updates play/pause button when player is paused', () => {
