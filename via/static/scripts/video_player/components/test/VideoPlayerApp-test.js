@@ -143,6 +143,12 @@ describe('VideoPlayerApp', () => {
     assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
   });
 
+  function setFilter(wrapper, query) {
+    const input = wrapper.find('input[data-testid="filter-input"]');
+    input.getDOMNode().value = query;
+    input.simulate('input');
+  }
+
   it('filters transcript when typing in search field', () => {
     const wrapper = mount(
       <VideoPlayerApp
@@ -152,12 +158,57 @@ describe('VideoPlayerApp', () => {
         transcript={transcriptData}
       />
     );
-    const input = wrapper.find('input[data-testid="filter-input"]');
 
-    input.getDOMNode().value = 'foobar';
-    input.simulate('input');
+    setFilter(wrapper, 'foobar');
 
     const transcript = wrapper.find('Transcript');
     assert.equal(transcript.prop('filter'), 'foobar');
+  });
+
+  it('clears transcript filter when Hypothesis client scrolls to a highlight', async () => {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+      />
+    );
+
+    setFilter(wrapper, 'foobar');
+
+    // Simulate event emitted by client before it scrolls a highlight, which
+    // may be in a hidden segment, into view.
+    const scrollToRangeEvent = new CustomEvent('scrolltorange');
+    let ready;
+    scrollToRangeEvent.waitUntil = promise => {
+      ready = promise;
+    };
+    document.body.dispatchEvent(scrollToRangeEvent);
+
+    // Wait for VideoPlayerApp to be re-rendered with filter cleared.
+    assert.instanceOf(ready, Promise);
+    await ready;
+
+    wrapper.update();
+    const transcript = wrapper.find('Transcript');
+    assert.equal(transcript.prop('filter'), '');
+  });
+
+  it('ignores "scrolltorange" events with wrong type', () => {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+      />
+    );
+
+    setFilter(wrapper, 'foobar');
+
+    // If a "scrolltorange" event is dispatched at the body, but doesn't
+    // have the expected even type, the video player should ignore it.
+    document.body.dispatchEvent(new Event('scrolltorange'));
   });
 });
