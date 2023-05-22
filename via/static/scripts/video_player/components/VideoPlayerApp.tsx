@@ -1,5 +1,5 @@
 import { Button, Input } from '@hypothesis/frontend-shared';
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
 import HypothesisClient from './HypothesisClient';
@@ -13,6 +13,22 @@ export type VideoPlayerAppProps = {
   clientConfig: object;
   transcript: TranscriptData;
 };
+
+/**
+ * Type of "scrolltorange" event emitted by the client when it is about to
+ * scroll a highlight into view.
+ */
+type ScrollToRangeEvent = CustomEvent<Range> & {
+  waitUntil(ready: Promise<void>): void;
+};
+
+function isScrollToRangeEvent(e: Event): e is ScrollToRangeEvent {
+  return (
+    e instanceof CustomEvent &&
+    'waitUntil' in e &&
+    typeof e.waitUntil === 'function'
+  );
+}
 
 /**
  * Video annotation application.
@@ -32,6 +48,42 @@ export default function VideoPlayerApp({
   const transcriptControls = useRef<TranscriptControls | null>(null);
 
   const [filter, setFilter] = useState('');
+  const trimmedFilter = useMemo(() => filter.trim(), [filter]);
+
+  // Listen for the event the Hypothesis client dispatches before it scrolls
+  // a highlight into view. If a filter is currently active, clear it first
+  // to ensure the highlight is visible.
+  const pendingRender = useRef<() => void>();
+  useEffect(() => {
+    if (trimmedFilter.length === 0) {
+      return () => {};
+    }
+
+    const listener = (e: Event) => {
+      setFilter('');
+
+      if (!isScrollToRangeEvent(e)) {
+        return;
+      }
+
+      // Make the client wait for the transcript to re-render after the clearing
+      // the filter, before it attempts to scroll the highlight into view.
+      const renderDone = new Promise<void>(
+        resolve => (pendingRender.current = resolve)
+      );
+      e.waitUntil(renderDone);
+    };
+    document.body.addEventListener('scrolltorange', listener);
+    return () => {
+      document.body.removeEventListener('scrolltorange', listener);
+    };
+  }, [trimmedFilter]);
+
+  // Notify Hypothesis client on next render after clearing a filter.
+  if (pendingRender.current) {
+    pendingRender.current();
+    pendingRender.current = undefined;
+  }
 
   return (
     <div className="w-full flex flex-row m-2">
@@ -62,19 +114,18 @@ export default function VideoPlayerApp({
           </Button>
           <div className="flex-grow" />
           <Input
-            aria-label="Filter transcript"
+            aria-label="Transcript filter"
             data-testid="filter-input"
-            onInput={e =>
-              setFilter((e.target as HTMLInputElement).value.trim())
-            }
+            onInput={e => setFilter((e.target as HTMLInputElement).value)}
             placeholder="Search..."
+            value={filter}
           />
         </div>
         <Transcript
           transcript={transcript}
           controlsRef={transcriptControls}
           currentTime={timestamp}
-          filter={filter}
+          filter={trimmedFilter}
           onSelectSegment={segment => setTimestamp(segment.start)}
         />
       </div>
