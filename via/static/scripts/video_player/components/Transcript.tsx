@@ -128,7 +128,22 @@ function TranscriptSegment({
       data-is-current={isCurrent}
       data-testid="segment"
     >
-      <button className="pr-5 hover:underline" onClick={onSelect}>
+      <button
+        className={classnames(
+          'pr-5 hover:underline',
+
+          // Workaround for a Firefox issue that prevented annotating across
+          // multiple segments [1]. Buttons have a default `user-select: none`
+          // style in FF and selections that include elements with this style
+          // are split into multiple ranges. The Hypothesis client in turn only
+          // uses the first range from a selection (see [2]).
+          //
+          // [1] https://github.com/hypothesis/via/issues/930
+          // [2] https://github.com/hypothesis/client/issues/5485
+          'select-text'
+        )}
+        onClick={onSelect}
+      >
         {formatTimestamp(time)}
       </button>
       <p
