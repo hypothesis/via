@@ -242,4 +242,96 @@ describe('VideoPlayerApp', () => {
     toggleAutoScroll();
     assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
   });
+
+  describe('keyboard shortcuts', () => {
+    let wrappers;
+
+    beforeEach(() => {
+      wrappers = [];
+    });
+
+    afterEach(() => {
+      wrappers.forEach(w => w.unmount());
+    });
+
+    function createVideoPlayer() {
+      const wrapper = mount(
+        <VideoPlayerApp
+          videoId="1234"
+          clientSrc="https://dummy.hypothes.is/embed.js"
+          clientConfig={{}}
+          transcript={transcriptData}
+        />,
+        { attachTo: document.body }
+      );
+      wrappers.push(wrapper);
+      return wrapper;
+    }
+
+    function sendKey(wrapper, key, target = document.body) {
+      act(() => {
+        target.dispatchEvent(
+          new KeyboardEvent('keyup', { key, bubbles: true })
+        );
+      });
+      wrapper.update();
+    }
+
+    it('toggles video playback when "k" is pressed', () => {
+      const wrapper = createVideoPlayer();
+      sendKey(wrapper, 'k');
+      assert.isTrue(wrapper.find('YouTubeVideoPlayer').prop('play'));
+      sendKey(wrapper, 'k');
+      assert.isFalse(wrapper.find('YouTubeVideoPlayer').prop('play'));
+    });
+
+    it('ignores shortcut keys when sent to input elements', async () => {
+      const wrapper = createVideoPlayer();
+      const inputField = wrapper
+        .find('input[data-testid="filter-input"]')
+        .getDOMNode();
+      inputField.focus();
+
+      sendKey(wrapper, 'k', inputField);
+
+      assert.isFalse(wrapper.find('YouTubeVideoPlayer').prop('play'));
+    });
+
+    it('focuses search field when "/" is pressed', () => {
+      const wrapper = createVideoPlayer();
+      const inputField = wrapper
+        .find('input[data-testid="filter-input"]')
+        .getDOMNode();
+
+      // nb. We are using `assert.isTrue` here rather than `assert.equal`
+      // for less verbose errors if assert fails.
+      assert.isTrue(document.activeElement !== inputField);
+
+      sendKey(wrapper, '/');
+
+      assert.isTrue(document.activeElement === inputField);
+
+      sendKey(wrapper, 'Escape', inputField);
+
+      assert.isFalse(document.activeElement === inputField);
+    });
+
+    it('syncs transcript when "s" is pressed', () => {
+      const wrapper = createVideoPlayer();
+      const transcriptController = wrapper
+        .find('Transcript')
+        .prop('controlsRef');
+
+      sendKey(wrapper, 's');
+
+      assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
+    });
+
+    it('toggles auto-scroll when "a" is pressed', () => {
+      const wrapper = createVideoPlayer();
+      assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
+      sendKey(wrapper, 'a');
+      assert.isFalse(wrapper.find('Transcript').prop('autoScroll'));
+    });
+  });
 });
