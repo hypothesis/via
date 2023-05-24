@@ -1,5 +1,11 @@
 import { Button, Checkbox, Input } from '@hypothesis/frontend-shared';
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
 import HypothesisClient from './HypothesisClient';
@@ -54,6 +60,7 @@ export default function VideoPlayerApp({
 
   const [filter, setFilter] = useState('');
   const trimmedFilter = useMemo(() => filter.trim(), [filter]);
+  const filterInputRef = useRef<HTMLInputElement>();
 
   // Listen for the event the Hypothesis client dispatches before it scrolls
   // a highlight into view. If a filter is currently active, clear it first
@@ -90,6 +97,45 @@ export default function VideoPlayerApp({
     pendingRender.current = undefined;
   }
 
+  const syncTranscript = useCallback(
+    () => transcriptControls.current!.scrollToCurrentSegment(),
+    []
+  );
+
+  // Handle app-wide keyboard shortcuts.
+  useEffect(() => {
+    const keyListener = (e: KeyboardEvent) => {
+      // Disable single letter shortcuts if focused element is a text input.
+      const enableSingleKey = !['input', 'select', 'textarea'].includes(
+        (e.target as Element).tagName.toLowerCase()
+      );
+      const matchesKey = (key: string) => enableSingleKey && e.key === key;
+
+      // Shortcuts that match the YouTube player, or perform a similar action.
+      // See https://support.google.com/youtube/answer/7631406.
+      if (matchesKey('k')) {
+        setPlaying(playing => !playing);
+      } else if (matchesKey('/')) {
+        const input = filterInputRef.current;
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }
+
+      // Custom shortcuts for our video player app.
+      if (matchesKey('s')) {
+        syncTranscript();
+      } else if (matchesKey('a')) {
+        setAutoScroll(autoScroll => !autoScroll);
+      }
+    };
+    document.body.addEventListener('keyup', keyListener);
+    return () => {
+      document.body.removeEventListener('keyup', keyListener);
+    };
+  }, [syncTranscript]);
+
   return (
     <div className="w-full flex flex-row m-2">
       <div className="mr-2">
@@ -111,16 +157,20 @@ export default function VideoPlayerApp({
           >
             {playing ? '⏸' : '⏵'}
           </Button>
-          <Button
-            onClick={() => transcriptControls.current!.scrollToCurrentSegment()}
-            data-testid="sync-button"
-          >
+          <Button onClick={syncTranscript} data-testid="sync-button">
             Sync
           </Button>
           <div className="flex-grow" />
           <Input
             aria-label="Transcript filter"
             data-testid="filter-input"
+            elementRef={filterInputRef}
+            onKeyUp={e => {
+              // Allow user to easily remove focus from search input.
+              if (e.key === 'Escape') {
+                (e.target as HTMLElement).blur();
+              }
+            }}
             onInput={e => setFilter((e.target as HTMLInputElement).value)}
             placeholder="Search..."
             value={filter}
