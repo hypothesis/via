@@ -30,6 +30,12 @@ export type TranscriptControls = {
 };
 
 export type TranscriptProps = {
+  /**
+   * Whether to automatically scroll the transcript as the video plays to keep
+   * the segment corresponding to `currentTime` in view.
+   */
+  autoScroll?: boolean;
+
   transcript: TranscriptData;
 
   /**
@@ -191,6 +197,7 @@ function offsetRelativeTo(element: HTMLElement, parent: HTMLElement): number {
 }
 
 export default function Transcript({
+  autoScroll = true,
   controlsRef,
   currentTime,
   filter = '',
@@ -250,8 +257,10 @@ export default function Transcript({
   }, []);
 
   useEffect(() => {
-    scrollToCurrentSegment();
-  }, [currentIndex, transcript, scrollToCurrentSegment]);
+    if (autoScroll) {
+      scrollToCurrentSegment();
+    }
+  }, [autoScroll, currentIndex, transcript, scrollToCurrentSegment]);
 
   useImperativeHandle(
     controlsRef || { current: null },

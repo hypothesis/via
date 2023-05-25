@@ -1,4 +1,4 @@
-import { Button, Input } from '@hypothesis/frontend-shared';
+import { Button, Checkbox, Input } from '@hypothesis/frontend-shared';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
@@ -44,6 +44,11 @@ export default function VideoPlayerApp({
 }: VideoPlayerAppProps) {
   // Current play time of the video, in seconds since the start.
   const [timestamp, setTimestamp] = useState(0);
+
+  // Whether transcript automatically scrolls to stay in sync with video
+  // position.
+  const [autoScroll, setAutoScroll] = useState(true);
+
   const [playing, setPlaying] = useState(false);
   const transcriptControls = useRef<TranscriptControls | null>(null);
 
@@ -122,12 +127,24 @@ export default function VideoPlayerApp({
           />
         </div>
         <Transcript
+          autoScroll={autoScroll}
           transcript={transcript}
           controlsRef={transcriptControls}
           currentTime={timestamp}
           filter={trimmedFilter}
           onSelectSegment={segment => setTimestamp(segment.start)}
         />
+        <div className="pl-2">
+          <Checkbox
+            checked={autoScroll}
+            data-testid="autoscroll-checkbox"
+            onChange={e =>
+              setAutoScroll((e.target as HTMLInputElement).checked)
+            }
+          >
+            <div className="p-2 select-none">Auto-scroll</div>
+          </Checkbox>
+        </div>
       </div>
       <HypothesisClient src={clientSrc} config={clientConfig} />
     </div>
