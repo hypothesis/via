@@ -215,4 +215,31 @@ describe('VideoPlayerApp', () => {
     // have the expected even type, the video player should ignore it.
     document.body.dispatchEvent(new Event('scrolltorange'));
   });
+
+  it('toggles automatic scrolling when "Auto-scroll" checkbox is changed', () => {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+      />
+    );
+
+    const toggleAutoScroll = () => {
+      act(() => {
+        const input = wrapper.find('input[data-testid="autoscroll-checkbox"]');
+
+        input.getDOMNode().checked = !input.getDOMNode().checked;
+        input.simulate('change');
+      });
+      wrapper.update();
+    };
+
+    assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
+    toggleAutoScroll();
+    assert.isFalse(wrapper.find('Transcript').prop('autoScroll'));
+    toggleAutoScroll();
+    assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
+  });
 });

@@ -81,6 +81,18 @@ describe('Transcript', () => {
     });
   });
 
+  it('does not scroll to current segment if `autoScroll` is disabled', () => {
+    const wrapper = mount(
+      <Transcript autoScroll={false} transcript={transcript} currentTime={5} />
+    );
+    const scrollContainer = wrapper.find('div[data-testid="scroll-container"]');
+    const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
+
+    wrapper.setProps({ currentTime: 10 });
+
+    assert.notCalled(scrollTo);
+  });
+
   it('does not scroll transcript while user is selecting text', () => {
     const wrapper = mount(
       <Transcript transcript={transcript} currentTime={5} />,
