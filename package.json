@@ -69,14 +69,22 @@
     "importOrder": [
       "^[./]"
     ],
-    "importOrderSeparation": true
+    "importOrderSeparation": true,
+    "overrides": [
+      {
+        "files": "*.svg",
+        "options": {
+          "parser": "html"
+        }
+      }
+    ]
   },
   "browserslist": "chrome 70, firefox 70, safari 11.1",
   "scripts": {
     "build": "gulp build",
     "checkformatting": "prettier --cache --check via/**/*.{js,ts,tsx}",
     "lint": "eslint --cache --ignore-pattern build --ignore-pattern 'via/static/js/**' --ignore-pattern 'via/static/vendor/**' .",
-    "format": "prettier --cache --list-different --write via/**/*.{js,ts,tsx}",
+    "format": "prettier --cache --list-different --write via/**/*.{js,svg,ts,tsx}",
     "typecheck": "tsc --build via/static/scripts/tsconfig.json"
   }
 }
