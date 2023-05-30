@@ -12,6 +12,7 @@ import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
 import YouTubeVideoPlayer from './YouTubeVideoPlayer';
+import { PauseIcon, PlayIcon, SyncIcon } from './icons';
 
 export type VideoPlayerAppProps = {
   videoId: string;
@@ -148,19 +149,7 @@ export default function VideoPlayerApp({
         />
       </div>
       <div className="w-2/5 h-[90vh] flex flex-col bg-grey-0 border">
-        <div className="p-1 bg-grey-1 border-b flex flex-row">
-          <Button
-            classes="text-xl"
-            onClick={() => setPlaying(playing => !playing)}
-            data-testid="play-button"
-            title={playing ? 'Pause' : 'Play'}
-          >
-            {playing ? '⏸' : '⏵'}
-          </Button>
-          <Button onClick={syncTranscript} data-testid="sync-button">
-            Sync
-          </Button>
-          <div className="flex-grow" />
+        <div className="p-1 bg-grey-1 border-b flex flex-col">
           <Input
             aria-label="Transcript filter"
             data-testid="filter-input"
@@ -175,6 +164,31 @@ export default function VideoPlayerApp({
             placeholder="Search..."
             value={filter}
           />
+          <div className="flex flex-row">
+            <Button
+              classes="text-l"
+              onClick={() => setPlaying(playing => !playing)}
+              data-testid="play-button"
+            >
+              {playing ? (
+                <>
+                  <PauseIcon /> Pause
+                </>
+              ) : (
+                <>
+                  <PlayIcon /> Play
+                </>
+              )}
+            </Button>
+            <div className="flex-grow" />
+            <Button
+              onClick={syncTranscript}
+              data-testid="sync-button"
+              title="Sync"
+            >
+              <SyncIcon />
+            </Button>
+          </div>
         </div>
         <Transcript
           autoScroll={autoScroll}

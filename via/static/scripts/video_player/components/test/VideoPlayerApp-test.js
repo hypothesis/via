@@ -33,6 +33,13 @@ describe('VideoPlayerApp', () => {
 
   beforeEach(() => {
     $imports.$mock(mockImportedComponents());
+
+    // Un-mock icons, so we get coverage for these very simple components
+    // without dedicated tests.
+    $imports.$restore({
+      './icons': true,
+    });
+
     $imports.$mock({
       './Transcript': FakeTranscript,
     });
@@ -55,8 +62,7 @@ describe('VideoPlayerApp', () => {
     assert.isFalse(player.prop('play'));
 
     let playButton = wrapper.find('button[data-testid="play-button"]');
-    assert.equal(playButton.text(), '⏵');
-    assert.equal(playButton.prop('title'), 'Play');
+    assert.equal(playButton.text().trim(), 'Play');
 
     playButton.simulate('click');
 
@@ -64,8 +70,7 @@ describe('VideoPlayerApp', () => {
     assert.isTrue(player.prop('play'));
 
     playButton = wrapper.find('button[data-testid="play-button"]');
-    assert.equal(playButton.text(), '⏸');
-    assert.equal(playButton.prop('title'), 'Pause');
+    assert.equal(playButton.text().trim(), 'Pause');
   });
 
   it('updates play/pause button when player is paused', () => {
@@ -83,13 +88,13 @@ describe('VideoPlayerApp', () => {
     wrapper.update();
 
     const playButton = wrapper.find('button[data-testid="play-button"]');
-    assert.equal(playButton.text(), '⏸');
+    assert.equal(playButton.text().trim(), 'Pause');
 
     act(() => {
       wrapper.find('YouTubeVideoPlayer').prop('onPlayingChanged')(false);
     });
     wrapper.update();
-    assert.equal(playButton.text(), '⏵');
+    assert.equal(playButton.text().trim(), 'Play');
   });
 
   it('syncs timestamp from player to transcript', () => {
