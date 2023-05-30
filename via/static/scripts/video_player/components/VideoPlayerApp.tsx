@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input } from '@hypothesis/frontend-shared';
+import { Button, Checkbox, CopyIcon, Input } from '@hypothesis/frontend-shared';
 import {
   useCallback,
   useEffect,
@@ -8,6 +8,7 @@ import {
 } from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
+import { formatTranscript } from '../utils/transcript';
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
@@ -137,6 +138,16 @@ export default function VideoPlayerApp({
     };
   }, [syncTranscript]);
 
+  const copyTranscript = async () => {
+    const formattedTranscript = formatTranscript(transcript.segments);
+    try {
+      await navigator.clipboard.writeText(formattedTranscript);
+    } catch (err) {
+      // TODO: Replace this with a toast message in the UI.
+      console.warn('Failed to copy transcript', err);
+    }
+  };
+
   return (
     <div className="w-full flex flex-row m-2">
       <div className="mr-2">
@@ -181,6 +192,13 @@ export default function VideoPlayerApp({
               )}
             </Button>
             <div className="flex-grow" />
+            <Button
+              onClick={copyTranscript}
+              data-testid="copy-button"
+              title="Copy transcript"
+            >
+              <CopyIcon />
+            </Button>
             <Button
               onClick={syncTranscript}
               data-testid="sync-button"
