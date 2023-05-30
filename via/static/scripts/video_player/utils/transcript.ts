@@ -65,3 +65,10 @@ export function filterTranscript(
   }
   return result;
 }
+
+/**
+ * Format a transcript as plain text.
+ */
+export function formatTranscript(transcript: Segment[]): string {
+  return transcript.map(seg => seg.text).join('\n');
+}
