@@ -249,12 +249,12 @@ describe('VideoPlayerApp', () => {
 
     // Simulate event emitted by client before it scrolls a highlight, which
     // may be in a hidden segment, into view.
-    const scrollToRangeEvent = new CustomEvent('scrolltorange');
+    const event = new CustomEvent('scrolltorange');
     let ready;
-    scrollToRangeEvent.waitUntil = promise => {
+    event.waitUntil = promise => {
       ready = promise;
     };
-    document.body.dispatchEvent(scrollToRangeEvent);
+    document.body.dispatchEvent(event);
 
     // Wait for VideoPlayerApp to be re-rendered with filter cleared.
     assert.instanceOf(ready, Promise);
@@ -263,6 +263,28 @@ describe('VideoPlayerApp', () => {
     wrapper.update();
     const transcript = wrapper.find('Transcript');
     assert.equal(transcript.prop('filter'), '');
+  });
+
+  it('pauses playback when Hypothesis client scrolls to a highlight', () => {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+      />
+    );
+    wrapper.find('button[data-testid="play-button"]').simulate('click');
+
+    const event = new CustomEvent('scrolltorange');
+    event.waitUntil = () => {}; // Dummy
+    act(() => {
+      document.body.dispatchEvent(event);
+    });
+    wrapper.update();
+
+    const player = wrapper.find('YouTubeVideoPlayer');
+    assert.isFalse(player.prop('play'));
   });
 
   it('ignores "scrolltorange" events with wrong type', () => {

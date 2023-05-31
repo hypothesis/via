@@ -65,20 +65,22 @@ export default function VideoPlayerApp({
   const filterInputRef = useRef<HTMLInputElement>();
 
   // Listen for the event the Hypothesis client dispatches before it scrolls
-  // a highlight into view. If a filter is currently active, clear it first
-  // to ensure the highlight is visible.
+  // a highlight into view.
+  //
+  // - If a filter is currently active, clear it first to ensure the highlight
+  //   is visible.
+  // - Pause playback to prevent transcript quickly scrolling away from the
+  //   highlight back to the current location, if autoscroll is active.
   const pendingRender = useRef<() => void>();
   useEffect(() => {
-    if (trimmedFilter.length === 0) {
-      return () => {};
-    }
-
     const listener = (e: Event) => {
       setFilter('');
 
       if (!isScrollToRangeEvent(e)) {
         return;
       }
+
+      setPlaying(false);
 
       // Make the client wait for the transcript to re-render after the clearing
       // the filter, before it attempts to scroll the highlight into view.
@@ -91,7 +93,7 @@ export default function VideoPlayerApp({
     return () => {
       document.body.removeEventListener('scrolltorange', listener);
     };
-  }, [trimmedFilter]);
+  }, []);
 
   // Notify Hypothesis client on next render after clearing a filter.
   if (pendingRender.current) {
