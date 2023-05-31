@@ -216,7 +216,7 @@ describe('VideoPlayerApp', () => {
     assert.equal(player.prop('time'), transcriptData.segments[1].start);
   });
 
-  it('scrolls current transcript segment into view when "Sync" button is clicked', () => {
+  it('syncs transcript when "Sync" button is clicked', () => {
     const wrapper = mount(
       <VideoPlayerApp
         videoId="1234"
@@ -231,6 +231,47 @@ describe('VideoPlayerApp', () => {
     wrapper.find('button[data-testid="sync-button"]').simulate('click');
 
     assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
+  });
+
+  const toggleAutoScroll = wrapper => {
+    act(() => {
+      const input = wrapper.find('input[data-testid="autoscroll-checkbox"]');
+
+      input.getDOMNode().checked = !input.getDOMNode().checked;
+      input.simulate('change');
+    });
+    wrapper.update();
+  };
+
+  const togglePlaying = wrapper => {
+    wrapper.find('button[data-testid="play-button"]').simulate('click');
+  };
+
+  it('syncs transcript when transitioning from paused to playing if auto-scroll is active', () => {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+      />
+    );
+    const transcriptController = wrapper.find('Transcript').prop('controlsRef');
+    assert.ok(transcriptController.current);
+
+    // When auto-scroll is active (default state) transcript should sync as
+    // soon as playback starts.
+    togglePlaying(wrapper);
+    assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
+    transcriptController.current.scrollToCurrentSegment.resetHistory();
+
+    togglePlaying(wrapper); // Pause video
+
+    // If auto-scroll is disabled when the play button is clicked, it shouldn't
+    // sync.
+    toggleAutoScroll(wrapper);
+    togglePlaying(wrapper);
+    assert.notCalled(transcriptController.current.scrollToCurrentSegment);
   });
 
   function setFilter(wrapper, query) {
@@ -347,20 +388,10 @@ describe('VideoPlayerApp', () => {
       />
     );
 
-    const toggleAutoScroll = () => {
-      act(() => {
-        const input = wrapper.find('input[data-testid="autoscroll-checkbox"]');
-
-        input.getDOMNode().checked = !input.getDOMNode().checked;
-        input.simulate('change');
-      });
-      wrapper.update();
-    };
-
     assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
-    toggleAutoScroll();
+    toggleAutoScroll(wrapper);
     assert.isFalse(wrapper.find('Transcript').prop('autoScroll'));
-    toggleAutoScroll();
+    toggleAutoScroll(wrapper);
     assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
   });
 
