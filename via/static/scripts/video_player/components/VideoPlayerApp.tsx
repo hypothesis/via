@@ -104,6 +104,15 @@ export default function VideoPlayerApp({
     []
   );
 
+  // If we transition from paused to playing while autoscroll is active,
+  // immediately scroll the current segment into view. Without this, the
+  // transcript will not scroll until playback reaches the next segment.
+  useEffect(() => {
+    if (autoScroll && playing) {
+      syncTranscript();
+    }
+  }, [autoScroll, playing, syncTranscript]);
+
   // Handle app-wide keyboard shortcuts.
   useEffect(() => {
     const keyListener = (e: KeyboardEvent) => {
