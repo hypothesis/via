@@ -70,9 +70,8 @@ class TestGoogleErrorBodySchema:
 
 
 class TestGoogleDriveAPI:
-    def test_it_builds_a_session_as_we_expect(
-        self, api, Credentials, AuthorizedSession
-    ):
+    @pytest.mark.usefixtures("api")
+    def test_it_builds_a_session_as_we_expect(self, Credentials, AuthorizedSession):
         Credentials.from_service_account_info.assert_called_once_with(
             {"valid": "credentials"}, scopes=GoogleDriveAPI.SCOPES
         )
@@ -100,7 +99,6 @@ class TestGoogleDriveAPI:
         # Google objects do, so we'll just check we call them in the right way
         list(api.iter_file("FILE_ID"))
 
-        # pylint: disable=no-member,protected-access
         AuthorizedSession.return_value.request.assert_called_once_with(
             "GET",
             "https://www.googleapis.com/drive/v3/files/FILE_ID?alt=media",
@@ -122,7 +120,6 @@ class TestGoogleDriveAPI:
     def test_iter_file_accepts_resource_key(self, api, AuthorizedSession):
         list(api.iter_file("FILE_ID", "SPECIFIED_RESOURCE_ID"))
 
-        # pylint: disable=no-member,protected-access
         AuthorizedSession.return_value.request.assert_called_once_with(
             "GET",
             Any(),
@@ -189,7 +186,7 @@ class TestGoogleDriveAPI:
     def test_iter_file_catches_specific_google_exceptions(
         self, api, kwargs, error_class, status_code, AuthorizedSession
     ):
-        # pylint: disable=protected-access,line-too-long
+        # pylint: disable=line-too-long
         AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = make_requests_exception(
             HTTPError, **kwargs
         )
@@ -216,7 +213,6 @@ class TestGoogleDriveAPI:
         }
         attrs.update(kwargs)
         exception = make_requests_exception(**attrs)
-        # pylint: disable=protected-access
         AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = (
             exception
         )
@@ -227,7 +223,6 @@ class TestGoogleDriveAPI:
     def test_iter_file_has_no_issue_with_errors_without_responses(
         self, api, AuthorizedSession
     ):
-        # pylint: disable=protected-access
         AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = (
             HTTPError()
         )

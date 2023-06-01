@@ -1,7 +1,8 @@
 pip-tools
 pip-sync-faster
-pytest
-webtest
-h_matchers
+-r prod.txt
 httpretty
--r requirements.txt
+pytest
+factory-boy
+h-matchers
+webtest

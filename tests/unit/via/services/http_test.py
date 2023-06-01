@@ -233,7 +233,7 @@ class TestHTTPService:
         return create_autospec(requests.Session, instance=True, spec_set=True)
 
     @pytest.fixture
-    def error_translator(self, session):
+    def error_translator(self):
         def error_mapper_callable(err):
             if isinstance(err, FileNotFoundError):
                 return NotADirectoryError("Translated")

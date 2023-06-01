@@ -1,9 +1,9 @@
 pip-tools
 pip-sync-faster
-coverage
-httpretty
+-r prod.txt
+coverage[toml]
 pytest
 factory-boy
-webtest
-h-matchers >= 1.2.4
--r requirements.txt
+h-matchers
+httpretty
+freezegun

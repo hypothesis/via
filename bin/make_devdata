@@ -1,5 +1,4 @@
-"""Download dev data from github.com:hypothesis/devdata.git."""
-
+#!/usr/bin/env python3
 import os
 from pathlib import Path
 from shutil import copyfile
@@ -8,7 +7,6 @@ from tempfile import TemporaryDirectory
 
 
 def _get_devdata():
-    # The directory that we'll clone the devdata git repo into.
     with TemporaryDirectory() as tmp_dir_name:
         git_dir = os.path.join(tmp_dir_name, "devdata")
 

@@ -30,11 +30,11 @@ WORKDIR /var/lib/hypothesis
 RUN chown -R hypothesis:hypothesis /etc/nginx/conf.d /var/log/nginx /var/lib/nginx /var/lib/hypothesis
 
 # Copy minimal data to allow installation of python dependencies.
-COPY requirements/requirements.txt ./
+COPY requirements/prod.txt ./
 
 # Install build deps, build, and then clean up.
 RUN pip install --no-cache-dir -U pip \
-  && pip install --no-cache-dir -r requirements.txt
+  && pip install --no-cache-dir -r prod.txt
 
 # Copy frontend assets.
 COPY --from=frontend-build /build build

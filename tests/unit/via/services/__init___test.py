@@ -32,9 +32,7 @@ class TestLoadInjectedJSON:
 
 
 class TestCreateGoogleAPI:
-    def test_it_with_credentials(
-        self, pyramid_request, GoogleDriveAPI, load_injected_json
-    ):
+    def test_it_with_credentials(self, GoogleDriveAPI, load_injected_json):
         load_injected_json.side_effect = (
             sentinel.credentials_list,
             sentinel.resource_keys,

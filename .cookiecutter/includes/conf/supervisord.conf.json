@@ -1,0 +1,10 @@
+{
+  "programs": {
+    "nginx": {
+      "command": "nginx"
+    },
+    "web": {
+      "command": "newrelic-admin run-program gunicorn --paste conf/production.ini -b unix:/tmp/gunicorn-web.sock"
+    }
+  }
+}

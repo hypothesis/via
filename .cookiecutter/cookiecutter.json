@@ -1,0 +1,39 @@
+{
+  "template": "https://github.com/hypothesis/cookiecutters",
+  "checkout": null,
+  "directory": "pyramid-app",
+  "ignore": [
+    "Dockerfile",
+    "docker-compose.yml",
+    "tests/unit/via/app_test.py",
+    "via/app.py",
+    "tests/functional/app_test.py",
+    "bin/make_devdata",
+    "bin/make_docker_run"
+  ],
+  "extra_context": {
+    "name": "Via",
+    "package_name": "via",
+    "slug": "via",
+    "short_description": "An app that proxies web pages and PDF files and injects the Hypothesis client so you can annotate them.",
+    "python_version": "3.8.12",
+    "port": "9082",
+    "github_owner": "hypothesis",
+    "visibility": "public",
+    "copyright_holder": "Hypothesis",
+    "dependabot_pip_interval": "monthly",
+    "dependabot_npm_interval": "monthly",
+    "dependabot_docker_interval": "monthly",
+    "devdata": "yes",
+    "frontend": "yes",
+    "__frontend_typechecking": "yes",
+    "postgres": "no",
+    "docker": "yes",
+    "__postgres_port": "4433",
+    "__docker_namespace": "hypothesis",
+    "__docker_network": "via_default",
+    "__github_url": "https://github.com/hypothesis/via",
+    "__hdev_project_type": "application",
+    "__copyright_year": "2016"
+  }
+}

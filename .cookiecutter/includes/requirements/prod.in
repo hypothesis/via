@@ -1,0 +1,13 @@
+checkmatelib
+h-assets
+h-pyramid-sentry
+h-vialib
+importlib_resources
+pyramid-exclog
+pyramid-jinja2
+pyramid-sanity
+pyramid-services
+requests
+whitenoise
+google-auth-oauthlib
+marshmallow

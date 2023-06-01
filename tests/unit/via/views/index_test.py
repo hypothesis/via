@@ -40,7 +40,7 @@ class TestIndexViews:
 
     @pytest.mark.usefixtures("disable_front_page")
     @pytest.mark.parametrize("view", ["get", "post"])
-    def test_it_404s_if_the_front_page_isnt_enabled(self, view, views, pyramid_request):
+    def test_it_404s_if_the_front_page_isnt_enabled(self, view, views):
         view = getattr(views, view)
 
         response = view()

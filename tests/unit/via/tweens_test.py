@@ -29,7 +29,7 @@ class TestRobotsTween:
 
     @pytest.fixture
     def handler(self):
-        def handler_spec(request):
+        def handler_spec(_request):
             """Spec for mock handler function."""
 
         return create_autospec(handler_spec)
