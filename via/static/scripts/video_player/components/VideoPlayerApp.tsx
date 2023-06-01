@@ -7,6 +7,7 @@ import {
   useState,
 } from 'preact/hooks';
 
+import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
 import { formatTranscript } from '../utils/transcript';
 import HypothesisClient from './HypothesisClient';
@@ -66,40 +67,36 @@ export default function VideoPlayerApp({
 
   // Listen for the event the Hypothesis client dispatches before it scrolls
   // a highlight into view.
-  //
-  // - If a filter is currently active, clear it first to ensure the highlight
-  //   is visible.
-  // - Pause playback to prevent transcript quickly scrolling away from the
-  //   highlight back to the current location, if autoscroll is active.
-  const pendingRender = useRef<() => void>();
+  const nextRender = useNextRender();
   useEffect(() => {
     const listener = (e: Event) => {
-      setFilter('');
-
       if (!isScrollToRangeEvent(e)) {
         return;
       }
 
+      // If a filter is currently active, clear it first to ensure the highlight
+      // is visible.
+      let didChangeFilter;
+      setFilter(prevFilter => {
+        didChangeFilter = prevFilter !== '';
+        return '';
+      });
+
+      // Pause playback to prevent transcript quickly scrolling away from the
+      // highlight back to the current location, if autoscroll is active.
       setPlaying(false);
 
-      // Make the client wait for the transcript to re-render after the clearing
-      // the filter, before it attempts to scroll the highlight into view.
-      const renderDone = new Promise<void>(
-        resolve => (pendingRender.current = resolve)
-      );
-      e.waitUntil(renderDone);
+      if (didChangeFilter) {
+        // Wait until component is re-rendered with filter cleared, before
+        // scrolling to highlight.
+        e.waitUntil(nextRender.wait());
+      }
     };
     document.body.addEventListener('scrolltorange', listener);
     return () => {
       document.body.removeEventListener('scrolltorange', listener);
     };
-  }, []);
-
-  // Notify Hypothesis client on next render after clearing a filter.
-  if (pendingRender.current) {
-    pendingRender.current();
-    pendingRender.current = undefined;
-  }
+  }, [nextRender]);
 
   const syncTranscript = useCallback(
     () => transcriptControls.current!.scrollToCurrentSegment(),

@@ -31,7 +31,26 @@ describe('VideoPlayerApp', () => {
   }
   FakeTranscript.displayName = 'Transcript';
 
+  let wrappers;
+
+  // TODO - Convert existing tests to use this helper to render the player.
+  function createVideoPlayer(props = {}) {
+    const wrapper = mount(
+      <VideoPlayerApp
+        videoId="1234"
+        clientSrc="https://dummy.hypothes.is/embed.js"
+        clientConfig={{}}
+        transcript={transcriptData}
+        {...props}
+      />
+    );
+    wrappers.push(wrapper);
+    return wrapper;
+  }
+
   beforeEach(() => {
+    wrappers = [];
+
     $imports.$mock(mockImportedComponents());
 
     // Un-mock icons, so we get coverage for these very simple components
@@ -46,6 +65,7 @@ describe('VideoPlayerApp', () => {
   });
 
   afterEach(() => {
+    wrappers.forEach(w => w.unmount());
     $imports.$restore();
   });
 
@@ -263,6 +283,19 @@ describe('VideoPlayerApp', () => {
     wrapper.update();
     const transcript = wrapper.find('Transcript');
     assert.equal(transcript.prop('filter'), '');
+  });
+
+  it('does not defer scrolling if there is no filter', () => {
+    createVideoPlayer();
+
+    // Simulate event emitted by client before it scrolls a highlight.
+    const event = new CustomEvent('scrolltorange');
+    event.waitUntil = sinon.stub();
+    document.body.dispatchEvent(event);
+
+    // Since there is no filter active, `ScrollToRangeEvent.waitUntil` will not
+    // be called, and the Hypothesis client will scroll immediately.
+    assert.notCalled(event.waitUntil);
   });
 
   it('pauses playback when Hypothesis client scrolls to a highlight', () => {
