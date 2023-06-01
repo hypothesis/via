@@ -79,7 +79,7 @@ class HTTPService:
         """
         response = None
 
-        try:  # pylint:disable=too-many-try-statements
+        try:
             response = self._session.request(
                 method,
                 url,

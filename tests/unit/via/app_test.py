@@ -32,7 +32,8 @@ def test_settings_raise_value_error_if_environment_variable_is_not_set():
         load_settings({})
 
 
-def test_settings_are_configured_from_environment_variables(os, pyramid_settings):
+@pytest.mark.usefixtures("os")
+def test_settings_are_configured_from_environment_variables(pyramid_settings):
     expected_settings = pyramid_settings
     expected_settings["data_directory"] = Path(pyramid_settings["data_directory"])
 
@@ -42,7 +43,8 @@ def test_settings_are_configured_from_environment_variables(os, pyramid_settings
         assert settings[key] == value
 
 
-def test_app(configurator, pyramid, os, pyramid_settings):
+@pytest.mark.usefixtures("os")
+def test_app(configurator, pyramid, pyramid_settings):
     create_app()
 
     expected_settings = dict(

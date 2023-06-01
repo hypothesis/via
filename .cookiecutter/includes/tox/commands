@@ -1,0 +1,3 @@
+updatepdfjs: sh bin/update-pdfjs
+build: python bin/minify_assets.py -c conf/minify_assets.json
+build: python -m whitenoise.compress --no-brotli via/static

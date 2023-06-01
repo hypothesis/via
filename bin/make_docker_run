@@ -1,0 +1,8 @@
+#!/bin/bash
+docker run --rm \
+    -v $(pwd)/.devdata/:/via-data/:ro \
+    --add-host host.docker.internal:host-gateway \
+    --env-file .docker.env \
+    --env-file .devdata.env \
+    -p 9083:9083 \
+    hypothesis/via:dev
