@@ -56,7 +56,7 @@ function isScrollToRangeEvent(e: Event): e is ScrollToRangeEvent {
 export default function VideoPlayerApp({
   videoId,
   clientSrc,
-  clientConfig,
+  clientConfig: baseClientConfig,
   transcript,
 }: VideoPlayerAppProps) {
   // Current play time of the video, in seconds since the start.
@@ -167,6 +167,14 @@ export default function VideoPlayerApp({
       console.warn('Failed to copy transcript', err);
     }
   };
+
+  const bucketContainerId = 'bucket-container';
+  const clientConfig = useMemo(() => {
+    return {
+      ...baseClientConfig,
+      bucketBarContainer: '#' + bucketContainerId,
+    };
+  }, [baseClientConfig]);
 
   return (
     <div
@@ -320,14 +328,37 @@ export default function VideoPlayerApp({
               <SyncIcon />
             </Button>
           </div>
-          <Transcript
-            autoScroll={autoScroll}
-            transcript={transcript}
-            controlsRef={transcriptControls}
-            currentTime={timestamp}
-            filter={trimmedFilter}
-            onSelectSegment={segment => setTimestamp(segment.start)}
-          />
+          <div
+            className={classnames(
+              'relative',
+
+              // Override flex-basis for transcript. Otherwise this container will
+              // be sized to accomodate all transcript elements.
+              'min-h-0'
+            )}
+          >
+            <Transcript
+              autoScroll={autoScroll}
+              transcript={transcript}
+              controlsRef={transcriptControls}
+              currentTime={timestamp}
+              filter={trimmedFilter}
+              onSelectSegment={segment => setTimestamp(segment.start)}
+            />
+            <div
+              id={bucketContainerId}
+              className={classnames(
+                // Position bucket bar along right edge of transcript, with a
+                // small gap to avoid buckets touching the border.
+                //
+                // The bucket bar width is currently copied from the client.
+                'absolute right-1 top-0 bottom-0 w-[23px]',
+
+                // Make the bucket bar fill this container.
+                'flex flex-column'
+              )}
+            />
+          </div>
           <div data-testid="transcript-footer" className="px-2 py-4">
             <Checkbox
               checked={autoScroll}
