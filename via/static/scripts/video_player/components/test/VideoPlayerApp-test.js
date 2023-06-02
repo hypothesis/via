@@ -395,6 +395,16 @@ describe('VideoPlayerApp', () => {
     assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
   });
 
+  it('configures bucket bar container for client', () => {
+    const clientConfig = { openSidebar: true };
+    const wrapper = createVideoPlayer({ clientConfig });
+    const mergedConfig = wrapper.find('HypothesisClient').prop('config');
+    assert.deepEqual(mergedConfig, {
+      openSidebar: true,
+      bucketBarContainer: '#bucket-container',
+    });
+  });
+
   describe('keyboard shortcuts', () => {
     let wrappers;
 
