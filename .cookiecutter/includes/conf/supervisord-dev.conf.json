@@ -4,7 +4,8 @@
       "command": "gunicorn -c conf/gunicorn/dev.conf.py --paste conf/development.ini"
     },
     "nginx": {
-      "command": "docker compose run --rm --service-ports nginx-proxy"
+      "command": "docker compose run --rm --service-ports nginx-proxy",
+      "stopsignal": "TERM"
     },
     "assets": {
       "command": "node_modules/.bin/gulp watch"
