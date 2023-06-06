@@ -2,12 +2,9 @@ from h_vialib import Configuration
 from pyramid.view import view_config
 
 
-@view_config(
-    renderer="via:templates/video_player.html.jinja2",
-    route_name="view_video",
-)
+@view_config(renderer="via:templates/view_video.html.jinja2", route_name="view_video")
 def view_video(request):
-    _, h_config = Configuration.extract_from_params(request.params)
+    _, client_config = Configuration.extract_from_params(request.params)
 
     video_id = request.matchdict["id"]
     transcript = {
@@ -25,7 +22,7 @@ def view_video(request):
 
     return {
         "client_embed_url": request.registry.settings["client_embed_url"],
-        "client_config": h_config,
+        "client_config": client_config,
         "transcript": transcript,
         "video_id": video_id,
     }
