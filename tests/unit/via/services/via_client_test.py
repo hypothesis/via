@@ -12,6 +12,7 @@ class TestViaClientService:
             ("application/x-pdf", "pdf"),
             ("application/pdf", "pdf"),
             ("text/html", "html"),
+            ("video/x-youtube", "video"),
         ],
     )
     def test_content_type(self, mime_type, expected_content_type, svc):

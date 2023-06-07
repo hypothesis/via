@@ -8,6 +8,7 @@ class ViaClientService:
     _mime_types_content_type = {
         "application/x-pdf": "pdf",
         "application/pdf": "pdf",
+        "video/x-youtube": "video",
     }
 
     def content_type(self, mime_type):
