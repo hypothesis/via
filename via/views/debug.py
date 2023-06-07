@@ -6,7 +6,7 @@ from collections import OrderedDict
 from pyramid import view
 from pyramid.response import Response
 
-from via.get_url import clean_headers
+from via.requests_tools.headers import clean_headers
 
 
 @view.view_config(route_name="debug_headers")

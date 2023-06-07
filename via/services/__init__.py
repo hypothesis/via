@@ -8,6 +8,7 @@ from via.services.google_drive import GoogleDriveAPI
 from via.services.http import HTTPService
 from via.services.pdf_url import PDFURLBuilder
 from via.services.secure_link import SecureLinkService, has_secure_url_token
+from via.services.url_details import URLDetailsService
 from via.services.via_client import ViaClientService
 from via.services.youtube import YouTubeService
 
@@ -31,6 +32,10 @@ def includeme(config):  # pragma: no cover
 
     config.register_service_factory(
         "via.services.youtube.factory", iface=YouTubeService
+    )
+
+    config.register_service_factory(
+        "via.services.url_details.factory", iface=URLDetailsService
     )
 
 
