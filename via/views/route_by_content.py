@@ -18,7 +18,7 @@ def route_by_content(context, request):
     )
     via_client_svc = request.find_service(ViaClientService)
 
-    if via_client_svc.is_pdf(mime_type):
+    if via_client_svc.content_type(mime_type) == "pdf":
         caching_headers = _caching_headers(max_age=300)
     else:
         caching_headers = _cache_headers_for_http(status_code)
