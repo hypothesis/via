@@ -19,6 +19,7 @@ def pyramid_settings():
         "enable_front_page": True,
         "data_directory": "tests/data_directory",
         "dev": False,
+        "youtube_transcripts": True,
     }
 
 

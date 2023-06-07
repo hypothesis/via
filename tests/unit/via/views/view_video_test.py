@@ -1,10 +1,12 @@
 from unittest.mock import sentinel
 
 import pytest
+from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.views.view_video import view_video
 
 
+@pytest.mark.usefixtures("youtube_service")
 class TestViewVideo:
     def test_it(self, pyramid_request, Configuration):
         pyramid_request.matchdict["id"] = "abcdef"
@@ -29,6 +31,14 @@ class TestViewVideo:
             ],
         }
         assert response["video_id"] == "abcdef"
+
+    def test_it_with_YouTube_transcripts_disabled(
+        self, pyramid_request, youtube_service
+    ):
+        youtube_service.enabled = False
+
+        with pytest.raises(HTTPUnauthorized):
+            view_video(pyramid_request)
 
     @pytest.fixture
     def Configuration(self, patch):

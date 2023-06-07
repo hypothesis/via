@@ -6,3 +6,4 @@ dev: VIA_SECRET = not_a_secret
 dev: CHECKMATE_API_KEY = dev_api_key
 dev: ENABLE_FRONT_PAGE = {env:ENABLE_FRONT_PAGE:true}
 dev: DATA_DIRECTORY = .devdata/
+dev: YOUTUBE_TRANSCRIPTS = {env:YOUTUBE_TRANSCRIPTS:true}

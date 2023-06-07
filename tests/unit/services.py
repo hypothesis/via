@@ -8,6 +8,7 @@ from via.services import (
     PDFURLBuilder,
     SecureLinkService,
     ViaClientService,
+    YouTubeService,
 )
 
 
@@ -45,3 +46,8 @@ def http_service(mock_service):
 @pytest.fixture
 def pdf_url_builder_service(mock_service):
     return mock_service(PDFURLBuilder)
+
+
+@pytest.fixture
+def youtube_service(mock_service):
+    return mock_service(YouTubeService)
