@@ -5,19 +5,22 @@ from h_vialib import ViaClient
 class ViaClientService:
     """A wrapper service for h_vialib.ViaClient."""
 
+    _mime_types_content_type = {
+        "application/x-pdf": "pdf",
+        "application/pdf": "pdf",
+    }
+
+    def content_type(self, mime_type):
+        return self._mime_types_content_type.get(mime_type, "html")
+
     def __init__(self, via_client):
         self.via_client = via_client
-
-    @staticmethod
-    def is_pdf(mime_type):
-        """Return True if the given MIME type is a PDF one."""
-        return mime_type in ("application/x-pdf", "application/pdf")
 
     def url_for(self, url, mime_type, params):
         """Return a Via URL for the given `url`."""
         return self.via_client.url_for(
             url,
-            content_type="pdf" if self.is_pdf(mime_type) else "html",
+            content_type=self.content_type(mime_type),
             options=params,
         )
 

@@ -13,12 +13,12 @@ class TestRouteByContent:
     @pytest.mark.parametrize(
         "content_type,status_code,expected_cache_control_header",
         [
-            ("PDF", 200, "public, max-age=300, stale-while-revalidate=86400"),
-            ("HTML", 200, "public, max-age=60, stale-while-revalidate=86400"),
-            ("HTML", 401, "public, max-age=60, stale-while-revalidate=86400"),
-            ("HTML", 404, "public, max-age=60, stale-while-revalidate=86400"),
-            ("HTML", 500, "no-cache"),
-            ("HTML", 501, "no-cache"),
+            ("pdf", 200, "public, max-age=300, stale-while-revalidate=86400"),
+            ("html", 200, "public, max-age=60, stale-while-revalidate=86400"),
+            ("html", 401, "public, max-age=60, stale-while-revalidate=86400"),
+            ("html", 404, "public, max-age=60, stale-while-revalidate=86400"),
+            ("html", 500, "no-cache"),
+            ("html", 501, "no-cache"),
         ],
     )
     def test_it(
@@ -34,7 +34,7 @@ class TestRouteByContent:
     ):
         pyramid_request.params = {"url": sentinel.url, "foo": "bar"}
         get_url_details.return_value = (sentinel.mime_type, status_code)
-        via_client_service.is_pdf.return_value = content_type == "PDF"
+        via_client_service.content_type.return_value = content_type
 
         response = route_by_content(context, pyramid_request)
 
@@ -43,7 +43,7 @@ class TestRouteByContent:
         get_url_details.assert_called_once_with(
             http_service, url, pyramid_request.headers
         )
-        via_client_service.is_pdf.assert_called_once_with(sentinel.mime_type)
+        via_client_service.content_type.assert_called_once_with(sentinel.mime_type)
         via_client_service.url_for.assert_called_once_with(
             url, sentinel.mime_type, {"foo": "bar"}
         )
