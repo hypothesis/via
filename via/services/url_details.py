@@ -3,13 +3,15 @@ import cgi
 from collections import OrderedDict
 
 from via.requests_tools.headers import add_request_headers, clean_headers
-from via.services import HTTPService
 from via.services.google_drive import GoogleDriveAPI
+from via.services.http import HTTPService
+from via.services.youtube import YouTubeService
 
 
 class URLDetailsService:
-    def __init__(self, http_service: HTTPService):
+    def __init__(self, http_service: HTTPService, youtube_service: YouTubeService):
         self._http = http_service
+        self._youtube = youtube_service
 
     def get_url_details(self, url, headers=None):
         """Get the content type and status code for a given URL.
@@ -27,6 +29,9 @@ class URLDetailsService:
 
         if GoogleDriveAPI.parse_file_url(url):
             return "application/pdf", 200
+
+        if self._youtube.enabled and self._youtube.get_video_id(url):
+            return "video/x-youtube", 200
 
         headers = add_request_headers(clean_headers(headers))
 
@@ -48,4 +53,7 @@ class URLDetailsService:
 
 
 def factory(_context, request):
-    return URLDetailsService(http_service=request.find_service(HTTPService))
+    return URLDetailsService(
+        http_service=request.find_service(HTTPService),
+        youtube_service=request.find_service(YouTubeService),
+    )

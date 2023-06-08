@@ -56,4 +56,7 @@ def pdf_url_builder_service(mock_service):
 
 @pytest.fixture
 def youtube_service(mock_service):
-    return mock_service(YouTubeService)
+    youtube_service = mock_service(YouTubeService)
+    youtube_service.enabled = True
+    youtube_service.get_video_id.return_value = None
+    return youtube_service
