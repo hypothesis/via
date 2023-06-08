@@ -1,8 +1,4 @@
-import {
-  Scroll,
-  ScrollContainer,
-  ScrollContent,
-} from '@hypothesis/frontend-shared';
+import { Scroll, ScrollContainer } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import type { Ref } from 'preact';
 import {
@@ -128,11 +124,19 @@ function TranscriptSegment({
 
   return (
     <li
-      className={classnames('flex flex-row p-1 hover:text-black', {
-        'bg-grey-2': isCurrent,
-        'text-grey-6': !isCurrent,
-        hidden,
-      })}
+      className={classnames(
+        'flex gap-x-3 p-1.5',
+        // Various tranparencies of a dark color are used for backgrounds to
+        // avoid obscuring scroll-hint shadows
+        'border-y hover:bg-slate-9/[.08]',
+        {
+          'bg-slate-9/[.08] border-grey-4/50 shadow-inner': isCurrent,
+          // Non-current entries have a bottom border only (subtle dotted)
+          'odd:bg-slate-9/[.03] border-t-transparent border-b-grey-2 border-b-dotted':
+            !isCurrent,
+          hidden,
+        }
+      )}
       data-is-current={isCurrent}
       data-testid="segment"
     >
@@ -140,8 +144,17 @@ function TranscriptSegment({
         aria-label={timestamp}
         onClick={onSelect}
         className={classnames(
-          'pr-2 mr-3 hover:underline',
-
+          // TODO: Use shared Button to get these styles for free
+          'flex transition-colors focus-visible-ring rounded-sm',
+          // `peer` allows Tailwind styling based on sibling state
+          'peer',
+          'font-medium hover:underline',
+          {
+            // Colors are one tick lighter than segment text
+            'text-stone-700': isCurrent,
+            'text-stone-500': !isCurrent,
+            'hover:text-stone-800': true,
+          },
           // Workaround for a Firefox issue that prevented annotating across
           // multiple segments [1]. Buttons have a default `user-select: none`
           // style in FF and selections that include elements with this style
@@ -161,12 +174,17 @@ function TranscriptSegment({
           // the clickable area of the timestamp button. The margin region enlarges
           // the area in which a user can start a selection of the transcript text.
           // Without it selecting the left edge of the transcript is fiddly.
-          'before:content-[attr(data-timestamp)]'
+          'before:content-[attr(data-timestamp)]',
+          // Style and position timestamp text
+          'before:px-1 before:pt-[1px] before:text-right before:text-[.8em]'
         )}
         data-timestamp={timestamp}
       />
       <p
-        className="basis-64 grow"
+        className={classnames('grow peer-hover:text-stone-900', {
+          'text-stone-600': !isCurrent,
+          'text-stone-800': isCurrent,
+        })}
         data-testid="transcript-text"
         ref={contentRef}
       >
@@ -305,33 +323,32 @@ export default function Transcript({
   return (
     <ScrollContainer borderless>
       <Scroll
-        classes={
+        classes={classnames(
           // Make element positioned for use with `offsetRelativeTo`.
-          'relative'
-        }
+          'relative',
+          'border-y'
+        )}
         data-testid="scroll-container"
         elementRef={scrollRef}
       >
-        <ScrollContent>
-          <ul>
-            {transcript.segments.map((segment, index) => (
-              <TranscriptSegment
-                key={index}
-                hidden={
-                  filterMatches
-                    ? !filterMatches.has(index) && index !== currentIndex
-                    : false
-                }
-                highlight={highlight}
-                isCurrent={index === currentIndex}
-                matches={filterMatches?.get(index)}
-                onSelect={() => onSelectSegment?.(segment)}
-                time={segment.start}
-                text={segment.text}
-              />
-            ))}
-          </ul>
-        </ScrollContent>
+        <ul>
+          {transcript.segments.map((segment, index) => (
+            <TranscriptSegment
+              key={index}
+              hidden={
+                filterMatches
+                  ? !filterMatches.has(index) && index !== currentIndex
+                  : false
+              }
+              highlight={highlight}
+              isCurrent={index === currentIndex}
+              matches={filterMatches?.get(index)}
+              onSelect={() => onSelectSegment?.(segment)}
+              time={segment.start}
+              text={segment.text}
+            />
+          ))}
+        </ul>
       </Scroll>
     </ScrollContainer>
   );
