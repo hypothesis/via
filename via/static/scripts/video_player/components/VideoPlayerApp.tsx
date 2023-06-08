@@ -157,8 +157,8 @@ export default function VideoPlayerApp({
   };
 
   return (
-    <div className="w-full flex flex-row m-2">
-      <div className="mr-2">
+    <div className="w-full flex">
+      <div className="grow flex flex-col p-4">
         <YouTubeVideoPlayer
           videoId={videoId}
           play={playing}
