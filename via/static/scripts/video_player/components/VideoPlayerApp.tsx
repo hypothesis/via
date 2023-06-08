@@ -1,4 +1,5 @@
 import { Button, Checkbox, CopyIcon, Input } from '@hypothesis/frontend-shared';
+import classnames from 'classnames';
 import {
   useCallback,
   useEffect,
@@ -158,7 +159,15 @@ export default function VideoPlayerApp({
 
   return (
     <div className="w-full flex">
-      <div className="grow flex flex-col p-4">
+      <div
+        className={classnames(
+          // This column will grow in width per the parent flex container and
+          // allow the contained media (video) to scale with available space.
+          // The column flex layout established here ensures this container fills
+          // the full height of the parent flex container
+          'grow flex flex-col p-3'
+        )}
+      >
         <YouTubeVideoPlayer
           videoId={videoId}
           play={playing}
@@ -167,8 +176,25 @@ export default function VideoPlayerApp({
           onTimeChanged={setTimestamp}
         />
       </div>
-      <div className="w-2/5 h-[90vh] flex flex-col bg-grey-0 border">
-        <div className="p-1 bg-grey-1 border-b flex flex-col">
+      <div
+        className={classnames(
+          // Full-height column with a width allowing comfortable line lengths
+          'h-[100vh] w-[50ch] flex flex-col',
+          'bg-grey-0 border-x',
+          // TODO: This is a stopgap measure to prevent controls from being
+          // interfered with (overlaid) by sidebar controls and toolbar
+          'mr-[30px]'
+        )}
+      >
+        <div
+          className={classnames(
+            'p-1 bg-grey-1',
+            // TODO: This is a stopgap measure to prevent the right side of the
+            // search input from being inpinged on by sidebar controls
+            'pr-2'
+          )}
+          data-testid="search-bar"
+        >
           <Input
             aria-label="Transcript filter"
             data-testid="filter-input"
@@ -224,7 +250,7 @@ export default function VideoPlayerApp({
           filter={trimmedFilter}
           onSelectSegment={segment => setTimestamp(segment.start)}
         />
-        <div className="pl-2">
+        <div className="p-2">
           <Checkbox
             checked={autoScroll}
             data-testid="autoscroll-checkbox"
@@ -232,7 +258,7 @@ export default function VideoPlayerApp({
               setAutoScroll((e.target as HTMLInputElement).checked)
             }
           >
-            <div className="p-2 select-none">Auto-scroll</div>
+            <div className="select-none">Auto-scroll</div>
           </Checkbox>
         </div>
       </div>
