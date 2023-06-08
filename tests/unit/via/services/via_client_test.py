@@ -1,6 +1,7 @@
 from unittest.mock import sentinel
 
 import pytest
+from h_vialib import ContentType
 
 from via.services.via_client import ViaClientService, factory
 
@@ -9,9 +10,10 @@ class TestViaClientService:
     @pytest.mark.parametrize(
         "mime_type,expected_content_type",
         [
-            ("application/x-pdf", "pdf"),
-            ("application/pdf", "pdf"),
-            ("text/html", "html"),
+            ("application/x-pdf", ContentType.PDF),
+            ("application/pdf", ContentType.PDF),
+            ("text/html", ContentType.HTML),
+            ("video/x-youtube", ContentType.YOUTUBE),
         ],
     )
     def test_content_type(self, mime_type, expected_content_type, svc):
@@ -20,9 +22,9 @@ class TestViaClientService:
     @pytest.mark.parametrize(
         "mime_type,expected_content_type",
         [
-            ("application/pdf", "pdf"),
-            ("text/html", "html"),
-            (None, "html"),
+            ("application/pdf", ContentType.PDF),
+            ("text/html", ContentType.HTML),
+            (None, ContentType.HTML),
         ],
     )
     def test_url_for(self, mime_type, expected_content_type, svc, via_client):

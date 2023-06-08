@@ -1,6 +1,7 @@
 from unittest.mock import create_autospec, sentinel
 
 import pytest
+from h_vialib import ContentType
 
 from tests.conftest import assert_cache_control
 from tests.unit.matchers import temporary_redirect_to
@@ -13,12 +14,17 @@ class TestRouteByContent:
     @pytest.mark.parametrize(
         "content_type,status_code,expected_cache_control_header",
         [
-            ("pdf", 200, "public, max-age=300, stale-while-revalidate=86400"),
-            ("html", 200, "public, max-age=60, stale-while-revalidate=86400"),
-            ("html", 401, "public, max-age=60, stale-while-revalidate=86400"),
-            ("html", 404, "public, max-age=60, stale-while-revalidate=86400"),
-            ("html", 500, "no-cache"),
-            ("html", 501, "no-cache"),
+            (ContentType.PDF, 200, "public, max-age=300, stale-while-revalidate=86400"),
+            (
+                ContentType.YOUTUBE,
+                200,
+                "public, max-age=300, stale-while-revalidate=86400",
+            ),
+            (ContentType.HTML, 200, "public, max-age=60, stale-while-revalidate=86400"),
+            (ContentType.HTML, 401, "public, max-age=60, stale-while-revalidate=86400"),
+            (ContentType.HTML, 404, "public, max-age=60, stale-while-revalidate=86400"),
+            (ContentType.HTML, 500, "no-cache"),
+            (ContentType.HTML, 501, "no-cache"),
         ],
     )
     def test_it(

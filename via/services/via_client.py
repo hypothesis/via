@@ -1,17 +1,18 @@
 """A thin wrapper around ViaClient to make it a service."""
-from h_vialib import ViaClient
+from h_vialib import ContentType, ViaClient
 
 
 class ViaClientService:
     """A wrapper service for h_vialib.ViaClient."""
 
     _mime_types_content_type = {
-        "application/x-pdf": "pdf",
-        "application/pdf": "pdf",
+        "application/x-pdf": ContentType.PDF,
+        "application/pdf": ContentType.PDF,
+        "video/x-youtube": ContentType.YOUTUBE,
     }
 
     def content_type(self, mime_type):
-        return self._mime_types_content_type.get(mime_type, "html")
+        return self._mime_types_content_type.get(mime_type, ContentType.HTML)
 
     def __init__(self, via_client):
         self.via_client = via_client
