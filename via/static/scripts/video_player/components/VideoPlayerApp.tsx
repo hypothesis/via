@@ -8,6 +8,7 @@ import {
   useState,
 } from 'preact/hooks';
 
+import { useAppLayout } from '../hooks/use-app-layout';
 import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
 import { formatTranscript } from '../utils/transcript';
@@ -65,6 +66,8 @@ export default function VideoPlayerApp({
   const [filter, setFilter] = useState('');
   const trimmedFilter = useMemo(() => filter.trim(), [filter]);
   const filterInputRef = useRef<HTMLInputElement>();
+  const appContainerRef = useRef<HTMLDivElement | null>(null);
+  const appSize = useAppLayout(appContainerRef);
 
   // Listen for the event the Hypothesis client dispatches before it scrolls
   // a highlight into view.
@@ -157,15 +160,26 @@ export default function VideoPlayerApp({
     }
   };
 
+  const multicolumn = appSize !== 'sm';
+
   return (
-    <div className="w-full flex">
+    <div
+      data-app-size={appSize}
+      data-multicolumn={multicolumn}
+      className={classnames('w-full flex', {
+        'flex-col min-h-0 h-[100vh]': !multicolumn,
+        'flex-row': multicolumn,
+      })}
+      ref={appContainerRef}
+    >
       <div
         className={classnames(
           // This column will grow in width per the parent flex container and
           // allow the contained media (video) to scale with available space.
           // The column flex layout established here ensures this container fills
           // the full height of the parent flex container
-          'grow flex flex-col p-3'
+          'flex flex-col p-3',
+          { grow: multicolumn }
         )}
       >
         <YouTubeVideoPlayer
@@ -179,11 +193,18 @@ export default function VideoPlayerApp({
       <div
         className={classnames(
           // Full-height column with a width allowing comfortable line lengths
-          'h-[100vh] w-[450px] flex flex-col',
-          'bg-grey-0 border-x',
-          // TODO: This is a stopgap measure to prevent controls from being
-          // interfered with (overlaid) by sidebar controls and toolbar
-          'mr-[30px]'
+          'flex flex-col',
+          {
+            'w-[480px]': appSize === '2xl',
+            'w-[450px]': appSize === 'xl',
+            'w-[410px]': appSize === 'lg',
+            'w-[380px]': appSize === 'md',
+            // TODO: This is a stopgap measure to prevent controls from being
+            // interfered with (overlaid) by sidebar controls and toolbar
+            'mr-[30px] h-[100vh]': multicolumn,
+            'min-h-0 grow': !multicolumn,
+          },
+          'bg-grey-0 border-x'
         )}
       >
         <div
