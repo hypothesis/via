@@ -1,3 +1,4 @@
+import { AspectRatio } from '@hypothesis/frontend-shared';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
 import { loadYouTubeIFrameAPI } from '../utils/youtube';
@@ -166,10 +167,9 @@ export default function YouTubeVideoPlayer({
   }, [time]);
 
   return (
-    <div>
+    <AspectRatio>
       <iframe
         allow="autoplay; fullscreen"
-        className="w-[640px] h-[360px] pb-2"
         title="Video player"
         src={playerURL}
         ref={videoFrame}
@@ -179,6 +179,6 @@ export default function YouTubeVideoPlayer({
           <b>There was an error loading this video. Try reloading the page.</b>
         </p>
       )}
-    </div>
+    </AspectRatio>
   );
 }

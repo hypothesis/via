@@ -3,6 +3,10 @@ CSS entry point for the video player app.
 */
 
 @tailwind base;
+
+html {
+  @apply bg-grey-0;
+}
 @tailwind components;
 @tailwind utilities;
 
