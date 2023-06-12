@@ -4,9 +4,11 @@ CSS entry point for the video player app.
 
 @tailwind base;
 
-html {
+body {
   @apply bg-grey-0;
+  @apply font-sans text-sm text-color-text;
 }
+
 @tailwind components;
 @tailwind utilities;
 

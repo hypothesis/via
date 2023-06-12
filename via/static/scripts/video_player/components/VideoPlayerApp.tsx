@@ -179,7 +179,7 @@ export default function VideoPlayerApp({
       <div
         className={classnames(
           // Full-height column with a width allowing comfortable line lengths
-          'h-[100vh] w-[50ch] flex flex-col',
+          'h-[100vh] w-[450px] flex flex-col',
           'bg-grey-0 border-x',
           // TODO: This is a stopgap measure to prevent controls from being
           // interfered with (overlaid) by sidebar controls and toolbar
@@ -250,7 +250,7 @@ export default function VideoPlayerApp({
           filter={trimmedFilter}
           onSelectSegment={segment => setTimestamp(segment.start)}
         />
-        <div className="p-2">
+        <div className="px-2 py-4">
           <Checkbox
             checked={autoScroll}
             data-testid="autoscroll-checkbox"
