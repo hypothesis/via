@@ -23,18 +23,6 @@ class TestViewVideo:
         assert response == {
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
-            "transcript": {
-                "segments": [
-                    {
-                        "time": 0,
-                        "text": "First segment of transcript",
-                    },
-                    {
-                        "time": 30,
-                        "text": "Second segment of transcript",
-                    },
-                ],
-            },
             "video_id": sentinel.youtube_video_id,
         }
 

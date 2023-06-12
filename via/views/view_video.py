@@ -23,22 +23,8 @@ def youtube(request, url):
 
     _, client_config = Configuration.extract_from_params(request.params)
 
-    transcript = {
-        "segments": [
-            {
-                "time": 0,
-                "text": "First segment of transcript",
-            },
-            {
-                "time": 30,
-                "text": "Second segment of transcript",
-            },
-        ],
-    }
-
     return {
         "client_embed_url": request.registry.settings["client_embed_url"],
         "client_config": client_config,
-        "transcript": transcript,
         "video_id": video_id,
     }
