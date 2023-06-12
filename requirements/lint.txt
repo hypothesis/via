@@ -163,6 +163,7 @@ marshmallow==3.19.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+    #   webargs
 mccabe==0.6.1
     # via pylint
 netaddr==0.8.0
@@ -186,6 +187,7 @@ packaging==21.3
     #   build
     #   marshmallow
     #   pytest
+    #   webargs
 pastedeploy==2.1.1
     # via
     #   -r requirements/functests.txt
@@ -372,6 +374,10 @@ waitress==2.1.2
     # via
     #   -r requirements/functests.txt
     #   webtest
+webargs==8.2.0
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
 webob==1.8.6
     # via
     #   -r requirements/functests.txt

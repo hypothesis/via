@@ -1,6 +1,7 @@
 """Error views to handle when things go wrong in the app."""
 
 import h_pyramid_sentry
+from marshmallow.exceptions import ValidationError as MarshmallowValidationError
 from pyramid.httpexceptions import HTTPClientError, HTTPNotFound
 from pyramid.view import exception_view_config
 
@@ -48,6 +49,12 @@ EXCEPTION_MAP = {
             "The URL you asked for is not part of this service.",
             "Please check the URL you have entered.",
         ],
+        "stage": "request",
+        "retryable": False,
+    },
+    MarshmallowValidationError: {
+        "title": "Invalid request",
+        "long_description": ["We can't process the request because it's invalid."],
         "stage": "request",
         "retryable": False,
     },
