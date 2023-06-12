@@ -53,7 +53,9 @@ markupsafe==1.1.1
     #   jinja2
     #   pyramid-jinja2
 marshmallow==3.19.0
-    # via -r requirements/prod.in
+    # via
+    #   -r requirements/prod.in
+    #   webargs
 netaddr==0.8.0
     # via checkmatelib
 newrelic==8.8.0
@@ -61,7 +63,9 @@ newrelic==8.8.0
 oauthlib==3.2.2
     # via requests-oauthlib
 packaging==21.3
-    # via marshmallow
+    # via
+    #   marshmallow
+    #   webargs
 pastedeploy==2.1.1
     # via plaster-pastedeploy
 plaster==1.0
@@ -128,6 +132,8 @@ urllib3==1.26.15
     #   sentry-sdk
 venusian==3.0.0
     # via pyramid
+webargs==8.2.0
+    # via -r requirements/prod.in
 webob==1.8.6
     # via
     #   h-vialib
