@@ -2,6 +2,7 @@ from h_vialib import Configuration
 from pyramid.httpexceptions import HTTPUnauthorized
 from pyramid.view import view_config
 
+from via.exceptions import BadURL
 from via.services import YouTubeService
 
 
@@ -12,9 +13,15 @@ def view_video(request):
     if not youtube_service.enabled:
         raise HTTPUnauthorized()
 
+    video_url = request.params["url"]
+
+    video_id = youtube_service.get_video_id(video_url)
+
+    if not video_id:
+        raise BadURL(f"Unsupported video URL: {video_url}", url=video_url)
+
     _, client_config = Configuration.extract_from_params(request.params)
 
-    video_id = request.matchdict["id"]
     transcript = {
         "segments": [
             {
