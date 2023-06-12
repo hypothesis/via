@@ -8,9 +8,9 @@ from via.exceptions import BadURL
 from via.services import YouTubeService
 
 
-@view_config(renderer="via:templates/view_video.html.jinja2", route_name="view_video")
+@view_config(renderer="via:templates/view_video.html.jinja2", route_name="youtube")
 @use_kwargs({"url": fields.Url(required=True)}, location="query")
-def view_video(request, url):
+def youtube(request, url):
     youtube_service = request.find_service(YouTubeService)
 
     if not youtube_service.enabled:

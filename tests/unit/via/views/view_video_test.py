@@ -5,7 +5,7 @@ from marshmallow.exceptions import ValidationError as MarshmallowValidationError
 from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.exceptions import BadURL
-from via.views.view_video import view_video
+from via.views.view_video import youtube
 
 # webargs's kwargs injection into view functions falsely triggers Pylint's
 # no-value-for-parameter all the time so just disable it file-wide.
@@ -17,7 +17,7 @@ class TestViewVideo:
     def test_it(self, pyramid_request, Configuration, youtube_service, video_url):
         youtube_service.get_video_id.return_value = sentinel.youtube_video_id
 
-        response = view_video(pyramid_request)
+        response = youtube(pyramid_request)
 
         youtube_service.get_video_id.assert_called_once_with(video_url)
         assert response == {
@@ -42,7 +42,7 @@ class TestViewVideo:
         pyramid_request.params["url"] = "not_a_valid_url"
 
         with pytest.raises(MarshmallowValidationError) as exc_info:
-            view_video(pyramid_request)
+            youtube(pyramid_request)
 
         assert exc_info.value.normalized_messages() == {
             "query": {"url": ["Not a valid URL."]}
@@ -57,7 +57,7 @@ class TestViewVideo:
         youtube_service.get_video_id.return_value = None
 
         with pytest.raises(BadURL) as exc_info:
-            view_video(pyramid_request)
+            youtube(pyramid_request)
 
         assert str(exc_info.value).startswith("Unsupported video URL")
 
@@ -67,7 +67,7 @@ class TestViewVideo:
         youtube_service.enabled = False
 
         with pytest.raises(HTTPUnauthorized):
-            view_video(pyramid_request)
+            youtube(pyramid_request)
 
     @pytest.fixture
     def Configuration(self, patch):
