@@ -1,6 +1,7 @@
 from unittest.mock import sentinel
 
 import pytest
+from checkmatelib import BadURL as CheckmateBadURL
 from marshmallow.exceptions import ValidationError as MarshmallowValidationError
 from pyramid.httpexceptions import HTTPUnauthorized
 
@@ -15,8 +16,6 @@ from via.views.view_video import youtube
 @pytest.mark.usefixtures("youtube_service")
 class TestViewVideo:
     def test_it(self, pyramid_request, Configuration, youtube_service, video_url):
-        youtube_service.get_video_id.return_value = sentinel.youtube_video_id
-
         response = youtube(pyramid_request)
 
         youtube_service.get_video_id.assert_called_once_with(video_url)
@@ -28,6 +27,16 @@ class TestViewVideo:
             "client_config": Configuration.extract_from_params.return_value[1],
             "video_id": sentinel.youtube_video_id,
         }
+
+    def test_it_raises_if_the_url_is_blocked_by_checkmate(
+        self, pyramid_request, video_url
+    ):
+        pyramid_request.checkmate.raise_if_blocked.side_effect = CheckmateBadURL
+
+        with pytest.raises(CheckmateBadURL):
+            youtube(pyramid_request)
+
+        pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(video_url)
 
     def test_it_errors_if_the_url_is_invalid(self, pyramid_request):
         pyramid_request.params["url"] = "not_a_valid_url"
@@ -70,6 +79,11 @@ class TestViewVideo:
             {"url": video_url, "via.foo": "foo", "via.bar": "bar"}
         )
         return pyramid_request
+
+    @pytest.fixture
+    def youtube_service(self, youtube_service):
+        youtube_service.get_video_id.return_value = sentinel.youtube_video_id
+        return youtube_service
 
 
 @pytest.fixture(autouse=True)
