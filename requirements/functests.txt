@@ -188,7 +188,7 @@ python-jose[cryptography]==3.3.0
     # via
     #   -r requirements/prod.txt
     #   h-vialib
-requests==2.28.2
+requests==2.31.0
     # via
     #   -r requirements/prod.txt
     #   checkmatelib
