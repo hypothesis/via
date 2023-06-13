@@ -20,6 +20,9 @@ class TestViewVideo:
         response = youtube(pyramid_request)
 
         youtube_service.get_video_id.assert_called_once_with(video_url)
+        Configuration.extract_from_params.assert_called_once_with(
+            {"via.foo": "foo", "via.bar": "bar"}
+        )
         assert response == {
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
@@ -58,20 +61,22 @@ class TestViewVideo:
             youtube(pyramid_request)
 
     @pytest.fixture
-    def Configuration(self, patch):
-        Configuration = patch("via.views.view_video.Configuration")
-        Configuration.extract_from_params.return_value = (
-            sentinel.via_config,
-            sentinel.h_config,
-        )
-
-        return Configuration
-
-    @pytest.fixture
     def video_url(self):
         return "https://example.com/watch?v=VIDEO_ID"
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request, video_url):
-        pyramid_request.params["url"] = video_url
+        pyramid_request.params.update(
+            {"url": video_url, "via.foo": "foo", "via.bar": "bar"}
+        )
         return pyramid_request
+
+
+@pytest.fixture(autouse=True)
+def Configuration(patch):
+    Configuration = patch("via.views.view_video.Configuration")
+    Configuration.extract_from_params.return_value = (
+        sentinel.via_config,
+        sentinel.h_config,
+    )
+    return Configuration
