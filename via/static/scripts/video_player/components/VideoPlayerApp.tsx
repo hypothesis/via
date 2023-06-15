@@ -172,7 +172,7 @@ export default function VideoPlayerApp({
   const clientConfig = useMemo(() => {
     return {
       ...baseClientConfig,
-      bucketBarContainer: '#' + bucketContainerId,
+      bucketContainerSelector: '#' + bucketContainerId,
     };
   }, [baseClientConfig]);
 
