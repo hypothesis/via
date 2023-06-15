@@ -1,4 +1,10 @@
-import { Button, Checkbox, CopyIcon, Input } from '@hypothesis/frontend-shared';
+import {
+  Button,
+  Checkbox,
+  CopyIcon,
+  Input,
+  LogoIcon,
+} from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import {
   useCallback,
@@ -8,6 +14,7 @@ import {
   useState,
 } from 'preact/hooks';
 
+import { useAppLayout } from '../hooks/use-app-layout';
 import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
 import { formatTranscript } from '../utils/transcript';
@@ -65,6 +72,10 @@ export default function VideoPlayerApp({
   const [filter, setFilter] = useState('');
   const trimmedFilter = useMemo(() => filter.trim(), [filter]);
   const filterInputRef = useRef<HTMLInputElement>();
+  const appContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const appSize = useAppLayout(appContainerRef);
+  const multicolumn = appSize !== 'sm';
 
   // Listen for the event the Hypothesis client dispatches before it scrolls
   // a highlight into view.
@@ -158,46 +169,48 @@ export default function VideoPlayerApp({
   };
 
   return (
-    <div className="w-full flex">
+    <div
+      data-testid="app-container"
+      className={classnames(
+        // Constrain height of interface to viewport height
+        'flex flex-col h-[100vh] min-h-0'
+      )}
+    >
       <div
+        data-testid="top-bar"
         className={classnames(
-          // This column will grow in width per the parent flex container and
-          // allow the contained media (video) to scale with available space.
-          // The column flex layout established here ensures this container fills
-          // the full height of the parent flex container
-          'grow flex flex-col p-3'
+          // Match height of sidebar's top-bar
+          'h-[40px] min-h-[40px]',
+          'w-full flex items-center gap-x-3 px-2 border-b',
+          // Background is one shade darker than sidebar top-bar
+          'bg-grey-0'
         )}
       >
-        <YouTubeVideoPlayer
-          videoId={videoId}
-          play={playing}
-          time={timestamp}
-          onPlayingChanged={setPlaying}
-          onTimeChanged={setTimestamp}
-        />
-      </div>
-      <div
-        className={classnames(
-          // Full-height column with a width allowing comfortable line lengths
-          'h-[100vh] w-[450px] flex flex-col',
-          'bg-grey-0 border-x',
-          // TODO: This is a stopgap measure to prevent controls from being
-          // interfered with (overlaid) by sidebar controls and toolbar
-          'mr-[30px]'
-        )}
-      >
-        <div
-          className={classnames(
-            'p-1 bg-grey-1',
-            // TODO: This is a stopgap measure to prevent the right side of the
-            // search input from being inpinged on by sidebar controls
-            'pr-2'
-          )}
-          data-testid="search-bar"
+        <a
+          href="https://web.hypothes.is"
+          target="_blank"
+          rel="noreferrer"
+          title="Hypothesis"
         >
+          <LogoIcon />
+        </a>
+        <div data-testid="filter-container" className="grow text-right">
           <Input
-            aria-label="Transcript filter"
             data-testid="filter-input"
+            aria-label="Transcript filter"
+            classes={classnames(
+              // Match height of search input in sidebar
+              'h-[32px]',
+              // TODO: Temporary prevention of sidebar controls overlapping
+              'mr-[22px]',
+              {
+                // Adapt width to match width of transcript
+                'max-w-[480px]': appSize === '2xl',
+                'max-w-[450px]': appSize === 'xl',
+                'max-w-[410px]': appSize === 'lg',
+                'max-w-[380px]': appSize === 'md',
+              }
+            )}
             elementRef={filterInputRef}
             onKeyUp={e => {
               // Allow user to easily remove focus from search input.
@@ -209,21 +222,87 @@ export default function VideoPlayerApp({
             placeholder="Search..."
             value={filter}
           />
-          <div className="flex flex-row">
+        </div>
+      </div>
+
+      <main
+        data-testid="app-layout"
+        className={classnames('w-full flex min-h-0', {
+          // Stack video over transcript.
+          'flex-col': !multicolumn,
+          // Video and transcript side-by-side, using up remaining vertical
+          // space in app-container (i.e. 100vh minus top-bar)
+          'flex-row grow h-full': multicolumn,
+        })}
+        ref={appContainerRef}
+      >
+        <div
+          data-testid="embedded-video-container"
+          className={classnames(
+            'flex flex-col',
+            {
+              // Allow video to grow with available horizontal space in
+              // multicolumn layouts (NB: It will take up full width in
+              // single-column)
+              grow: multicolumn,
+            },
+            {
+              // Adapt spacing around video for different app sizes
+              'p-0': appSize === 'sm',
+              'p-1': appSize === 'md',
+              'p-2': appSize === 'lg',
+              'py-2 px-3': appSize === 'xl',
+              'py-2 px-4': appSize === '2xl',
+            }
+          )}
+        >
+          <YouTubeVideoPlayer
+            videoId={videoId}
+            play={playing}
+            time={timestamp}
+            onPlayingChanged={setPlaying}
+            onTimeChanged={setTimestamp}
+          />
+        </div>
+        <div
+          data-testid="transcript-container"
+          className={classnames(
+            'flex flex-col bg-grey-0 border-x',
+            {
+              // Make transcript fill available vertical space in single-column
+              // layouts
+              'min-h-0 grow': !multicolumn,
+              // TODO: This is a stopgap measure to prevent controls from being
+              // interfered with (overlaid) by sidebar controls and toolbar
+              'mr-[30px]': multicolumn,
+            },
+            {
+              // Adapt transcript width for different app sizes
+              'w-[480px]': appSize === '2xl',
+              'w-[450px]': appSize === 'xl',
+              'w-[410px]': appSize === 'lg',
+              'w-[380px]': appSize === 'md',
+            }
+          )}
+        >
+          <div
+            data-testid="transcript-controls"
+            className={classnames(
+              // Same height as top-bar
+              'h-[40px]',
+              'bg-grey-1 flex items-center',
+              // TODO: This is a stopgap measure to prevent the right side of the
+              // transcript controls from being inpinged on by sidebar controls
+              'pr-2'
+            )}
+          >
             <Button
               classes="text-l"
+              icon={playing ? PauseIcon : PlayIcon}
               onClick={() => setPlaying(playing => !playing)}
               data-testid="play-button"
             >
-              {playing ? (
-                <>
-                  <PauseIcon /> Pause
-                </>
-              ) : (
-                <>
-                  <PlayIcon /> Play
-                </>
-              )}
+              {playing ? 'Pause' : 'Play'}
             </Button>
             <div className="flex-grow" />
             <Button
@@ -241,28 +320,28 @@ export default function VideoPlayerApp({
               <SyncIcon />
             </Button>
           </div>
+          <Transcript
+            autoScroll={autoScroll}
+            transcript={transcript}
+            controlsRef={transcriptControls}
+            currentTime={timestamp}
+            filter={trimmedFilter}
+            onSelectSegment={segment => setTimestamp(segment.start)}
+          />
+          <div data-testid="transcript-footer" className="px-2 py-4">
+            <Checkbox
+              checked={autoScroll}
+              data-testid="autoscroll-checkbox"
+              onChange={e =>
+                setAutoScroll((e.target as HTMLInputElement).checked)
+              }
+            >
+              <div className="select-none">Auto-scroll</div>
+            </Checkbox>
+          </div>
         </div>
-        <Transcript
-          autoScroll={autoScroll}
-          transcript={transcript}
-          controlsRef={transcriptControls}
-          currentTime={timestamp}
-          filter={trimmedFilter}
-          onSelectSegment={segment => setTimestamp(segment.start)}
-        />
-        <div className="px-2 py-4">
-          <Checkbox
-            checked={autoScroll}
-            data-testid="autoscroll-checkbox"
-            onChange={e =>
-              setAutoScroll((e.target as HTMLInputElement).checked)
-            }
-          >
-            <div className="select-none">Auto-scroll</div>
-          </Checkbox>
-        </div>
-      </div>
-      <HypothesisClient src={clientSrc} config={clientConfig} />
+        <HypothesisClient src={clientSrc} config={clientConfig} />
+      </main>
     </div>
   );
 }

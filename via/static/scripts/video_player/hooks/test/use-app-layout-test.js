@@ -1,22 +1,17 @@
-import { render } from 'preact';
+import { mount } from 'enzyme';
 import { useRef } from 'preact/hooks';
-import { act } from 'preact/test-utils';
 
 import { waitFor } from '../../../test-util/wait';
 import { useAppLayout } from '../use-app-layout';
 
 describe('useAppLayout', () => {
   let container;
-  let appSize;
-
-  function findElementByTestId(testId) {
-    return container.querySelector(`[data-testid=${testId}]`);
-  }
+  let wrappers;
 
   // Create a fake component to mount in tests that uses the hook
   function FakeComponent() {
     const myRef = useRef();
-    appSize = useAppLayout(myRef);
+    const appSize = useAppLayout(myRef);
     return (
       <div
         ref={myRef}
@@ -30,20 +25,21 @@ describe('useAppLayout', () => {
   }
 
   function renderComponent() {
-    act(() => {
-      render(<FakeComponent />, container);
-    });
-
-    return findElementByTestId('appContainer');
+    const wrapper = mount(<FakeComponent />, { attachTo: container });
+    wrappers.push(wrapper);
+    return wrapper;
   }
 
   beforeEach(() => {
     container = document.createElement('div');
     container.setAttribute('id', 'container');
     document.body.append(container);
+
+    wrappers = [];
   });
 
   afterEach(() => {
+    wrappers.forEach(w => w.unmount());
     container.remove();
   });
 
@@ -55,17 +51,19 @@ describe('useAppLayout', () => {
   ].forEach(({ containerWidth, expected }) => {
     it('should provide relative app size when component is rendered', () => {
       container.style.width = `${containerWidth}px`;
-
-      renderComponent();
-      assert.equal(appSize, expected);
+      const appContainerEl = renderComponent().find(
+        '[data-testid="appContainer"]'
+      );
+      assert.equal(appContainerEl.prop('data-app-size'), expected);
     });
   });
 
   it('should update app size if relative size of container changes', async () => {
     container.style.width = '200px';
 
-    const appContainerEl = renderComponent();
-    assert.equal(appSize, 'sm');
+    const wrapper = renderComponent();
+    const appContainerEl = wrapper.find('[data-testid="appContainer"]');
+    assert.equal(appContainerEl.prop('data-app-size'), 'sm');
 
     const steps = [
       [800, 'md'],
@@ -75,8 +73,13 @@ describe('useAppLayout', () => {
       [400, 'sm'],
     ];
     for (const [width, expected] of steps) {
-      appContainerEl.style.width = `${width}px`;
-      await waitFor(() => appSize === expected, /* timeout */ 50);
+      container.style.width = `${width}px`;
+
+      await waitFor(() => {
+        wrapper.update();
+        const appContainerEl = wrapper.find('[data-testid="appContainer"]');
+        return appContainerEl.prop('data-app-size') === expected;
+      }, /* timeout */ 50);
     }
   });
 });
