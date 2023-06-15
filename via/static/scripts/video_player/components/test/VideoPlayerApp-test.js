@@ -401,7 +401,7 @@ describe('VideoPlayerApp', () => {
     const mergedConfig = wrapper.find('HypothesisClient').prop('config');
     assert.deepEqual(mergedConfig, {
       openSidebar: true,
-      bucketBarContainer: '#bucket-container',
+      bucketContainerSelector: '#bucket-container',
     });
   });
 
