@@ -13,6 +13,7 @@ export default function PlayIcon(props: PlayIconProps) {
       width="16"
       height="16"
       fill="none"
+      viewBox="0 0 16 16"
       data-component="PlayIcon"
       {...props}
     >
