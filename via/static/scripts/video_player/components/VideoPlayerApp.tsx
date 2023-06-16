@@ -332,9 +332,12 @@ export default function VideoPlayerApp({
             className={classnames(
               'relative',
 
-              // Override flex-basis for transcript. Otherwise this container will
-              // be sized to accomodate all transcript elements.
-              'min-h-0'
+              // Override flex-basis for transcript. Otherwise this container
+              // will be sized to accomodate all transcript elements.
+              'min-h-0',
+
+              // Make the bucket bar fill this container.
+              'flex flex-col'
             )}
           >
             <Transcript
