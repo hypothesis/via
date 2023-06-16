@@ -20,6 +20,7 @@ export function useAppLayout(
 
   const updateWidth = useCallback(() => {
     const containerWidth = appContainer.current?.clientWidth;
+    /* istanbul ignore next */
     if (!containerWidth) {
       return;
     }

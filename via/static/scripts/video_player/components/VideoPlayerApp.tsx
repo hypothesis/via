@@ -2,10 +2,12 @@ import {
   Button,
   Checkbox,
   CopyIcon,
+  IconButton,
   Input,
   LogoIcon,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
+import type { Ref } from 'preact';
 import {
   useCallback,
   useEffect,
@@ -47,6 +49,47 @@ function isScrollToRangeEvent(e: Event): e is ScrollToRangeEvent {
   );
 }
 
+type FilterInputProps = {
+  elementRef: Ref<HTMLElement | undefined>;
+  setFilter: (filter: string) => void;
+  filter: string;
+};
+
+function FilterInput({ elementRef, setFilter, filter }: FilterInputProps) {
+  return (
+    <Input
+      data-testid="filter-input"
+      aria-label="Transcript filter"
+      classes={classnames(
+        // Match height of search input in sidebar
+        'h-[32px]'
+      )}
+      elementRef={elementRef}
+      onKeyUp={e => {
+        // Allow user to easily remove focus from search input.
+        if (e.key === 'Escape') {
+          (e.target as HTMLElement).blur();
+        }
+      }}
+      onInput={e => setFilter((e.target as HTMLInputElement).value)}
+      placeholder="Search..."
+      value={filter}
+    />
+  );
+}
+
+function HypothesisLogo() {
+  return (
+    <a
+      href="https://web.hypothes.is"
+      target="_blank"
+      rel="noreferrer"
+      title="Hypothesis"
+    >
+      <LogoIcon data-testid="hypothesis-logo" />
+    </a>
+  );
+}
 /**
  * Video annotation application.
  *
@@ -76,6 +119,13 @@ export default function VideoPlayerApp({
 
   const appSize = useAppLayout(appContainerRef);
   const multicolumn = appSize !== 'sm';
+  const transcriptWidths = {
+    sm: '100%',
+    md: '380px',
+    lg: '410px',
+    xl: '450px',
+    '2xl': '480px',
+  };
 
   // Listen for the event the Hypothesis client dispatches before it scrolls
   // a highlight into view.
@@ -179,67 +229,40 @@ export default function VideoPlayerApp({
   return (
     <div
       data-testid="app-container"
-      className={classnames(
-        // Constrain height of interface to viewport height
-        'flex flex-col h-[100vh] min-h-0'
-      )}
+      className="flex flex-col h-[100vh] min-h-0"
     >
-      <div
-        data-testid="top-bar"
-        className={classnames(
-          // Match height of sidebar's top-bar
-          'h-[40px] min-h-[40px]',
-          'w-full flex items-center gap-x-3 px-2 border-b',
-          // Background is one shade darker than sidebar top-bar
-          'bg-grey-0'
-        )}
-      >
-        <a
-          href="https://web.hypothes.is"
-          target="_blank"
-          rel="noreferrer"
-          title="Hypothesis"
+      {multicolumn && (
+        <div
+          data-testid="top-bar"
+          className={classnames(
+            'h-[40px] min-h-[40px] w-full flex items-center gap-x-3',
+            'px-2 border-b bg-grey-0'
+          )}
         >
-          <LogoIcon />
-        </a>
-        <div data-testid="filter-container" className="grow text-right">
-          <Input
-            data-testid="filter-input"
-            aria-label="Transcript filter"
-            classes={classnames(
-              // Match height of search input in sidebar
-              'h-[32px]',
+          <HypothesisLogo />
+          <div className="grow" />
+          <div
+            data-testid="filter-container"
+            className={classnames(
+              'text-right',
               // TODO: Temporary prevention of sidebar controls overlapping
-              'mr-[22px]',
-              {
-                // Adapt width to match width of transcript
-                'max-w-[480px]': appSize === '2xl',
-                'max-w-[450px]': appSize === 'xl',
-                'max-w-[410px]': appSize === 'lg',
-                'max-w-[380px]': appSize === 'md',
-              }
+              'mr-[22px]'
             )}
-            elementRef={filterInputRef}
-            onKeyUp={e => {
-              // Allow user to easily remove focus from search input.
-              if (e.key === 'Escape') {
-                (e.target as HTMLElement).blur();
-              }
-            }}
-            onInput={e => setFilter((e.target as HTMLInputElement).value)}
-            placeholder="Search..."
-            value={filter}
-          />
+            style={{ width: transcriptWidths[appSize] }}
+          >
+            <FilterInput
+              elementRef={filterInputRef}
+              setFilter={setFilter}
+              filter={filter}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <main
         data-testid="app-layout"
         className={classnames('w-full flex min-h-0', {
-          // Stack video over transcript.
           'flex-col': !multicolumn,
-          // Video and transcript side-by-side, using up remaining vertical
-          // space in app-container (i.e. 100vh minus top-bar)
           'flex-row grow h-full': multicolumn,
         })}
         ref={appContainerRef}
@@ -272,61 +295,76 @@ export default function VideoPlayerApp({
             onTimeChanged={setTimestamp}
           />
         </div>
+
         <div
           data-testid="transcript-container"
-          className={classnames(
-            'flex flex-col bg-grey-0 border-x',
-            {
-              // Make transcript fill available vertical space in single-column
-              // layouts
-              'min-h-0 grow': !multicolumn,
-              // TODO: This is a stopgap measure to prevent controls from being
-              // interfered with (overlaid) by sidebar controls and toolbar
-              'mr-[30px]': multicolumn,
-            },
-            {
-              // Adapt transcript width for different app sizes
-              'w-[480px]': appSize === '2xl',
-              'w-[450px]': appSize === 'xl',
-              'w-[410px]': appSize === 'lg',
-              'w-[380px]': appSize === 'md',
-            }
-          )}
+          className={classnames('flex flex-col bg-grey-0 border-x', {
+            // Make transcript fill available vertical space in single-column
+            // layouts
+            'min-h-0 grow': !multicolumn,
+            // TODO: This is a stopgap measure to prevent controls from being
+            // interfered with (overlaid) by sidebar controls and toolbar
+            'mr-[30px]': multicolumn,
+          })}
+          style={{ width: transcriptWidths[appSize] }}
         >
           <div
             data-testid="transcript-controls"
             className={classnames(
               // Same height as top-bar
-              'h-[40px]',
+              'h-[40px] min-h-[40px]',
               'bg-grey-1 flex items-center',
               // TODO: This is a stopgap measure to prevent the right side of the
               // transcript controls from being inpinged on by sidebar controls
-              'pr-2'
+              'pr-2',
+              {
+                'px-1.5': !multicolumn,
+              }
             )}
           >
-            <Button
-              classes="text-l"
-              icon={playing ? PauseIcon : PlayIcon}
-              onClick={() => setPlaying(playing => !playing)}
-              data-testid="play-button"
-            >
-              {playing ? 'Pause' : 'Play'}
-            </Button>
-            <div className="flex-grow" />
-            <Button
+            {multicolumn && (
+              <>
+                <Button
+                  icon={playing ? PauseIcon : PlayIcon}
+                  onClick={() => setPlaying(playing => !playing)}
+                  data-testid="play-button"
+                  variant="custom"
+                  classes="text-grey-7 hover:text-grey-9 font-semibold"
+                >
+                  {playing ? 'Pause' : 'Play'}
+                </Button>
+                <div className="grow" />
+              </>
+            )}
+            {!multicolumn && (
+              <>
+                <HypothesisLogo />
+                <div className="flex-grow ml-2.5">
+                  <FilterInput
+                    setFilter={setFilter}
+                    elementRef={filterInputRef}
+                    filter={filter}
+                  />
+                </div>
+              </>
+            )}
+
+            <IconButton
+              onClick={syncTranscript}
+              data-testid="sync-button"
+              icon={SyncIcon}
+              title="Sync transcript to video"
+              size="custom"
+              classes="p-2"
+            />
+            <IconButton
               onClick={copyTranscript}
               data-testid="copy-button"
               title="Copy transcript"
-            >
-              <CopyIcon />
-            </Button>
-            <Button
-              onClick={syncTranscript}
-              data-testid="sync-button"
-              title="Sync"
-            >
-              <SyncIcon />
-            </Button>
+              icon={CopyIcon}
+              size="custom"
+              classes="p-2"
+            />
           </div>
           <div
             className={classnames(
@@ -362,7 +400,10 @@ export default function VideoPlayerApp({
               )}
             />
           </div>
-          <div data-testid="transcript-footer" className="px-2 py-4">
+          <div
+            data-testid="transcript-footer"
+            className="p-2 bg-grey-1 border-b h-[40px] min-h-[40px] flex items-center"
+          >
             <Checkbox
               checked={autoScroll}
               data-testid="autoscroll-checkbox"
