@@ -181,10 +181,16 @@ function TranscriptSegment({
         data-timestamp={timestamp}
       />
       <p
-        className={classnames('grow peer-hover:text-stone-900', {
-          'text-stone-600': !isCurrent,
-          'text-stone-800': isCurrent,
-        })}
+        className={classnames(
+          'grow text-justify peer-hover:text-stone-900',
+          {
+            'text-stone-600': !isCurrent,
+            'text-stone-800': isCurrent,
+          },
+
+          // Avoid buckets overlapping highlighted text.
+          'pr-[30px]'
+        )}
         data-testid="transcript-text"
         ref={contentRef}
       >
