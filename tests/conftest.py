@@ -20,6 +20,7 @@ def pyramid_settings():
         "data_directory": "tests/data_directory",
         "dev": False,
         "youtube_transcripts": True,
+        "api_jwt_secret": "secret",
     }
 
 

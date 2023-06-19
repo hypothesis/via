@@ -1,6 +1,7 @@
 from unittest.mock import sentinel
 
 import pytest
+from h_matchers import Any
 from marshmallow.exceptions import ValidationError as MarshmallowValidationError
 from pyramid.httpexceptions import HTTPUnauthorized
 
@@ -14,7 +15,14 @@ from via.views.view_video import youtube
 
 @pytest.mark.usefixtures("youtube_service")
 class TestViewVideo:
-    def test_it(self, pyramid_request, Configuration, youtube_service, video_url):
+    def test_it(
+        self,
+        pyramid_request,
+        Configuration,
+        youtube_service,
+        video_url,
+        ViaSecurityPolicy,
+    ):
         youtube_service.get_video_id.return_value = sentinel.youtube_video_id
 
         response = youtube(pyramid_request)
@@ -23,10 +31,23 @@ class TestViewVideo:
         Configuration.extract_from_params.assert_called_once_with(
             {"via.foo": "foo", "via.bar": "bar"}
         )
+        ViaSecurityPolicy.encode_jwt.assert_called_once_with(pyramid_request)
         assert response == {
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
             "video_id": sentinel.youtube_video_id,
+            "api": {
+                "transcript": {
+                    "doc": Any.string(),
+                    "url": pyramid_request.route_url(
+                        "api.youtube.transcript", transcript_id="1"
+                    ),
+                    "method": "GET",
+                    "headers": {
+                        "Authorization": f"Bearer {ViaSecurityPolicy.encode_jwt.return_value}",
+                    },
+                }
+            },
         }
 
     def test_it_errors_if_the_url_is_invalid(self, pyramid_request):
@@ -80,3 +101,8 @@ def Configuration(patch):
         sentinel.h_config,
     )
     return Configuration
+
+
+@pytest.fixture(autouse=True)
+def ViaSecurityPolicy(patch):
+    return patch("via.views.view_video.ViaSecurityPolicy")
