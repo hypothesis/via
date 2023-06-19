@@ -7,6 +7,7 @@ import VideoPlayerApp from './components/VideoPlayerApp';
 import { readConfig } from './config';
 import { sampleTranscript } from './sample-transcript';
 import type { TranscriptData } from './utils/transcript';
+import { mergeSegments } from './utils/transcript';
 
 export function init() {
   const rootEl = document.querySelector('#app');
@@ -24,9 +25,12 @@ export function init() {
     video_id: videoId,
   } = readConfig();
 
-  // Pre-fetched transcript for testing. Use the video ID
+  // Pre-fetched transcript for testing. From the video
   // https://www.youtube.com/watch?v=x8TO-nrUtSI.
   const transcript: TranscriptData = { segments: sampleTranscript };
+
+  // Group segments together for better readability.
+  transcript.segments = mergeSegments(transcript.segments, 3);
 
   render(
     <VideoPlayerApp

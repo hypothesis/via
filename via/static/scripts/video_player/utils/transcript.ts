@@ -72,3 +72,23 @@ export function filterTranscript(
 export function formatTranscript(transcript: Segment[]): string {
   return transcript.map(seg => seg.text).join('\n');
 }
+
+/**
+ * Merge every group of `n` consecutive segments into a single transcript
+ * segment.
+ *
+ * This is useful for transcript sources like YouTube where each entry is short,
+ * typically just a few words, and so the transcript can be more readable if
+ * segments are grouped.
+ */
+export function mergeSegments(segments: Segment[], n: number): Segment[] {
+  return segments.reduce((merged, segment, idx) => {
+    if (idx % n !== 0) {
+      merged[merged.length - 1].text += ' ' + segment.text;
+    } else {
+      // Copy segment so we can modify in subsequent iterations.
+      merged.push({ ...segment });
+    }
+    return merged;
+  }, [] as Segment[]);
+}
