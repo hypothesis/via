@@ -9,6 +9,7 @@ from whitenoise import WhiteNoise
 
 from via.cache_buster import PathCacheBuster
 from via.checkmate import ViaCheckmateClient
+from via.security import ViaSecurityPolicy
 from via.sentry_filters import SENTRY_FILTERS
 
 PARAMETERS = {
@@ -28,6 +29,7 @@ PARAMETERS = {
     "signed_urls_required": {"formatter": asbool},
     "enable_front_page": {"formatter": asbool},
     "youtube_transcripts": {"formatter": asbool},
+    "api_jwt_secret": {"required": True},
 }
 
 
@@ -66,6 +68,8 @@ def load_settings(settings):
 def create_app(_=None, **settings):
     """Configure and return the WSGI app."""
     config = pyramid.config.Configurator(settings=load_settings(settings))
+
+    config.set_security_policy(ViaSecurityPolicy())
 
     config.include("pyramid_exclog")
     config.include("pyramid_jinja2")

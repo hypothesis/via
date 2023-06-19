@@ -6,6 +6,7 @@ from webargs import fields
 from webargs.pyramidparser import use_kwargs
 
 from via.exceptions import BadURL
+from via.security import ViaSecurityPolicy
 from via.services import YouTubeService
 
 
@@ -30,4 +31,14 @@ def youtube(request, url, **kwargs):
         "client_embed_url": request.registry.settings["client_embed_url"],
         "client_config": client_config,
         "video_id": video_id,
+        "api": {
+            "transcript": {
+                "doc": "Get the transcript of the current video",
+                "url": request.route_url("api.youtube.transcript", transcript_id="1"),
+                "method": "GET",
+                "headers": {
+                    "Authorization": f"Bearer {ViaSecurityPolicy.encode_jwt(request)}"
+                },
+            }
+        },
     }

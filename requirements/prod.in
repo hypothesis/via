@@ -6,6 +6,7 @@ h-assets
 h-pyramid-sentry
 h-vialib
 importlib_resources
+pyjwt
 pyramid-exclog
 pyramid-jinja2
 pyramid-sanity
