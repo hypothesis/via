@@ -24,8 +24,6 @@ def youtube(request, url, **kwargs):
     if not video_id:
         raise BadURL(f"Unsupported video URL: {url}", url=url)
 
-    request.checkmate.raise_if_blocked(url)
-
     _, client_config = Configuration.extract_from_params(kwargs)
 
     return {
