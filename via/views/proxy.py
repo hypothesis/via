@@ -1,6 +1,14 @@
+from pyramid.httpexceptions import HTTPGone
 from pyramid.view import view_config
 
 from via.services import URLDetailsService, ViaClientService
+
+
+@view_config(route_name="static_fallback")
+def static_fallback(_context, _request):
+    """Make sure we don't try to proxy out of date static content."""
+
+    raise HTTPGone("It appears you have requested out of date content")
 
 
 @view_config(route_name="proxy", renderer="via:templates/proxy.html.jinja2")

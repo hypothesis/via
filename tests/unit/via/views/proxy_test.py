@@ -1,9 +1,16 @@
 from unittest.mock import create_autospec, sentinel
 
 import pytest
+from pyramid.httpexceptions import HTTPGone
 
 from via.resources import PathURLResource
-from via.views.proxy import proxy
+from via.views.proxy import proxy, static_fallback
+
+
+class TestStaticFallback:
+    def test_it(self):
+        with pytest.raises(HTTPGone):
+            static_fallback(sentinel.context, sentinel.request)
 
 
 class TestProxy:
