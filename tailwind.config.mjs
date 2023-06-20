@@ -17,6 +17,11 @@ export default {
           'sans-serif',
         ],
       },
+      boxShadow: {
+        // Similar to tailwind's default `shadow-inner` but coming from the
+        // right edge instead of the left
+        'r-inner': 'inset -2px 0 4px 0 rgb(0,0,0,.05)',
+      },
     },
   },
 };
