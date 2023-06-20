@@ -85,6 +85,8 @@
     "checkformatting": "prettier --cache --check via/**/*.{js,ts,tsx}",
     "lint": "eslint --cache --ignore-pattern build --ignore-pattern 'via/static/js/**' --ignore-pattern 'via/static/vendor/**' .",
     "format": "prettier --cache --list-different --write via/**/*.{js,svg,ts,tsx}",
+    "test": "gulp test",
+    "test:watch": "gulp test --live",
     "typecheck": "tsc --build via/static/scripts/tsconfig.json"
   }
 }
