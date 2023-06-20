@@ -32,6 +32,7 @@ describe('VideoPlayerApp', () => {
   FakeTranscript.displayName = 'Transcript';
 
   let wrappers;
+  let fakeUseAppLayout;
 
   // TODO - Convert existing tests to use this helper to render the player.
   function createVideoPlayer(props = {}) {
@@ -50,6 +51,7 @@ describe('VideoPlayerApp', () => {
 
   beforeEach(() => {
     wrappers = [];
+    fakeUseAppLayout = sinon.stub().returns('lg');
 
     $imports.$mock(mockImportedComponents());
 
@@ -61,12 +63,61 @@ describe('VideoPlayerApp', () => {
 
     $imports.$mock({
       './Transcript': FakeTranscript,
+      '../hooks/use-app-layout': { useAppLayout: fakeUseAppLayout },
     });
   });
 
   afterEach(() => {
     wrappers.forEach(w => w.unmount());
     $imports.$restore();
+  });
+
+  describe('app layout', () => {
+    context('multi-column layout for wider widths', () => {
+      for (const appSize of ['md', 'lg', 'xl', '2xl']) {
+        it('renders a top bar with branding and filter input', () => {
+          fakeUseAppLayout.returns(appSize);
+          const wrapper = createVideoPlayer();
+
+          const topBar = wrapper.find('[data-testid="top-bar"]');
+          assert.isTrue(topBar.exists());
+          assert.isTrue(
+            topBar.find('[data-testid="hypothesis-logo"]').exists()
+          );
+          assert.isTrue(topBar.find('[data-testid="filter-input"]').exists());
+        });
+
+        it('renders a play/pause button', () => {
+          fakeUseAppLayout.returns(appSize);
+          const wrapper = createVideoPlayer();
+          assert.isTrue(wrapper.find('[data-testid="play-button"]').exists());
+        });
+      }
+    });
+
+    context('single-column layout for narrow widths', () => {
+      beforeEach(() => {
+        fakeUseAppLayout.returns('sm');
+      });
+
+      it('does not render a top bar', () => {
+        const wrapper = createVideoPlayer();
+
+        const topBar = wrapper.find('[data-testid="top-bar"]');
+        assert.isFalse(topBar.exists());
+      });
+
+      it('renders filter input within transcript controls', () => {
+        const wrapper = createVideoPlayer();
+        const controls = wrapper.find('[data-testid="transcript-controls"]');
+        assert.isTrue(controls.find('[data-testid="filter-input"]').exists());
+      });
+
+      it('does not render a play/pause button', () => {
+        const wrapper = createVideoPlayer();
+        assert.isFalse(wrapper.find('[data-testid="play-button"]').exists());
+      });
+    });
   });
 
   it('plays and pauses video', () => {
