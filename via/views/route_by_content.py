@@ -19,7 +19,8 @@ def route_by_content(context, request):
     )
     via_client_svc = request.find_service(ViaClientService)
 
-    if via_client_svc.content_type(mime_type) in (ContentType.PDF, ContentType.YOUTUBE):
+    content_type = via_client_svc.content_type(mime_type)
+    if content_type in (ContentType.PDF, ContentType.YOUTUBE):
         caching_headers = _caching_headers(max_age=300)
     else:
         caching_headers = _cache_headers_for_http(status_code)
@@ -27,7 +28,7 @@ def route_by_content(context, request):
     params = dict(request.params)
     params.pop("url", None)
 
-    url = via_client_svc.url_for(url, mime_type, params)
+    url = via_client_svc.url_for(url, content_type, params)
 
     return exc.HTTPFound(url, headers=caching_headers)
 

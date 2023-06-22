@@ -53,7 +53,7 @@ class TestRouteByContent:
         )
         via_client_service.content_type.assert_called_once_with(sentinel.mime_type)
         via_client_service.url_for.assert_called_once_with(
-            url, sentinel.mime_type, {"foo": "bar"}
+            url, via_client_service.content_type.return_value, {"foo": "bar"}
         )
         assert response == temporary_redirect_to(
             via_client_service.url_for.return_value

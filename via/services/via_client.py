@@ -17,13 +17,9 @@ class ViaClientService:
     def __init__(self, via_client):
         self.via_client = via_client
 
-    def url_for(self, url, mime_type, params):
+    def url_for(self, url, content_type, params):
         """Return a Via URL for the given `url`."""
-        return self.via_client.url_for(
-            url,
-            content_type=self.content_type(mime_type),
-            options=params,
-        )
+        return self.via_client.url_for(url, content_type=content_type, options=params)
 
 
 def factory(_context, request):

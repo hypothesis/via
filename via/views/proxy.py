@@ -20,8 +20,7 @@ def proxy(context, request):
         url
     )
 
-    return {
-        "src": request.find_service(ViaClientService).url_for(
-            url, mime_type, request.params
-        )
-    }
+    via_client_svc = request.find_service(ViaClientService)
+    content_type = via_client_svc.content_type(mime_type)
+
+    return {"src": via_client_svc.url_for(url, content_type, request.params)}

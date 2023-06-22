@@ -19,21 +19,11 @@ class TestViaClientService:
     def test_content_type(self, mime_type, expected_content_type, svc):
         assert svc.content_type(mime_type) == expected_content_type
 
-    @pytest.mark.parametrize(
-        "mime_type,expected_content_type",
-        [
-            ("application/pdf", ContentType.PDF),
-            ("text/html", ContentType.HTML),
-            (None, ContentType.HTML),
-        ],
-    )
-    def test_url_for(self, mime_type, expected_content_type, svc, via_client):
-        params = {"foo": "bar"}
-
-        url = svc.url_for(sentinel.url, mime_type, params)
+    def test_url_for(self, svc, via_client):
+        url = svc.url_for(sentinel.url, sentinel.content_type, sentinel.params)
 
         via_client.url_for.assert_called_once_with(
-            sentinel.url, expected_content_type, params
+            sentinel.url, sentinel.content_type, sentinel.params
         )
         assert url == via_client.url_for.return_value
 
