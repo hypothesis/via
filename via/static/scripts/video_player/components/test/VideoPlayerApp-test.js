@@ -3,9 +3,17 @@ import { useImperativeHandle } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 
 import { mockImportedComponents } from '../../../test-util/mock-imported-components';
+import {
+  videoPlayerConfig,
+  transcriptsAPIResponse,
+} from '../../../test-util/video-player-fixtures';
+import { waitForElement } from '../../../test-util/wait';
+import { APIError } from '../../utils/api';
 import VideoPlayerApp, { $imports } from '../VideoPlayerApp';
 
 describe('VideoPlayerApp', () => {
+  let fakeCallAPI;
+
   const transcriptData = {
     segments: [
       {
@@ -34,14 +42,15 @@ describe('VideoPlayerApp', () => {
   let wrappers;
   let fakeUseAppLayout;
 
-  // TODO - Convert existing tests to use this helper to render the player.
   function createVideoPlayer(props = {}) {
     const wrapper = mount(
       <VideoPlayerApp
         videoId="1234"
         clientSrc="https://dummy.hypothes.is/embed.js"
         clientConfig={{}}
-        transcript={transcriptData}
+        // By default start with the transcript already loaded, instead of
+        // using the API to fetch it.
+        transcriptSource={transcriptData}
         {...props}
       />
     );
@@ -52,6 +61,7 @@ describe('VideoPlayerApp', () => {
   beforeEach(() => {
     wrappers = [];
     fakeUseAppLayout = sinon.stub().returns('lg');
+    fakeCallAPI = sinon.stub().rejects(new Error('Dummy API error'));
 
     $imports.$mock(mockImportedComponents());
 
@@ -64,6 +74,9 @@ describe('VideoPlayerApp', () => {
     $imports.$mock({
       './Transcript': FakeTranscript,
       '../hooks/use-app-layout': { useAppLayout: fakeUseAppLayout },
+      '../utils/api': {
+        callAPI: fakeCallAPI,
+      },
     });
   });
 
@@ -120,15 +133,76 @@ describe('VideoPlayerApp', () => {
     });
   });
 
+  describe('transcript loading', () => {
+    beforeEach(() => {
+      fakeCallAPI
+        .withArgs(videoPlayerConfig.api.transcript)
+        .resolves(transcriptsAPIResponse);
+    });
+
+    function createVideoPlayerUsingAPI() {
+      return createVideoPlayer({
+        transcriptSource: videoPlayerConfig.api.transcript,
+      });
+    }
+
+    it('loads transcript via API', async () => {
+      const wrapper = createVideoPlayerUsingAPI();
+      assert.calledWith(fakeCallAPI, videoPlayerConfig.api.transcript);
+
+      // App should initially be in a loading state.
+      assert.isTrue(
+        wrapper.exists('[data-testid="transcript-loading-spinner"]')
+      );
+
+      // Transcript should be displayed when loading completes.
+      const transcript = await waitForElement(wrapper, 'Transcript');
+      assert.equal(
+        transcript.prop('transcript'),
+        transcriptsAPIResponse.data.attributes
+      );
+    });
+
+    function findCopyButton(wrapper) {
+      return wrapper.find('button[data-testid="copy-button"]');
+    }
+
+    function findSyncButton(wrapper) {
+      return wrapper.find('button[data-testid="sync-button"]');
+    }
+
+    it('disables "Copy" and "Sync" buttons while transcript is loading', async () => {
+      const wrapper = createVideoPlayerUsingAPI();
+
+      assert.isTrue(findCopyButton(wrapper).prop('disabled'));
+      assert.isTrue(findSyncButton(wrapper).prop('disabled'));
+
+      await waitForElement(wrapper, 'Transcript');
+
+      assert.isFalse(findCopyButton(wrapper).prop('disabled'));
+      assert.isFalse(findSyncButton(wrapper).prop('disabled'));
+    });
+
+    it('displays error if transcript failed to load', async () => {
+      const error = new APIError(404);
+      fakeCallAPI.withArgs(videoPlayerConfig.api.transcript).rejects(error);
+
+      const wrapper = createVideoPlayerUsingAPI();
+      const errorDisplay = await waitForElement(
+        wrapper,
+        '[data-testid="transcript-error"]'
+      );
+
+      assert.equal(
+        errorDisplay.text(),
+        `Unable to load transcript: ${error.message}`
+      );
+    });
+  });
+
   it('plays and pauses video', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
+
     let player = wrapper.find('YouTubeVideoPlayer');
     assert.isFalse(player.prop('play'));
 
@@ -145,14 +219,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('updates play/pause button when player is paused', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
     act(() => {
       wrapper.find('YouTubeVideoPlayer').prop('onPlayingChanged')(true);
     });
@@ -177,14 +244,7 @@ describe('VideoPlayerApp', () => {
       .get(() => fakeClipboard);
 
     try {
-      const wrapper = mount(
-        <VideoPlayerApp
-          videoId="1234"
-          clientSrc="https://dummy.hypothes.is/embed.js"
-          clientConfig={{}}
-          transcript={transcriptData}
-        />
-      );
+      const wrapper = createVideoPlayer();
 
       await wrapper.find('button[data-testid="copy-button"]').prop('onClick')();
 
@@ -205,14 +265,7 @@ describe('VideoPlayerApp', () => {
     const warnStub = sinon.stub(console, 'warn');
 
     try {
-      const wrapper = mount(
-        <VideoPlayerApp
-          videoId="1234"
-          clientSrc="https://dummy.hypothes.is/embed.js"
-          clientConfig={{}}
-          transcript={transcriptData}
-        />
-      );
+      const wrapper = createVideoPlayer();
 
       try {
         await wrapper
@@ -230,14 +283,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('syncs timestamp from player to transcript', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
     act(() => {
       wrapper.find('YouTubeVideoPlayer').prop('onTimeChanged')(20);
     });
@@ -248,14 +294,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('updates player time when transcript segment is selected', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
     act(() => {
       wrapper.find('Transcript').prop('onSelectSegment')(
         transcriptData.segments[1]
@@ -268,14 +307,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('syncs transcript when "Sync" button is clicked', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
     const transcriptController = wrapper.find('Transcript').prop('controlsRef');
     assert.ok(transcriptController.current);
 
@@ -299,14 +331,7 @@ describe('VideoPlayerApp', () => {
   };
 
   it('syncs transcript when transitioning from paused to playing if auto-scroll is active', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
     const transcriptController = wrapper.find('Transcript').prop('controlsRef');
     assert.ok(transcriptController.current);
 
@@ -332,14 +357,7 @@ describe('VideoPlayerApp', () => {
   }
 
   it('filters transcript when typing in search field', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
 
     setFilter(wrapper, 'foobar');
 
@@ -348,14 +366,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('clears transcript filter when Hypothesis client scrolls to a highlight', async () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
 
     setFilter(wrapper, 'foobar');
 
@@ -391,14 +402,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('pauses playback when Hypothesis client scrolls to a highlight', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
     wrapper.find('button[data-testid="play-button"]').simulate('click');
 
     const event = new CustomEvent('scrolltorange');
@@ -413,14 +417,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('ignores "scrolltorange" events with wrong type', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
+    const wrapper = createVideoPlayer();
 
     setFilter(wrapper, 'foobar');
 
@@ -430,15 +427,7 @@ describe('VideoPlayerApp', () => {
   });
 
   it('toggles automatic scrolling when "Auto-scroll" checkbox is changed', () => {
-    const wrapper = mount(
-      <VideoPlayerApp
-        videoId="1234"
-        clientSrc="https://dummy.hypothes.is/embed.js"
-        clientConfig={{}}
-        transcript={transcriptData}
-      />
-    );
-
+    const wrapper = createVideoPlayer();
     assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
     toggleAutoScroll(wrapper);
     assert.isFalse(wrapper.find('Transcript').prop('autoScroll'));
@@ -473,7 +462,7 @@ describe('VideoPlayerApp', () => {
           videoId="1234"
           clientSrc="https://dummy.hypothes.is/embed.js"
           clientConfig={{}}
-          transcript={transcriptData}
+          transcriptSource={transcriptData}
         />,
         { attachTo: document.body }
       );

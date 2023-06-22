@@ -5,6 +5,7 @@ import {
   IconButton,
   Input,
   LogoIcon,
+  Spinner,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import type { Ref } from 'preact';
@@ -17,9 +18,11 @@ import {
 } from 'preact/hooks';
 
 import { useAppLayout } from '../hooks/use-app-layout';
+import { callAPI } from '../utils/api';
+import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
-import { formatTranscript } from '../utils/transcript';
+import { formatTranscript, mergeSegments } from '../utils/transcript';
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
@@ -27,10 +30,20 @@ import YouTubeVideoPlayer from './YouTubeVideoPlayer';
 import { PauseIcon, PlayIcon, SyncIcon } from './icons';
 
 export type VideoPlayerAppProps = {
+  /** ID of the YouTube video to load. */
   videoId: string;
+
+  /** URL of the boot script for the Hypothesis client. */
   clientSrc: string;
+
+  /** JSON-serializable configuration for the Hypothesis client. */
   clientConfig: object;
-  transcript: TranscriptData;
+
+  /**
+   * The data source for the transcript. Either an API to call when the player
+   * loads, or pre-fetched data.
+   */
+  transcriptSource: APIMethod | TranscriptData;
 };
 
 /**
@@ -90,6 +103,13 @@ function HypothesisLogo() {
     </a>
   );
 }
+
+function isTranscript(value: any): value is TranscriptData {
+  return (
+    typeof value === 'object' && value !== null && Array.isArray(value.segments)
+  );
+}
+
 /**
  * Video annotation application.
  *
@@ -100,7 +120,7 @@ export default function VideoPlayerApp({
   videoId,
   clientSrc,
   clientConfig: baseClientConfig,
-  transcript,
+  transcriptSource,
 }: VideoPlayerAppProps) {
   // Current play time of the video, in seconds since the start.
   const [timestamp, setTimestamp] = useState(0);
@@ -126,6 +146,28 @@ export default function VideoPlayerApp({
     xl: '450px',
     '2xl': '480px',
   };
+
+  // Fetch transcript when app loads.
+  const [transcript, setTranscript] = useState<
+    TranscriptData | APIError | null
+  >(isTranscript(transcriptSource) ? transcriptSource : null);
+
+  useEffect(() => {
+    if (isTranscript(transcriptSource)) {
+      return;
+    }
+    callAPI<JSONAPIObject<TranscriptData>>(transcriptSource)
+      .then(response => {
+        const transcript = response.data.attributes;
+
+        // Group segments together for better readability.
+        transcript.segments = mergeSegments(transcript.segments, 3);
+
+        setTranscript(transcript);
+      })
+      .catch(err => setTranscript(err));
+  }, [transcriptSource]);
+  const isLoading = transcript === null;
 
   // Listen for the event the Hypothesis client dispatches before it scrolls
   // a highlight into view.
@@ -209,7 +251,9 @@ export default function VideoPlayerApp({
   }, [syncTranscript]);
 
   const copyTranscript = async () => {
-    const formattedTranscript = formatTranscript(transcript.segments);
+    const formattedTranscript = isTranscript(transcript)
+      ? formatTranscript(transcript.segments)
+      : '';
     try {
       await navigator.clipboard.writeText(formattedTranscript);
     } catch (err) {
@@ -356,6 +400,7 @@ export default function VideoPlayerApp({
             <IconButton
               onClick={syncTranscript}
               data-testid="sync-button"
+              disabled={!isTranscript(transcript)}
               icon={SyncIcon}
               title="Sync transcript to video"
               size="custom"
@@ -364,6 +409,7 @@ export default function VideoPlayerApp({
             <IconButton
               onClick={copyTranscript}
               data-testid="copy-button"
+              disabled={!isTranscript(transcript)}
               title="Copy transcript"
               icon={CopyIcon}
               size="custom"
@@ -382,24 +428,36 @@ export default function VideoPlayerApp({
               'flex flex-col'
             )}
           >
-            <Transcript
-              autoScroll={autoScroll}
-              transcript={transcript}
-              controlsRef={transcriptControls}
-              currentTime={timestamp}
-              filter={trimmedFilter}
-              onSelectSegment={segment => setTimestamp(segment.start)}
-            >
-              <div
-                data-testid="bucket-bar-channel"
-                className={classnames(
-                  // Provide a backdrop for bucket bar buttons. 20px of this
-                  // is overlaid by the sidebar's semi-transparent bucket
-                  // channel.
-                  'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]'
-                )}
-              />
-            </Transcript>
+            {isLoading && (
+              <div className="flex justify-center p-8">
+                <Spinner data-testid="transcript-loading-spinner" size="md" />
+              </div>
+            )}
+            {isTranscript(transcript) && (
+              <Transcript
+                autoScroll={autoScroll}
+                transcript={transcript}
+                controlsRef={transcriptControls}
+                currentTime={timestamp}
+                filter={trimmedFilter}
+                onSelectSegment={segment => setTimestamp(segment.start)}
+              >
+                <div
+                  data-testid="bucket-bar-channel"
+                  className={classnames(
+                    // Provide a backdrop for bucket bar buttons. 20px of this
+                    // is overlaid by the sidebar's semi-transparent bucket
+                    // channel.
+                    'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]'
+                  )}
+                />
+              </Transcript>
+            )}
+            {transcript instanceof Error && (
+              <div data-testid="transcript-error">
+                Unable to load transcript: {transcript.message}
+              </div>
+            )}
             <div
               id={bucketContainerId}
               className={classnames(

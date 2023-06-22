@@ -1,4 +1,9 @@
-import type { TranscriptData } from './utils/transcript';
+import type { APIMethod } from './utils/api';
+
+/** Directory of available API methods. */
+export type APIIndex = {
+  transcript: APIMethod;
+};
 
 export type ConfigObject = {
   /** ID of the YouTube video to load. */
@@ -10,8 +15,8 @@ export type ConfigObject = {
   /** URL of the Hypothesis client to load. */
   client_src: string;
 
-  /** Transcript of the video. */
-  transcript: TranscriptData;
+  /** API index. */
+  api: APIIndex;
 };
 
 /**
