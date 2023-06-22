@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 from via.services import (
+    CheckmateService,
     GoogleDriveAPI,
     HTTPService,
     PDFURLBuilder,
@@ -32,6 +33,11 @@ def url_details_service(mock_service):
 @pytest.fixture
 def via_client_service(mock_service):
     return mock_service(ViaClientService)
+
+
+@pytest.fixture
+def checkmate_service(mock_service):
+    return mock_service(CheckmateService)
 
 
 @pytest.fixture

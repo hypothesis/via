@@ -7,7 +7,7 @@ from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
 from via.requests_tools.headers import add_request_headers
-from via.services import GoogleDriveAPI, HTTPService
+from via.services import CheckmateService, GoogleDriveAPI, HTTPService
 from via.services.pdf_url import PDFURLBuilder
 from via.services.secure_link import has_secure_url_token
 
@@ -24,7 +24,9 @@ def view_pdf(context, request):
     """HTML page with client and the PDF embedded."""
 
     url = context.url_from_query()
-    request.checkmate.raise_if_blocked(url)
+    checkmate_service = request.find_service(CheckmateService)
+
+    checkmate_service.raise_if_blocked(url)
 
     _, h_config = Configuration.extract_from_params(request.params)
 

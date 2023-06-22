@@ -4,6 +4,7 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from via.exceptions import ConfigurationError
+from via.services.checkmate import CheckmateService
 from via.services.google_drive import GoogleDriveAPI
 from via.services.http import HTTPService
 from via.services.pdf_url import PDFURLBuilder
@@ -20,6 +21,9 @@ def includeme(config):  # pragma: no cover
         create_google_api(config.registry.settings), iface=GoogleDriveAPI
     )
 
+    config.register_service_factory(
+        "via.services.checkmate.factory", iface=CheckmateService
+    )
     config.register_service_factory(
         "via.services.via_client.factory", iface=ViaClientService
     )

@@ -21,12 +21,13 @@ class TestStatusRoute:
         checkmate_fails,
         expected_status,
         expected_body,
+        checkmate_service,
     ):
         if include_checkmate:
             pyramid_request.params["include-checkmate"] = ""
 
         if checkmate_fails:
-            pyramid_request.checkmate.check_url.side_effect = CheckmateException
+            checkmate_service.check_url.side_effect = CheckmateException
 
         result = get_status(pyramid_request)
 
