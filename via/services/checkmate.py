@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from checkmatelib import BadURL as CheckmateBadURL
 from checkmatelib import CheckmateClient, CheckmateException
 from pyramid.httpexceptions import HTTPTemporaryRedirect
@@ -12,6 +14,7 @@ class CheckmateService:
         self._blocked_for = blocked_for
         self._ignore_reasons = ignore_reasons
 
+    @lru_cache
     def check_url(self, url):
         return self._checkmate_client.check_url(
             url,
