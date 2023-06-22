@@ -1,6 +1,6 @@
 import { Scroll, ScrollContainer } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import type { Ref } from 'preact';
+import type { ComponentChildren, Ref } from 'preact';
 import {
   useCallback,
   useEffect,
@@ -31,6 +31,11 @@ export type TranscriptProps = {
    * the segment corresponding to `currentTime` in view.
    */
   autoScroll?: boolean;
+
+  /** Other content to render in scrolling container after the transcript
+   * segments.
+   */
+  children?: ComponentChildren;
 
   transcript: TranscriptData;
 
@@ -182,14 +187,14 @@ function TranscriptSegment({
       />
       <p
         className={classnames(
-          'grow text-justify peer-hover:text-stone-900',
+          'grow peer-hover:text-stone-900',
           {
             'text-stone-600': !isCurrent,
             'text-stone-800': isCurrent,
           },
 
           // Avoid buckets overlapping highlighted text.
-          'pr-[30px]'
+          'pr-3'
         )}
         data-testid="transcript-text"
         ref={contentRef}
@@ -222,6 +227,7 @@ function offsetRelativeTo(element: HTMLElement, parent: HTMLElement): number {
 
 export default function Transcript({
   autoScroll = true,
+  children,
   controlsRef,
   currentTime,
   filter = '',
@@ -337,24 +343,27 @@ export default function Transcript({
         data-testid="scroll-container"
         elementRef={scrollRef}
       >
-        <ul>
-          {transcript.segments.map((segment, index) => (
-            <TranscriptSegment
-              key={index}
-              hidden={
-                filterMatches
-                  ? !filterMatches.has(index) && index !== currentIndex
-                  : false
-              }
-              highlight={highlight}
-              isCurrent={index === currentIndex}
-              matches={filterMatches?.get(index)}
-              onSelect={() => onSelectSegment?.(segment)}
-              time={segment.start}
-              text={segment.text}
-            />
-          ))}
-        </ul>
+        <div className="flex">
+          <ul className="grow shadow-r-inner">
+            {transcript.segments.map((segment, index) => (
+              <TranscriptSegment
+                key={index}
+                hidden={
+                  filterMatches
+                    ? !filterMatches.has(index) && index !== currentIndex
+                    : false
+                }
+                highlight={highlight}
+                isCurrent={index === currentIndex}
+                matches={filterMatches?.get(index)}
+                onSelect={() => onSelectSegment?.(segment)}
+                time={segment.start}
+                text={segment.text}
+              />
+            ))}
+          </ul>
+          {children}
+        </div>
       </Scroll>
     </ScrollContainer>
   );
