@@ -13,15 +13,23 @@ from via.views.view_pdf import proxy_google_drive_file, proxy_python_pdf, view_p
     "google_drive_api",
     "http_service",
     "pdf_url_builder_service",
+    "checkmate_service",
 )
 class TestViewPDF:
-    def test_it(self, call_view, pyramid_request, pyramid_settings, Configuration):
+    def test_it(
+        self,
+        call_view,
+        pyramid_request,
+        pyramid_settings,
+        Configuration,
+        checkmate_service,
+    ):
         response = call_view("http://example.com/foo.pdf")
 
         Configuration.extract_from_params.assert_called_once_with(
             pyramid_request.params
         )
-        pyramid_request.checkmate.raise_if_blocked(sentinel.url)
+        checkmate_service.raise_if_blocked(sentinel.url)
 
         assert response == {
             "pdf_url": "http://example.com/foo.pdf",

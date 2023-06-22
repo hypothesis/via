@@ -3,6 +3,8 @@
 from checkmatelib import CheckmateException
 from pyramid import view
 
+from via.services import CheckmateService
+
 
 @view.view_config(route_name="get_status", renderer="json", http_cache=0)
 def get_status(request):
@@ -11,8 +13,10 @@ def get_status(request):
     body = {"status": "okay"}
 
     if "include-checkmate" in request.params:
+        checkmate_service = request.find_service(CheckmateService)
+
         try:
-            request.checkmate.check_url("https://example.com/")
+            checkmate_service.check_url("https://example.com/")
         except CheckmateException:
             body["down"] = ["checkmate"]
         else:

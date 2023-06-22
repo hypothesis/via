@@ -36,6 +36,7 @@ class TestRouteByContent:
         pyramid_request,
         status_code,
         via_client_service,
+        checkmate_service,
     ):
         pyramid_request.params = {"url": sentinel.url, "foo": "bar"}
         url_details_service.get_url_details.return_value = (
@@ -47,7 +48,7 @@ class TestRouteByContent:
         response = route_by_content(context, pyramid_request)
 
         url = context.url_from_query.return_value
-        pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(url)
+        checkmate_service.raise_if_blocked.assert_called_once_with(url)
         url_details_service.get_url_details.assert_called_once_with(
             url, pyramid_request.headers
         )

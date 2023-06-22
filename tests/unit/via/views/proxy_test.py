@@ -15,7 +15,12 @@ class TestStaticFallback:
 
 class TestProxy:
     def test_it(
-        self, context, pyramid_request, url_details_service, via_client_service
+        self,
+        context,
+        pyramid_request,
+        url_details_service,
+        via_client_service,
+        checkmate_service,
     ):
         url_details_service.get_url_details.return_value = (
             sentinel.mime_type,
@@ -25,7 +30,7 @@ class TestProxy:
 
         result = proxy(context, pyramid_request)
 
-        pyramid_request.checkmate.raise_if_blocked.assert_called_once_with(url)
+        checkmate_service.raise_if_blocked.assert_called_once_with(url)
         url_details_service.get_url_details.assert_called_once_with(url)
         via_client_service.url_for.assert_called_once_with(
             url, sentinel.mime_type, pyramid_request.params

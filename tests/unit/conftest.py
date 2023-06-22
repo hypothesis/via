@@ -1,12 +1,10 @@
 """A place to put fixture functions that are useful application-wide."""
 import functools
-from unittest.mock import create_autospec
 
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 
 from tests.unit.services import *  # pylint: disable=wildcard-import,unused-wildcard-import
-from via.checkmate import ViaCheckmateClient
 from via.views import add_routes
 
 
@@ -39,12 +37,5 @@ def pyramid_request(
     pyramid_config,  # pylint:disable=unused-argument
 ):
     pyramid_request = testing.DummyRequest()
-
     apply_request_extensions(pyramid_request)
-
-    pyramid_request.checkmate = create_autospec(
-        ViaCheckmateClient, spec_set=True, instance=True
-    )
-    pyramid_request.checkmate.check_url.return_value = None
-
     return pyramid_request
