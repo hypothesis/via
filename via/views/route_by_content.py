@@ -4,20 +4,13 @@ from h_vialib import ContentType
 from pyramid import httpexceptions as exc
 from pyramid import view
 
-from via.services import (
-    CheckmateService,
-    URLDetailsService,
-    ViaClientService,
-    has_secure_url_token,
-)
+from via.services import URLDetailsService, ViaClientService, has_secure_url_token
 
 
 @view.view_config(route_name="route_by_content", decorator=(has_secure_url_token,))
 def route_by_content(context, request):
     """Routes the request according to the Content-Type header."""
     url = context.url_from_query()
-
-    request.find_service(CheckmateService).raise_if_blocked(url)
 
     mime_type, status_code = request.find_service(URLDetailsService).get_url_details(
         url, request.headers

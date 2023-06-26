@@ -1,7 +1,7 @@
 from pyramid.httpexceptions import HTTPGone
 from pyramid.view import view_config
 
-from via.services import CheckmateService, URLDetailsService, ViaClientService
+from via.services import URLDetailsService, ViaClientService
 
 
 @view_config(route_name="static_fallback")
@@ -14,8 +14,6 @@ def static_fallback(_context, _request):
 @view_config(route_name="proxy", renderer="via:templates/proxy.html.jinja2")
 def proxy(context, request):
     url = context.url_from_path()
-
-    request.find_service(CheckmateService).raise_if_blocked(url)
 
     mime_type, _status_code = request.find_service(URLDetailsService).get_url_details(
         url
