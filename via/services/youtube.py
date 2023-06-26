@@ -1,5 +1,7 @@
 from urllib.parse import parse_qs, urlparse
 
+from youtube_transcript_api import YouTubeTranscriptApi
+
 
 class YouTubeService:
     def __init__(self, enabled: bool):
@@ -38,6 +40,15 @@ class YouTubeService:
             return path_parts[2]
 
         return None
+
+    def get_transcript(self, video_id):
+        """
+        Call the YouTube API and return the transcript for the given video_id.
+
+        :raise Exception: this method might raise any type of exception that
+            YouTubeTranscriptApi raises
+        """
+        return YouTubeTranscriptApi.get_transcript(video_id)
 
 
 def factory(_context, request):

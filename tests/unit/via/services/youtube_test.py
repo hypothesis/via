@@ -35,6 +35,12 @@ class TestYouTubeService:
     def test_get_video_id(self, url, expected_video_id, svc):
         assert expected_video_id == svc.get_video_id(url)
 
+    def test_get_transcript(self, YouTubeTranscriptApi, svc):
+        transcript = svc.get_transcript(sentinel.video_id)
+
+        YouTubeTranscriptApi.get_transcript.assert_called_once_with(sentinel.video_id)
+        assert transcript == YouTubeTranscriptApi.get_transcript.return_value
+
     @pytest.fixture
     def svc(self):
         return YouTubeService(enabled=True)
@@ -56,3 +62,8 @@ class TestFactory:
     @pytest.fixture
     def youtube_service(self, YouTubeService):
         return YouTubeService.return_value
+
+
+@pytest.fixture(autouse=True)
+def YouTubeTranscriptApi(patch):
+    return patch("via.services.youtube.YouTubeTranscriptApi")
