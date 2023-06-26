@@ -5,6 +5,7 @@ import pytest
 from h_matchers import Any
 from requests import Response
 
+from via.exceptions import BadURL
 from via.services.url_details import URLDetailsService, factory
 
 
@@ -73,7 +74,7 @@ class TestGetURLDetails:
         http_service.get.assert_not_called()
 
     def test_it_returns_youtube_for_youtube_url(
-        self, http_service, youtube_service, GoogleDriveAPI, svc
+        self, checkmate_service, http_service, youtube_service, GoogleDriveAPI, svc
     ):
         GoogleDriveAPI.parse_file_url.return_value = {}
         youtube_service.get_video_id.return_value = "VIDEO_ID"
@@ -81,6 +82,7 @@ class TestGetURLDetails:
         result = svc.get_url_details(sentinel.youtube_url)
 
         youtube_service.get_video_id.assert_called_once_with(sentinel.youtube_url)
+        checkmate_service.raise_if_blocked.assert_not_called()
         http_service.get.assert_not_called()
         assert result == ("video/x-youtube", 200)
 
@@ -94,9 +96,17 @@ class TestGetURLDetails:
         youtube_service.get_video_id.assert_not_called()
         assert result == ("dummy", 200)
 
+    def test_it_when_url_blocked_by_checkmate(self, checkmate_service, svc):
+        checkmate_service.raise_if_blocked.side_effect = BadURL("Bad URL")
+
+        with pytest.raises(BadURL):
+            svc.get_url_details(sentinel.url)
+
+        checkmate_service.raise_if_blocked.assert_called_once_with(sentinel.url)
+
     @pytest.fixture
-    def svc(self, http_service, youtube_service):
-        return URLDetailsService(http_service, youtube_service)
+    def svc(self, checkmate_service, http_service, youtube_service):
+        return URLDetailsService(checkmate_service, http_service, youtube_service)
 
     @pytest.fixture
     def response(self, http_service):
@@ -121,7 +131,7 @@ class TestGetURLDetails:
         return patch("via.services.url_details.clean_headers", return_value={})
 
 
-@pytest.mark.usefixtures("http_service", "youtube_service")
+@pytest.mark.usefixtures("checkmate_service", "http_service", "youtube_service")
 def test_factory(pyramid_request):
     svc = factory(sentinel.context, pyramid_request)
 

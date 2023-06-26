@@ -3,13 +3,20 @@ import cgi
 from collections import OrderedDict
 
 from via.requests_tools.headers import add_request_headers, clean_headers
+from via.services.checkmate import CheckmateService
 from via.services.google_drive import GoogleDriveAPI
 from via.services.http import HTTPService
 from via.services.youtube import YouTubeService
 
 
 class URLDetailsService:
-    def __init__(self, http_service: HTTPService, youtube_service: YouTubeService):
+    def __init__(
+        self,
+        checkmate_service: CheckmateService,
+        http_service: HTTPService,
+        youtube_service: YouTubeService,
+    ):
+        self._checkmate = checkmate_service
         self._http = http_service
         self._youtube = youtube_service
 
@@ -21,19 +28,19 @@ class URLDetailsService:
         :return: 2-tuple of (mime type, status code)
 
         :raise BadURL: When the URL is malformed
+        :raise checkmatelib.BadURL: if the URL is blocked by Checkmate
         :raise UpstreamServiceError: If we server gives us errors
         :raise UnhandledException: For all other request based errors
         """
-        if headers is None:
-            headers = OrderedDict()
+        if self._youtube.enabled and self._youtube.get_video_id(url):
+            return "video/x-youtube", 200
+
+        self._checkmate.raise_if_blocked(url)
 
         if GoogleDriveAPI.parse_file_url(url):
             return "application/pdf", 200
 
-        if self._youtube.enabled and self._youtube.get_video_id(url):
-            return "video/x-youtube", 200
-
-        headers = add_request_headers(clean_headers(headers))
+        headers = add_request_headers(clean_headers(headers or OrderedDict()))
 
         with self._http.get(
             url,
@@ -54,6 +61,7 @@ class URLDetailsService:
 
 def factory(_context, request):
     return URLDetailsService(
+        checkmate_service=request.find_service(CheckmateService),
         http_service=request.find_service(HTTPService),
         youtube_service=request.find_service(YouTubeService),
     )
