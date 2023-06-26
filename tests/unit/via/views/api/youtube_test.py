@@ -1,29 +1,55 @@
+import logging
+from unittest.mock import sentinel
+
 import pytest
-from h_matchers import Any
-from pyramid.httpexceptions import HTTPNotFound
 
 from via.views.api import youtube
 
 
 class TestTranscript:
-    def test_it(self, pyramid_request):
+    def test_it(self, pyramid_request, youtube_service):
         response = youtube.transcript(pyramid_request)
 
+        youtube_service.get_transcript.assert_called_once_with(sentinel.video_id)
         assert response == {
             "data": {
                 "type": "transcripts",
-                "id": "1",
-                "attributes": {"segments": Any.list()},
+                "id": sentinel.video_id,
+                "attributes": {"segments": youtube_service.get_transcript.return_value},
             }
         }
 
-    def test_it_errors_if_the_video_id_is_unknown(self, pyramid_request):
-        pyramid_request.matchdict["video_id"] = "unknown"
+    def test_it_handles_errors_from_youtube(
+        self, caplog, pyramid_request, youtube_service, report_exception_to_sentry
+    ):
+        exception = youtube_service.get_transcript.side_effect = RuntimeError(
+            "Test error"
+        )
 
-        with pytest.raises(HTTPNotFound):
-            youtube.transcript(pyramid_request)
+        response = youtube.transcript(pyramid_request)
+
+        report_exception_to_sentry.assert_called_once_with(exception)
+        assert caplog.record_tuples == [
+            ("via.views.api.youtube", logging.ERROR, str(exception))
+        ]
+        assert pyramid_request.response.status_int == 500
+        assert response == {
+            "errors": [
+                {
+                    "status": 500,
+                    "code": "failed_to_get_transcript",
+                    "title": "Failed to get transcript from YouTube",
+                    "detail": str(exception),
+                }
+            ]
+        }
 
     @pytest.fixture
     def pyramid_request(self, pyramid_request):
-        pyramid_request.matchdict["video_id"] = "1"
+        pyramid_request.matchdict["video_id"] = sentinel.video_id
         return pyramid_request
+
+
+@pytest.fixture(autouse=True)
+def report_exception_to_sentry(patch):
+    return patch("via.views.api.youtube.report_exception_to_sentry")
