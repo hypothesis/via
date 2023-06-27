@@ -14,9 +14,8 @@ def static_fallback(_context, _request):
 @view_config(route_name="proxy", renderer="via:templates/proxy.html.jinja2")
 def proxy(context, request):
     url = context.url_from_path()
-    checkmate_service = request.find_service(CheckmateService)
 
-    checkmate_service.raise_if_blocked(url)
+    request.find_service(CheckmateService).raise_if_blocked(url)
 
     mime_type, _status_code = request.find_service(URLDetailsService).get_url_details(
         url
