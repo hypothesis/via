@@ -16,6 +16,11 @@ class CheckmateService:
         self._ignore_reasons = ignore_reasons
 
     def check_url(self, url) -> Optional[BlockResponse]:
+        """Check whether the given URL is blocked by Checkmate.
+
+        Return a BlockResponse object if the URL is blocked,
+        or None if the URL is not blocked.
+        """
         return self._checkmate_client.check_url(
             url,
             allow_all=self._allow_all,
