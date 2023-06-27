@@ -40,13 +40,11 @@ class URLDetailsService:
         if GoogleDriveAPI.parse_file_url(url):
             return "application/pdf", 200
 
-        headers = add_request_headers(clean_headers(headers or OrderedDict()))
-
         with self._http.get(
             url,
             stream=True,
             allow_redirects=True,
-            headers=headers,
+            headers=add_request_headers(clean_headers(headers or OrderedDict())),
             timeout=10,
             raise_for_status=False,
         ) as rsp:
