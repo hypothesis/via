@@ -41,7 +41,7 @@ export type VideoPlayerAppProps = {
 
   /**
    * The data source for the transcript. Either an API to call when the player
-   * loads, or pre-fetched data.
+   * loads, or pre-fetched data (mostly useful in tests).
    */
   transcriptSource: APIMethod | TranscriptData;
 };
