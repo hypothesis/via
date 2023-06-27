@@ -16,9 +16,8 @@ from via.services import (
 def route_by_content(context, request):
     """Routes the request according to the Content-Type header."""
     url = context.url_from_query()
-    checkmate_service = request.find_service(CheckmateService)
 
-    checkmate_service.raise_if_blocked(url)
+    request.find_service(CheckmateService).raise_if_blocked(url)
 
     mime_type, status_code = request.find_service(URLDetailsService).get_url_details(
         url, request.headers
