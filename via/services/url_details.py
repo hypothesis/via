@@ -27,10 +27,10 @@ class URLDetailsService:
         :param headers: The original headers the request was made with
         :return: 2-tuple of (mime type, status code)
 
-        :raise BadURL: When the URL is malformed
+        :raise BadURL: if the URL is malformed
         :raise checkmatelib.BadURL: if the URL is blocked by Checkmate
-        :raise UpstreamServiceError: If we server gives us errors
-        :raise UnhandledException: For all other request based errors
+        :raise UpstreamServiceError: if we get an error from the upstream server
+        :raise UnhandledException: if we get any other request-based error
         """
         if self._youtube.enabled and self._youtube.get_video_id(url):
             return "video/x-youtube", 200
