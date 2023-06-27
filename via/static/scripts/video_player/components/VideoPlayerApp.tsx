@@ -494,7 +494,12 @@ export default function VideoPlayerApp({
             </Checkbox>
           </div>
         </div>
-        <HypothesisClient src={clientSrc} config={clientConfig} />
+        {isTranscript(transcript) && (
+          // Defer loading Hypothesis client until content is ready. This is
+          // temporary until https://github.com/hypothesis/client/issues/5568
+          // is completed.
+          <HypothesisClient src={clientSrc} config={clientConfig} />
+        )}
       </main>
     </div>
   );
