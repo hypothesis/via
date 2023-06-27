@@ -1,5 +1,8 @@
+from typing import Optional
+
 from checkmatelib import BadURL as CheckmateBadURL
 from checkmatelib import CheckmateClient, CheckmateException
+from checkmatelib.client import BlockResponse
 from pyramid.httpexceptions import HTTPTemporaryRedirect
 
 from via.exceptions import BadURL
@@ -12,7 +15,7 @@ class CheckmateService:
         self._blocked_for = blocked_for
         self._ignore_reasons = ignore_reasons
 
-    def check_url(self, url):
+    def check_url(self, url) -> Optional[BlockResponse]:
         return self._checkmate_client.check_url(
             url,
             allow_all=self._allow_all,
