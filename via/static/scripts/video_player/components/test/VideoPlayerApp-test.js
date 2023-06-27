@@ -183,6 +183,13 @@ describe('VideoPlayerApp', () => {
       assert.isFalse(findSyncButton(wrapper).prop('disabled'));
     });
 
+    it("doesn't load client when transcript is loading", async () => {
+      const wrapper = createVideoPlayerUsingAPI();
+      assert.isFalse(wrapper.exists('HypothesisClient'));
+      await waitForElement(wrapper, 'Transcript');
+      assert.isTrue(wrapper.exists('HypothesisClient'));
+    });
+
     it('displays error if transcript failed to load', async () => {
       const error = new APIError(404);
       fakeCallAPI.withArgs(videoPlayerConfig.api.transcript).rejects(error);
