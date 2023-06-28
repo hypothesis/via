@@ -39,7 +39,7 @@ class TestGetTranscript:
                     "status": 500,
                     "code": "failed_to_get_transcript",
                     "title": "Failed to get transcript from YouTube",
-                    "detail": str(exception),
+                    "detail": str(exception).strip(),
                 }
             ]
         }

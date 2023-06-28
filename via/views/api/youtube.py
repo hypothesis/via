@@ -33,7 +33,7 @@ def get_transcript(request):
                     "status": request.response.status_int,
                     "code": "failed_to_get_transcript",
                     "title": "Failed to get transcript from YouTube",
-                    "detail": str(exc),
+                    "detail": str(exc).strip(),
                 }
             ]
         }
