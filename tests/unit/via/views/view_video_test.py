@@ -40,7 +40,7 @@ class TestViewVideo:
                 "transcript": {
                     "doc": Any.string(),
                     "url": pyramid_request.route_url(
-                        "api.youtube.transcript", video_id="1"
+                        "api.youtube.transcript", video_id=sentinel.youtube_video_id
                     ),
                     "method": "GET",
                     "headers": {
