@@ -1,6 +1,5 @@
 import logging
 
-from h_pyramid_sentry import report_exception as report_exception_to_sentry
 from pyramid.view import view_config
 
 from via.services import YouTubeService
@@ -19,26 +18,7 @@ def get_transcript(request):
 
     video_id = request.matchdict["video_id"]
 
-    try:
-        transcript = request.find_service(YouTubeService).get_transcript(video_id)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        report_exception_to_sentry(exc)
-        logger.exception(exc)
-
-        request.response.status_int = 500
-
-        return {
-            "errors": [
-                {
-                    "status": request.response.status_int,
-                    "code": exc.__class__.__name__,
-                    "title": str(
-                        getattr(exc, "cause", "Failed to get transcript from YouTube")
-                    ),
-                    "detail": str(exc).strip(),
-                }
-            ]
-        }
+    transcript = request.find_service(YouTubeService).get_transcript(video_id)
 
     return {
         "data": {
