@@ -21,6 +21,7 @@ def youtube(request, url, **kwargs):
         raise HTTPUnauthorized()
 
     video_id = youtube_service.get_video_id(url)
+    video_url = youtube_service.canonical_video_url(video_id)
 
     if not video_id:
         raise BadURL(f"Unsupported video URL: {url}", url=url)
@@ -31,6 +32,7 @@ def youtube(request, url, **kwargs):
         "client_embed_url": request.registry.settings["client_embed_url"],
         "client_config": client_config,
         "video_id": video_id,
+        "video_url": video_url,
         "api": {
             "transcript": {
                 "doc": "Get the transcript of the current video",

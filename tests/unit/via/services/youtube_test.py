@@ -41,6 +41,25 @@ class TestYouTubeService:
         YouTubeTranscriptApi.get_transcript.assert_called_once_with(sentinel.video_id)
         assert transcript == YouTubeTranscriptApi.get_transcript.return_value
 
+    @pytest.mark.parametrize(
+        "video_id,expected_url",
+        [
+            ("x8TO-nrUtSI", "https://www.youtube.com/watch?v=x8TO-nrUtSI"),
+            # YouTube video IDs don't actually contain any characters that
+            # require escaping, but this is not guaranteed for the future.
+            # See https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video.
+            ("foo bar", "https://www.youtube.com/watch?v=foo+bar"),
+            ("foo/bar", "https://www.youtube.com/watch?v=foo%2Fbar"),
+        ],
+    )
+    def test_canonical_video_url(self, video_id, expected_url, svc):
+        assert expected_url == svc.canonical_video_url(video_id)
+
+    def test_canonical_video_url_raises_if_value_invalid(self, svc):
+        with pytest.raises(ValueError) as exc_info:
+            svc.canonical_video_url("")
+        assert str(exc_info.value) == "Invalid video ID"
+
     @pytest.fixture
     def svc(self):
         return YouTubeService(enabled=True)
