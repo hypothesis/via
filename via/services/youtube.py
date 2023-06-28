@@ -1,4 +1,4 @@
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote_plus, urlparse
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
@@ -10,6 +10,19 @@ class YouTubeService:
     @property
     def enabled(self):
         return self._enabled
+
+    def canonical_video_url(self, video_id: str) -> str:
+        """
+        Return the canonical URL for a YouTube video.
+
+        This is used as the URL which YouTube transcript annotations are
+        associated with.
+        """
+        if not video_id:
+            raise ValueError("Invalid video ID")
+
+        escaped_id = quote_plus(video_id)
+        return f"https://www.youtube.com/watch?v={escaped_id}"
 
     def get_video_id(self, url):
         """Return the YouTube video ID from the given URL, or None."""

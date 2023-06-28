@@ -23,11 +23,15 @@ class TestViewVideo:
         video_url,
         ViaSecurityPolicy,
     ):
+        youtube_service.canonical_video_url.return_value = sentinel.canonical_video_url
         youtube_service.get_video_id.return_value = sentinel.youtube_video_id
 
         response = youtube(pyramid_request)
 
         youtube_service.get_video_id.assert_called_once_with(video_url)
+        youtube_service.canonical_video_url.assert_called_once_with(
+            sentinel.youtube_video_id
+        )
         Configuration.extract_from_params.assert_called_once_with(
             {"via.foo": "foo", "via.bar": "bar"}
         )
@@ -36,6 +40,7 @@ class TestViewVideo:
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
             "video_id": sentinel.youtube_video_id,
+            "video_url": sentinel.canonical_video_url,
             "api": {
                 "transcript": {
                     "doc": Any.string(),
