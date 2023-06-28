@@ -31,8 +31,10 @@ def get_transcript(request):
             "errors": [
                 {
                     "status": request.response.status_int,
-                    "code": "failed_to_get_transcript",
-                    "title": "Failed to get transcript from YouTube",
+                    "code": exc.__class__.__name__,
+                    "title": str(
+                        getattr(exc, "cause", "Failed to get transcript from YouTube")
+                    ),
                     "detail": str(exc).strip(),
                 }
             ]
