@@ -8,7 +8,12 @@ from via.services import YouTubeService
 logger = logging.getLogger(__name__)
 
 
-@view_config(route_name="api.youtube.transcript", permission="api", renderer="json")
+@view_config(
+    route_name="api.youtube.transcript",
+    request_method="GET",
+    permission="api",
+    renderer="json",
+)
 def get_transcript(request):
     """Return the transcript of a given YouTube video."""
 
