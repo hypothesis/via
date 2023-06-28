@@ -9,13 +9,13 @@ logger = logging.getLogger(__name__)
 
 
 @view_config(route_name="api.youtube.transcript", permission="api", renderer="json")
-def transcript(request):
+def get_transcript(request):
     """Return the transcript of a given YouTube video."""
 
     video_id = request.matchdict["video_id"]
 
     try:
-        transcript_ = request.find_service(YouTubeService).get_transcript(video_id)
+        transcript = request.find_service(YouTubeService).get_transcript(video_id)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         report_exception_to_sentry(exc)
         logger.exception(exc)
@@ -37,6 +37,6 @@ def transcript(request):
         "data": {
             "type": "transcripts",
             "id": video_id,
-            "attributes": {"segments": transcript_},
+            "attributes": {"segments": transcript},
         }
     }

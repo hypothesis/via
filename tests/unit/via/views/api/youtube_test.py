@@ -6,9 +6,9 @@ import pytest
 from via.views.api import youtube
 
 
-class TestTranscript:
+class TestGetTranscript:
     def test_it(self, pyramid_request, youtube_service):
-        response = youtube.transcript(pyramid_request)
+        response = youtube.get_transcript(pyramid_request)
 
         youtube_service.get_transcript.assert_called_once_with(sentinel.video_id)
         assert response == {
@@ -26,7 +26,7 @@ class TestTranscript:
             "Test error"
         )
 
-        response = youtube.transcript(pyramid_request)
+        response = youtube.get_transcript(pyramid_request)
 
         report_exception_to_sentry.assert_called_once_with(exception)
         assert caplog.record_tuples == [
