@@ -34,7 +34,7 @@ def youtube(request, url, **kwargs):
         "api": {
             "transcript": {
                 "doc": "Get the transcript of the current video",
-                "url": request.route_url("api.youtube.transcript", video_id="1"),
+                "url": request.route_url("api.youtube.transcript", video_id=video_id),
                 "method": "GET",
                 "headers": {
                     "Authorization": f"Bearer {ViaSecurityPolicy.encode_jwt(request)}"
