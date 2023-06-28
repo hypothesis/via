@@ -37,7 +37,7 @@ class TestGetTranscript:
             "errors": [
                 {
                     "status": 500,
-                    "code": "failed_to_get_transcript",
+                    "code": "RuntimeError",
                     "title": "Failed to get transcript from YouTube",
                     "detail": str(exception).strip(),
                 }
