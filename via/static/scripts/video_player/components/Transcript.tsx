@@ -130,15 +130,11 @@ function TranscriptSegment({
   return (
     <li
       className={classnames(
-        'flex gap-x-3 p-1.5',
-        // Various tranparencies of a dark color are used for backgrounds to
-        // avoid obscuring scroll-hint shadows
-        'border-y hover:bg-slate-9/[.08]',
+        'flex gap-x-3 p-1.5 rounded',
+        // Margin needed to provide space for box shadow on current item
+        'mb-1',
         {
-          'bg-slate-9/[.08] border-grey-4/50 shadow-inner': isCurrent,
-          // Non-current entries have a bottom border only (subtle dotted)
-          'odd:bg-slate-9/[.03] border-t-transparent border-b-grey-2 border-b-dotted':
-            !isCurrent,
+          'bg-white shadow-md': isCurrent,
           hidden,
         }
       )}
@@ -343,7 +339,13 @@ export default function Transcript({
         elementRef={scrollRef}
       >
         <div className="flex">
-          <ul className="grow shadow-r-inner">
+          <ul
+            className={classnames(
+              'grow shadow-r-inner p-2',
+              // Transparency is necessary to avoid obscuring scroll shadows
+              'bg-grey-3/30'
+            )}
+          >
             {transcript.segments.map((segment, index) => (
               <TranscriptSegment
                 key={index}
