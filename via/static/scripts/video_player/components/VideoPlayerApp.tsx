@@ -440,7 +440,16 @@ export default function VideoPlayerApp({
                 controlsRef={transcriptControls}
                 currentTime={timestamp}
                 filter={trimmedFilter}
-                onSelectSegment={segment => setTimestamp(segment.start)}
+                onSelectSegment={segment => {
+                  // Clear the filter before jumping to a segment, so the user
+                  // can easily read the text that comes before and after it.
+                  //
+                  // Note that we always show the current segment, regardless
+                  // of whether a filter is applied.
+                  setFilter('');
+
+                  setTimestamp(segment.start);
+                }}
               >
                 <div
                   data-testid="bucket-bar-channel"
