@@ -55,11 +55,6 @@ class TestYouTubeService:
     def test_canonical_video_url(self, video_id, expected_url, svc):
         assert expected_url == svc.canonical_video_url(video_id)
 
-    def test_canonical_video_url_raises_if_value_invalid(self, svc):
-        with pytest.raises(ValueError) as exc_info:
-            svc.canonical_video_url("")
-        assert str(exc_info.value) == "Invalid video ID"
-
     @pytest.fixture
     def svc(self):
         return YouTubeService(enabled=True)

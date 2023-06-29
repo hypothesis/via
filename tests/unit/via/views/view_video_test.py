@@ -23,7 +23,7 @@ class TestViewVideo:
         video_url,
         ViaSecurityPolicy,
     ):
-        youtube_service.canonical_video_url.return_value = sentinel.canonical_video_url
+        # Override default `None` response.
         youtube_service.get_video_id.return_value = sentinel.youtube_video_id
 
         response = youtube(pyramid_request)
@@ -39,8 +39,8 @@ class TestViewVideo:
         assert response == {
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
-            "video_id": sentinel.youtube_video_id,
-            "video_url": sentinel.canonical_video_url,
+            "video_id": youtube_service.get_video_id.return_value,
+            "video_url": youtube_service.canonical_video_url.return_value,
             "api": {
                 "transcript": {
                     "doc": Any.string(),
