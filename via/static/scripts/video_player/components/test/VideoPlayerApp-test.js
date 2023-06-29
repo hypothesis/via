@@ -313,6 +313,24 @@ describe('VideoPlayerApp', () => {
     assert.equal(player.prop('time'), transcriptData.segments[1].start);
   });
 
+  it('clears filter when transcript segment is selected', () => {
+    const wrapper = createVideoPlayer();
+    setFilter(wrapper, 'foobar');
+
+    let transcript = wrapper.find('Transcript');
+    assert.equal(transcript.prop('filter'), 'foobar');
+
+    act(() => {
+      wrapper.find('Transcript').prop('onSelectSegment')(
+        transcriptData.segments[1]
+      );
+    });
+    wrapper.update();
+
+    transcript = wrapper.find('Transcript');
+    assert.equal(transcript.prop('filter'), '');
+  });
+
   it('syncs transcript when "Sync" button is clicked', () => {
     const wrapper = createVideoPlayer();
     const transcriptController = wrapper.find('Transcript').prop('controlsRef');
@@ -372,7 +390,7 @@ describe('VideoPlayerApp', () => {
     assert.equal(transcript.prop('filter'), 'foobar');
   });
 
-  it('clears transcript filter when Hypothesis client scrolls to a highlight', async () => {
+  it('clears filter when Hypothesis client scrolls to a highlight', async () => {
     const wrapper = createVideoPlayer();
 
     setFilter(wrapper, 'foobar');
