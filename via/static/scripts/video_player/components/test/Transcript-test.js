@@ -77,7 +77,6 @@ describe('Transcript', () => {
     assert.calledWith(scrollTo, {
       left: 0,
       top: 0,
-      behavior: 'smooth',
     });
   });
 
@@ -135,7 +134,6 @@ describe('Transcript', () => {
     assert.calledWith(scrollTo, {
       left: 0,
       top: 0,
-      behavior: 'smooth',
     });
   });
 
