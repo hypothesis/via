@@ -18,9 +18,6 @@ class YouTubeService:
         This is used as the URL which YouTube transcript annotations are
         associated with.
         """
-        if not video_id:
-            raise ValueError("Invalid video ID")
-
         escaped_id = quote_plus(video_id)
         return f"https://www.youtube.com/watch?v={escaped_id}"
 
