@@ -282,7 +282,6 @@ export default function Transcript({
     scrollContainer.scrollTo({
       left: 0,
       top: scrollTarget,
-      behavior: 'smooth',
     });
   }, []);
 
