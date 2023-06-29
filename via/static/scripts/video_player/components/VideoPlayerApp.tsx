@@ -312,7 +312,7 @@ export default function VideoPlayerApp({
       <main
         data-testid="app-layout"
         className={classnames('w-full flex min-h-0', {
-          'flex-col': !multicolumn,
+          'flex-col grow': !multicolumn,
           'flex-row grow h-full': multicolumn,
         })}
         ref={appContainerRef}
@@ -347,7 +347,7 @@ export default function VideoPlayerApp({
         </div>
 
         <div
-          data-testid="transcript-container"
+          data-testid="transcript-and-controls-container"
           className={classnames('flex flex-col bg-grey-0 border-x', {
             // Make transcript fill available vertical space in single-column
             // layouts
@@ -417,16 +417,12 @@ export default function VideoPlayerApp({
             />
           </div>
           <div
-            className={classnames(
-              'relative',
-
-              // Override flex-basis for transcript. Otherwise this container
-              // will be sized to accomodate all transcript elements.
-              'min-h-0',
-
-              // Make the bucket bar fill this container.
-              'flex flex-col'
-            )}
+            className={classnames('relative grow', 'min-h-0', 'flex flex-col', {
+              // Ensure that this container uses all available vertical space
+              // on narrow screens
+              'h-full': !multicolumn,
+            })}
+            data-testid="transcript-container"
           >
             {isLoading && (
               <div className="flex justify-center p-8">
