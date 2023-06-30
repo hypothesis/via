@@ -89,7 +89,7 @@ describe('YouTubeVideoPlayer', () => {
     const origin = encodeURIComponent(window.origin);
     assert.equal(
       iframe.prop('src'),
-      `https://www.youtube.com/embed/abcdef?enablejsapi=1&origin=${origin}`
+      `https://www.youtube.com/embed/abcdef?enablejsapi=1&origin=${origin}&rel=0`
     );
   });
 
