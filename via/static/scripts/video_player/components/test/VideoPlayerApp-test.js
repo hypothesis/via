@@ -195,15 +195,9 @@ describe('VideoPlayerApp', () => {
       fakeCallAPI.withArgs(videoPlayerConfig.api.transcript).rejects(error);
 
       const wrapper = createVideoPlayerUsingAPI();
-      const errorDisplay = await waitForElement(
-        wrapper,
-        '[data-testid="transcript-error"]'
-      );
+      const errorDisplay = await waitForElement(wrapper, 'TranscriptError');
 
-      assert.equal(
-        errorDisplay.text(),
-        `Unable to load transcript: ${error.message}`
-      );
+      assert.equal(errorDisplay.prop('error'), error);
     });
   });
 

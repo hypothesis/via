@@ -10,22 +10,17 @@ export type APIMethod = {
   url: string;
 };
 
-export class APIError extends Error {
-  /** The HTTP status code of the response. */
+/**
+ * Structure of a JSON API error.
+ *
+ * See https://jsonapi.org/format/#error-objects.
+ */
+export type JSONAPIError = {
   status: number;
-
-  /**
-   * Payload of the response.
-   */
-  data: unknown;
-
-  constructor(status: number, data: unknown) {
-    super('API call failed');
-
-    this.status = status;
-    this.data = data;
-  }
-}
+  code: string;
+  title: string;
+  detail: string;
+};
 
 /**
  * Structure of a JSON API response.
@@ -37,8 +32,24 @@ export type JSONAPIObject<Properties extends object> = {
     type: string;
     id: string;
     attributes: Properties;
+    errors: JSONAPIError[];
   };
 };
+
+export class APIError extends Error {
+  /** The HTTP status code of the response. */
+  status: number;
+
+  /** Error details returned by the API. */
+  error: JSONAPIError | undefined;
+
+  constructor(status: number, error?: JSONAPIError) {
+    super('API call failed');
+
+    this.status = status;
+    this.error = error;
+  }
+}
 
 /**
  * Make an API call to the backend.
@@ -57,7 +68,15 @@ export async function callAPI<T = unknown>(api: APIMethod): Promise<T> {
   const resultData = await result.json().catch(() => null);
 
   if (result.status >= 400 && result.status < 600) {
-    throw new APIError(result.status, resultData);
+    let error;
+    if (
+      resultData &&
+      Array.isArray(resultData.errors) &&
+      resultData.errors.length > 0
+    ) {
+      error = resultData.errors[0];
+    }
+    throw new APIError(result.status, error);
   }
 
   return resultData;

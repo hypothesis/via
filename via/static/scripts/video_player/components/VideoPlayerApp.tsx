@@ -26,6 +26,7 @@ import { formatTranscript, mergeSegments } from '../utils/transcript';
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
+import TranscriptError from './TranscriptError';
 import YouTubeVideoPlayer from './YouTubeVideoPlayer';
 import { PauseIcon, PlayIcon, SyncIcon } from './icons';
 
@@ -459,9 +460,7 @@ export default function VideoPlayerApp({
               </Transcript>
             )}
             {transcript instanceof Error && (
-              <div data-testid="transcript-error">
-                Unable to load transcript: {transcript.message}
-              </div>
+              <TranscriptError error={transcript} />
             )}
             <div
               id={bucketContainerId}

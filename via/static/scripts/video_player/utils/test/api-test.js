@@ -33,38 +33,71 @@ describe('callAPI', () => {
     assert.deepEqual(result, transcriptsAPIResponse);
   });
 
-  it('throws exception if result is not JSON', async () => {
-    fakeFetch
-      .withArgs(videoPlayerConfig.api.transcript.url)
-      .resolves(new Response('<b>Oh no</b>', { status: 500 }));
+  context('when request fails', () => {
+    it('throws exception if result is not JSON', async () => {
+      fakeFetch
+        .withArgs(videoPlayerConfig.api.transcript.url)
+        .resolves(new Response('<b>Oh no</b>', { status: 500 }));
 
-    let error;
-    try {
-      await callAPI(videoPlayerConfig.api.transcript);
-    } catch (e) {
-      error = e;
-    }
+      let error;
+      try {
+        await callAPI(videoPlayerConfig.api.transcript);
+      } catch (e) {
+        error = e;
+      }
 
-    assert.instanceOf(error, APIError);
-    assert.equal(error.status, 500);
-    assert.equal(error.data, null);
-    assert.equal(error.message, 'API call failed');
-  });
+      assert.instanceOf(error, APIError);
+      assert.equal(error.status, 500);
+      assert.isUndefined(error.error);
+      assert.equal(error.message, 'API call failed');
+    });
 
-  it('throws exception if API request fails', async () => {
-    fakeFetch
-      .withArgs(videoPlayerConfig.api.transcript.url)
-      .resolves(jsonResponse(404));
+    [{}, { errors: [] }].forEach(responseBody => {
+      it('throws exception without `error` if `errors` field is missing or empty', async () => {
+        fakeFetch
+          .withArgs(videoPlayerConfig.api.transcript.url)
+          .resolves(jsonResponse(404, responseBody));
 
-    let error;
-    try {
-      await callAPI(videoPlayerConfig.api.transcript);
-    } catch (e) {
-      error = e;
-    }
+        let error;
+        try {
+          await callAPI(videoPlayerConfig.api.transcript);
+        } catch (e) {
+          error = e;
+        }
 
-    assert.instanceOf(error, APIError);
-    assert.equal(error.status, 404);
-    assert.equal(error.message, 'API call failed');
+        assert.instanceOf(error, APIError);
+        assert.isUndefined(error.error);
+        assert.equal(error.status, 404);
+        assert.equal(error.message, 'API call failed');
+      });
+    });
+
+    it('throws exception with `error` if `errors` field is present', async () => {
+      const responseBody = {
+        errors: [
+          {
+            code: 'VideoNotFound',
+            title: 'This video does not exist',
+            detail: 'Video ID is invalid',
+          },
+        ],
+      };
+
+      fakeFetch
+        .withArgs(videoPlayerConfig.api.transcript.url)
+        .resolves(jsonResponse(404, responseBody));
+
+      let error;
+      try {
+        await callAPI(videoPlayerConfig.api.transcript);
+      } catch (e) {
+        error = e;
+      }
+
+      assert.instanceOf(error, APIError);
+      assert.deepEqual(error.error, responseBody.errors[0]);
+      assert.equal(error.status, 404);
+      assert.equal(error.message, 'API call failed');
+    });
   });
 });
