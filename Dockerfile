@@ -15,7 +15,7 @@ RUN yarn build
 # reverted back to Alpine when Musl v1.2.4 is released.
 #
 # See https://github.com/hypothesis/product-backlog/issues/1409
-FROM python:3.8.16-slim-bullseye
+FROM python:3.8.17-slim-bullseye
 LABEL maintainer="Hypothes.is Project and contributors"
 
 # Install nginx & supervisor
