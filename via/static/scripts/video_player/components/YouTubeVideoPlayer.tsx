@@ -1,5 +1,5 @@
 import { AspectRatio } from '@hypothesis/frontend-shared';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 import { loadYouTubeIFrameAPI } from '../utils/youtube';
 
@@ -85,11 +85,22 @@ export default function YouTubeVideoPlayer({
   time,
 }: YouTubeVideoPlayerProps) {
   const [loadError, setLoadError] = useState(null);
-  const encodedId = encodeURIComponent(videoId);
-  const encodedOrigin = encodeURIComponent(window.origin);
 
   // See https://developers.google.com/youtube/player_parameters#Manual_IFrame_Embeds
-  const playerURL = `https://www.youtube.com/embed/${encodedId}?enablejsapi=1&origin=${encodedOrigin}`;
+  const playerURL = useMemo(() => {
+    const encodedId = encodeURIComponent(videoId);
+    const url = new URL(`https://www.youtube.com/embed/${encodedId}`);
+    url.searchParams.set('enablejsapi', '1'); // Enable `YT.Player` API
+    url.searchParams.set('origin', window.origin);
+
+    // Make the "More videos" overlay show only videos from the same channel.
+    //
+    // Ideally we would be able to turn this off entirely. YT doesn't allow
+    // that, but it does at least allow us to avoid showing suggestions from
+    // other channels.
+    url.searchParams.set('rel', '0');
+    return url.toString();
+  }, [videoId]);
 
   const playerController = useRef<YT.Player>();
 
