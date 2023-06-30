@@ -397,7 +397,7 @@ wheel==0.38.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pip-tools
-whitenoise==6.4.0
+whitenoise==6.5.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
