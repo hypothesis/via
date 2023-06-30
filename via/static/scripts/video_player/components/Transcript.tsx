@@ -338,7 +338,7 @@ export default function Transcript({
         data-testid="scroll-container"
         elementRef={scrollRef}
       >
-        <div className="flex">
+        <div className="flex min-h-full">
           <ul
             className={classnames(
               'grow shadow-r-inner p-2',
