@@ -17,23 +17,23 @@ cffi==1.15.1
 charset-normalizer==2.0.1
     # via requests
 checkmatelib==1.0.15
-    # via -r requirements/prod.in
-cryptography==39.0.1
+    # via -r prod.in
+cryptography==41.0.0
     # via python-jose
 ecdsa==0.18.0
     # via python-jose
 google-auth==2.16.0
     # via google-auth-oauthlib
 google-auth-oauthlib==1.0.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 gunicorn==20.1.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-assets==1.0.5
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-pyramid-sentry==1.2.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-vialib==1.2.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 hupper==1.10.2
     # via pyramid
 idna==2.10
@@ -42,7 +42,7 @@ importlib-metadata==6.0.0
     # via h-vialib
 importlib-resources==5.12.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   checkmatelib
 jinja2==2.11.3
     # via pyramid-jinja2
@@ -54,12 +54,12 @@ markupsafe==1.1.1
     #   pyramid-jinja2
 marshmallow==3.19.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   webargs
 netaddr==0.8.0
     # via checkmatelib
 newrelic==8.8.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 oauthlib==3.2.2
     # via requests-oauthlib
 packaging==21.3
@@ -84,12 +84,12 @@ pyasn1-modules==0.2.8
 pycparser==2.21
     # via cffi
 pyjwt==2.7.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyparsing==3.0.7
     # via packaging
 pyramid==2.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   h-assets
     #   h-pyramid-sentry
     #   pyramid-exclog
@@ -97,20 +97,20 @@ pyramid==2.0
     #   pyramid-sanity
     #   pyramid-services
 pyramid-exclog==1.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-jinja2==2.10
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-sanity==1.0.3
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-services==2.2
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyrsistent==0.17.3
     # via jsonschema
 python-jose[cryptography]==3.3.0
     # via h-vialib
 requests==2.31.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   checkmatelib
     #   requests-oauthlib
     #   youtube-transcript-api
@@ -136,17 +136,17 @@ urllib3==1.26.15
 venusian==3.0.0
     # via pyramid
 webargs==8.2.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 webob==1.8.6
     # via
     #   h-vialib
     #   pyramid
 whitenoise==6.5.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 wired==0.3
     # via pyramid-services
 youtube-transcript-api==0.6.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 zipp==3.4.1
     # via
     #   importlib-metadata
