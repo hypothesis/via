@@ -32,7 +32,9 @@ checkmatelib==1.0.15
 click==8.1.3
     # via pip-tools
 coverage[toml]==7.2.7
-    # via -r tests.in
+    # via
+    #   -r tests.in
+    #   pytest-cov
 cryptography==41.0.0
     # via
     #   -r prod.txt
@@ -43,6 +45,8 @@ ecdsa==0.18.0
     #   python-jose
 exceptiongroup==1.0.0rc9
     # via pytest
+execnet==1.9.0
+    # via pytest-xdist
 factory-boy==3.2.1
     # via -r tests.in
 faker==18.9.0
@@ -143,6 +147,8 @@ plaster-pastedeploy==0.7
     #   pyramid
 pluggy==0.13.1
     # via pytest
+psutil==5.9.5
+    # via pytest-xdist
 pyasn1==0.4.8
     # via
     #   -r prod.txt
@@ -185,6 +191,13 @@ pyrsistent==0.17.3
     #   -r prod.txt
     #   jsonschema
 pytest==7.4.0
+    # via
+    #   -r tests.in
+    #   pytest-cov
+    #   pytest-xdist
+pytest-cov==4.1.0
+    # via -r tests.in
+pytest-xdist[psutil]==3.3.1
     # via -r tests.in
 python-dateutil==2.8.2
     # via

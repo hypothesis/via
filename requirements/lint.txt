@@ -51,7 +51,9 @@ click==8.1.3
     #   -r tests.txt
     #   pip-tools
 coverage[toml]==7.2.7
-    # via -r tests.txt
+    # via
+    #   -r tests.txt
+    #   pytest-cov
 cryptography==41.0.0
     # via
     #   -r functests.txt
@@ -69,6 +71,11 @@ exceptiongroup==1.0.0rc9
     #   -r functests.txt
     #   -r tests.txt
     #   pytest
+execnet==1.9.0
+    # via
+    #   -r functests.txt
+    #   -r tests.txt
+    #   pytest-xdist
 factory-boy==3.2.1
     # via
     #   -r functests.txt
@@ -227,6 +234,11 @@ pluggy==0.13.1
     #   -r functests.txt
     #   -r tests.txt
     #   pytest
+psutil==5.9.5
+    # via
+    #   -r functests.txt
+    #   -r tests.txt
+    #   pytest-xdist
 pyasn1==0.4.8
     # via
     #   -r functests.txt
@@ -291,6 +303,14 @@ pyrsistent==0.17.3
     #   -r tests.txt
     #   jsonschema
 pytest==7.4.0
+    # via
+    #   -r functests.txt
+    #   -r tests.txt
+    #   pytest-cov
+    #   pytest-xdist
+pytest-cov==4.1.0
+    # via -r tests.txt
+pytest-xdist[psutil]==3.3.1
     # via
     #   -r functests.txt
     #   -r tests.txt

@@ -2,8 +2,10 @@ pip-tools
 pip-sync-faster
 -r prod.txt
 coverage[toml]
+pytest-cov
 pytest
 factory-boy
 h-matchers
 httpretty
 freezegun
+pytest-xdist[psutil]
