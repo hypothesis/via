@@ -270,6 +270,21 @@ export default function VideoPlayerApp({
     };
   }, [baseClientConfig]);
 
+  const bucketBarChannel = useMemo(
+    () => (
+      <div
+        data-testid="bucket-bar-channel"
+        className={classnames(
+          // Provide a backdrop for bucket bar buttons. 20px of this
+          // is overlaid by the sidebar's semi-transparent bucket
+          // channel.
+          'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]'
+        )}
+      />
+    ),
+    []
+  );
+
   return (
     <div
       data-testid="app-container"
@@ -451,15 +466,7 @@ export default function VideoPlayerApp({
                   setTimestamp(segment.start);
                 }}
               >
-                <div
-                  data-testid="bucket-bar-channel"
-                  className={classnames(
-                    // Provide a backdrop for bucket bar buttons. 20px of this
-                    // is overlaid by the sidebar's semi-transparent bucket
-                    // channel.
-                    'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]'
-                  )}
-                />
+                {bucketBarChannel}
               </Transcript>
             )}
             {transcript instanceof Error && (
