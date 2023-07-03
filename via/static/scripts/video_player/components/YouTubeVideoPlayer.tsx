@@ -1,6 +1,7 @@
 import { AspectRatio } from '@hypothesis/frontend-shared';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
+import { useStableCallback } from '../hooks/use-stable-callback';
 import { loadYouTubeIFrameAPI } from '../utils/youtube';
 
 /**
@@ -104,13 +105,9 @@ export default function YouTubeVideoPlayer({
 
   const playerController = useRef<YT.Player>();
 
-  // Capture last-seen values of props so we can invoke callbacks without
-  // re-running effects when they change.
-  const onPlayingChangedCallback = useRef<(playing: boolean) => void>();
-  onPlayingChangedCallback.current = onPlayingChanged;
-
-  const onTimeChangedCallback = useRef<(timestamp: number) => void>();
-  onTimeChangedCallback.current = onTimeChanged;
+  // Wrap callbacks to avoid re-running effects when they change.
+  const onPlayingChangedCallback = useStableCallback(onPlayingChanged);
+  const onTimeChangedCallback = useStableCallback(onTimeChanged);
 
   const videoFrame = useRef(null);
 
@@ -126,20 +123,18 @@ export default function YouTubeVideoPlayer({
               playerController.current = player;
 
               // Report initial state when the video loads.
-              onPlayingChangedCallback.current?.(
-                isPlaying(player.getPlayerState())
-              );
+              onPlayingChangedCallback(isPlaying(player.getPlayerState()));
             },
 
             onStateChange: event => {
               if (event.data === PlayerState.UNSTARTED) {
                 return;
               }
-              onPlayingChangedCallback.current?.(isPlaying(event.data));
+              onPlayingChangedCallback(isPlaying(event.data));
             },
 
             onVideoProgress: event => {
-              onTimeChangedCallback.current?.(event.data);
+              onTimeChangedCallback(event.data);
             },
           } as PlayerEvents,
         });
@@ -148,7 +143,7 @@ export default function YouTubeVideoPlayer({
         console.error('Error loading video:', err);
         setLoadError(err);
       });
-  }, []);
+  }, [onPlayingChangedCallback, onTimeChangedCallback]);
 
   // Play/pause video when `play` prop changes.
   useEffect(() => {
