@@ -16,6 +16,7 @@ import {
 
 import { useAppLayout } from '../hooks/use-app-layout';
 import { useSideBySideLayout } from '../hooks/use-side-by-side-layout';
+import { useStableCallback } from '../hooks/use-stable-callback';
 import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
@@ -271,8 +272,7 @@ export default function VideoPlayerApp({
   }, [syncTranscript]);
 
   const bucketContainerId = 'bucket-container';
-  const prevSideBySideActive = useRef(sideBySideActive);
-  prevSideBySideActive.current = sideBySideActive;
+  const isActive = useStableCallback(() => sideBySideActive);
   const clientConfig = useMemo(() => {
     return {
       ...baseClientConfig,
@@ -280,12 +280,10 @@ export default function VideoPlayerApp({
       contentReady,
       sideBySide: {
         mode: 'manual',
-        // Using a ref here to make sure the `isActive` callback reference is
-        // kept, and only its return value changes
-        isActive: () => prevSideBySideActive.current,
+        isActive,
       },
     };
-  }, [baseClientConfig, contentReady]);
+  }, [baseClientConfig, contentReady, isActive]);
 
   return (
     <div
