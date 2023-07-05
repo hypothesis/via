@@ -23,11 +23,7 @@ describe('TranscriptError', () => {
     const wrapper = mount(<TranscriptError error={error} />);
     assert.equal(
       wrapper.text(),
-      [
-        'Unable to load transcript',
-        'The video was not found',
-        'Error details:Some long details here',
-      ].join('')
+      ['Unable to load transcript', 'The video was not found'].join('')
     );
   });
 });
