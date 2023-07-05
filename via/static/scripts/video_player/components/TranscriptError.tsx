@@ -1,3 +1,5 @@
+import { Callout, CautionIcon } from '@hypothesis/frontend-shared';
+
 import type { APIError } from '../utils/api';
 
 export type TranscriptErrorProps = {
@@ -6,9 +8,9 @@ export type TranscriptErrorProps = {
 
 export default function TranscriptError({ error }: TranscriptErrorProps) {
   return (
-    <div className="p-3">
+    <Callout role="alert" status="error" icon={CautionIcon}>
       <h2 className="text-lg">Unable to load transcript</h2>
-      <p className="mb-3">{error.error?.title ?? error.message}</p>
-    </div>
+      <p>{error.error?.title ?? error.message}</p>
+    </Callout>
   );
 }
