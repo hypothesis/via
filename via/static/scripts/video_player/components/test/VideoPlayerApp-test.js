@@ -41,7 +41,9 @@ describe('VideoPlayerApp', () => {
 
   function setFilter(wrapper, query) {
     const input = wrapper.find('FilterInput');
-    input.prop('setFilter')(query);
+    act(() => {
+      input.prop('setFilter')(query);
+    });
     wrapper.update();
   }
 
@@ -342,6 +344,16 @@ describe('VideoPlayerApp', () => {
     assert.equal(getFilter(wrapper), '');
   });
 
+  it('scrolls to current segment when filter is cleared', () => {
+    const wrapper = createVideoPlayer();
+    setFilter(wrapper, 'foobar');
+
+    const transcriptController = wrapper.find('Transcript').prop('controlsRef');
+    setFilter(wrapper, '');
+
+    assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
+  });
+
   it('syncs transcript when "Sync" button is clicked', () => {
     const wrapper = createVideoPlayer();
     const transcriptController = wrapper.find('Transcript').prop('controlsRef');
@@ -397,6 +409,7 @@ describe('VideoPlayerApp', () => {
 
   it('clears filter when Hypothesis client scrolls to a highlight', async () => {
     const wrapper = createVideoPlayer();
+    const transcriptController = wrapper.find('Transcript').prop('controlsRef');
 
     setFilter(wrapper, 'foobar');
 
@@ -407,7 +420,9 @@ describe('VideoPlayerApp', () => {
     event.waitUntil = promise => {
       ready = promise;
     };
-    document.body.dispatchEvent(event);
+    act(() => {
+      document.body.dispatchEvent(event);
+    });
 
     // Wait for VideoPlayerApp to be re-rendered with filter cleared.
     assert.instanceOf(ready, Promise);
@@ -415,6 +430,11 @@ describe('VideoPlayerApp', () => {
 
     wrapper.update();
     assert.equal(getFilter(wrapper), '');
+
+    // Unlike when the user clears the filter directly, we shouldn't scroll
+    // to the current segment, as this would conflict with the client trying
+    // to scroll to a highlight.
+    assert.notCalled(transcriptController.current.scrollToCurrentSegment);
   });
 
   it('does not defer scrolling if there is no filter', () => {

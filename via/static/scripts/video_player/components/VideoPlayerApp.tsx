@@ -138,11 +138,14 @@ export default function VideoPlayerApp({
   // Listen for the event the Hypothesis client dispatches before it scrolls
   // a highlight into view.
   const nextRender = useNextRender();
+  const pendingScrollToHighlight = useRef(false);
   useEffect(() => {
     const listener = (e: Event) => {
       if (!isScrollToRangeEvent(e)) {
         return;
       }
+
+      pendingScrollToHighlight.current = true;
 
       // If a filter is currently active, clear it first to ensure the highlight
       // is visible.
@@ -169,9 +172,25 @@ export default function VideoPlayerApp({
   }, [nextRender]);
 
   const syncTranscript = useCallback(
-    () => transcriptControls.current!.scrollToCurrentSegment(),
+    () => transcriptControls.current?.scrollToCurrentSegment(),
     []
   );
+
+  // After clearing the filter, scroll the current segment into view, unless
+  // we cleared the filter to allow the client to scroll to a highlight.
+  const isFilterEmpty = trimmedFilter.length === 0;
+  const prevFilterEmpty = useRef(isFilterEmpty);
+  useEffect(() => {
+    if (
+      isFilterEmpty &&
+      !prevFilterEmpty.current &&
+      !pendingScrollToHighlight.current
+    ) {
+      syncTranscript();
+    }
+    prevFilterEmpty.current = isFilterEmpty;
+    pendingScrollToHighlight.current = false;
+  }, [isFilterEmpty, syncTranscript]);
 
   // If we transition from paused to playing while autoscroll is active,
   // immediately scroll the current segment into view. Without this, the
