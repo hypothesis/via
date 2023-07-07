@@ -454,13 +454,16 @@ describe('VideoPlayerApp', () => {
     assert.isTrue(wrapper.find('Transcript').prop('autoScroll'));
   });
 
-  it('configures bucket bar container for client', () => {
+  it('configures client bucket bar and disables side-by-side mode', () => {
     const clientConfig = { openSidebar: true };
     const wrapper = createVideoPlayer({ clientConfig });
     const mergedConfig = wrapper.find('HypothesisClient').prop('config');
     assert.deepEqual(mergedConfig, {
       openSidebar: true,
       bucketContainerSelector: '#bucket-container',
+      sideBySide: {
+        mode: 'manual',
+      },
     });
   });
 

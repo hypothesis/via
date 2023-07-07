@@ -18,6 +18,7 @@ import {
 } from 'preact/hooks';
 
 import { useAppLayout } from '../hooks/use-app-layout';
+import { useSideBySideLayout } from '../hooks/use-side-by-side-layout';
 import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
@@ -139,6 +140,7 @@ export default function VideoPlayerApp({
   const appContainerRef = useRef<HTMLDivElement | null>(null);
 
   const appSize = useAppLayout(appContainerRef);
+  useSideBySideLayout();
   const multicolumn = appSize !== 'sm';
   const transcriptWidths = {
     sm: '100%',
@@ -268,17 +270,16 @@ export default function VideoPlayerApp({
     return {
       ...baseClientConfig,
       bucketContainerSelector: '#' + bucketContainerId,
+      sideBySide: {
+        mode: 'manual',
+      },
     };
   }, [baseClientConfig]);
 
   return (
     <div
       data-testid="app-container"
-      className={classnames(
-        'flex flex-col h-[100vh] min-h-0',
-        // Leave room for the sidebar toolbar/bucket-bar channel on the right
-        'mr-[20px]'
-      )}
+      className={classnames('flex flex-col h-[100vh] min-h-0')}
     >
       {multicolumn && (
         <div

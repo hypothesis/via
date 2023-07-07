@@ -46,7 +46,7 @@ describe('useAppLayout', () => {
   [
     { containerWidth: 200, expected: 'sm' },
     { containerWidth: 768, expected: 'sm' },
-    { containerWidth: 769, expected: 'md' },
+    { containerWidth: 856, expected: 'md' },
     { containerWidth: 875, expected: 'md' },
   ].forEach(({ containerWidth, expected }) => {
     it('should provide relative app size when component is rendered', () => {
@@ -66,7 +66,7 @@ describe('useAppLayout', () => {
     assert.equal(appContainerEl.prop('data-app-size'), 'sm');
 
     const steps = [
-      [800, 'md'],
+      [866, 'md'],
       [1000, 'lg'],
       [1200, 'xl'],
       [1500, '2xl'],
@@ -75,11 +75,15 @@ describe('useAppLayout', () => {
     for (const [width, expected] of steps) {
       container.style.width = `${width}px`;
 
-      await waitFor(() => {
-        wrapper.update();
-        const appContainerEl = wrapper.find('[data-testid="appContainer"]');
-        return appContainerEl.prop('data-app-size') === expected;
-      }, /* timeout */ 50);
+      await waitFor(
+        () => {
+          wrapper.update();
+          const appContainerEl = wrapper.find('[data-testid="appContainer"]');
+          return appContainerEl.prop('data-app-size') === expected;
+        },
+        /* timeout */ 50,
+        `reported app size for container of ${width} is ${expected}`
+      );
     }
   });
 });
