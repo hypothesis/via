@@ -66,18 +66,30 @@ describe('Transcript', () => {
   });
 
   it('scrolls current segment into view', () => {
-    const wrapper = mount(
-      <Transcript transcript={transcript} currentTime={5} />
-    );
-    const scrollContainer = wrapper.find('div[data-testid="scroll-container"]');
-    const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
+    let wrapper;
+    try {
+      wrapper = mount(<Transcript transcript={transcript} currentTime={5} />, {
+        // Render into document so transcript has a non-zero height.
+        attachTo: document.body,
+      });
+      const scrollContainer = wrapper.find(
+        'div[data-testid="scroll-container"]'
+      );
+      const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
+      const segment = wrapper.find('[data-testid="segment"]').at(1);
+      const expectedTop =
+        segment.getDOMNode().offsetTop -
+        scrollContainer.getDOMNode().clientHeight * (1 / 4);
 
-    wrapper.setProps({ currentTime: 10 });
+      wrapper.setProps({ currentTime: 10 });
 
-    assert.calledWith(scrollTo, {
-      left: 0,
-      top: 0,
-    });
+      assert.calledWith(scrollTo, {
+        left: 0,
+        top: expectedTop,
+      });
+    } finally {
+      wrapper?.unmount();
+    }
   });
 
   it('does not scroll to current segment if `autoScroll` is disabled', () => {
