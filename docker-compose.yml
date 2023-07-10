@@ -3,7 +3,7 @@ services:
   nginx-proxy:
     image: nginx:1.17.6-alpine
     ports:
-      - '127.0.0.1:9083:9083'
+      - '9083:9083'
     environment:
       - NGINX_SECURE_LINK_SECRET
     volumes:
