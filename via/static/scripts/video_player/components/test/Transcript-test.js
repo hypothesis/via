@@ -46,7 +46,7 @@ describe('Transcript', () => {
     assert.isFalse(segments.at(0).prop('data-is-current'));
   });
 
-  it('invokes callback when segment is clicked', () => {
+  it('invokes `onSelectSegment` callback when segment timestamp is clicked', () => {
     const selectSegment = sinon.stub();
     const wrapper = mount(
       <Transcript
@@ -63,6 +63,46 @@ describe('Transcript', () => {
     timestamp.simulate('click');
 
     assert.calledWith(selectSegment, transcript.segments[1]);
+  });
+
+  it('invokes `onSelectSegment` callback when segment text is clicked', () => {
+    let wrapper;
+
+    try {
+      const selectSegment = sinon.stub();
+      const wrapper = mount(
+        <Transcript
+          transcript={transcript}
+          currentTime={5}
+          onSelectSegment={selectSegment}
+        />,
+        { attachTo: document.body }
+      );
+      const timestamp = wrapper.find('[data-testid="segment"]').at(1).find('p');
+
+      // Click on segment text with no selection. This should select the segment.
+      timestamp.simulate('pointerdown');
+      timestamp.simulate('pointerup');
+      assert.calledWith(selectSegment, transcript.segments[1]);
+      selectSegment.resetHistory();
+
+      // Click on segment text, clearing existing selection in the process.
+      // This should be ignored.
+      window.getSelection().selectAllChildren(document.body);
+      timestamp.simulate('pointerdown');
+      window.getSelection().empty();
+      timestamp.simulate('pointerup');
+      assert.notCalled(selectSegment);
+
+      // Click on segment text, creating a new selection in the process.
+      // This should be ignored.
+      timestamp.simulate('pointerdown');
+      window.getSelection().selectAllChildren(document.body);
+      timestamp.simulate('pointerup');
+      assert.notCalled(selectSegment);
+    } finally {
+      wrapper?.unmount();
+    }
   });
 
   it('scrolls current segment into view', () => {

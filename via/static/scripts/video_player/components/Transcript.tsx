@@ -87,6 +87,10 @@ type TranscriptSegmentProps = {
   text: string;
 };
 
+function hasSelection() {
+  return Boolean(window.getSelection()?.toString());
+}
+
 function TranscriptSegment({
   hidden = false,
   highlight,
@@ -124,6 +128,8 @@ function TranscriptSegment({
       ranges.forEach(r => highlight.delete(r));
     };
   }, [highlight, matches]);
+
+  const hadSelectionOnPointerDown = useRef(false);
 
   const timestamp = formatTimestamp(time);
 
@@ -194,6 +200,20 @@ function TranscriptSegment({
         )}
         data-testid="transcript-text"
         ref={contentRef}
+        // We have a "click" handler here, but don't set a role because
+        // this is a secondary way to focus the transcript. The timestamp
+        // button is the primary control for this action.
+        onPointerDown={() => {
+          hadSelectionOnPointerDown.current = hasSelection();
+        }}
+        onPointerUp={() => {
+          // Allow the user to easily select a segment by clicking it, but
+          // don't seek the video if they are selecting or de-selecting text
+          // to annotate.
+          if (!hadSelectionOnPointerDown.current && !hasSelection()) {
+            onSelect();
+          }
+        }}
       >
         {text}
         {
