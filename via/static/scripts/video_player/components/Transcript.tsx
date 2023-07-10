@@ -263,17 +263,17 @@ export default function Transcript({
       return;
     }
 
-    // Scroll container such that the middle of the current segment is centered
-    // in the container. Note that we don't use `currentSegment.scrollIntoView`
-    // here because that may scroll the whole document, which we don't want.
+    // Scroll the container such that the current segment is positioned towards
+    // the top. We allow more space below than above, on the assumption that the
+    // user is likely to want to read forwards further than they want to read
+    // back from the current position.
     const currentSegmentOffset = offsetRelativeTo(
       currentSegment,
       scrollContainer
     );
+
     const scrollTarget =
-      currentSegmentOffset +
-      currentSegment.clientHeight / 2 -
-      scrollContainer.clientHeight / 2;
+      currentSegmentOffset - scrollContainer.clientHeight * (1 / 4);
 
     scrollContainer.scrollTo({
       left: 0,
