@@ -27,7 +27,7 @@ class YouTubeService:
         path_parts = parsed.path.split("/")
 
         # youtu.be/VIDEO_ID
-        if parsed.netloc in "youtu.be" and len(path_parts) >= 2 and not path_parts[0]:
+        if parsed.netloc == "youtu.be" and len(path_parts) >= 2 and not path_parts[0]:
             return path_parts[1]
 
         if parsed.netloc not in ["www.youtube.com", "youtube.com"]:
