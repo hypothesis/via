@@ -19,6 +19,7 @@ class TestYouTubeService:
             ("https://youtube.com", None),
             ("https://youtube.com?param=nope", None),
             ("https://youtube.com?v=", None),
+            ("https://youtu/VIDEO_ID", None),
             ("https://youtube.com?v=VIDEO_ID", "VIDEO_ID"),
             ("https://www.youtube.com/watch?v=VIDEO_ID", "VIDEO_ID"),
             ("https://www.youtube.com/watch?v=VIDEO_ID&t=14s", "VIDEO_ID"),
