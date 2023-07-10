@@ -30,6 +30,7 @@ class TestYouTubeService:
             ("https://youtu.be/VIDEO_ID", "VIDEO_ID"),
             ("https://youtube.com/shorts/VIDEO_ID?feature=share", "VIDEO_ID"),
             ("https://www.youtube.com/live/VIDEO_ID?feature=share", "VIDEO_ID"),
+            ("https://m.youtube.com/watch?v=VIDEO_ID", "VIDEO_ID"),
         ],
     )
     def test_get_video_id(self, url, expected_video_id, svc):
