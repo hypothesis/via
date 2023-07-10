@@ -30,7 +30,7 @@ class YouTubeService:
         if parsed.netloc in "youtu.be" and len(path_parts) >= 2 and not path_parts[0]:
             return path_parts[1]
 
-        if parsed.netloc not in ["www.youtube.com", "youtube.com"]:
+        if parsed.netloc not in ["www.youtube.com", "youtube.com", "m.youtube.com"]:
             return None
 
         query_params = parse_qs(parsed.query)
