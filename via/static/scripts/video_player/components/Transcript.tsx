@@ -9,6 +9,7 @@ import {
   useRef,
 } from 'preact/hooks';
 
+import { useScrollAnchor } from '../hooks/use-scroll-anchor';
 import { formatTimestamp } from '../utils/time';
 import type { MatchOffset, Segment, TranscriptData } from '../utils/transcript';
 import { filterTranscript } from '../utils/transcript';
@@ -346,6 +347,15 @@ export default function Transcript({
     }
     return filterTranscript(transcript.segments, filter);
   }, [filter, transcript]);
+
+  // Adjust the scroll position when the transcript container is resized, so the
+  // user doesn't lose their place. See
+  // https://github.com/hypothesis/via/issues/1021.
+  const getScrollChildren = useCallback(
+    (element: HTMLElement) => element.querySelectorAll('li'),
+    []
+  );
+  useScrollAnchor(scrollRef, getScrollChildren);
 
   return (
     <ScrollContainer borderless>
