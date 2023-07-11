@@ -3,6 +3,10 @@ import { mount } from 'enzyme';
 import HypothesisClient from '../HypothesisClient';
 
 describe('HypothesisClient', () => {
+  beforeEach(() => {
+    delete window.hypothesisConfig;
+  });
+
   it('adds Hypothesis client and configuration to page', () => {
     const config = { openSidebar: true };
     const wrapper = mount(
@@ -10,8 +14,7 @@ describe('HypothesisClient', () => {
     );
     assert.isTrue(wrapper.exists('script[src="https://hypothes.is/embed.js"]'));
 
-    const configScript = wrapper.find('script.js-hypothesis-config');
-    assert.isTrue(configScript.exists());
-    assert.equal(configScript.text(), JSON.stringify(config));
+    assert.isFunction(window.hypothesisConfig);
+    assert.equal(window.hypothesisConfig(), config);
   });
 });
