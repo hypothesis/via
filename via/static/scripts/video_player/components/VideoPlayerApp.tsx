@@ -268,6 +268,13 @@ export default function VideoPlayerApp({
     return {
       ...baseClientConfig,
       bucketContainerSelector: '#' + bucketContainerId,
+      sideBySide: {
+        mode: 'manual',
+        isActive: () => {
+          console.log('Side-by-side queried');
+          return true;
+        },
+      },
     };
   }, [baseClientConfig]);
 
