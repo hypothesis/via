@@ -1,7 +1,10 @@
 from urllib.parse import parse_qs, quote_plus, urlparse
 
+from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 from youtube_transcript_api import YouTubeTranscriptApi
 
+from via.models import Transcript
 from via.services.http import HTTPService
 
 
@@ -10,7 +13,10 @@ class YouTubeDataAPIError(Exception):
 
 
 class YouTubeService:
-    def __init__(self, enabled: bool, api_key: str, http_service: HTTPService):
+    def __init__(
+        self, db_session, enabled: bool, api_key: str, http_service: HTTPService
+    ):
+        self._db = db_session
         self._enabled = enabled
         self._api_key = api_key
         self._http_service = http_service
@@ -82,11 +88,37 @@ class YouTubeService:
         :raise Exception: this method might raise any type of exception that
             YouTubeTranscriptApi raises
         """
-        return YouTubeTranscriptApi.get_transcript(video_id)
+        transcript_id = language_code = "en"
+
+        try:
+            transcript = (
+                self._db.scalars(
+                    select(Transcript).where(
+                        Transcript.video_id == video_id,
+                        Transcript.transcript_id == transcript_id,
+                    )
+                )
+                .one()
+                .transcript
+            )
+        except NoResultFound:
+            transcript = YouTubeTranscriptApi.get_transcript(
+                video_id, languages=(language_code,)
+            )
+            self._db.add(
+                Transcript(
+                    video_id=video_id,
+                    transcript_id=transcript_id,
+                    transcript=transcript,
+                )
+            )
+
+        return transcript
 
 
 def factory(_context, request):
     return YouTubeService(
+        db_session=request.db,
         enabled=request.registry.settings["youtube_transcripts"],
         api_key=request.registry.settings["youtube_api_key"],
         http_service=request.find_service(HTTPService),
