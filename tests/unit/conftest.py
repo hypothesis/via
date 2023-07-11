@@ -1,6 +1,7 @@
 """A place to put fixture functions that are useful application-wide."""
 import functools
 
+import pytest
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 
@@ -34,8 +35,10 @@ def pyramid_config(pyramid_settings):
 
 @pytest.fixture
 def pyramid_request(
+    db_session,
     pyramid_config,  # pylint:disable=unused-argument
 ):
     pyramid_request = testing.DummyRequest()
     apply_request_extensions(pyramid_request)
+    pyramid_request.db = db_session
     return pyramid_request

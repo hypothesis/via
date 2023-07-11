@@ -137,6 +137,7 @@ packaging==21.3
     #   marshmallow
     #   pytest
     #   webargs
+    #   zope-sqlalchemy
 pastedeploy==2.1.1
     # via
     #   -r prod.txt
@@ -191,6 +192,7 @@ pyramid==2.0
     #   pyramid-jinja2
     #   pyramid-sanity
     #   pyramid-services
+    #   pyramid-tm
 pyramid-exclog==1.1
     # via -r prod.txt
 pyramid-jinja2==2.10
@@ -198,6 +200,8 @@ pyramid-jinja2==2.10
 pyramid-sanity==1.0.3
     # via -r prod.txt
 pyramid-services==2.2
+    # via -r prod.txt
+pyramid-tm==2.5
     # via -r prod.txt
 pyrsistent==0.17.3
     # via
@@ -247,6 +251,7 @@ sqlalchemy==2.0.19
     # via
     #   -r prod.txt
     #   alembic
+    #   zope-sqlalchemy
 tomli==2.0.0
     # via
     #   build
@@ -254,6 +259,11 @@ tomli==2.0.0
     #   pep517
     #   pip-tools
     #   pytest
+transaction==3.1.0
+    # via
+    #   -r prod.txt
+    #   pyramid-tm
+    #   zope-sqlalchemy
 translationstring==1.4
     # via
     #   -r prod.txt
@@ -305,7 +315,11 @@ zope-interface==5.2.0
     #   -r prod.txt
     #   pyramid
     #   pyramid-services
+    #   transaction
     #   wired
+    #   zope-sqlalchemy
+zope-sqlalchemy==3.0
+    # via -r prod.txt
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==23.1.2
@@ -321,3 +335,4 @@ setuptools==67.7.2
     #   pyramid
     #   zope-deprecation
     #   zope-interface
+    #   zope-sqlalchemy

@@ -3,8 +3,7 @@ from unittest import mock
 
 import pytest
 
-from via.app import configure_jinja2_assets, create_app, load_settings
-from via.sentry_filters import SENTRY_FILTERS
+from via.app import configure_jinja2_assets, load_settings
 
 
 class TestConfigureJinja2Assets:
@@ -41,29 +40,6 @@ def test_settings_are_configured_from_environment_variables(pyramid_settings):
 
     for key, value in expected_settings.items():
         assert settings[key] == value
-
-
-@pytest.mark.usefixtures("os")
-def test_app(configurator, pyramid, pyramid_settings):
-    create_app()
-
-    expected_settings = dict(
-        {"h_pyramid_sentry.filters": SENTRY_FILTERS}, **pyramid_settings
-    )
-    expected_settings["data_directory"] = Path(pyramid_settings["data_directory"])
-
-    pyramid.config.Configurator.assert_called_once_with(settings=expected_settings)
-    configurator.make_wsgi_app.assert_called_once_with()
-
-
-@pytest.fixture
-def configurator(pyramid):
-    return pyramid.config.Configurator.return_value
-
-
-@pytest.fixture(autouse=True)
-def pyramid(patch):
-    return patch("via.app.pyramid")
 
 
 @pytest.fixture
