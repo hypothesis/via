@@ -13,6 +13,7 @@ from via.sentry_filters import SENTRY_FILTERS
 
 PARAMETERS = {
     "client_embed_url": {"required": True},
+    "database_url": {"required": True},
     "nginx_server": {"required": True},
     "via_html_url": {"required": True},
     "checkmate_url": {"required": True},
@@ -63,17 +64,23 @@ def load_settings(settings):
     return settings
 
 
-def create_app(_=None, **settings):
+def create_app(_=None, **settings):  # pragma: no cover
     """Configure and return the WSGI app."""
     config = pyramid.config.Configurator(settings=load_settings(settings))
 
     config.set_security_policy(ViaSecurityPolicy())
+
+    config.registry.settings["tm.annotate_user"] = False
+    config.registry.settings["tm.manager_hook"] = "pyramid_tm.explicit_manager"
+    config.include("pyramid_tm")
 
     config.include("pyramid_exclog")
     config.include("pyramid_jinja2")
     config.include("pyramid_services")
     config.include("h_pyramid_sentry")
 
+    config.include("via.models")
+    config.include("via.db")
     config.include("via.assets")
     config.include("via.views")
     config.include("via.services")
