@@ -1,7 +1,18 @@
-import { useEffect } from 'preact/hooks';
+import { useLayoutEffect } from 'preact/hooks';
 
 export type HypothesisClientProps = {
+  /** URL of the client's boot script. */
   src?: string;
+
+  /**
+   * Configuration to pass to the Hypothesis client via the `hypothesisConfig`
+   * global [1].
+   *
+   * Note that changing this has no effect once the client is started and read
+   * its configuration.
+   *
+   * [1] https://h.readthedocs.io/projects/client/en/latest/publishers/config.html#configuring-the-client-using-javascript
+   */
   config?: object;
 };
 
@@ -12,17 +23,11 @@ export default function HypothesisClient({
   src = 'https://hypothes.is/embed.js',
   config = {},
 }: HypothesisClientProps) {
-  useEffect(() => {
-    // TODO - Unload the client when unmounted
-  }, []);
+  // nb. Use a layout effect here so that variable is definitely set before
+  // client's boot script executes.
+  useLayoutEffect(() => {
+    (window as any).hypothesisConfig = () => config;
+  }, [config]);
 
-  const clientConfig = JSON.stringify(config);
-  return (
-    <>
-      <script type="application/json" className="js-hypothesis-config">
-        {clientConfig}
-      </script>
-      <script src={src} />
-    </>
-  );
+  return <script src={src} />;
 }
