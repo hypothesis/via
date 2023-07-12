@@ -1,5 +1,6 @@
 import {
   Button,
+  CancelIcon,
   Checkbox,
   CopyIcon,
   IconButton,
@@ -71,24 +72,43 @@ type FilterInputProps = {
 
 function FilterInput({ elementRef, setFilter, filter }: FilterInputProps) {
   return (
-    <Input
-      data-testid="filter-input"
-      aria-label="Transcript filter"
-      classes={classnames(
-        // Match height of search input in sidebar
-        'h-[32px]'
+    <div className="relative">
+      <Input
+        data-testid="filter-input"
+        aria-label="Transcript filter"
+        classes={classnames(
+          // Match height of search input in sidebar
+          'h-[32px]',
+          // Extra padding right to prevent text and "clear" button overlapping
+          'pr-9'
+        )}
+        elementRef={elementRef}
+        onKeyUp={e => {
+          // Allow user to easily remove focus from search input.
+          if (e.key === 'Escape') {
+            (e.target as HTMLElement).blur();
+          }
+        }}
+        onInput={e => setFilter((e.target as HTMLInputElement).value)}
+        placeholder="Search..."
+        value={filter}
+      />
+      {filter && (
+        <Button
+          data-testid="clear-filter-button"
+          title="Clear"
+          onClick={() => setFilter('')}
+          unstyled
+          classes={classnames(
+            'text-grey-7 hover:text-grey-9 font-semibold',
+            'focus-visible-ring',
+            'absolute right-2 top-[6px] w-5 h-5'
+          )}
+        >
+          <CancelIcon className="w-5 h-5" />
+        </Button>
       )}
-      elementRef={elementRef}
-      onKeyUp={e => {
-        // Allow user to easily remove focus from search input.
-        if (e.key === 'Escape') {
-          (e.target as HTMLElement).blur();
-        }
-      }}
-      onInput={e => setFilter((e.target as HTMLInputElement).value)}
-      placeholder="Search..."
-      value={filter}
-    />
+    </div>
   );
 }
 

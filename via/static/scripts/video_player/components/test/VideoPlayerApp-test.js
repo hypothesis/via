@@ -375,36 +375,70 @@ describe('VideoPlayerApp', () => {
     input.simulate('input');
   }
 
-  it('filters transcript when typing in search field', () => {
-    const wrapper = createVideoPlayer();
-
-    setFilter(wrapper, 'foobar');
-
+  function getFilter(wrapper) {
     const transcript = wrapper.find('Transcript');
-    assert.equal(transcript.prop('filter'), 'foobar');
-  });
+    return transcript.prop('filter');
+  }
 
-  it('clears filter when Hypothesis client scrolls to a highlight', async () => {
-    const wrapper = createVideoPlayer();
+  describe('transcript filtering', () => {
+    it('filters transcript when typing in search field', () => {
+      const wrapper = createVideoPlayer();
 
-    setFilter(wrapper, 'foobar');
+      setFilter(wrapper, 'foobar');
 
-    // Simulate event emitted by client before it scrolls a highlight, which
-    // may be in a hidden segment, into view.
-    const event = new CustomEvent('scrolltorange');
-    let ready;
-    event.waitUntil = promise => {
-      ready = promise;
-    };
-    document.body.dispatchEvent(event);
+      const transcript = wrapper.find('Transcript');
+      assert.equal(transcript.prop('filter'), 'foobar');
+    });
 
-    // Wait for VideoPlayerApp to be re-rendered with filter cleared.
-    assert.instanceOf(ready, Promise);
-    await ready;
+    it('clears filter when Hypothesis client scrolls to a highlight', async () => {
+      const wrapper = createVideoPlayer();
 
-    wrapper.update();
-    const transcript = wrapper.find('Transcript');
-    assert.equal(transcript.prop('filter'), '');
+      setFilter(wrapper, 'foobar');
+
+      // Simulate event emitted by client before it scrolls a highlight, which
+      // may be in a hidden segment, into view.
+      const event = new CustomEvent('scrolltorange');
+      let ready;
+      event.waitUntil = promise => {
+        ready = promise;
+      };
+      document.body.dispatchEvent(event);
+
+      // Wait for VideoPlayerApp to be re-rendered with filter cleared.
+      assert.instanceOf(ready, Promise);
+      await ready;
+
+      wrapper.update();
+      assert.equal(getFilter(wrapper), '');
+    });
+
+    it('displays clear button when filter is not empty', () => {
+      const wrapper = createVideoPlayer();
+      const clearButtonSelector = 'button[data-testid="clear-filter-button"]';
+
+      assert.isFalse(wrapper.exists(clearButtonSelector));
+
+      // Once a filter is set, the clear button is rendered
+      setFilter(wrapper, 'foobar');
+      assert.isTrue(wrapper.exists(clearButtonSelector));
+
+      // When the filter is removed, the button is unmounted
+      setFilter(wrapper, '');
+      assert.isFalse(wrapper.exists(clearButtonSelector));
+    });
+
+    it('clears filter when clear button is pressed', () => {
+      const wrapper = createVideoPlayer();
+      const clearButtonSelector = 'button[data-testid="clear-filter-button"]';
+
+      setFilter(wrapper, 'foobar');
+
+      const clearButton = wrapper.find(clearButtonSelector);
+      clearButton.simulate('click');
+
+      assert.isFalse(wrapper.exists(clearButtonSelector));
+      assert.equal(getFilter(wrapper), '');
+    });
   });
 
   it('does not defer scrolling if there is no filter', () => {
