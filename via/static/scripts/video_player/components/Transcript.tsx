@@ -136,7 +136,7 @@ function TranscriptSegment({
   return (
     <li
       className={classnames(
-        'flex gap-x-3 p-1.5 rounded',
+        'flex gap-x-3 p-1.5 rounded-[4px]',
         // Margin needed to provide space for box shadow on current item
         'mb-1',
         {
@@ -152,7 +152,7 @@ function TranscriptSegment({
         onClick={onSelect}
         className={classnames(
           // TODO: Use shared Button to get these styles for free
-          'flex transition-colors focus-visible-ring rounded-sm',
+          'flex transition-colors focus-visible-ring rounded',
           // `peer` allows Tailwind styling based on sibling state
           'peer',
           'font-medium hover:underline',
