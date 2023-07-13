@@ -4,6 +4,8 @@
 #
 #    pip-compile --allow-unsafe --config=pyproject.toml requirements/functests.in
 #
+alembic==1.11.1
+    # via -r prod.txt
 attrs==20.3.0
     # via
     #   -r prod.txt
@@ -55,6 +57,10 @@ google-auth==2.16.0
     #   google-auth-oauthlib
 google-auth-oauthlib==1.0.0
     # via -r prod.txt
+greenlet==2.0.2
+    # via
+    #   -r prod.txt
+    #   sqlalchemy
 gunicorn==20.1.0
     # via -r prod.txt
 h-assets==1.0.5
@@ -78,11 +84,13 @@ idna==2.10
 importlib-metadata==6.0.0
     # via
     #   -r prod.txt
+    #   alembic
     #   h-vialib
     #   pip-sync-faster
 importlib-resources==5.12.0
     # via
     #   -r prod.txt
+    #   alembic
     #   checkmatelib
 inflection==0.5.1
     # via pytest-factoryboy
@@ -96,10 +104,15 @@ jsonschema==3.2.0
     # via
     #   -r prod.txt
     #   checkmatelib
+mako==1.2.4
+    # via
+    #   -r prod.txt
+    #   alembic
 markupsafe==1.1.1
     # via
     #   -r prod.txt
     #   jinja2
+    #   mako
     #   pyramid-jinja2
 marshmallow==3.19.0
     # via
@@ -145,6 +158,8 @@ plaster-pastedeploy==0.7
     #   pyramid
 pluggy==0.13.1
     # via pytest
+psycopg2==2.9.6
+    # via -r prod.txt
 pyasn1==0.4.8
     # via
     #   -r prod.txt
@@ -226,6 +241,10 @@ six==1.15.0
     #   python-dateutil
 soupsieve==2.1
     # via beautifulsoup4
+sqlalchemy==2.0.19
+    # via
+    #   -r prod.txt
+    #   alembic
 tomli==2.0.0
     # via
     #   build
@@ -237,7 +256,11 @@ translationstring==1.4
     #   -r prod.txt
     #   pyramid
 typing-extensions==4.7.1
-    # via pytest-factoryboy
+    # via
+    #   -r prod.txt
+    #   alembic
+    #   pytest-factoryboy
+    #   sqlalchemy
 urllib3==1.26.15
     # via
     #   -r prod.txt
