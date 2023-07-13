@@ -3,12 +3,10 @@ import {
   Checkbox,
   CopyIcon,
   IconButton,
-  Input,
   LogoIcon,
   Spinner,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import type { Ref } from 'preact';
 import {
   useCallback,
   useEffect,
@@ -23,6 +21,7 @@ import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
 import { formatTranscript, mergeSegments } from '../utils/transcript';
+import FilterInput from './FilterInput';
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
@@ -60,35 +59,6 @@ function isScrollToRangeEvent(e: Event): e is ScrollToRangeEvent {
     e instanceof CustomEvent &&
     'waitUntil' in e &&
     typeof e.waitUntil === 'function'
-  );
-}
-
-type FilterInputProps = {
-  elementRef: Ref<HTMLElement | undefined>;
-  setFilter: (filter: string) => void;
-  filter: string;
-};
-
-function FilterInput({ elementRef, setFilter, filter }: FilterInputProps) {
-  return (
-    <Input
-      data-testid="filter-input"
-      aria-label="Transcript filter"
-      classes={classnames(
-        // Match height of search input in sidebar
-        'h-[32px]'
-      )}
-      elementRef={elementRef}
-      onKeyUp={e => {
-        // Allow user to easily remove focus from search input.
-        if (e.key === 'Escape') {
-          (e.target as HTMLElement).blur();
-        }
-      }}
-      onInput={e => setFilter((e.target as HTMLInputElement).value)}
-      placeholder="Search..."
-      value={filter}
-    />
   );
 }
 

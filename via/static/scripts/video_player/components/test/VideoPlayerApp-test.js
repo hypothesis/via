@@ -39,6 +39,17 @@ describe('VideoPlayerApp', () => {
   }
   FakeTranscript.displayName = 'Transcript';
 
+  function setFilter(wrapper, query) {
+    const input = wrapper.find('FilterInput');
+    input.prop('setFilter')(query);
+    wrapper.update();
+  }
+
+  function getFilter(wrapper) {
+    const transcript = wrapper.find('Transcript');
+    return transcript.prop('filter');
+  }
+
   let wrappers;
   let fakeUseAppLayout;
 
@@ -97,7 +108,7 @@ describe('VideoPlayerApp', () => {
           assert.isTrue(
             topBar.find('[data-testid="hypothesis-logo"]').exists()
           );
-          assert.isTrue(topBar.find('[data-testid="filter-input"]').exists());
+          assert.isTrue(topBar.find('FilterInput').exists());
         });
 
         it('renders a play/pause button', () => {
@@ -123,7 +134,7 @@ describe('VideoPlayerApp', () => {
       it('renders filter input within transcript controls', () => {
         const wrapper = createVideoPlayer();
         const controls = wrapper.find('[data-testid="transcript-controls"]');
-        assert.isTrue(controls.find('[data-testid="filter-input"]').exists());
+        assert.isTrue(controls.find('FilterInput').exists());
       });
 
       it('does not render a play/pause button', () => {
@@ -311,8 +322,7 @@ describe('VideoPlayerApp', () => {
     const wrapper = createVideoPlayer();
     setFilter(wrapper, 'foobar');
 
-    let transcript = wrapper.find('Transcript');
-    assert.equal(transcript.prop('filter'), 'foobar');
+    assert.equal(getFilter(wrapper), 'foobar');
 
     act(() => {
       wrapper.find('Transcript').prop('onSelectSegment')(
@@ -321,8 +331,7 @@ describe('VideoPlayerApp', () => {
     });
     wrapper.update();
 
-    transcript = wrapper.find('Transcript');
-    assert.equal(transcript.prop('filter'), '');
+    assert.equal(getFilter(wrapper), '');
   });
 
   it('syncs transcript when "Sync" button is clicked', () => {
@@ -369,12 +378,6 @@ describe('VideoPlayerApp', () => {
     assert.notCalled(transcriptController.current.scrollToCurrentSegment);
   });
 
-  function setFilter(wrapper, query) {
-    const input = wrapper.find('input[data-testid="filter-input"]');
-    input.getDOMNode().value = query;
-    input.simulate('input');
-  }
-
   it('filters transcript when typing in search field', () => {
     const wrapper = createVideoPlayer();
 
@@ -403,8 +406,7 @@ describe('VideoPlayerApp', () => {
     await ready;
 
     wrapper.update();
-    const transcript = wrapper.find('Transcript');
-    assert.equal(transcript.prop('filter'), '');
+    assert.equal(getFilter(wrapper), '');
   });
 
   it('does not defer scrolling if there is no filter', () => {
@@ -506,35 +508,44 @@ describe('VideoPlayerApp', () => {
       assert.isFalse(wrapper.find('YouTubeVideoPlayer').prop('play'));
     });
 
-    it('ignores shortcut keys when sent to input elements', async () => {
-      const wrapper = createVideoPlayer();
-      const inputField = wrapper
-        .find('input[data-testid="filter-input"]')
-        .getDOMNode();
-      inputField.focus();
+    context('when interacting with input', () => {
+      beforeEach(() => {
+        // These tests need the actual input
+        $imports.$restore({
+          './FilterInput': true,
+        });
+      });
 
-      sendKey(wrapper, 'k', inputField);
+      it('ignores shortcut keys when sent to input elements', async () => {
+        const wrapper = createVideoPlayer();
+        const inputField = wrapper
+          .find('input[data-testid="filter-input"]')
+          .getDOMNode();
+        inputField.focus();
 
-      assert.isFalse(wrapper.find('YouTubeVideoPlayer').prop('play'));
-    });
+        sendKey(wrapper, 'k', inputField);
 
-    it('focuses search field when "/" is pressed', () => {
-      const wrapper = createVideoPlayer();
-      const inputField = wrapper
-        .find('input[data-testid="filter-input"]')
-        .getDOMNode();
+        assert.isFalse(wrapper.find('YouTubeVideoPlayer').prop('play'));
+      });
 
-      // nb. We are using `assert.isTrue` here rather than `assert.equal`
-      // for less verbose errors if assert fails.
-      assert.isTrue(document.activeElement !== inputField);
+      it('focuses search field when "/" is pressed', () => {
+        const wrapper = createVideoPlayer();
+        const inputField = wrapper
+          .find('input[data-testid="filter-input"]')
+          .getDOMNode();
 
-      sendKey(wrapper, '/');
+        // nb. We are using `assert.isTrue` here rather than `assert.equal`
+        // for less verbose errors if assert fails.
+        assert.isTrue(document.activeElement !== inputField);
 
-      assert.isTrue(document.activeElement === inputField);
+        sendKey(wrapper, '/');
 
-      sendKey(wrapper, 'Escape', inputField);
+        assert.isTrue(document.activeElement === inputField);
 
-      assert.isFalse(document.activeElement === inputField);
+        sendKey(wrapper, 'Escape', inputField);
+
+        assert.isFalse(document.activeElement === inputField);
+      });
     });
 
     it('syncs transcript when "s" is pressed', () => {
