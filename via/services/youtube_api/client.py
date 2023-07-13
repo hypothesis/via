@@ -1,6 +1,3 @@
-# import json
-# import re
-# from html import unescape
 from urllib.parse import quote_plus
 from xml.etree import ElementTree
 
@@ -26,9 +23,10 @@ def strip_html(string):
 class YouTubeAPIClient:
     def __init__(self, api_key: str):
         self._api_key = api_key
-        self._http_session = requests.Session()
-        self._http_session.headers["Accept-Language"] = "en-US"
-        self._http = HTTPService(session=self._http_session)
+
+        session = requests.Session()
+        session.headers["Accept-Language"] = "en-US"
+        self._http = HTTPService(session=session)
 
     def canonical_video_url(self, video_id: str) -> str:
         """
@@ -76,45 +74,3 @@ class YouTubeAPIClient:
                 if xml_element.text is not None
             ],
         )
-
-    # def get_video_info_(self, video_id: str) -> Video:
-    #     url = self.canonical_video_url(video_id)
-    #     html = self._get_html(url)
-    #
-    #     # It might be nice to do something less horrible here, like using
-    #     # beautiful soup to find all script tags (which is where this comes
-    #     # from)
-    #     start_chars = ">var ytInitialPlayerResponse = "
-    #     try:
-    #         start = html.index(start_chars)
-    #     except ValueError:
-    #         # The placement here is weird. Should we check for this first in
-    #         # _get_html or can we get the info we need _and_ get captcha'd
-    #         # sometimes?
-    #         if 'class="g-recaptcha"' in html:
-    #             raise YouTubeAPIError("too_many_requests", video_id)
-    #
-    #         raise YouTubeAPIError("unexpected_json_format", video_id)
-    #
-    #     end = html.index("};", start)
-    #     video_info = html[start + len(start_chars) : end + 1]
-    #
-    #     return Video.from_json(url=url, data=json.loads(video_info))
-    #
-    # _COOKIE_REGEX = re.compile(r'name="v" value="(.*?)"')
-    #
-    # def _get_html(self, url, retry_on_consent=True):
-    #     response = self._http.get(url=url)
-    #     html = unescape(response.text)
-    #
-    #     if 'action="https://consent.youtube.com/s"' not in html:
-    #         return html
-    #
-    #     # Looks like we are being asked for Cookie permission
-    #     if retry_on_consent and (match := self._COOKIE_REGEX.search(html)):
-    #         self._http_session.cookies.set(
-    #             "CONSENT", "YES+" + match.group(1), domain=".youtube.com"
-    #         )
-    #         return self._get_html(url, retry_on_consent=False)
-    #
-    #     raise YouTubeAPIError("failed_to_create_consent_cookie", url)
