@@ -1,11 +1,18 @@
 from urllib.parse import parse_qs, quote_plus, urlparse
 
-from youtube_transcript_api import YouTubeTranscriptApi
+from via.services import HTTPService
+from via.services.youtube_api import Transcript
+from via.services.youtube_api.client import Video, YouTubeAPI
+
+
+class YouTubeServiceError(Exception):
+    ...
 
 
 class YouTubeService:
-    def __init__(self, enabled: bool):
+    def __init__(self, enabled: bool, api_client: YouTubeAPI):
         self._enabled = enabled
+        self._api_client = api_client
 
     @property
     def enabled(self):
@@ -51,15 +58,29 @@ class YouTubeService:
 
         return None
 
-    def get_transcript(self, video_id):
-        """
-        Call the YouTube API and return the transcript for the given video_id.
+    def get_video_info(self, video_id) -> Video:
+        video = self._api_client.get_video_info(video_id=video_id)
 
-        :raise Exception: this method might raise any type of exception that
-            YouTubeTranscriptApi raises
-        """
-        return YouTubeTranscriptApi.get_transcript(video_id)
+        if not video.is_playable:
+            raise YouTubeServiceError("video_unavailable", video_id)
+
+        return video
+
+    def get_transcript(self, video_id, caption_track_id=".en") -> Transcript:
+        video = self.get_video_info(video_id)
+
+        if video.has_captions:
+            for caption_track in video.caption.tracks:
+                if caption_track.id == caption_track_id:
+                    return self._api_client.get_transcript(caption_track)
+
+        raise YouTubeServiceError("no_transcript_available", video_id)
 
 
 def factory(_context, request):
-    return YouTubeService(enabled=request.registry.settings["youtube_transcripts"])
+    return YouTubeService(
+        enabled=request.registry.settings["youtube_transcripts"],
+        # Do not use the global HTTPService, as we will pollute the
+        # session with cookie information as a part of getting info
+        api_client=YouTubeAPI(http_session=HTTPService()),
+    )
