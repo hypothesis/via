@@ -1,14 +1,31 @@
+from io import BytesIO
 from unittest.mock import sentinel
 
 import pytest
+from requests import Response
 
-from via.services.youtube import YouTubeService, factory
+from via.services.youtube import YouTubeDataAPIError, YouTubeService, factory
 
 
 class TestYouTubeService:
-    @pytest.mark.parametrize("enabled", [True, False])
-    def test_enabled(self, enabled):
-        assert YouTubeService(enabled=enabled).enabled == enabled
+    @pytest.mark.parametrize(
+        "enabled,api_key,expected",
+        [
+            (False, None, False),
+            (True, None, False),
+            (False, sentinel.api_key, False),
+            (True, sentinel.api_key, True),
+        ],
+    )
+    def test_enabled(self, enabled, api_key, expected):
+        assert (
+            YouTubeService(
+                enabled=enabled,
+                api_key=api_key,
+                http_service=sentinel.http_service,
+            ).enabled
+            == expected
+        )
 
     @pytest.mark.parametrize(
         "url,expected_video_id",
@@ -37,6 +54,31 @@ class TestYouTubeService:
     def test_get_video_id(self, url, expected_video_id, svc):
         assert expected_video_id == svc.get_video_id(url)
 
+    def test_get_video_title(self, svc, http_service):
+        response = http_service.get.return_value = Response()
+        response.raw = BytesIO(b'{"items": [{"snippet": {"title": "video_title"}}]}')
+
+        title = svc.get_video_title(sentinel.video_id)
+
+        http_service.get.assert_called_once_with(
+            "https://www.googleapis.com/youtube/v3/videos",
+            params={
+                "id": sentinel.video_id,
+                "key": sentinel.api_key,
+                "part": "snippet",
+                "maxResults": "1",
+            },
+        )
+        assert title == "video_title"
+
+    def test_get_video_title_raises_YouTubeDataAPIError(self, svc, http_service):
+        http_service.get.side_effect = RuntimeError()
+
+        with pytest.raises(YouTubeDataAPIError) as exc_info:
+            svc.get_video_title(sentinel.video_id)
+
+        assert exc_info.value.__cause__ == http_service.get.side_effect
+
     def test_get_transcript(self, YouTubeTranscriptApi, svc):
         transcript = svc.get_transcript(sentinel.video_id)
 
@@ -58,16 +100,18 @@ class TestYouTubeService:
         assert expected_url == svc.canonical_video_url(video_id)
 
     @pytest.fixture
-    def svc(self):
-        return YouTubeService(enabled=True)
+    def svc(self, http_service):
+        return YouTubeService(
+            enabled=True, api_key=sentinel.api_key, http_service=http_service
+        )
 
 
 class TestFactory:
-    def test_it(self, YouTubeService, youtube_service, pyramid_request):
+    def test_it(self, YouTubeService, youtube_service, http_service, pyramid_request):
         returned = factory(sentinel.context, pyramid_request)
 
         YouTubeService.assert_called_once_with(
-            pyramid_request.registry.settings["youtube_transcripts"]
+            enabled=True, api_key="test_youtube_api_key", http_service=http_service
         )
         assert returned == youtube_service
 

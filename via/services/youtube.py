@@ -2,14 +2,22 @@ from urllib.parse import parse_qs, quote_plus, urlparse
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
+from via.services.http import HTTPService
+
+
+class YouTubeDataAPIError(Exception):
+    """A problem with calling the YouTube Data API."""
+
 
 class YouTubeService:
-    def __init__(self, enabled: bool):
+    def __init__(self, enabled: bool, api_key: str, http_service: HTTPService):
         self._enabled = enabled
+        self._api_key = api_key
+        self._http_service = http_service
 
     @property
     def enabled(self):
-        return self._enabled
+        return bool(self._enabled and self._api_key)
 
     def canonical_video_url(self, video_id: str) -> str:
         """
@@ -51,6 +59,22 @@ class YouTubeService:
 
         return None
 
+    def get_video_title(self, video_id):
+        """Call the YouTube API and return the title for the given video_id."""
+        # https://developers.google.com/youtube/v3/docs/videos/list
+        try:
+            return self._http_service.get(
+                "https://www.googleapis.com/youtube/v3/videos",
+                params={
+                    "id": video_id,
+                    "key": self._api_key,
+                    "part": "snippet",
+                    "maxResults": "1",
+                },
+            ).json()["items"][0]["snippet"]["title"]
+        except Exception as exc:
+            raise YouTubeDataAPIError("getting the video title failed") from exc
+
     def get_transcript(self, video_id):
         """
         Call the YouTube API and return the transcript for the given video_id.
@@ -62,4 +86,8 @@ class YouTubeService:
 
 
 def factory(_context, request):
-    return YouTubeService(enabled=request.registry.settings["youtube_transcripts"])
+    return YouTubeService(
+        enabled=request.registry.settings["youtube_transcripts"],
+        api_key=request.registry.settings["youtube_api_key"],
+        http_service=request.find_service(HTTPService),
+    )
