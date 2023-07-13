@@ -32,6 +32,9 @@ class TestViewVideo:
         youtube_service.canonical_video_url.assert_called_once_with(
             sentinel.youtube_video_id
         )
+        youtube_service.get_video_title.assert_called_once_with(
+            youtube_service.get_video_id.return_value
+        )
         Configuration.extract_from_params.assert_called_once_with(
             {"via.foo": "foo", "via.bar": "bar"}
         )
@@ -39,6 +42,7 @@ class TestViewVideo:
         assert response == {
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
+            "title": youtube_service.get_video_title.return_value,
             "video_id": youtube_service.get_video_id.return_value,
             "video_url": youtube_service.canonical_video_url.return_value,
             "api": {

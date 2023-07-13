@@ -29,6 +29,7 @@ PARAMETERS = {
     "enable_front_page": {"formatter": asbool},
     "youtube_transcripts": {"formatter": asbool},
     "api_jwt_secret": {"required": True},
+    "youtube_api_key": {},
 }
 
 

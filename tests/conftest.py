@@ -21,6 +21,7 @@ def pyramid_settings():
         "dev": False,
         "youtube_transcripts": True,
         "api_jwt_secret": "secret",
+        "youtube_api_key": "test_youtube_api_key",
     }
 
 
