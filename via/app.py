@@ -12,7 +12,6 @@ from via.security import ViaSecurityPolicy
 from via.sentry_filters import SENTRY_FILTERS
 
 PARAMETERS = {
-    # Required
     "client_embed_url": {"required": True},
     "nginx_server": {"required": True},
     "via_html_url": {"required": True},
@@ -20,7 +19,6 @@ PARAMETERS = {
     "via_secret": {"required": True},
     "checkmate_api_key": {"required": True},
     "nginx_secure_link_secret": {"required": True},
-    # Optional
     "checkmate_ignore_reasons": {},
     "checkmate_allow_all": {"formatter": asbool},
     "dev": {"formatter": asbool},
