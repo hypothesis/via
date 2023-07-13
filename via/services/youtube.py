@@ -1,6 +1,6 @@
 from urllib.parse import parse_qs, quote_plus, urlparse
 
-from via.services import HTTPService
+from via.exceptions import BadURL
 from via.services.youtube_api import Transcript
 from via.services.youtube_api.client import Video, YouTubeAPIClient
 
@@ -17,16 +17,6 @@ class YouTubeService:
     @property
     def enabled(self):
         return self._enabled
-
-    def canonical_video_url(self, video_id: str) -> str:
-        """
-        Return the canonical URL for a YouTube video.
-
-        This is used as the URL which YouTube transcript annotations are
-        associated with.
-        """
-        escaped_id = quote_plus(video_id)
-        return f"https://www.youtube.com/watch?v={escaped_id}"
 
     def get_video_id(self, url):
         """Return the YouTube video ID from the given URL, or None."""
@@ -58,7 +48,13 @@ class YouTubeService:
 
         return None
 
-    def get_video_info(self, video_id) -> Video:
+    def get_video_info(self, video_id=None, video_url=None) -> Video:
+        if video_url:
+            video_id = self.get_video_id(video_url)
+
+        if not video_id:
+            raise BadURL(f"Unsupported video URL: {video_url}", url=video_url)
+
         video = self._api_client.get_video_info(video_id=video_id)
 
         if not video.is_playable:
@@ -66,18 +62,18 @@ class YouTubeService:
 
         return video
 
-    def get_transcript(self, video_id, caption_track_ids) -> Transcript:
+    def get_transcript(self, video_id, caption_track_id) -> Transcript:
         video = self.get_video_info(video_id)
 
         if not video.has_captions:
             raise YouTubeServiceError("no_transcripts_available", video_id)
 
         for caption_track in video.caption.tracks:
-            if caption_track.id in caption_track_ids:
+            if caption_track.id == caption_track_id:
                 return self._api_client.get_transcript(caption_track)
 
         raise YouTubeServiceError(
-            "cannot_find_transcript", video_id, caption_track_ids)
+            "cannot_find_transcript", video_id, caption_track_id)
 
 
 def factory(_context, request):

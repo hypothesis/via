@@ -76,15 +76,17 @@ def safe_get(data, path, default=None):
 
 @dataclass
 class Video:
+    url: str = None
     details: Optional[VideoDetails] = None
     caption: Optional[Captions] = None
     playability_status: str = None
 
     @classmethod
-    def from_json(cls, data):
+    def from_json(cls, url, data):
         captions = safe_get(data, ["captions", "playerCaptionsTracklistRenderer"])
 
         return Video(
+            url=url,
             details=VideoDetails.from_json(data["videoDetails"]),
             caption=Captions.from_json(captions) if captions else None,
             playability_status=safe_get(data, ["playabilityStatus", "status"]),
