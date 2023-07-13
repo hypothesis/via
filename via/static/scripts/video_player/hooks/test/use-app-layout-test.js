@@ -11,11 +11,12 @@ describe('useAppLayout', () => {
   // Create a fake component to mount in tests that uses the hook
   function FakeComponent() {
     const myRef = useRef();
-    const appSize = useAppLayout(myRef);
+    const { appSize, multicolumn } = useAppLayout(myRef);
     return (
       <div
         ref={myRef}
         data-app-size={appSize}
+        data-app-multicolumn={multicolumn}
         style="width:100%"
         data-testid="appContainer"
       >
@@ -58,32 +59,42 @@ describe('useAppLayout', () => {
     });
   });
 
-  it('should update app size if relative size of container changes', async () => {
-    container.style.width = '200px';
+  describe('updating app layout info when relative container size changes', () => {
+    let wrapper;
 
-    const wrapper = renderComponent();
-    const appContainerEl = wrapper.find('[data-testid="appContainer"]');
-    assert.equal(appContainerEl.prop('data-app-size'), 'sm');
+    beforeEach(() => {
+      container.style.width = '200px';
+      wrapper = renderComponent();
+    });
 
-    const steps = [
-      [866, 'md'],
-      [1000, 'lg'],
-      [1200, 'xl'],
-      [1500, '2xl'],
+    for (const [width, expected] of [
+      [866, 'sm'],
+      [868, 'md'],
+      [1000, 'md'],
+      [1200, 'lg'],
+      [1500, 'xl'],
       [400, 'sm'],
-    ];
-    for (const [width, expected] of steps) {
-      container.style.width = `${width}px`;
-
-      await waitFor(
-        () => {
+    ]) {
+      it('should update the relative appSize', async () => {
+        container.style.width = `${width}px`;
+        await waitFor(() => {
           wrapper.update();
           const appContainerEl = wrapper.find('[data-testid="appContainer"]');
           return appContainerEl.prop('data-app-size') === expected;
-        },
-        /* timeout */ 50,
-        `reported app size for container of ${width} is ${expected}`
-      );
+        }, 50 /* timeout */);
+      });
+
+      it('should update multicolumn value for relative appSize', async () => {
+        container.style.width = `${width}px`;
+        const shouldBeMulticolumn = expected !== 'sm';
+        await waitFor(() => {
+          wrapper.update();
+          const appContainerEl = wrapper.find('[data-testid="appContainer"]');
+          return (
+            appContainerEl.prop('data-app-multicolumn') === shouldBeMulticolumn
+          );
+        }, 50 /* timeout */);
+      });
     }
   });
 });

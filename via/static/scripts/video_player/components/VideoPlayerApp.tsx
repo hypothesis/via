@@ -109,16 +109,9 @@ export default function VideoPlayerApp({
   const filterInputRef = useRef<HTMLInputElement>();
   const appContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const appSize = useAppLayout(appContainerRef);
+  const { appSize, multicolumn, transcriptWidth } =
+    useAppLayout(appContainerRef);
   useSideBySideLayout();
-  const multicolumn = appSize !== 'sm';
-  const transcriptWidths = {
-    sm: '100%',
-    md: '380px',
-    lg: '410px',
-    xl: '450px',
-    '2xl': '480px',
-  };
 
   // Fetch transcript when app loads.
   const [transcript, setTranscript] = useState<
@@ -270,7 +263,7 @@ export default function VideoPlayerApp({
               // gets "consumed" in side-by-side mode
               'pr-4'
             )}
-            style={{ width: transcriptWidths[appSize] }}
+            style={{ width: transcriptWidth }}
           >
             <FilterInput
               elementRef={filterInputRef}
@@ -303,9 +296,8 @@ export default function VideoPlayerApp({
               // Adapt spacing around video for different app sizes
               'p-0': appSize === 'sm',
               'p-1': appSize === 'md',
-              'p-2': appSize === 'lg',
-              'py-2 px-3': appSize === 'xl',
-              'py-2 px-4': appSize === '2xl',
+              'py-2 px-3': appSize === 'lg',
+              'py-2 px-4': appSize === 'xl',
             }
           )}
         >
@@ -325,7 +317,7 @@ export default function VideoPlayerApp({
             // layouts
             'min-h-0 grow': !multicolumn,
           })}
-          style={{ width: transcriptWidths[appSize] }}
+          style={{ width: transcriptWidth }}
         >
           <div
             data-testid="transcript-controls"
