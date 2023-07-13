@@ -3,8 +3,9 @@ import re
 from html import unescape
 from xml.etree import ElementTree
 
-from requests import HTTPError
+import requests
 
+from via.services import HTTPService
 from via.services.youtube_api.models import (
     CaptionTrack,
     Transcript,
@@ -21,17 +22,25 @@ def strip_html(string):
     return "".join(ElementTree.fromstring(f"<span>{string}</span>").itertext()).strip()
 
 
-class YouTubeAPI:
-    def __init__(self, http_session):
-        self._http = http_session
+class YouTubeAPIClient:
+    def __init__(self):
+        self._http_session = requests.Session()
+        self._http_session.headers["Accept-Language"] = "en-US"
+        self._http = HTTPService(session=self._http_session)
 
     def get_video_info(self, video_id: str) -> Video:
         html = self._get_video_html(video_id)
 
+        # It might be nice to do something less horrible here, like using
+        # beautiful soup to find all script tags (which is where this comes
+        # from)
         start_chars = ">var ytInitialPlayerResponse = "
         try:
             start = html.index(start_chars)
         except ValueError:
+            # The placement here is weird. Should we check for this first in
+            # _get_video_html or can we get the info we need _and_ get captcha'd
+            # sometimes?
             if 'class="g-recaptcha"' in html:
                 raise YouTubeAPIError("too_many_requests", video_id)
 
@@ -43,8 +52,8 @@ class YouTubeAPI:
         return Video.from_json(json.loads(video_info))
 
     def get_transcript(self, caption_track: CaptionTrack) -> Transcript:
-        xml_data = self._get_url(url=caption_track.url)
-        xml_elements = ElementTree.fromstring(xml_data)
+        response = self._http.get(url=caption_track.url)
+        xml_elements = ElementTree.fromstring(response.text)
 
         return Transcript(
             track=caption_track,
@@ -60,27 +69,20 @@ class YouTubeAPI:
         )
 
     _WATCH_URL = "https://www.youtube.com/watch?v={video_id}"
+    _COOKIE_REGEX = re.compile(r'name="v" value="(.*?)"')
 
     def _get_video_html(self, video_id, retry_on_consent=True):
-        html = unescape(self._get_url(url=self._WATCH_URL.format(video_id=video_id)))
+        response = self._http.get(url=self._WATCH_URL.format(video_id=video_id))
+        html = unescape(response.text)
 
         if 'action="https://consent.youtube.com/s"' not in html:
             return html
 
         # Looks like we are being asked for Cookie permission
-        if retry_on_consent and (match := re.search('name="v" value="(.*?)"', html)):
-            self._http.cookies.set(
+        if retry_on_consent and (match := self._COOKIE_REGEX.search(html)):
+            self._http_session.cookies.set(
                 "CONSENT", "YES+" + match.group(1), domain=".youtube.com"
             )
             return self._get_video_html(video_id, retry_on_consent=False)
 
         raise YouTubeAPIError("failed_to_create_consent_cookie", video_id)
-
-    def _get_url(self, url):
-        response = self._http.get(url, headers={"Accept-Language": "en-US"})
-
-        try:
-            response.raise_for_status()
-            return response.text
-        except HTTPError as error:
-            raise YouTubeAPIError("unhandled_error", error)
