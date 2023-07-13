@@ -85,7 +85,7 @@ class YouTubeAPIV3CredBased:
     def _request(self, method, path, query=None):
         url = self._URL_STUB + "/" + path.lstrip("/")
         if query:
-            query += "?" + urlencode(query)
+            url += "?" + urlencode(query)
 
         return self._http_service.request(
             method=method,
