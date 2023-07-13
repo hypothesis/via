@@ -56,11 +56,7 @@ class YouTubeAPIV3CredBased:
         data = self._request(
             "GET",
             "/captions",
-            query=(
-                ("part", "id"),
-                ("part", "snippet"),
-                ("videoId", video_id),
-            ),
+            query=(("part", "id"), ("part", "snippet"), ("videoId", video_id)),
         )
 
         return [
