@@ -28,6 +28,7 @@ PARAMETERS = {
     "signed_urls_required": {"formatter": asbool},
     "enable_front_page": {"formatter": asbool},
     "youtube_transcripts": {"formatter": asbool},
+    "youtube_api_key": {},
     "api_jwt_secret": {"required": True},
 }
 

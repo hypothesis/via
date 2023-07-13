@@ -72,14 +72,17 @@ class YouTubeService:
             if caption_track.id == caption_track_id:
                 return self._api_client.get_transcript(caption_track)
 
-        raise YouTubeServiceError(
-            "cannot_find_transcript", video_id, caption_track_id)
+        raise YouTubeServiceError("cannot_find_transcript", video_id, caption_track_id)
 
 
 def factory(_context, request):
+    enabled = request.registry.settings["youtube_transcripts"]
+
     return YouTubeService(
-        enabled=request.registry.settings["youtube_transcripts"],
+        enabled=enabled,
         # Do not use the global HTTPService, as we will pollute the
         # session with cookie information as a part of getting info
-        api_client=YouTubeAPIClient(),
+        api_client=YouTubeAPIClient(request.registry.settings["youtube_api_key"])
+        if enabled
+        else None,
     )

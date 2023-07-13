@@ -20,7 +20,9 @@ def get_transcript(request):
     video_id = request.matchdict["video_id"]
     caption_track_id = request.matchdict["caption_track_id"]
 
-    transcript = request.find_service(YouTubeService).get_transcript(video_id, caption_track_id=caption_track_id)
+    transcript = request.find_service(YouTubeService).get_transcript(
+        video_id, caption_track_id=caption_track_id
+    )
 
     return {
         # Ideally this return value would be vert close to asdict(transcript)
