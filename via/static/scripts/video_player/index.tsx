@@ -23,16 +23,15 @@ export function init() {
   // location. This also acts to tell the top-level frame that we finished
   // loading. See proxy.html.jinja2.
   if (window !== window.top) {
+    const canonicalLink = document.querySelector('link[rel=canonical]') as
+      | HTMLLinkElement
+      | undefined;
+    const documentURL = canonicalLink?.href ?? document.location.href;
     window.parent.postMessage(
       {
         type: 'metadatachange',
         metadata: {
-          // TODO: Once https://github.com/hypothesis/via/pull/1015 lands,
-          // get the URL from `link[rel=canonical]` or pass the video URL as
-          // config.
-          location: `https://www.youtube.com/watch?v=${encodeURIComponent(
-            videoId
-          )}`,
+          location: documentURL,
           title: document.title,
         },
       },
