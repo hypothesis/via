@@ -4,6 +4,8 @@
 #
 #    pip-compile --allow-unsafe --config=pyproject.toml requirements/prod.in
 #
+alembic==1.11.1
+    # via -r prod.in
 attrs==20.3.0
     # via jsonschema
 cachetools==4.2.2
@@ -26,6 +28,8 @@ google-auth==2.16.0
     # via google-auth-oauthlib
 google-auth-oauthlib==1.0.0
     # via -r prod.in
+greenlet==2.0.2
+    # via sqlalchemy
 gunicorn==20.1.0
     # via -r prod.in
 h-assets==1.0.5
@@ -39,18 +43,24 @@ hupper==1.10.2
 idna==2.10
     # via requests
 importlib-metadata==6.0.0
-    # via h-vialib
+    # via
+    #   alembic
+    #   h-vialib
 importlib-resources==5.12.0
     # via
     #   -r prod.in
+    #   alembic
     #   checkmatelib
 jinja2==2.11.3
     # via pyramid-jinja2
 jsonschema==3.2.0
     # via checkmatelib
+mako==1.2.4
+    # via alembic
 markupsafe==1.1.1
     # via
     #   jinja2
+    #   mako
     #   pyramid-jinja2
 marshmallow==3.19.0
     # via
@@ -74,6 +84,8 @@ plaster==1.0
     #   pyramid
 plaster-pastedeploy==0.7
     # via pyramid
+psycopg2==2.9.6
+    # via -r prod.in
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
@@ -127,8 +139,16 @@ six==1.15.0
     #   ecdsa
     #   google-auth
     #   jsonschema
+sqlalchemy==2.0.19
+    # via
+    #   -r prod.in
+    #   alembic
 translationstring==1.4
     # via pyramid
+typing-extensions==4.7.1
+    # via
+    #   alembic
+    #   sqlalchemy
 urllib3==1.26.15
     # via
     #   requests

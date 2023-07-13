@@ -1,6 +1,9 @@
 pyramid
 gunicorn
 newrelic
+sqlalchemy
+psycopg2
+alembic
 checkmatelib
 h-assets
 h-pyramid-sentry

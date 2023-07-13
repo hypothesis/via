@@ -1,5 +1,13 @@
-version: '3'
 services:
+  postgres:
+    image: postgres:15.3-alpine
+    ports:
+      - "127.0.0.1:4433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 1s
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
   nginx-proxy:
     image: nginx:1.17.6-alpine
     ports:
@@ -18,4 +26,5 @@ services:
       - ./conf/nginx/dev_host_bridge.sh:/etc/nginx/dev_host_bridge.sh:ro
       - ./conf/nginx/envsubst.conf.template:/var/lib/hypothesis/nginx_envsubst.conf.template:ro
     command: /bin/sh -c "/etc/nginx/dev_host_bridge.sh && envsubst '$${NGINX_SECURE_LINK_SECRET}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && exec nginx"
-
+    profiles:
+      - make_dev
