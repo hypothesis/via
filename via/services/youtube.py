@@ -2,7 +2,7 @@ from urllib.parse import parse_qs, quote_plus, urlparse
 
 from via.services import HTTPService
 from via.services.youtube_api import Transcript
-from via.services.youtube_api.client import Video, YouTubeAPI
+from via.services.youtube_api.client import Video, YouTubeAPIClient
 
 
 class YouTubeServiceError(Exception):
@@ -10,7 +10,7 @@ class YouTubeServiceError(Exception):
 
 
 class YouTubeService:
-    def __init__(self, enabled: bool, api_client: YouTubeAPI):
+    def __init__(self, enabled: bool, api_client: YouTubeAPIClient):
         self._enabled = enabled
         self._api_client = api_client
 
@@ -66,15 +66,18 @@ class YouTubeService:
 
         return video
 
-    def get_transcript(self, video_id, caption_track_id=".en") -> Transcript:
+    def get_transcript(self, video_id, caption_track_ids) -> Transcript:
         video = self.get_video_info(video_id)
 
-        if video.has_captions:
-            for caption_track in video.caption.tracks:
-                if caption_track.id == caption_track_id:
-                    return self._api_client.get_transcript(caption_track)
+        if not video.has_captions:
+            raise YouTubeServiceError("no_transcripts_available", video_id)
 
-        raise YouTubeServiceError("no_transcript_available", video_id)
+        for caption_track in video.caption.tracks:
+            if caption_track.id in caption_track_ids:
+                return self._api_client.get_transcript(caption_track)
+
+        raise YouTubeServiceError(
+            "cannot_find_transcript", video_id, caption_track_ids)
 
 
 def factory(_context, request):
@@ -82,5 +85,5 @@ def factory(_context, request):
         enabled=request.registry.settings["youtube_transcripts"],
         # Do not use the global HTTPService, as we will pollute the
         # session with cookie information as a part of getting info
-        api_client=YouTubeAPI(http_session=HTTPService()),
+        api_client=YouTubeAPIClient(),
     )

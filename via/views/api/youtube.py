@@ -1,4 +1,5 @@
 import logging
+from dataclasses import asdict
 
 from pyramid.view import view_config
 
@@ -18,12 +19,14 @@ def get_transcript(request):
 
     video_id = request.matchdict["video_id"]
 
-    transcript = request.find_service(YouTubeService).get_transcript(video_id)
+    transcript = request.find_service(YouTubeService).get_transcript(video_id, caption_track_ids={'.en', 'a.en'})
 
     return {
+        # Ideally this return value would be vert close to asdict(transcript)
+        # instead of there being a lot of mapping
         "data": {
             "type": "transcripts",
             "id": video_id,
-            "attributes": {"segments": transcript},
+            "attributes": {"segments": asdict(transcript)["text"]},
         }
     }
