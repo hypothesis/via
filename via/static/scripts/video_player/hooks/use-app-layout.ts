@@ -1,6 +1,8 @@
 import type { RefObject } from 'preact';
 import { useCallback, useLayoutEffect, useState } from 'preact/hooks';
 
+import { SIDEBYSIDE_THRESHOLD, TOOLBAR_WIDTH } from './use-side-by-side-layout';
+
 /* Relative application container size */
 export type AppSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
@@ -30,12 +32,11 @@ export function useAppLayout(
       containerSize = '2xl';
     } else if (containerWidth > 1024) {
       containerSize = 'xl';
-    } else if (containerWidth > 875) {
+    } else if (containerWidth > SIDEBYSIDE_THRESHOLD) {
       containerSize = 'lg';
-    } else if (containerWidth > 768) {
+    } else if (containerWidth >= SIDEBYSIDE_THRESHOLD - TOOLBAR_WIDTH) {
       containerSize = 'md';
     }
-
     setAppSize(containerSize);
   }, [appContainer]);
 
