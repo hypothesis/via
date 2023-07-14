@@ -11,10 +11,11 @@ describe('useSideBySideLayout', () => {
 
   // Create a fake component to mount in tests that uses the hook
   function FakeComponent() {
-    useSideBySideLayout(container);
+    const sideBySideEnabled = useSideBySideLayout(container);
     return (
       <div style="width:100%">
         <button>Hi</button>
+        {sideBySideEnabled && <span data-testid="side-by-side-enabled" />}
       </div>
     );
   }
@@ -62,14 +63,9 @@ describe('useSideBySideLayout', () => {
   }
 
   function sideBySideState() {
-    const attr = container.getAttribute('data-side-by-side');
-    if (attr === 'true') {
-      return true;
-    } else if (attr === 'false') {
-      return false;
-    } else {
-      return undefined;
-    }
+    return (
+      container.querySelector('[data-testid="side-by-side-enabled"]') !== null
+    );
   }
 
   describe('initial render', () => {

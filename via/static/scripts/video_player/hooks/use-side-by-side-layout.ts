@@ -38,13 +38,15 @@ export const TOOLBAR_WIDTH = 22;
  * is resized.
  *
  * @param [container] test seam
+ * @return Whether side-by-side is currently active or not
  */
-export function useSideBySideLayout(container = document.body) {
+export function useSideBySideLayout(container = document.body): boolean {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sufficientSpace, setSufficientSpace] = useState(
     container.clientWidth >= SIDEBYSIDE_THRESHOLD
   );
   const [sidebarWidth, setSidebarWidth] = useState(0);
+  const sideBySideActive = sufficientSpace && sidebarOpen;
 
   const updateSidebarState = useCallback((e: Event) => {
     const sidebarInfo: LayoutChangeEventDetail = (e as LayoutChangeEvent)
@@ -60,8 +62,7 @@ export function useSideBySideLayout(container = document.body) {
   // here (versus margin) because it is part of an element's dimensions
   // (`clientWidth`) and thus easier to compute with.
   useEffect(() => {
-    const applySideBySide = sufficientSpace && sidebarOpen;
-    if (applySideBySide) {
+    if (sideBySideActive) {
       // prettier-ignore
       container.style.paddingRight = `${
         sidebarWidth - (TOOLBAR_WIDTH / 2)
@@ -69,8 +70,7 @@ export function useSideBySideLayout(container = document.body) {
     } else {
       container.style.paddingRight = `${TOOLBAR_WIDTH}px`;
     }
-    container.setAttribute('data-side-by-side', `${applySideBySide}`);
-  }, [container, sidebarOpen, sidebarWidth, sufficientSpace]);
+  }, [container, sidebarWidth, sideBySideActive]);
 
   useEffect(() => {
     const onResize = () => {
@@ -90,4 +90,6 @@ export function useSideBySideLayout(container = document.body) {
       window.removeEventListener('resize', onResize);
     };
   }, [container, updateSidebarState]);
+
+  return sideBySideActive;
 }
