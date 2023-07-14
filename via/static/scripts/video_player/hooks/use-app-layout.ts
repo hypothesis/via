@@ -1,24 +1,41 @@
 import type { RefObject } from 'preact';
-import { useCallback, useLayoutEffect, useState } from 'preact/hooks';
+import { useCallback, useLayoutEffect, useRef, useState } from 'preact/hooks';
 
 import { SIDEBYSIDE_THRESHOLD, TOOLBAR_WIDTH } from './use-side-by-side-layout';
 
 /* Relative application container size */
 export type AppSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
+export type AppLayoutInfo = {
+  /* Relative size of app container element */
+  appSize: AppSize;
+  multicolumn: boolean;
+  /* Width for the column containing the transcript as a CSS dimension */
+  transcriptWidth: string;
+};
+
+const transcriptWidths = {
+  sm: '100%',
+  md: '380px',
+  lg: '410px',
+  xl: '450px',
+};
+
 /**
- * Return a string representing the relative size of `appContainer` that can
- * be used to make decisions about app layout and sizing of components. This
- * would typically be something handled by media queries, but it is an element
- * (`body`) width that needs to be queried, not the viewport. We could replace
- * this with container queries once browser support is sufficient.
+ * Return app layout info based on the size of the `appContainer` element. We
+ * could replace this with container queries once browser support is sufficient.
  *
  * NB: This hook will not update if `appContainer.current` changes.
  */
 export function useAppLayout(
   appContainer: RefObject<HTMLDivElement | null>
-): AppSize {
-  const [appSize, setAppSize] = useState<AppSize>('sm');
+): AppLayoutInfo {
+  const lastContainerSize = useRef<AppSize>('sm');
+  const [layoutInfo, setLayoutInfo] = useState<AppLayoutInfo>({
+    appSize: 'sm',
+    multicolumn: false,
+    transcriptWidth: transcriptWidths.sm,
+  });
 
   const updateWidth = useCallback(() => {
     const containerWidth = appContainer.current?.clientWidth;
@@ -28,16 +45,23 @@ export function useAppLayout(
     }
 
     let containerSize: AppSize = 'sm';
+    const minimumMulticolumn = SIDEBYSIDE_THRESHOLD - TOOLBAR_WIDTH;
+
     if (containerWidth > 1376) {
-      containerSize = '2xl';
-    } else if (containerWidth > 1024) {
       containerSize = 'xl';
-    } else if (containerWidth > SIDEBYSIDE_THRESHOLD) {
+    } else if (containerWidth > 1024) {
       containerSize = 'lg';
-    } else if (containerWidth >= SIDEBYSIDE_THRESHOLD - TOOLBAR_WIDTH) {
+    } else if (containerWidth >= minimumMulticolumn) {
       containerSize = 'md';
     }
-    setAppSize(containerSize);
+    if (lastContainerSize.current !== containerSize) {
+      lastContainerSize.current = containerSize;
+      setLayoutInfo({
+        appSize: containerSize,
+        multicolumn: containerSize !== 'sm',
+        transcriptWidth: transcriptWidths[containerSize],
+      });
+    }
   }, [appContainer]);
 
   useLayoutEffect(() => {
@@ -52,5 +76,5 @@ export function useAppLayout(
     return () => observer.disconnect();
   }, [updateWidth, appContainer]);
 
-  return appSize;
+  return layoutInfo;
 }

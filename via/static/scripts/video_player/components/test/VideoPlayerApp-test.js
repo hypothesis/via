@@ -51,6 +51,7 @@ describe('VideoPlayerApp', () => {
   }
 
   let wrappers;
+  let fakeLayoutInfo;
   let fakeUseAppLayout;
 
   function createVideoPlayer(props = {}) {
@@ -71,7 +72,12 @@ describe('VideoPlayerApp', () => {
 
   beforeEach(() => {
     wrappers = [];
-    fakeUseAppLayout = sinon.stub().returns('lg');
+    fakeLayoutInfo = {
+      appSize: 'lg',
+      multicolumn: true,
+      transcriptWidth: '100%',
+    };
+    fakeUseAppLayout = sinon.stub().returns(fakeLayoutInfo);
     fakeCallAPI = sinon.stub().rejects(new Error('Dummy API error'));
 
     $imports.$mock(mockImportedComponents());
@@ -98,30 +104,27 @@ describe('VideoPlayerApp', () => {
 
   describe('app layout', () => {
     context('multi-column layout for wider widths', () => {
-      for (const appSize of ['md', 'lg', 'xl', '2xl']) {
-        it('renders a top bar with branding and filter input', () => {
-          fakeUseAppLayout.returns(appSize);
-          const wrapper = createVideoPlayer();
+      beforeEach(() => {
+        fakeLayoutInfo.multicolumn = true;
+      });
+      it('renders a top bar with branding and filter input', () => {
+        const wrapper = createVideoPlayer();
 
-          const topBar = wrapper.find('[data-testid="top-bar"]');
-          assert.isTrue(topBar.exists());
-          assert.isTrue(
-            topBar.find('[data-testid="hypothesis-logo"]').exists()
-          );
-          assert.isTrue(topBar.find('FilterInput').exists());
-        });
+        const topBar = wrapper.find('[data-testid="top-bar"]');
+        assert.isTrue(topBar.exists());
+        assert.isTrue(topBar.find('[data-testid="hypothesis-logo"]').exists());
+        assert.isTrue(topBar.find('FilterInput').exists());
+      });
 
-        it('renders a play/pause button', () => {
-          fakeUseAppLayout.returns(appSize);
-          const wrapper = createVideoPlayer();
-          assert.isTrue(wrapper.find('[data-testid="play-button"]').exists());
-        });
-      }
+      it('renders a play/pause button', () => {
+        const wrapper = createVideoPlayer();
+        assert.isTrue(wrapper.find('[data-testid="play-button"]').exists());
+      });
     });
 
     context('single-column layout for narrow widths', () => {
       beforeEach(() => {
-        fakeUseAppLayout.returns('sm');
+        fakeLayoutInfo.multicolumn = false;
       });
 
       it('does not render a top bar', () => {
