@@ -17,6 +17,7 @@
     "@babel/preset-typescript": "^7.22.5",
     "@hypothesis/frontend-build": "^2.2.0",
     "@hypothesis/frontend-shared": "^6.1.1",
+    "@preact/signals": "^1.1.5",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.2",
     "@rollup/plugin-node-resolve": "^15.0.2",
