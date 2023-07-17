@@ -53,6 +53,7 @@ describe('VideoPlayerApp', () => {
   let wrappers;
   let fakeLayoutInfo;
   let fakeUseAppLayout;
+  let fakeUseSideBySideLayout;
 
   function createVideoPlayer(props = {}) {
     const wrapper = mount(
@@ -78,6 +79,7 @@ describe('VideoPlayerApp', () => {
       transcriptWidth: '100%',
     };
     fakeUseAppLayout = sinon.stub().returns(fakeLayoutInfo);
+    fakeUseSideBySideLayout = sinon.stub().returns(false);
     fakeCallAPI = sinon.stub().rejects(new Error('Dummy API error'));
 
     $imports.$mock(mockImportedComponents());
@@ -91,6 +93,9 @@ describe('VideoPlayerApp', () => {
     $imports.$mock({
       './Transcript': FakeTranscript,
       '../hooks/use-app-layout': { useAppLayout: fakeUseAppLayout },
+      '../hooks/use-side-by-side-layout': {
+        useSideBySideLayout: fakeUseSideBySideLayout,
+      },
       '../utils/api': {
         callAPI: fakeCallAPI,
       },
@@ -463,12 +468,21 @@ describe('VideoPlayerApp', () => {
     const clientConfig = { openSidebar: true };
     const wrapper = createVideoPlayer({ clientConfig });
     const mergedConfig = wrapper.find('HypothesisClient').prop('config');
-    assert.deepEqual(mergedConfig, {
-      openSidebar: true,
-      bucketContainerSelector: '#bucket-container',
-      sideBySide: {
-        mode: 'manual',
-      },
+
+    assert.isTrue(mergedConfig.openSidebar);
+    assert.equal(mergedConfig.bucketContainerSelector, '#bucket-container');
+    assert.equal(mergedConfig.sideBySide.mode, 'manual');
+    assert.isDefined(mergedConfig.sideBySide.isActive);
+  });
+
+  [true, false].forEach(sideBySideEnabled => {
+    it('tells client if side-by-side is active', () => {
+      fakeUseSideBySideLayout.returns(sideBySideEnabled);
+
+      const wrapper = createVideoPlayer();
+      const { sideBySide } = wrapper.find('HypothesisClient').prop('config');
+
+      assert.equal(sideBySide.isActive(), sideBySideEnabled);
     });
   });
 

@@ -111,7 +111,7 @@ export default function VideoPlayerApp({
 
   const { appSize, multicolumn, transcriptWidth } =
     useAppLayout(appContainerRef);
-  useSideBySideLayout();
+  const sideBySideActive = useSideBySideLayout();
 
   // Fetch transcript when app loads.
   const [transcript, setTranscript] = useState<
@@ -229,12 +229,17 @@ export default function VideoPlayerApp({
   };
 
   const bucketContainerId = 'bucket-container';
+  const prevSideBySideActive = useRef(sideBySideActive);
+  prevSideBySideActive.current = sideBySideActive;
   const clientConfig = useMemo(() => {
     return {
       ...baseClientConfig,
       bucketContainerSelector: '#' + bucketContainerId,
       sideBySide: {
         mode: 'manual',
+        // Using a ref here to make sure the `isActive` callback reference is
+        // kept, and only its return value changes
+        isActive: () => prevSideBySideActive.current,
       },
     };
   }, [baseClientConfig]);
