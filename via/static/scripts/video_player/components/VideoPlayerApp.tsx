@@ -1,7 +1,6 @@
 import {
   Button,
   Checkbox,
-  CopyIcon,
   IconButton,
   LogoIcon,
   Spinner,
@@ -21,9 +20,11 @@ import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
-import { formatTranscript, mergeSegments } from '../utils/transcript';
+import { mergeSegments } from '../utils/transcript';
+import CopyToClipboard from './CopyToClipboard';
 import FilterInput from './FilterInput';
 import HypothesisClient from './HypothesisClient';
+import ToastMessagesProvider from './ToastMessagesProvider';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
 import TranscriptError from './TranscriptError';
@@ -235,18 +236,6 @@ export default function VideoPlayerApp({
     };
   }, [syncTranscript]);
 
-  const copyTranscript = async () => {
-    const formattedTranscript = isTranscript(transcript)
-      ? formatTranscript(transcript.segments)
-      : '';
-    try {
-      await navigator.clipboard.writeText(formattedTranscript);
-    } catch (err) {
-      // TODO: Replace this with a toast message in the UI.
-      console.warn('Failed to copy transcript', err);
-    }
-  };
-
   const bucketContainerId = 'bucket-container';
   const prevSideBySideActive = useRef(sideBySideActive);
   prevSideBySideActive.current = sideBySideActive;
@@ -268,230 +257,231 @@ export default function VideoPlayerApp({
       data-testid="app-container"
       className={classnames('flex flex-col h-[100vh] min-h-0')}
     >
-      {multicolumn && (
-        <div
-          data-testid="top-bar"
-          className={classnames(
-            'h-[40px] min-h-[40px] w-full flex items-center gap-x-3',
-            'pl-2 border-b bg-grey-0'
-          )}
-        >
-          <HypothesisLogo />
-          <div className="grow" />
+      <ToastMessagesProvider>
+        {multicolumn && (
           <div
-            data-testid="filter-container"
+            data-testid="top-bar"
             className={classnames(
-              'text-right',
-              // Put space to the right of the filter input so it is not
-              // overlaid by sidebar controls. NB: Cannot use margin because it
-              // gets "consumed" in side-by-side mode
-              'pr-4'
+              'h-[40px] min-h-[40px] w-full flex items-center gap-x-3',
+              'pl-2 border-b bg-grey-0'
             )}
+          >
+            <HypothesisLogo />
+            <div className="grow" />
+            <div
+              data-testid="filter-container"
+              className={classnames(
+                'text-right',
+                // Put space to the right of the filter input so it is not
+                // overlaid by sidebar controls. NB: Cannot use margin because it
+                // gets "consumed" in side-by-side mode
+                'pr-4'
+              )}
+              style={{ width: transcriptWidth }}
+            >
+              <FilterInput
+                elementRef={filterInputRef}
+                setFilter={setFilter}
+                filter={filter}
+              />
+            </div>
+          </div>
+        )}
+
+        <main
+          data-testid="app-layout"
+          className={classnames('w-full flex min-h-0', {
+            'flex-col grow': !multicolumn,
+            'flex-row grow h-full': multicolumn,
+          })}
+          ref={appContainerRef}
+        >
+          <div
+            data-testid="embedded-video-container"
+            className={classnames(
+              'flex flex-col',
+              {
+                // Allow video to grow with available horizontal space in
+                // multicolumn layouts (NB: It will take up full width in
+                // single-column)
+                grow: multicolumn,
+              },
+              {
+                // Adapt spacing around video for different app sizes
+                'p-0': appSize === 'sm',
+                'p-1': appSize === 'md',
+                'py-2 px-3': appSize === 'lg',
+                'py-2 px-4': appSize === 'xl',
+              }
+            )}
+          >
+            <YouTubeVideoPlayer
+              videoId={videoId}
+              play={playing}
+              time={timestamp}
+              onPlayingChanged={setPlaying}
+              onTimeChanged={setTimestamp}
+            />
+          </div>
+
+          <div
+            data-testid="transcript-and-controls-container"
+            className={classnames('flex flex-col bg-grey-0 border-x', {
+              // Make transcript fill available vertical space in single-column
+              // layouts
+              'min-h-0 grow': !multicolumn,
+            })}
             style={{ width: transcriptWidth }}
           >
-            <FilterInput
-              elementRef={filterInputRef}
-              setFilter={setFilter}
-              filter={filter}
-            />
-          </div>
-        </div>
-      )}
-
-      <main
-        data-testid="app-layout"
-        className={classnames('w-full flex min-h-0', {
-          'flex-col grow': !multicolumn,
-          'flex-row grow h-full': multicolumn,
-        })}
-        ref={appContainerRef}
-      >
-        <div
-          data-testid="embedded-video-container"
-          className={classnames(
-            'flex flex-col',
-            {
-              // Allow video to grow with available horizontal space in
-              // multicolumn layouts (NB: It will take up full width in
-              // single-column)
-              grow: multicolumn,
-            },
-            {
-              // Adapt spacing around video for different app sizes
-              'p-0': appSize === 'sm',
-              'p-1': appSize === 'md',
-              'py-2 px-3': appSize === 'lg',
-              'py-2 px-4': appSize === 'xl',
-            }
-          )}
-        >
-          <YouTubeVideoPlayer
-            videoId={videoId}
-            play={playing}
-            time={timestamp}
-            onPlayingChanged={setPlaying}
-            onTimeChanged={setTimestamp}
-          />
-        </div>
-
-        <div
-          data-testid="transcript-and-controls-container"
-          className={classnames('flex flex-col bg-grey-0 border-x', {
-            // Make transcript fill available vertical space in single-column
-            // layouts
-            'min-h-0 grow': !multicolumn,
-          })}
-          style={{ width: transcriptWidth }}
-        >
-          <div
-            data-testid="transcript-controls"
-            className={classnames(
-              // Same height as top-bar
-              'h-[40px] min-h-[40px]',
-              'bg-grey-1 flex items-center',
-              {
-                // Provide the correct right alignment with the sidebar
-                // Multicolumn needs more right-hand space to avoid interference
-                // by sidebar controls
-                'px-1.5': !multicolumn,
-                'pr-4': multicolumn,
-              }
-            )}
-          >
-            {multicolumn && (
-              <>
-                <Button
-                  icon={playing ? PauseIcon : PlayIcon}
-                  onClick={() => setPlaying(playing => !playing)}
-                  data-testid="play-button"
-                  variant="custom"
-                  classes="text-grey-7 hover:text-grey-9 font-semibold"
-                >
-                  {playing ? 'Pause' : 'Play'}
-                </Button>
-                <div className="grow" />
-              </>
-            )}
-            {!multicolumn && (
-              <>
-                <HypothesisLogo />
-                <div className="flex-grow ml-2.5">
-                  <FilterInput
-                    setFilter={setFilter}
-                    elementRef={filterInputRef}
-                    filter={filter}
-                  />
-                </div>
-              </>
-            )}
-
-            <IconButton
-              onClick={syncTranscript}
-              data-testid="sync-button"
-              disabled={!isTranscript(transcript)}
-              icon={SyncIcon}
-              title="Sync transcript to video"
-              size="custom"
-              classes="p-2"
-            />
-            <IconButton
-              onClick={copyTranscript}
-              data-testid="copy-button"
-              disabled={!isTranscript(transcript)}
-              title="Copy transcript"
-              icon={CopyIcon}
-              size="custom"
-              classes="p-2"
-            />
-          </div>
-          <div
-            className={classnames('relative grow', 'min-h-0', 'flex flex-col', {
-              // Ensure that this container uses all available vertical space
-              // on narrow screens
-              'h-full': !multicolumn,
-            })}
-            data-testid="transcript-container"
-          >
-            {isLoading && (
-              <div className="flex justify-center p-8">
-                <Spinner data-testid="transcript-loading-spinner" size="md" />
-              </div>
-            )}
-            {isTranscript(transcript) && (
-              <Transcript
-                autoScroll={autoScroll}
-                transcript={transcript}
-                controlsRef={transcriptControls}
-                currentTime={timestamp}
-                filter={trimmedFilter}
-                onSelectSegment={segment => {
-                  // Clear the filter before jumping to a segment, so the user
-                  // can easily read the text that comes before and after it.
-                  //
-                  // Note that we always show the current segment, regardless
-                  // of whether a filter is applied.
-                  setFilter('');
-
-                  setTimestamp(segment.start);
-                }}
-              >
-                <div
-                  data-testid="bucket-bar-channel"
-                  className={classnames(
-                    // Provide a backdrop for bucket bar buttons. 20px of this
-                    // is overlaid by the sidebar's semi-transparent bucket
-                    // channel.
-                    'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]'
-                  )}
-                />
-              </Transcript>
-            )}
-            {transcript instanceof Error && (
-              <TranscriptError error={transcript} />
-            )}
             <div
-              id={bucketContainerId}
+              data-testid="transcript-controls"
               className={classnames(
-                // Position bucket bar along right edge of transcript, with a
-                // small gap to avoid buckets touching the border.
-                //
-                // The bucket bar width is currently copied from the client.
-                'absolute right-1.5 bottom-0 w-[23px]',
-
-                // Make the bucket bar fill this container.
-                'flex flex-column',
-
+                // Same height as top-bar
+                'h-[40px] min-h-[40px]',
+                'bg-grey-1 flex items-center',
                 {
-                  'top-0': !multicolumn,
-                  // Leave room for sidebar toolbar buttons at top of buckets
-                  // in multi-column layouts
-                  'h-[calc(100%-24px)]': multicolumn,
+                  // Provide the correct right alignment with the sidebar
+                  // Multicolumn needs more right-hand space to avoid interference
+                  // by sidebar controls
+                  'px-1.5': !multicolumn,
+                  'pr-4': multicolumn,
                 }
               )}
-            />
-          </div>
-          <div
-            data-testid="transcript-footer"
-            className="p-2 bg-grey-1 border-b h-[40px] min-h-[40px] flex items-center"
-          >
-            <Checkbox
-              checked={autoScroll}
-              data-testid="autoscroll-checkbox"
-              onChange={e =>
-                setAutoScroll((e.target as HTMLInputElement).checked)
-              }
             >
-              <div className="select-none">Auto-scroll</div>
-            </Checkbox>
+              {multicolumn && (
+                <>
+                  <Button
+                    icon={playing ? PauseIcon : PlayIcon}
+                    onClick={() => setPlaying(playing => !playing)}
+                    data-testid="play-button"
+                    variant="custom"
+                    classes="text-grey-7 hover:text-grey-9 font-semibold"
+                  >
+                    {playing ? 'Pause' : 'Play'}
+                  </Button>
+                  <div className="grow" />
+                </>
+              )}
+              {!multicolumn && (
+                <>
+                  <HypothesisLogo />
+                  <div className="flex-grow ml-2.5">
+                    <FilterInput
+                      setFilter={setFilter}
+                      elementRef={filterInputRef}
+                      filter={filter}
+                    />
+                  </div>
+                </>
+              )}
+
+              <IconButton
+                onClick={syncTranscript}
+                data-testid="sync-button"
+                disabled={!isTranscript(transcript)}
+                icon={SyncIcon}
+                title="Sync transcript to video"
+                size="custom"
+                classes="p-2"
+              />
+              <CopyToClipboard
+                transcript={isTranscript(transcript) ? transcript : undefined}
+              />
+            </div>
+            <div
+              className={classnames(
+                'relative grow',
+                'min-h-0',
+                'flex flex-col',
+                {
+                  // Ensure that this container uses all available vertical space
+                  // on narrow screens
+                  'h-full': !multicolumn,
+                }
+              )}
+              data-testid="transcript-container"
+            >
+              {isLoading && (
+                <div className="flex justify-center p-8">
+                  <Spinner data-testid="transcript-loading-spinner" size="md" />
+                </div>
+              )}
+              {isTranscript(transcript) && (
+                <Transcript
+                  autoScroll={autoScroll}
+                  transcript={transcript}
+                  controlsRef={transcriptControls}
+                  currentTime={timestamp}
+                  filter={trimmedFilter}
+                  onSelectSegment={segment => {
+                    // Clear the filter before jumping to a segment, so the user
+                    // can easily read the text that comes before and after it.
+                    //
+                    // Note that we always show the current segment, regardless
+                    // of whether a filter is applied.
+                    setFilter('');
+
+                    setTimestamp(segment.start);
+                  }}
+                >
+                  <div
+                    data-testid="bucket-bar-channel"
+                    className={classnames(
+                      // Provide a backdrop for bucket bar buttons. 20px of this
+                      // is overlaid by the sidebar's semi-transparent bucket
+                      // channel.
+                      'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]'
+                    )}
+                  />
+                </Transcript>
+              )}
+              {transcript instanceof Error && (
+                <TranscriptError error={transcript} />
+              )}
+              <div
+                id={bucketContainerId}
+                className={classnames(
+                  // Position bucket bar along right edge of transcript, with a
+                  // small gap to avoid buckets touching the border.
+                  //
+                  // The bucket bar width is currently copied from the client.
+                  'absolute right-1.5 bottom-0 w-[23px]',
+
+                  // Make the bucket bar fill this container.
+                  'flex flex-column',
+
+                  {
+                    'top-0': !multicolumn,
+                    // Leave room for sidebar toolbar buttons at top of buckets
+                    // in multi-column layouts
+                    'h-[calc(100%-24px)]': multicolumn,
+                  }
+                )}
+              />
+            </div>
+            <div
+              data-testid="transcript-footer"
+              className="p-2 bg-grey-1 border-b h-[40px] min-h-[40px] flex items-center"
+            >
+              <Checkbox
+                checked={autoScroll}
+                data-testid="autoscroll-checkbox"
+                onChange={e =>
+                  setAutoScroll((e.target as HTMLInputElement).checked)
+                }
+              >
+                <div className="select-none">Auto-scroll</div>
+              </Checkbox>
+            </div>
           </div>
-        </div>
-        {isTranscript(transcript) && (
-          // Defer loading Hypothesis client until content is ready. This is
-          // temporary until https://github.com/hypothesis/client/issues/5568
-          // is completed.
-          <HypothesisClient src={clientSrc} config={clientConfig} />
-        )}
-      </main>
+          {isTranscript(transcript) && (
+            // Defer loading Hypothesis client until content is ready. This is
+            // temporary until https://github.com/hypothesis/client/issues/5568
+            // is completed.
+            <HypothesisClient src={clientSrc} config={clientConfig} />
+          )}
+        </main>
+      </ToastMessagesProvider>
     </div>
   );
 }
