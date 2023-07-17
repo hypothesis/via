@@ -7,7 +7,7 @@ import {
   videoPlayerConfig,
   transcriptsAPIResponse,
 } from '../../../test-util/video-player-fixtures';
-import { waitForElement } from '../../../test-util/wait';
+import { delay, waitForElement } from '../../../test-util/wait';
 import { APIError } from '../../utils/api';
 import VideoPlayerApp, { $imports } from '../VideoPlayerApp';
 
@@ -26,6 +26,14 @@ describe('VideoPlayerApp', () => {
       },
     ],
   };
+
+  function FakeHypothesisClient({ config }) {
+    // Catch `contentReady` errors so tests don't fail with errors about
+    // unhandled rejections.
+    config.contentReady?.catch(() => {});
+    return <div />;
+  }
+  FakeHypothesisClient.displayName = 'HypothesisClient';
 
   function FakeTranscript({ controlsRef }) {
     useImperativeHandle(
@@ -93,6 +101,7 @@ describe('VideoPlayerApp', () => {
     });
 
     $imports.$mock({
+      './HypothesisClient': FakeHypothesisClient,
       './Transcript': FakeTranscript,
       '../hooks/use-app-layout': { useAppLayout: fakeUseAppLayout },
       '../hooks/use-side-by-side-layout': {
@@ -204,11 +213,63 @@ describe('VideoPlayerApp', () => {
       assert.isFalse(findSyncButton(wrapper).prop('disabled'));
     });
 
-    it("doesn't load client when transcript is loading", async () => {
+    it('loads client while transcript is loading', async () => {
       const wrapper = createVideoPlayerUsingAPI();
-      assert.isFalse(wrapper.exists('HypothesisClient'));
-      await waitForElement(wrapper, 'Transcript');
       assert.isTrue(wrapper.exists('HypothesisClient'));
+    });
+
+    it('informs client via `contentReady` when content is loaded', async () => {
+      const events = [];
+
+      function FakeTranscript() {
+        events.push('transcript-rendered');
+        return <div />;
+      }
+      FakeTranscript.displayName = 'Transcript';
+
+      $imports.$mock({
+        './Transcript': FakeTranscript,
+      });
+
+      fakeCallAPI
+        .withArgs(videoPlayerConfig.api.transcript)
+        .callsFake(async () => {
+          await delay(1);
+          events.push('transcript-loaded');
+          return transcriptsAPIResponse;
+        });
+
+      const wrapper = createVideoPlayerUsingAPI();
+
+      // Get the promise we tell the client to wait for.
+      const { contentReady } = wrapper.find('HypothesisClient').prop('config');
+      assert.instanceOf(contentReady, Promise);
+      contentReady.then(() => events.push('content-ready'));
+      await waitForElement(wrapper, 'Transcript');
+
+      assert.deepEqual(events, [
+        'transcript-loaded',
+        'transcript-rendered',
+        'content-ready',
+      ]);
+    });
+
+    it('informs client via `contentReady` when content fails to load', async () => {
+      const error = new APIError(404);
+      fakeCallAPI.withArgs(videoPlayerConfig.api.transcript).rejects(error);
+
+      const wrapper = createVideoPlayerUsingAPI();
+      const { contentReady } = wrapper.find('HypothesisClient').prop('config');
+
+      let contentReadyError;
+      try {
+        await contentReady;
+      } catch (e) {
+        contentReadyError = e;
+      }
+
+      assert.instanceOf(contentReadyError, Error);
+      assert.equal(contentReadyError.message, 'Transcript failed to load');
     });
 
     it('displays error if transcript failed to load', async () => {
