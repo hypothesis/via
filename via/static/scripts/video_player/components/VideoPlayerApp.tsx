@@ -118,6 +118,24 @@ export default function VideoPlayerApp({
     TranscriptData | APIError | null
   >(isTranscript(transcriptSource) ? transcriptSource : null);
 
+  // Notify client once the transcript is rendered, and ready to anchor
+  // annotations.
+  const [contentReady, resolveContentReady, rejectContentReady] =
+    useMemo(() => {
+      let reject: (err: Error) => void;
+      let resolve: () => void;
+      const promise = new Promise<void>((resolve_, reject_) => {
+        resolve = resolve_;
+        reject = reject_;
+      });
+      return [promise, resolve!, reject!];
+    }, []);
+  if (isTranscript(transcript)) {
+    resolveContentReady();
+  } else if (transcript instanceof Error) {
+    rejectContentReady(new Error('Transcript failed to load'));
+  }
+
   useEffect(() => {
     if (isTranscript(transcriptSource)) {
       return;
@@ -254,6 +272,7 @@ export default function VideoPlayerApp({
     return {
       ...baseClientConfig,
       bucketContainerSelector: '#' + bucketContainerId,
+      contentReady,
       sideBySide: {
         mode: 'manual',
         // Using a ref here to make sure the `isActive` callback reference is
@@ -261,7 +280,7 @@ export default function VideoPlayerApp({
         isActive: () => prevSideBySideActive.current,
       },
     };
-  }, [baseClientConfig]);
+  }, [baseClientConfig, contentReady]);
 
   return (
     <div
@@ -333,7 +352,6 @@ export default function VideoPlayerApp({
             onTimeChanged={setTimestamp}
           />
         </div>
-
         <div
           data-testid="transcript-and-controls-container"
           className={classnames('flex flex-col bg-grey-0 border-x', {
@@ -485,12 +503,7 @@ export default function VideoPlayerApp({
             </Checkbox>
           </div>
         </div>
-        {isTranscript(transcript) && (
-          // Defer loading Hypothesis client until content is ready. This is
-          // temporary until https://github.com/hypothesis/client/issues/5568
-          // is completed.
-          <HypothesisClient src={clientSrc} config={clientConfig} />
-        )}
+        <HypothesisClient src={clientSrc} config={clientConfig} />
       </main>
     </div>
   );
