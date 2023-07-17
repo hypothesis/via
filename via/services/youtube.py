@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from youtube_transcript_api import YouTubeTranscriptApi
 
-from via.models import Transcript
+from via.models import Transcript, Video
 from via.services.http import HTTPService
 
 
@@ -67,9 +67,12 @@ class YouTubeService:
 
     def get_video_title(self, video_id):
         """Call the YouTube API and return the title for the given video_id."""
-        # https://developers.google.com/youtube/v3/docs/videos/list
+        if video := self._db.scalar(select(Video).where(Video.video_id == video_id)):
+            return video.title
+
         try:
-            return self._http_service.get(
+            # https://developers.google.com/youtube/v3/docs/videos/list
+            title = self._http_service.get(
                 "https://www.googleapis.com/youtube/v3/videos",
                 params={
                     "id": video_id,
@@ -80,6 +83,10 @@ class YouTubeService:
             ).json()["items"][0]["snippet"]["title"]
         except Exception as exc:
             raise YouTubeDataAPIError("getting the video title failed") from exc
+
+        self._db.add(Video(video_id=video_id, title=title))
+
+        return title
 
     def get_transcript(self, video_id):
         """

@@ -6,7 +6,7 @@ from h_matchers import Any
 from requests import Response
 from sqlalchemy import select
 
-from via.models import Transcript
+from via.models import Transcript, Video
 from via.services.youtube import YouTubeDataAPIError, YouTubeService, factory
 
 
@@ -58,28 +58,38 @@ class TestYouTubeService:
     def test_get_video_id(self, url, expected_video_id, svc):
         assert expected_video_id == svc.get_video_id(url)
 
-    def test_get_video_title(self, svc, http_service):
+    def test_get_video_title(self, svc, db_session, http_service):
         response = http_service.get.return_value = Response()
         response.raw = BytesIO(b'{"items": [{"snippet": {"title": "video_title"}}]}')
 
-        title = svc.get_video_title(sentinel.video_id)
+        title = svc.get_video_title("test_video_id")
 
         http_service.get.assert_called_once_with(
             "https://www.googleapis.com/youtube/v3/videos",
             params={
-                "id": sentinel.video_id,
+                "id": "test_video_id",
                 "key": sentinel.api_key,
                 "part": "snippet",
                 "maxResults": "1",
             },
         )
         assert title == "video_title"
+        # It should have cached the video in the DB.
+        assert db_session.scalars(
+            select(Video).where(Video.video_id == "test_video_id")
+        ).all() == [Any.instance_of(Video).with_attrs({"title": "video_title"})]
+
+    def test_get_video_title_uses_cached_videos(self, svc, http_service, video):
+        title = svc.get_video_title(video.video_id)
+
+        assert title == video.title
+        http_service.get.assert_not_called()
 
     def test_get_video_title_raises_YouTubeDataAPIError(self, svc, http_service):
         http_service.get.side_effect = RuntimeError()
 
         with pytest.raises(YouTubeDataAPIError) as exc_info:
-            svc.get_video_title(sentinel.video_id)
+            svc.get_video_title("test_video_id")
 
         assert exc_info.value.__cause__ == http_service.get.side_effect
 
