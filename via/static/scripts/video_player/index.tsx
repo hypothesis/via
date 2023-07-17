@@ -3,6 +3,7 @@ import { render } from 'preact';
 // Enable debugging checks and devtools. Removed in prod builds by Rollup config.
 import 'preact/debug';
 
+import AppProvider from './components/AppProvider';
 import VideoPlayerApp from './components/VideoPlayerApp';
 import { readConfig } from './config';
 
@@ -40,12 +41,14 @@ export function init() {
   }
 
   render(
-    <VideoPlayerApp
-      videoId={videoId}
-      clientConfig={clientConfig}
-      clientSrc={clientSrc}
-      transcriptSource={api.transcript}
-    />,
+    <AppProvider>
+      <VideoPlayerApp
+        videoId={videoId}
+        clientConfig={clientConfig}
+        clientSrc={clientSrc}
+        transcriptSource={api.transcript}
+      />
+    </AppProvider>,
     rootEl
   );
 }

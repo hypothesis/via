@@ -17,6 +17,7 @@ import {
 
 import { useAppLayout } from '../hooks/use-app-layout';
 import { useSideBySideLayout } from '../hooks/use-side-by-side-layout';
+import { useToastMessages } from '../hooks/use-toast-messages';
 import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
@@ -27,6 +28,7 @@ import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
 import TranscriptError from './TranscriptError';
+import VideoPlayerAppToastMessages from './VideoPlayerAppToastMessages';
 import YouTubeVideoPlayer from './YouTubeVideoPlayer';
 import { PauseIcon, PlayIcon, SyncIcon } from './icons';
 
@@ -235,15 +237,23 @@ export default function VideoPlayerApp({
     };
   }, [syncTranscript]);
 
+  const { appendToastMessage } = useToastMessages();
+
   const copyTranscript = async () => {
     const formattedTranscript = isTranscript(transcript)
       ? formatTranscript(transcript.segments)
       : '';
     try {
       await navigator.clipboard.writeText(formattedTranscript);
+      appendToastMessage({
+        type: 'success',
+        message: 'Transcript copied to clipboard',
+      });
     } catch (err) {
-      // TODO: Replace this with a toast message in the UI.
-      console.warn('Failed to copy transcript', err);
+      appendToastMessage({
+        type: 'error',
+        message: 'Failed to copy transcript',
+      });
     }
   };
 
@@ -266,7 +276,7 @@ export default function VideoPlayerApp({
   return (
     <div
       data-testid="app-container"
-      className={classnames('flex flex-col h-[100vh] min-h-0')}
+      className={classnames('flex flex-col h-[100vh] min-h-0 relative')}
     >
       {multicolumn && (
         <div
@@ -412,6 +422,7 @@ export default function VideoPlayerApp({
             })}
             data-testid="transcript-container"
           >
+            <VideoPlayerAppToastMessages />
             {isLoading && (
               <div className="flex justify-center p-8">
                 <Spinner data-testid="transcript-loading-spinner" size="md" />
