@@ -1,10 +1,17 @@
 from io import BytesIO
-from unittest.mock import sentinel
+from unittest.mock import create_autospec, sentinel
 
 import pytest
 from requests import Response
 
-from via.services.youtube import YouTubeDataAPIError, YouTubeService, factory
+from via.exceptions import BadURL
+from via.services.youtube import (
+    YouTubeDataAPIError,
+    YouTubeService,
+    YouTubeServiceError,
+    factory,
+)
+from via.services.youtube_api import YouTubeAPIClient
 
 
 class TestYouTubeService:
@@ -21,6 +28,7 @@ class TestYouTubeService:
         assert (
             YouTubeService(
                 enabled=enabled,
+                api_client=sentinel.api_client,
                 api_key=api_key,
                 http_service=sentinel.http_service,
             ).enabled
@@ -79,11 +87,48 @@ class TestYouTubeService:
 
         assert exc_info.value.__cause__ == http_service.get.side_effect
 
-    def test_get_transcript(self, YouTubeTranscriptApi, svc):
-        transcript = svc.get_transcript(sentinel.video_id)
+    @pytest.mark.parametrize(
+        "kwargs",
+        (
+            {"video_url": "https://www.youtube.com/watch?v=VIDEO_ID"},
+            {"video_id": "VIDEO_ID"},
+        ),
+    )
+    def test_get_video_info(self, svc, api_client, kwargs):
+        video = svc.get_video_info(**kwargs)
 
-        YouTubeTranscriptApi.get_transcript.assert_called_once_with(sentinel.video_id)
-        assert transcript == YouTubeTranscriptApi.get_transcript.return_value
+        api_client.get_video_info.assert_called_once_with(video_id="VIDEO_ID")
+
+        assert video == api_client.get_video_info.return_value
+
+    def test_get_video_info_with_bad_url(self, svc):
+        with pytest.raises(BadURL):
+            svc.get_video_info(video_url="BAD URL")
+
+    def test_get_transcript(self, svc, api_client, CaptionTrack):
+        transcript = svc.get_transcript(
+            video_id=sentinel.video_id, transcript_id=sentinel.transcript_id
+        )
+
+        # This is called via `get_video_info`
+        api_client.get_video_info.assert_called_once_with(sentinel.video_id)
+        video = api_client.get_video_info.return_value
+
+        CaptionTrack.from_id.assert_called_once_with(sentinel.transcript_id)
+        video.caption.find_matching_track.assert_called_once_with(
+            [CaptionTrack.from_id.return_value]
+        )
+        caption_track = video.caption.find_matching_track.return_value
+
+        api_client.get_transcript.assert_called_once_with(caption_track)
+        assert transcript == api_client.get_transcript.return_value
+
+    def test_get_transcript_with_no_matching_captions(self, svc, api_client):
+        video = api_client.get_video_info.return_value
+        video.caption.find_matching_track.return_value = None
+
+        with pytest.raises(YouTubeServiceError):
+            svc.get_transcript(video_id=sentinel.video_id, transcript_id="en")
 
     @pytest.mark.parametrize(
         "video_id,expected_url",
@@ -100,30 +145,40 @@ class TestYouTubeService:
         assert expected_url == svc.canonical_video_url(video_id)
 
     @pytest.fixture
-    def svc(self, http_service):
+    def api_client(self):
+        return create_autospec(YouTubeAPIClient, spec_set=True, instance=True)
+
+    @pytest.fixture
+    def svc(self, http_service, api_client):
         return YouTubeService(
-            enabled=True, api_key=sentinel.api_key, http_service=http_service
+            enabled=True,
+            api_key=sentinel.api_key,
+            http_service=http_service,
+            api_client=api_client,
         )
+
+    @pytest.fixture
+    def CaptionTrack(self, patch):
+        return patch("via.services.youtube.CaptionTrack")
 
 
 class TestFactory:
-    def test_it(self, YouTubeService, youtube_service, http_service, pyramid_request):
-        returned = factory(sentinel.context, pyramid_request)
+    def test_it(self, YouTubeService, YouTubeAPIClient, http_service, pyramid_request):
+        svc = factory(sentinel.context, pyramid_request)
 
+        YouTubeAPIClient.assert_called_once_with()
         YouTubeService.assert_called_once_with(
-            enabled=True, api_key="test_youtube_api_key", http_service=http_service
+            enabled=True,
+            api_client=YouTubeAPIClient.return_value,
+            api_key="test_youtube_api_key",
+            http_service=http_service,
         )
-        assert returned == youtube_service
-
-    @pytest.fixture(autouse=True)
-    def YouTubeService(self, patch):
-        return patch("via.services.youtube.YouTubeService")
+        assert svc == YouTubeService.return_value
 
     @pytest.fixture
-    def youtube_service(self, YouTubeService):
-        return YouTubeService.return_value
+    def YouTubeAPIClient(self, patch):
+        return patch("via.services.youtube.YouTubeAPIClient")
 
-
-@pytest.fixture(autouse=True)
-def YouTubeTranscriptApi(patch):
-    return patch("via.services.youtube.YouTubeTranscriptApi")
+    @pytest.fixture
+    def YouTubeService(self, patch):
+        return patch("via.services.youtube.YouTubeService")

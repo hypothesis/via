@@ -130,6 +130,12 @@ class TestGetURLDetails:
     def clean_headers(self, patch):
         return patch("via.services.url_details.clean_headers", return_value={})
 
+    @pytest.fixture
+    def youtube_service(self, youtube_service):
+        # By default, we don't want everything appearing as a YouTube video
+        youtube_service.get_video_id.return_value = None
+        return youtube_service
+
 
 @pytest.mark.usefixtures("checkmate_service", "http_service", "youtube_service")
 def test_factory(pyramid_request):
