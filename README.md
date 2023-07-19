@@ -22,9 +22,6 @@ First you'll need to install:
   The **Basic GitHub Checkout** method works best on Ubuntu.
   You _don't_ need to set up pyenv's shell integration ("shims"), you can
   [use pyenv without shims](https://github.com/pyenv/pyenv#using-pyenv-without-shims).
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-  On Ubuntu follow [Install on Ubuntu](https://docs.docker.com/desktop/install/ubuntu/).
-  On macOS follow [Install on Mac](https://docs.docker.com/desktop/install/mac-install/).
 * [Node](https://nodejs.org/) and npm.
   On Ubuntu: `sudo snap install --classic node`.
   On macOS: `brew install node`.
@@ -35,7 +32,6 @@ Then to set up your development environment:
 ```terminal
 git clone https://github.com/hypothesis/via.git
 cd via
-make services
 make devdata
 make help
 ```
