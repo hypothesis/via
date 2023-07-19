@@ -4,6 +4,7 @@ newrelic
 checkmatelib
 h-assets
 h-pyramid-sentry
+h-matchers
 h-vialib
 importlib_resources
 pyjwt

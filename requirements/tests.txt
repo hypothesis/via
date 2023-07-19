@@ -62,7 +62,9 @@ gunicorn==20.1.0
 h-assets==1.0.5
     # via -r requirements/prod.txt
 h-matchers==1.2.15
-    # via -r requirements/tests.in
+    # via
+    #   -r requirements/prod.txt
+    #   -r requirements/tests.in
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.txt
 h-vialib==1.2.1
