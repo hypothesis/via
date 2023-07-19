@@ -5,17 +5,6 @@ help = help::; @echo $$$$(tput bold)$(strip $(1)):$$$$(tput sgr0) $(strip $(2))
 $(call help,make help,print this help message)
 
 .PHONY: services
-$(call help,make services,start the services that the app needs)
-services: args?=up -d --wait
-services: python
-	@docker compose $(args)
-
-.PHONY: db
-$(call help,make db,initialize the DB and upgrade it to the latest migration)
-db: args?=upgrade head
-db: python
-	@tox -qe dev --run-command 'python bin/make_db'
-	@tox -qe dev  --run-command 'alembic $(args)'
 
 .PHONY: devdata
 $(call help,make devdata,load development data and environment variables)
@@ -36,11 +25,6 @@ web: python
 $(call help,make shell,"launch a Python shell in this project's virtualenv")
 shell: python
 	@pyenv exec tox -qe dev --run-command 'pshell conf/development.ini'
-
-.PHONY: sql
-$(call help,make sql,"Connect to the dev database with a psql shell")
-sql: python
-	@docker compose exec postgres psql --pset expanded=auto -U postgres
 
 .PHONY: lint
 $(call help,make lint,"lint the code and print any warnings")

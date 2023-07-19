@@ -4,10 +4,6 @@
 #
 #    pip-compile --allow-unsafe --config=pyproject.toml requirements/lint.in
 #
-alembic==1.11.1
-    # via
-    #   -r functests.txt
-    #   -r tests.txt
 astroid==2.15.5
     # via pylint
 attrs==20.3.0
@@ -94,11 +90,6 @@ google-auth-oauthlib==1.0.0
     # via
     #   -r functests.txt
     #   -r tests.txt
-greenlet==2.0.2
-    # via
-    #   -r functests.txt
-    #   -r tests.txt
-    #   sqlalchemy
 gunicorn==20.1.0
     # via
     #   -r functests.txt
@@ -137,14 +128,12 @@ importlib-metadata==6.0.0
     # via
     #   -r functests.txt
     #   -r tests.txt
-    #   alembic
     #   h-vialib
     #   pip-sync-faster
 importlib-resources==5.12.0
     # via
     #   -r functests.txt
     #   -r tests.txt
-    #   alembic
     #   checkmatelib
 inflection==0.5.1
     # via
@@ -170,17 +159,11 @@ jsonschema==3.2.0
     #   checkmatelib
 lazy-object-proxy==1.6.0
     # via astroid
-mako==1.2.4
-    # via
-    #   -r functests.txt
-    #   -r tests.txt
-    #   alembic
 markupsafe==1.1.1
     # via
     #   -r functests.txt
     #   -r tests.txt
     #   jinja2
-    #   mako
     #   pyramid-jinja2
 marshmallow==3.19.0
     # via
@@ -250,10 +233,6 @@ pluggy==0.13.1
     #   -r functests.txt
     #   -r tests.txt
     #   pytest
-psycopg2==2.9.6
-    # via
-    #   -r functests.txt
-    #   -r tests.txt
 pyasn1==0.4.8
     # via
     #   -r functests.txt
@@ -374,11 +353,6 @@ soupsieve==2.1
     # via
     #   -r functests.txt
     #   beautifulsoup4
-sqlalchemy==2.0.19
-    # via
-    #   -r functests.txt
-    #   -r tests.txt
-    #   alembic
 toml==0.10.2
     # via -r lint.in
 tomli==2.0.0
@@ -402,11 +376,9 @@ typing-extensions==4.7.1
     # via
     #   -r functests.txt
     #   -r tests.txt
-    #   alembic
     #   astroid
     #   pylint
     #   pytest-factoryboy
-    #   sqlalchemy
 urllib3==1.26.15
     # via
     #   -r functests.txt
