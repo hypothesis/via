@@ -14,7 +14,7 @@ from via.services import YouTubeService
 @use_kwargs(
     {"url": fields.Url(required=True)}, location="query", unknown=marshmallow.INCLUDE
 )
-def youtube(request, url, **kwargs):
+def view_youtube_video(request, url, **kwargs):
     youtube_service = request.find_service(YouTubeService)
 
     if not youtube_service.enabled:
@@ -27,7 +27,7 @@ def youtube(request, url, **kwargs):
     if not video_id:
         raise BadURL(f"Unsupported video URL: {url}", url=url)
 
-    _, client_config = Configuration.extract_from_params(kwargs)
+    via_config, client_config = Configuration.extract_from_params(kwargs)
 
     return {
         "client_embed_url": request.registry.settings["client_embed_url"],
@@ -38,7 +38,11 @@ def youtube(request, url, **kwargs):
         "api": {
             "transcript": {
                 "doc": "Get the transcript of the current video",
-                "url": request.route_url("api.youtube.transcript", video_id=video_id),
+                "url": request.route_url(
+                    "api.youtube.transcript",
+                    video_id=video_id,
+                    transcript_id=via_config.get("video", {}).get("lang", "en.a"),
+                ),
                 "method": "GET",
                 "headers": {
                     "Authorization": f"Bearer {ViaSecurityPolicy.encode_jwt(request)}"

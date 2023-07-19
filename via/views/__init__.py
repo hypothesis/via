@@ -28,7 +28,9 @@ def add_routes(config):  # pragma: no cover
     config.add_route("proxy_d2l_pdf", "/d2l/proxied.pdf", factory=QueryURLResource)
     config.add_route("proxy_python_pdf", "proxied.pdf", factory=QueryURLResource)
 
-    config.add_route("api.youtube.transcript", "/api/youtube/transcript/{video_id}")
+    config.add_route(
+        "api.youtube.transcript", "/api/youtube/transcript/{video_id}/{transcript_id}"
+    )
 
     config.add_route("static_fallback", "/static/{url:.*}")
     config.add_route("proxy", "/{url:.*}", factory=PathURLResource)

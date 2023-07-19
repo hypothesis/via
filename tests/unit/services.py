@@ -62,10 +62,4 @@ def pdf_url_builder_service(mock_service):
 
 @pytest.fixture
 def youtube_service(mock_service):
-    youtube_service = mock_service(YouTubeService)
-    youtube_service.enabled = True
-
-    # By default, the mock reports that URLs are not YouTube URLs.
-    youtube_service.get_video_id.return_value = None
-
-    return youtube_service
+    return mock_service(YouTubeService)
