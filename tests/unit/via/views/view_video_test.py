@@ -6,7 +6,7 @@ from marshmallow.exceptions import ValidationError as MarshmallowValidationError
 from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.exceptions import BadURL
-from via.views.view_video import view_youtube_video
+from via.views.view_video import CAPTION_TRACK_PREFERENCES, view_youtube_video
 
 # webargs's kwargs injection into view functions falsely triggers Pylint's
 # no-value-for-parameter all the time so just disable it file-wide.
@@ -22,7 +22,6 @@ class TestViewVideo:
         video_url,
         ViaSecurityPolicy,
     ):
-        # Override default `None` response.
         pyramid_request.params["via.video.lang"] = sentinel.transcript_id
 
         response = view_youtube_video(pyramid_request)
@@ -61,8 +60,35 @@ class TestViewVideo:
             },
         }
 
-    def test_it_defaults_to_en(self, pyramid_request, youtube_service):
+    def test_it_looks_up_transcripts(self, pyramid_request, youtube_service):
         pyramid_request.params.pop("via.video.lang", None)
+
+        response = view_youtube_video(pyramid_request)
+
+        youtube_service.get_video_info.assert_called_once_with(
+            video_url=youtube_service.canonical_video_url.return_value
+        )
+        video = youtube_service.get_video_info.return_value
+        video.caption.find_matching_track.assert_called_once_with(
+            CAPTION_TRACK_PREFERENCES
+        )
+        caption_track = video.caption.find_matching_track.return_value
+
+        assert response["api"]["transcript"]["url"] == pyramid_request.route_url(
+            "api.youtube.transcript",
+            video_id=youtube_service.get_video_id.return_value,
+            transcript_id=caption_track.id,
+        )
+
+    @pytest.mark.parametrize("has_captions,has_matches", ((True, False), (False, True)))
+    def test_it_defaults_to_en_a(
+        self, pyramid_request, youtube_service, has_captions, has_matches
+    ):
+        pyramid_request.params.pop("via.video.lang", None)
+        video = youtube_service.get_video_info.return_value
+        video.has_captions = has_captions
+        if not has_matches:
+            video.caption.find_matching_track.return_value = None
 
         response = view_youtube_video(pyramid_request)
 
@@ -82,7 +108,7 @@ class TestViewVideo:
             "query": {"url": ["Not a valid URL."]}
         }
 
-    def test_it_errors_if_the_url_is_not_a_YouTube_url(
+    def test_it_errors_if_the_url_is_not_a_youtube_url(
         self, pyramid_request, youtube_service
     ):
         # YouTubeService returns None if it can't extract the YouTube video ID
