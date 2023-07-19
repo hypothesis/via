@@ -140,3 +140,20 @@ class Video:
                 safe_get(data, ["captions", "playerCaptionsTracklistRenderer"], {})
             )
         )
+
+
+@dataclass
+class TranscriptText:
+    """An individual row of transcript text."""
+
+    text: str
+    start: float
+    duration: float
+
+
+@dataclass
+class Transcript:
+    """A full transcript from a caption track."""
+
+    track: CaptionTrack
+    text: List[TranscriptText]
