@@ -1,20 +1,12 @@
+import type { Signal } from '@preact/signals';
 import { createContext } from 'preact';
-import type { StateUpdater } from 'preact/hooks';
 
 import type { ToastMessage } from './ToastMessages';
 
-export type ToastMessagesState = {
-  toastMessages: ToastMessage[];
-  setToastMessages: StateUpdater<ToastMessage[]>;
-};
-
 export type AppStore = {
-  toastMessages: ToastMessagesState;
+  toastMessages: Signal<ToastMessage[]>;
 };
 
 export const AppContext = createContext<AppStore>({
-  toastMessages: {
-    toastMessages: [],
-    setToastMessages: () => {},
-  },
-});
+  toastMessages: {},
+} as AppStore);

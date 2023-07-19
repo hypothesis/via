@@ -6,6 +6,7 @@ import {
   LogoIcon,
   Spinner,
 } from '@hypothesis/frontend-shared';
+import { useSignal } from '@preact/signals';
 import classnames from 'classnames';
 import {
   useCallback,
@@ -257,7 +258,7 @@ export default function VideoPlayerApp({
     };
   }, [syncTranscript]);
 
-  const [toastMessages, setToastMessages] = useState<ToastMessage[]>([]);
+  const toastMessages = useSignal<ToastMessage[]>([]);
 
   const copyTranscript = async () => {
     const formattedTranscript = isTranscript(transcript)
@@ -271,7 +272,7 @@ export default function VideoPlayerApp({
           type: 'error',
           message: 'Failed to copy transcript',
         },
-        setToastMessages
+        toastMessages
       );
     }
   };
@@ -294,14 +295,7 @@ export default function VideoPlayerApp({
   }, [baseClientConfig, contentReady]);
 
   return (
-    <AppContext.Provider
-      value={{
-        toastMessages: {
-          toastMessages,
-          setToastMessages,
-        },
-      }}
-    >
+    <AppContext.Provider value={{ toastMessages }}>
       <div
         data-testid="app-container"
         className={classnames('flex flex-col h-[100vh] min-h-0 relative')}
