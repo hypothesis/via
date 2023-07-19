@@ -1,17 +1,27 @@
-from dataclasses import dataclass
+import base64
+from copy import deepcopy
+from dataclasses import dataclass, field
+from itertools import zip_longest
+from operator import attrgetter
 from typing import List, Optional
+
+from via.services.youtube_api._nested_data import safe_get
 
 
 @dataclass
 class VideoDetails:
-    id: str
-    title: str
-    short_description: str
-    author: str
-    thumbnails: List[dict]
+    """Metadata for the video."""
+
+    id: str = None
+    title: str = None
+    short_description: str = None
+    author: str = None
+    thumbnails: List[dict] = None
 
     @classmethod
     def from_json(cls, data):
+        """Create an instance from the `videoDetails` section of JSON."""
+
         return VideoDetails(
             id=data["videoId"],
             title=data["title"],
@@ -23,90 +33,254 @@ class VideoDetails:
 
 @dataclass
 class CaptionTrack:
-    id: str
-    name: str
+    """A source of transcription data, in a particular language."""
+
+    # Items which form the unique part
     language_code: str
-    kind: str
-    is_translatable: bool
-    url: str = None
+    name: Optional[str] = None
+    kind: str = None
+    translated_language_code: Optional[str] = None
+
+    # Other items which we cannot determine from the id
+    label: Optional[str] = None
+    is_translatable: Optional[bool] = None
+    base_url: Optional[str] = None
 
     @classmethod
-    def from_json(cls, data):
+    def from_json(cls, data: dict):
+        """Create an instance from a `captionTrack` section of JSON."""
+
+        label = data["name"]["simpleText"]
+
         return CaptionTrack(
-            id=data["vssId"],
-            language_code=data["languageCode"],
-            name=data["name"]["simpleText"],
+            name=label.split(" - ", 1)[-1] if " - " in label else None,
+            language_code=data["languageCode"].lower(),
+            label=label,
             kind=data.get("kind", None),
             is_translatable=data.get("isTranslatable", False),
-            url=data["baseUrl"],
+            base_url=data["baseUrl"],
         )
 
+    @classmethod
+    def from_id(cls, id_string: str):
+        """Create a partially filled out track from and id string."""
+
+        data = dict(
+            zip_longest(
+                [
+                    "language_code",
+                    "auto_generated",
+                    "name",
+                    "translated_language_code",
+                ],
+                [part or None for part in id_string.split(".")],
+            )
+        )
+
+        if name := data.get("name"):
+            data["name"] = base64.b64decode(name.encode("utf-8")).decode("utf-8")
+
+        if data.pop("auto_generated", None):
+            data["kind"] = "asr"
+
+        return cls(**data)
+
     @property
-    def is_auto_generated(self):
+    def id(self) -> str:
+        if self.name:
+            # Ensure our ids don't contain wild characters
+            name = base64.b64encode(self.name.encode("utf-8")).decode("utf-8")
+        else:
+            name = None
+
+        return ".".join(
+            part or ""
+            for part in [
+                self.language_code,
+                "a" if self.is_auto_generated else None,
+                name,
+                self.translated_language_code,
+            ]
+        ).rstrip(".")
+
+    @property
+    def is_auto_generated(self) -> bool:
+        """Is this caption track auto generated?"""
+
         return self.kind == "asr"
+
+    @is_auto_generated.setter
+    def is_auto_generated(self, value: bool):
+        self.kind = "asr" if value else None
+
+    @property
+    def url(self) -> Optional[str]:
+        """Get the URL to download a transcript of this caption track"""
+        if not self.base_url:
+            return None
+
+        url = self.base_url
+
+        if self.translated_language_code:
+            url += f"&tlang={self.translated_language_code}"
+
+        return url
 
 
 @dataclass
 class Captions:
-    tracks: List[CaptionTrack]
-    translation_languages: List[dict]
+    """All information about captions."""
+
+    tracks: List[CaptionTrack] = field(default_factory=list)
+    translation_languages: List[dict] = field(default_factory=list)
 
     @classmethod
-    def from_json(cls, data):
+    def from_json(cls, data: dict):
+        """Create an instance from JSON.
+
+        This is populated from the `captions.playerCaptionsTracklistRenderer`
+        section.
+        """
+
         return Captions(
             tracks=[
                 CaptionTrack.from_json(track) for track in data.get("captionTracks", [])
             ],
             translation_languages=[
-                {"code": language["languageCode"], "name": language["languageName"]}
+                {
+                    "code": language["languageCode"].lower(),
+                    "name": language["languageName"],
+                }
                 for language in data.get("translationLanguages", [])
             ],
         )
 
+    def is_translation_supported(self, language_code: str) -> bool:
+        """Can we translate caption tracks into this language?"""
 
-def safe_get(data, path, default=None):
-    for key in path:
-        if key not in data:
-            return default
+        if not self.translation_languages:
+            return False
 
-        data = data[key]
+        language_code = language_code.lower()
+        return any(
+            language["code"] == language_code for language in self.translation_languages
+        )
 
-    return data
+    def find_matching_track(
+        self, preferences: List[CaptionTrack]
+    ) -> Optional[CaptionTrack]:
+        """
+        Get a caption track which matching the preferences in order.
+
+        This method takes the provided list of caption track objects and
+        searches the available tracks for those with matching details:
+
+        * language_code
+        * name
+        * is_auto_generated / kind
+        * translation_language_code
+
+        For a match to happen, we must match the first three items, and be
+        translatable to the last if present.
+
+        Earlier items are higher priority.
+
+        :param preferences: List of partially filled out caption track objects
+            which represent the caption track we would like.
+        :return:
+        """
+
+        def get_key(track: CaptionTrack):
+            return track.language_code, track.kind, track.name
+
+        search_keys = [get_key(preference) for preference in preferences]
+        best_index, best_preference, best_caption_track = None, None, None
+
+        # Sort the tracks to keep the algorithm more stable! This only insulates
+        # us from sorting changes, not metadata changes.
+        for caption_track in sorted(self.tracks, key=attrgetter("id")):
+            try:
+                index = search_keys.index(get_key(caption_track))
+            except ValueError:
+                continue
+
+            preference = preferences[index]
+
+            # If we match, but we want to be translated, check we can be
+            if preference.translated_language_code and (
+                not caption_track.is_translatable
+                or not self.is_translation_supported(
+                    preference.translated_language_code
+                )
+            ):
+                continue
+
+            # Items with lower indexes are first choices for the user
+            if best_index is None or best_index > index:
+                best_index = index
+                best_preference = preference
+                best_caption_track = deepcopy(caption_track)
+
+        if best_index is None:
+            return None
+
+        if best_preference.translated_language_code:
+            # Convert the track to a translated language if required, we've
+            # checked above this is ok.
+            best_caption_track.translated_language_code = (
+                best_preference.translated_language_code
+            )
+
+        return best_caption_track
 
 
 @dataclass
 class Video:
-    url: str = None
-    details: Optional[VideoDetails] = None
+    """Data for a video in YouTube."""
+
     caption: Optional[Captions] = None
+    details: Optional[VideoDetails] = None
     playability_status: str = None
+    url: str = None
+    """The URL for the video, added by us, rather than from the JSON."""
 
     @classmethod
     def from_json(cls, url, data):
         captions = safe_get(data, ["captions", "playerCaptionsTracklistRenderer"])
+        details = data.get("videoDetails")
 
         return Video(
-            url=url,
-            details=VideoDetails.from_json(data["videoDetails"]),
             caption=Captions.from_json(captions) if captions else None,
+            details=VideoDetails.from_json(details) if details else None,
             playability_status=safe_get(data, ["playabilityStatus", "status"]),
+            url=url,
         )
 
     @property
-    def is_playable(self):
+    def is_playable(self) -> bool:
+        """Can this video be played?"""
+
         return self.playability_status == "OK"
 
     @property
-    def has_captions(self):
-        return self.caption and self.caption.tracks
+    def has_captions(self) -> bool:
+        """Does this video have captions?"""
+
+        return bool(self.caption and self.caption.tracks)
 
     @property
-    def id(self):
-        return self.details.id
+    def id(self) -> Optional[str]:
+        """Get the ID of this video."""
+
+        # Just a convenience accessor, as having the id tucked away in the
+        # details object is weird.
+        return self.details.id if self.details else None
 
 
 @dataclass
 class TranscriptText:
+    """An individual row of transcript text."""
+
     text: str
     start: float
     duration: float
@@ -114,5 +288,7 @@ class TranscriptText:
 
 @dataclass
 class Transcript:
+    """A full transcript from a caption track."""
+
     track: CaptionTrack
     text: List[TranscriptText]

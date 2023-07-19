@@ -21,9 +21,7 @@ def strip_html(string):
 
 
 class YouTubeAPIClient:
-    def __init__(self, api_key: str):
-        self._api_key = api_key
-
+    def __init__(self):
         session = requests.Session()
         session.headers["Accept-Language"] = "en-US"
         self._http = HTTPService(session=session)
@@ -40,7 +38,7 @@ class YouTubeAPIClient:
 
     def get_video_info(self, video_id: str) -> Video:
         response = self._http.post(
-            f"https://youtubei.googleapis.com/youtubei/v1/player?key={self._api_key}",
+            f"https://youtubei.googleapis.com/youtubei/v1/player",
             json={
                 "context": {
                     "client": {
@@ -59,6 +57,9 @@ class YouTubeAPIClient:
         )
 
     def get_transcript(self, caption_track: CaptionTrack) -> Transcript:
+        if not caption_track.url:
+            raise ValueError("Cannot get a transcript without a URL")
+
         response = self._http.get(url=caption_track.url)
         xml_elements = ElementTree.fromstring(response.text)
 

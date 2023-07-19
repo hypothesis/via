@@ -1,7 +1,7 @@
 from urllib.parse import parse_qs, quote_plus, urlparse
 
 from via.exceptions import BadURL
-from via.services.youtube_api import Transcript
+from via.services.youtube_api import CaptionTrack, Transcript
 from via.services.youtube_api.client import Video, YouTubeAPIClient
 
 
@@ -68,9 +68,10 @@ class YouTubeService:
         if not video.has_captions:
             raise YouTubeServiceError("no_transcripts_available", video_id)
 
-        for caption_track in video.caption.tracks:
-            if caption_track.id == caption_track_id:
-                return self._api_client.get_transcript(caption_track)
+        if caption_track := video.caption.find_matching_transcript(
+            [CaptionTrack.from_id(caption_track_id)]
+        ):
+            return self._api_client.get_transcript(caption_track)
 
         raise YouTubeServiceError("cannot_find_transcript", video_id, caption_track_id)
 
