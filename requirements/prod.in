@@ -5,6 +5,7 @@ checkmatelib
 h-assets
 h-pyramid-sentry
 h-vialib
+h-matchers
 importlib_resources
 pyjwt
 pyramid-exclog
@@ -16,4 +17,3 @@ whitenoise
 google-auth-oauthlib
 marshmallow
 webargs
-youtube-transcript-api
