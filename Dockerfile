@@ -18,8 +18,7 @@ RUN yarn build
 FROM python:3.8.17-slim-bullseye
 LABEL maintainer="Hypothes.is Project and contributors"
 
-# Install nginx & supervisor
-RUN apt-get update && apt-get install --yes nginx nginx-extras gettext-base supervisor \
+RUN apt-get update && apt-get install --yes nginx nginx-extras gettext-base supervisor libpq-dev \
   && apt-get clean
 
 # Create the hypothesis user, group, home directory and package directory.
@@ -33,8 +32,11 @@ RUN chown -R hypothesis:hypothesis /etc/nginx/conf.d /var/log/nginx /var/lib/ngi
 COPY requirements/prod.txt ./
 
 # Install build deps, build, and then clean up.
-RUN pip install --no-cache-dir -U pip \
-  && pip install --no-cache-dir -r prod.txt
+RUN apt-get install --yes gcc \
+  && pip install --no-cache-dir -U pip \
+  && pip install --no-cache-dir -r prod.txt \
+  && apt-get remove --yes gcc \
+  && apt-get autoremove --yes
 
 # Copy frontend assets.
 COPY --from=frontend-build /build build
