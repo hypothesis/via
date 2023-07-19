@@ -3,14 +3,25 @@ CSS entry point for the video player app.
 */
 
 @tailwind base;
-
-body {
-  @apply bg-grey-0;
-  @apply font-sans text-sm text-color-text;
-}
-
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-grey-0;
+    @apply font-sans text-sm text-color-text;
+  }
+
+  /*
+  Input fields must have a minimum size on iOS to avoid the browser zooming in
+  when they are focused.
+  */
+  @media(pointer: coarse) {
+    input, textarea {
+      font-size: max(16px, 100%);
+    }
+  }
+}
 
 p::highlight(transcript-filter-match) {
   text-decoration: underline;
