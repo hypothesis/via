@@ -163,6 +163,9 @@ class TestCaptions:
         assert captions.is_translation_supported("en-gb")
         assert not captions.is_translation_supported("en")
 
+    def test_is_translation_supported_with_no_languages(self):
+        assert not Captions().is_translation_supported("any")
+
     @pytest.mark.parametrize(
         "preferences,expected_label",
         (
@@ -195,6 +198,11 @@ class TestCaptions:
                 id="same_level_sorting",
             ),
             param([CaptionTrack("fr")], None, id="miss"),
+            param(
+                [CaptionTrack("en", translated_language_code="fr")],
+                None,
+                id="translation_without_languages",
+            ),
         ),
     )
     def test_find_matching_track(self, preferences, expected_label):
