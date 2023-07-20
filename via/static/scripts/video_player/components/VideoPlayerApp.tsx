@@ -28,7 +28,7 @@ import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
 import TranscriptError from './TranscriptError';
 import YouTubeVideoPlayer from './YouTubeVideoPlayer';
-import { PauseIcon, PlayIcon, SyncIcon } from './icons';
+import { DownIcon, PauseIcon, PlayIcon, SyncIcon, UpIcon } from './icons';
 
 export type VideoPlayerAppProps = {
   /** ID of the YouTube video to load. */
@@ -191,6 +191,14 @@ export default function VideoPlayerApp({
 
   const syncTranscript = useCallback(
     () => transcriptControls.current?.scrollToCurrentSegment(),
+    []
+  );
+  const scrollToTop = useCallback(
+    () => transcriptControls.current?.scrollToTop(),
+    []
+  );
+  const scrollToBottom = useCallback(
+    () => transcriptControls.current?.scrollToBottom(),
     []
   );
 
@@ -402,6 +410,24 @@ export default function VideoPlayerApp({
             />
             <CopyButton
               transcript={isTranscript(transcript) ? transcript : null}
+            />
+            <IconButton
+              onClick={scrollToTop}
+              data-testid="scroll-top-button"
+              disabled={!isTranscript(transcript)}
+              title="Scroll to top"
+              icon={UpIcon}
+              size="custom"
+              classes="p-2"
+            />
+            <IconButton
+              onClick={scrollToBottom}
+              data-testid="scroll-bottom-button"
+              disabled={!isTranscript(transcript)}
+              title="Scroll to bottom"
+              icon={DownIcon}
+              size="custom"
+              classes="p-2"
             />
           </div>
           <div

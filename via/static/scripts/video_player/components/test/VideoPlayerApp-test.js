@@ -39,7 +39,9 @@ describe('VideoPlayerApp', () => {
     useImperativeHandle(
       controlsRef,
       () => ({
+        scrollToBottom: sinon.stub(),
         scrollToCurrentSegment: sinon.stub(),
+        scrollToTop: sinon.stub(),
       }),
       []
     );
@@ -79,6 +81,10 @@ describe('VideoPlayerApp', () => {
     );
     wrappers.push(wrapper);
     return wrapper;
+  }
+
+  function findButton(wrapper, name) {
+    return wrapper.find(`button[data-testid="${name}-button"]`);
   }
 
   beforeEach(() => {
@@ -197,20 +203,21 @@ describe('VideoPlayerApp', () => {
       return wrapper.find('CopyButton');
     }
 
-    function findSyncButton(wrapper) {
-      return wrapper.find('button[data-testid="sync-button"]');
-    }
-
-    it('disables "Copy" and "Sync" buttons while transcript is loading', async () => {
+    it('disables toolbar buttons while transcript is loading', async () => {
       const wrapper = createVideoPlayerUsingAPI();
+      const buttons = ['scroll-top', 'scroll-bottom', 'sync'];
 
       assert.isNull(findCopyButton(wrapper).prop('transcript'));
-      assert.isTrue(findSyncButton(wrapper).prop('disabled'));
+      for (const button of buttons) {
+        assert.isTrue(findButton(wrapper, button).prop('disabled'));
+      }
 
       await waitForElement(wrapper, 'Transcript');
 
       assert.isNotNull(findCopyButton(wrapper).prop('transcript'));
-      assert.isFalse(findSyncButton(wrapper).prop('disabled'));
+      for (const button of buttons) {
+        assert.isFalse(findButton(wrapper, button).prop('disabled'));
+      }
     });
 
     it('loads client while transcript is loading', async () => {
@@ -368,14 +375,31 @@ describe('VideoPlayerApp', () => {
     assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
   });
 
-  it('syncs transcript when "Sync" button is clicked', () => {
-    const wrapper = createVideoPlayer();
-    const transcriptController = wrapper.find('Transcript').prop('controlsRef');
-    assert.ok(transcriptController.current);
+  [
+    {
+      button: 'sync',
+      method: 'scrollToCurrentSegment',
+    },
+    {
+      button: 'scroll-top',
+      method: 'scrollToTop',
+    },
+    {
+      button: 'scroll-bottom',
+      method: 'scrollToBottom',
+    },
+  ].forEach(({ button, method }) => {
+    it(`scrolls transcript when "${button}" button is clicked`, () => {
+      const wrapper = createVideoPlayer();
+      const transcriptController = wrapper
+        .find('Transcript')
+        .prop('controlsRef');
+      assert.ok(transcriptController.current);
 
-    wrapper.find('button[data-testid="sync-button"]').simulate('click');
+      findButton(wrapper, button).simulate('click');
 
-    assert.calledOnce(transcriptController.current.scrollToCurrentSegment);
+      assert.calledOnce(transcriptController.current[method]);
+    });
   });
 
   const toggleAutoScroll = wrapper => {
