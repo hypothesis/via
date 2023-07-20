@@ -1,5 +1,3 @@
-from urllib.parse import parse_qs, urlparse
-
 from via.exceptions import BadURL
 from via.services.youtube_api import CaptionTrack, Transcript, Video, YouTubeAPIClient
 
@@ -17,41 +15,11 @@ class YouTubeService:
     def enabled(self):
         return bool(self._enabled and self._api_client)
 
-    def get_video_id(self, url):
-        """Return the YouTube video ID from the given URL, or None."""
-        parsed = urlparse(url)
-        path_parts = parsed.path.split("/")
-
-        # youtu.be/VIDEO_ID
-        if parsed.netloc == "youtu.be" and len(path_parts) >= 2 and not path_parts[0]:
-            return path_parts[1]
-
-        if parsed.netloc not in ["www.youtube.com", "youtube.com", "m.youtube.com"]:
-            return None
-
-        query_params = parse_qs(parsed.query)
-
-        # https://youtube.com?v=VIDEO_ID, youtube.com/watch?v=VIDEO_ID, etc.
-        if "v" in query_params:
-            return query_params["v"][0]
-
-        path_parts = parsed.path.split("/")
-
-        # https://yotube.com/v/VIDEO_ID, /embed/VIDEO_ID, etc.
-        if (
-            len(path_parts) >= 3
-            and not path_parts[0]
-            and path_parts[1] in ["v", "embed", "shorts", "live"]
-        ):
-            return path_parts[2]
-
-        return None
-
     def get_video_info(
         self, video_id=None, video_url=None, with_captions=False
     ) -> Video:
         if video_url:
-            video_id = self.get_video_id(video_url)
+            video_id = self._api_client.parse_video_url(video_url)
 
         if not video_id:
             raise BadURL(f"Unsupported video URL: {video_url}", url=video_url)

@@ -11,8 +11,35 @@ from via.services.youtube_api import (
 
 
 class TestYouTubeAPIClient:
-    def test_get_video_info(self, client, http_session, Video):
-        video = client.get_video_info("VIDEO_ID")
+    @pytest.mark.parametrize(
+        "url,expected_video_id",
+        [
+            ("not_an_url", None),
+            ("https://notyoutube:1000000", None),
+            ("https://notyoutube.com", None),
+            ("https://youtube.com", None),
+            ("https://youtube.com?param=nope", None),
+            ("https://youtube.com?v=", None),
+            ("https://youtu/VIDEO_ID", None),
+            ("https://youtube.com?v=VIDEO_ID", "VIDEO_ID"),
+            ("https://www.youtube.com/watch?v=VIDEO_ID", "VIDEO_ID"),
+            ("https://www.youtube.com/watch?v=VIDEO_ID&t=14s", "VIDEO_ID"),
+            (
+                "https://www.youtube.com/v/VIDEO_ID?fs=1&amp;hl=en_US&amp;rel=0",
+                "VIDEO_ID",
+            ),
+            ("https://www.youtube.com/embed/VIDEO_ID?rel=0", "VIDEO_ID"),
+            ("https://youtu.be/VIDEO_ID", "VIDEO_ID"),
+            ("https://youtube.com/shorts/VIDEO_ID?feature=share", "VIDEO_ID"),
+            ("https://www.youtube.com/live/VIDEO_ID?feature=share", "VIDEO_ID"),
+            ("https://m.youtube.com/watch?v=VIDEO_ID", "VIDEO_ID"),
+        ],
+    )
+    def test_parse_video_url(self, client, url, expected_video_id):
+        assert expected_video_id == client.parse_video_url(url)
+
+    def test_get_video_info_with_captions(self, client, http_session, Video):
+        video = client.get_video_info("VIDEO_ID", with_captions=True)
 
         http_session.post.assert_called_once_with(
             "https://youtubei.googleapis.com/youtubei/v1/player",
@@ -66,7 +93,7 @@ class TestYouTubeAPIClient:
 
     @pytest.fixture
     def client(self):
-        return YouTubeAPIClient()
+        return YouTubeAPIClient(sentinel.api_key)
 
     @pytest.fixture
     def Video(self, patch):

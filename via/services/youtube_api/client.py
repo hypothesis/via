@@ -1,3 +1,5 @@
+from typing import Optional
+from urllib.parse import parse_qs, urlparse
 from xml.etree import ElementTree
 
 import requests
@@ -24,6 +26,37 @@ class YouTubeAPIClient:
         # Ensure any translations that Google provides are in English
         session.headers["Accept-Language"] = "en-US"
         self._http = HTTPService(session=session)
+
+    def parse_video_url(self, url: str) -> Optional[str]:
+        """Return the YouTube video ID from the given URL, or None."""
+
+        parsed = urlparse(url)
+        path_parts = parsed.path.split("/")
+
+        # youtu.be/VIDEO_ID
+        if parsed.netloc == "youtu.be" and len(path_parts) >= 2 and not path_parts[0]:
+            return path_parts[1]
+
+        if parsed.netloc not in ["www.youtube.com", "youtube.com", "m.youtube.com"]:
+            return None
+
+        query_params = parse_qs(parsed.query)
+
+        # https://youtube.com?v=VIDEO_ID, youtube.com/watch?v=VIDEO_ID, etc.
+        if "v" in query_params:
+            return query_params["v"][0]
+
+        path_parts = parsed.path.split("/")
+
+        # https://yotube.com/v/VIDEO_ID, /embed/VIDEO_ID, etc.
+        if (
+            len(path_parts) >= 3
+            and not path_parts[0]
+            and path_parts[1] in ["v", "embed", "shorts", "live"]
+        ):
+            return path_parts[2]
+
+        return None
 
     def get_video_info(self, video_id: str, with_captions: bool = False):
         if with_captions:
