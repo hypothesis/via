@@ -4,7 +4,43 @@ import pytest
 from h_matchers import Any
 from pytest import param
 
-from via.services.youtube_api import Captions, CaptionTrack, Video
+from via.services.youtube_api import Captions, CaptionTrack, Video, VideoDetails
+
+
+class TestVideoDetails:
+    def test_from_v1_json(self):
+        video_details = VideoDetails.from_v1_json(
+            {
+                "videoId": "VIDEO_ID",
+                "title": sentinel.title,
+            }
+        )
+
+        assert video_details == Any.instance_of(VideoDetails).with_attrs(
+            {
+                "id": "VIDEO_ID",
+                "title": sentinel.title,
+                "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+            }
+        )
+
+    def test_from_v1_json_minimal(self):
+        # Just check we don't explode.
+        assert VideoDetails.from_v1_json({})
+
+    @pytest.mark.parametrize(
+        "video_id,expected_url",
+        [
+            ("x8TO-nrUtSI", "https://www.youtube.com/watch?v=x8TO-nrUtSI"),
+            # YouTube video IDs don't actually contain any characters that
+            # require escaping, but this is not guaranteed for the future.
+            # See https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video.
+            ("foo bar", "https://www.youtube.com/watch?v=foo+bar"),
+            ("foo/bar", "https://www.youtube.com/watch?v=foo%2Fbar"),
+        ],
+    )
+    def test_canonical_video_url(self, video_id, expected_url):
+        assert expected_url == VideoDetails.canonical_video_url(video_id)
 
 
 class TestCaptionTrack:
@@ -185,24 +221,34 @@ class TestCaptions:
 
 
 class TestVideo:
-    def test_from_v1_json(self, Captions):
+    def test_from_v1_json(self, Captions, VideoDetails):
         video = Video.from_v1_json(
             data={
+                "videoDetails": sentinel.video_details,
                 "captions": {"playerCaptionsTracklistRenderer": sentinel.captions},
             },
         )
 
         Captions.from_v1_json.assert_called_once_with(sentinel.captions)
+        VideoDetails.from_v1_json.assert_called_once_with(sentinel.video_details)
 
         assert video == Any.instance_of(Video).with_attrs(
-            {"caption": Captions.from_v1_json.return_value}
+            {
+                "caption": Captions.from_v1_json.return_value,
+                "details": VideoDetails.from_v1_json.return_value,
+            }
         )
 
-    def test_from_v1_json_minimal(self, Captions):
+    def test_from_v1_json_minimal(self, Captions, VideoDetails):
         Video.from_v1_json({})
 
         Captions.from_v1_json.assert_called_once_with({})
+        VideoDetails.from_v1_json.assert_called_once_with({})
 
     @pytest.fixture
     def Captions(self, patch):
         return patch("via.services.youtube_api.models.Captions")
+
+    @pytest.fixture
+    def VideoDetails(self, patch):
+        return patch("via.services.youtube_api.models.VideoDetails")

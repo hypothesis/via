@@ -4,8 +4,39 @@ from dataclasses import dataclass, field
 from itertools import zip_longest
 from operator import attrgetter
 from typing import List, Optional
+from urllib.parse import quote_plus
 
 from via.services.youtube_api._nested_data import safe_get
+
+
+@dataclass
+class VideoDetails:
+    """Metadata for the video."""
+
+    id: str = None  # pylint: disable=invalid-name
+    title: str = None
+    url: str = None
+
+    @classmethod
+    def from_v1_json(cls, data):
+        """Create an instance from the `videoDetails` section of JSON."""
+
+        return VideoDetails(id=data.get("videoId"), title=data.get("title"))
+
+    def __post_init__(self):
+        if self.id:
+            self.url = self.canonical_video_url(self.id)
+
+    @classmethod
+    def canonical_video_url(cls, video_id: str) -> str:
+        """
+        Return the canonical URL for a YouTube video.
+
+        This is used as the URL which YouTube transcript annotations are
+        associated with.
+        """
+        escaped_id = quote_plus(video_id)
+        return f"https://www.youtube.com/watch?v={escaped_id}"
 
 
 @dataclass
@@ -193,12 +224,16 @@ class Video:
     caption: Optional[Captions] = None
     """Caption related information (tracks and languages)."""
 
+    details: Optional[VideoDetails] = None
+    """Metadata for the video."""
+
     @classmethod
     def from_v1_json(cls, data):
         return Video(
             caption=Captions.from_v1_json(
                 safe_get(data, ["captions", "playerCaptionsTracklistRenderer"], {})
-            )
+            ),
+            details=VideoDetails.from_v1_json(data.get("videoDetails", {})),
         )
 
 
