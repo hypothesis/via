@@ -109,7 +109,7 @@ export default function VideoPlayerApp({
   const filterInputRef = useRef<HTMLInputElement>();
   const appContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const { appSize, multicolumn, transcriptWidth } =
+  const { appSize, multicolumn, transcriptWidth, videoWidth } =
     useAppLayout(appContainerRef);
   const sideBySideActive = useSideBySideLayout();
 
@@ -315,6 +315,10 @@ export default function VideoPlayerApp({
               // multicolumn layouts (NB: It will take up full width in
               // single-column)
               grow: multicolumn,
+
+              // In single-column layouts, the video may be narrower than the
+              // column width. Center the video in the column.
+              'ml-auto mr-auto': typeof videoWidth !== 'undefined',
             },
             {
               // Adapt spacing around video for different app sizes
@@ -324,6 +328,7 @@ export default function VideoPlayerApp({
               'py-2 px-4': appSize === 'xl',
             }
           )}
+          style={{ width: videoWidth ? `${videoWidth}px` : undefined }}
         >
           <YouTubeVideoPlayer
             videoId={videoId}

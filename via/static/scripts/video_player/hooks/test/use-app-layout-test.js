@@ -6,20 +6,15 @@ import { useAppLayout } from '../use-app-layout';
 
 describe('useAppLayout', () => {
   let container;
+  let lastAppLayout;
   let wrappers;
 
   // Create a fake component to mount in tests that uses the hook
   function FakeComponent() {
     const myRef = useRef();
-    const { appSize, multicolumn } = useAppLayout(myRef);
+    lastAppLayout = useAppLayout(myRef);
     return (
-      <div
-        ref={myRef}
-        data-app-size={appSize}
-        data-app-multicolumn={multicolumn}
-        style="width:100%"
-        data-testid="appContainer"
-      >
+      <div ref={myRef} style="width:100%" data-testid="appContainer">
         <button>Hi</button>
       </div>
     );
@@ -37,6 +32,7 @@ describe('useAppLayout', () => {
     document.body.append(container);
 
     wrappers = [];
+    lastAppLayout = null;
   });
 
   afterEach(() => {
@@ -52,10 +48,23 @@ describe('useAppLayout', () => {
   ].forEach(({ containerWidth, expected }) => {
     it('should provide relative app size when component is rendered', () => {
       container.style.width = `${containerWidth}px`;
-      const appContainerEl = renderComponent().find(
-        '[data-testid="appContainer"]'
-      );
-      assert.equal(appContainerEl.prop('data-app-size'), expected);
+      renderComponent();
+      assert.equal(lastAppLayout.appSize, expected);
+    });
+
+    it('should set video width in single-column layouts', () => {
+      container.style.width = `${containerWidth}px`;
+      renderComponent();
+
+      if (expected === 'sm') {
+        const expectedWidth = Math.min(
+          containerWidth,
+          (window.innerHeight / 2) * (16 / 9)
+        );
+        assert.approximately(lastAppLayout.videoWidth, expectedWidth, 1);
+      } else {
+        assert.isUndefined(lastAppLayout.videoWidth);
+      }
     });
   });
 
@@ -79,8 +88,7 @@ describe('useAppLayout', () => {
         container.style.width = `${width}px`;
         await waitFor(() => {
           wrapper.update();
-          const appContainerEl = wrapper.find('[data-testid="appContainer"]');
-          return appContainerEl.prop('data-app-size') === expected;
+          return lastAppLayout.appSize === expected;
         }, 50 /* timeout */);
       });
 
@@ -89,10 +97,7 @@ describe('useAppLayout', () => {
         const shouldBeMulticolumn = expected !== 'sm';
         await waitFor(() => {
           wrapper.update();
-          const appContainerEl = wrapper.find('[data-testid="appContainer"]');
-          return (
-            appContainerEl.prop('data-app-multicolumn') === shouldBeMulticolumn
-          );
+          return lastAppLayout.multicolumn === shouldBeMulticolumn;
         }, 50 /* timeout */);
       });
     }
