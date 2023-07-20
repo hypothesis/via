@@ -218,6 +218,25 @@ class Captions:
 
 
 @dataclass
+class PlayabilityStatus:
+    is_embeddable: bool = None
+    is_age_restricted: bool = None
+
+    @classmethod
+    def from_v1_json(cls, data):
+        return cls(
+            is_embeddable=bool(
+                safe_get(data, ["microformat", "playerMicroformatRenderer", "embed"])
+                or safe_get(data, ["playabilityStatus", "playableInEmbed"])
+            ),
+            is_age_restricted=bool(
+                safe_get(data, ["playabilityStatus", "status"]) == "LOGIN_REQUIRED"
+                and "age" in safe_get(data, ["playabilityStatus", "reason"])
+            ),
+        )
+
+
+@dataclass
 class Video:
     """Data for a video in YouTube."""
 
@@ -227,6 +246,9 @@ class Video:
     details: Optional[VideoDetails] = None
     """Metadata for the video."""
 
+    status: PlayabilityStatus = None
+    """Indicator of whether the video can be played."""
+
     @classmethod
     def from_v1_json(cls, data):
         return Video(
@@ -234,6 +256,7 @@ class Video:
                 safe_get(data, ["captions", "playerCaptionsTracklistRenderer"], {})
             ),
             details=VideoDetails.from_v1_json(data.get("videoDetails", {})),
+            status=PlayabilityStatus.from_v1_json(data),
         )
 
 

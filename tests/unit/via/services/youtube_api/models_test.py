@@ -4,7 +4,13 @@ import pytest
 from h_matchers import Any
 from pytest import param
 
-from via.services.youtube_api import Captions, CaptionTrack, Video, VideoDetails
+from via.services.youtube_api import (
+    Captions,
+    CaptionTrack,
+    PlayabilityStatus,
+    Video,
+    VideoDetails,
+)
 
 
 class TestVideoDetails:
@@ -220,30 +226,58 @@ class TestCaptions:
         return patch("via.services.youtube_api.models.CaptionTrack")
 
 
+class TestPlayabilityStatus:
+    @pytest.mark.parametrize(
+        "data,expected",
+        (
+            (
+                {
+                    "microformat": {"playerMicroformatRenderer": {"embed": Any()}},
+                    "playabilityStatus": {
+                        "status": "LOGIN_REQUIRED",
+                        "reason": "Anything blah verify age blah",
+                    },
+                },
+                PlayabilityStatus(is_embeddable=True, is_age_restricted=True),
+            ),
+            (
+                {"playabilityStatus": {"playableInEmbed": True}},
+                PlayabilityStatus(is_embeddable=True, is_age_restricted=False),
+            ),
+            ({}, PlayabilityStatus(is_embeddable=False, is_age_restricted=False)),
+        ),
+    )
+    def test_from_v1_json(self, data, expected):
+        assert PlayabilityStatus.from_v1_json(data) == expected
+
+
 class TestVideo:
-    def test_from_v1_json(self, Captions, VideoDetails):
-        video = Video.from_v1_json(
-            data={
-                "videoDetails": sentinel.video_details,
-                "captions": {"playerCaptionsTracklistRenderer": sentinel.captions},
-            },
-        )
+    def test_from_v1_json(self, Captions, VideoDetails, PlayabilityStatus):
+        data = {
+            "videoDetails": sentinel.video_details,
+            "captions": {"playerCaptionsTracklistRenderer": sentinel.captions},
+        }
+
+        video = Video.from_v1_json(data=data)
 
         Captions.from_v1_json.assert_called_once_with(sentinel.captions)
         VideoDetails.from_v1_json.assert_called_once_with(sentinel.video_details)
+        PlayabilityStatus.from_v1_json.assert_called_once_with(data)
 
         assert video == Any.instance_of(Video).with_attrs(
             {
                 "caption": Captions.from_v1_json.return_value,
                 "details": VideoDetails.from_v1_json.return_value,
+                "status": PlayabilityStatus.from_v1_json.return_value,
             }
         )
 
-    def test_from_v1_json_minimal(self, Captions, VideoDetails):
+    def test_from_v1_json_minimal(self, Captions, VideoDetails, PlayabilityStatus):
         Video.from_v1_json({})
 
         Captions.from_v1_json.assert_called_once_with({})
         VideoDetails.from_v1_json.assert_called_once_with({})
+        PlayabilityStatus.from_v1_json.assert_called_once_with({})
 
     @pytest.fixture
     def Captions(self, patch):
@@ -252,3 +286,7 @@ class TestVideo:
     @pytest.fixture
     def VideoDetails(self, patch):
         return patch("via.services.youtube_api.models.VideoDetails")
+
+    @pytest.fixture
+    def PlayabilityStatus(self, patch):
+        return patch("via.services.youtube_api.models.PlayabilityStatus")
