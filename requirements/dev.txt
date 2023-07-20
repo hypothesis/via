@@ -86,6 +86,8 @@ ipython==8.10.0
     # via pyramid-ipython
 ipython-genutils==0.2.0
     # via traitlets
+isodate==0.6.1
+    # via -r requirements/prod.txt
 jedi==0.18.0
     # via ipython
 jinja2==2.11.3
@@ -232,6 +234,7 @@ six==1.15.0
     #   -r requirements/prod.txt
     #   ecdsa
     #   google-auth
+    #   isodate
     #   jsonschema
     #   python-dateutil
 stack-data==0.6.2

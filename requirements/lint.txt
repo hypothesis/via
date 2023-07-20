@@ -145,6 +145,10 @@ iniconfig==1.1.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pytest
+isodate==0.6.1
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
 isort==5.12.0
     # via pylint
 jinja2==2.11.3
@@ -345,6 +349,7 @@ six==1.15.0
     #   -r requirements/tests.txt
     #   ecdsa
     #   google-auth
+    #   isodate
     #   jsonschema
     #   python-dateutil
 snowballstemmer==2.2.0
