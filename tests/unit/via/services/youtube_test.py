@@ -1,38 +1,25 @@
-from io import BytesIO
 from unittest.mock import create_autospec, sentinel
 
 import pytest
-from requests import Response
 
 from via.exceptions import BadURL
-from via.services.youtube import (
-    YouTubeDataAPIError,
-    YouTubeService,
-    YouTubeServiceError,
-    factory,
-)
+from via.services.youtube import YouTubeService, YouTubeServiceError, factory
 from via.services.youtube_api import YouTubeAPIClient
 
 
 class TestYouTubeService:
     @pytest.mark.parametrize(
-        "enabled,api_key,expected",
+        "enabled,api_client,expected",
         [
             (False, None, False),
             (True, None, False),
-            (False, sentinel.api_key, False),
-            (True, sentinel.api_key, True),
+            (False, sentinel.api_client, False),
+            (True, sentinel.api_client, True),
         ],
     )
-    def test_enabled(self, enabled, api_key, expected):
+    def test_enabled(self, enabled, api_client, expected):
         assert (
-            YouTubeService(
-                enabled=enabled,
-                api_client=sentinel.api_client,
-                api_key=api_key,
-                http_service=sentinel.http_service,
-            ).enabled
-            == expected
+            YouTubeService(enabled=enabled, api_client=api_client).enabled == expected
         )
 
     @pytest.mark.parametrize(
@@ -62,31 +49,6 @@ class TestYouTubeService:
     def test_get_video_id(self, url, expected_video_id, svc):
         assert expected_video_id == svc.get_video_id(url)
 
-    def test_get_video_title(self, svc, http_service):
-        response = http_service.get.return_value = Response()
-        response.raw = BytesIO(b'{"items": [{"snippet": {"title": "video_title"}}]}')
-
-        title = svc.get_video_title(sentinel.video_id)
-
-        http_service.get.assert_called_once_with(
-            "https://www.googleapis.com/youtube/v3/videos",
-            params={
-                "id": sentinel.video_id,
-                "key": sentinel.api_key,
-                "part": "snippet",
-                "maxResults": "1",
-            },
-        )
-        assert title == "video_title"
-
-    def test_get_video_title_raises_YouTubeDataAPIError(self, svc, http_service):
-        http_service.get.side_effect = RuntimeError()
-
-        with pytest.raises(YouTubeDataAPIError) as exc_info:
-            svc.get_video_title(sentinel.video_id)
-
-        assert exc_info.value.__cause__ == http_service.get.side_effect
-
     @pytest.mark.parametrize(
         "kwargs",
         (
@@ -95,9 +57,11 @@ class TestYouTubeService:
         ),
     )
     def test_get_video_info(self, svc, api_client, kwargs):
-        video = svc.get_video_info(**kwargs)
+        video = svc.get_video_info(with_captions=sentinel.with_captions, **kwargs)
 
-        api_client.get_video_info.assert_called_once_with(video_id="VIDEO_ID")
+        api_client.get_video_info.assert_called_once_with(
+            video_id="VIDEO_ID", with_captions=sentinel.with_captions
+        )
 
         assert video == api_client.get_video_info.return_value
 
@@ -111,7 +75,9 @@ class TestYouTubeService:
         )
 
         # This is called via `get_video_info`
-        api_client.get_video_info.assert_called_once_with(sentinel.video_id)
+        api_client.get_video_info.assert_called_once_with(
+            sentinel.video_id, with_captions=True
+        )
         video = api_client.get_video_info.return_value
 
         CaptionTrack.from_id.assert_called_once_with(sentinel.transcript_id)
@@ -130,32 +96,13 @@ class TestYouTubeService:
         with pytest.raises(YouTubeServiceError):
             svc.get_transcript(video_id=sentinel.video_id, transcript_id="en")
 
-    @pytest.mark.parametrize(
-        "video_id,expected_url",
-        [
-            ("x8TO-nrUtSI", "https://www.youtube.com/watch?v=x8TO-nrUtSI"),
-            # YouTube video IDs don't actually contain any characters that
-            # require escaping, but this is not guaranteed for the future.
-            # See https://webapps.stackexchange.com/questions/54443/format-for-id-of-youtube-video.
-            ("foo bar", "https://www.youtube.com/watch?v=foo+bar"),
-            ("foo/bar", "https://www.youtube.com/watch?v=foo%2Fbar"),
-        ],
-    )
-    def test_canonical_video_url(self, video_id, expected_url, svc):
-        assert expected_url == svc.canonical_video_url(video_id)
-
     @pytest.fixture
     def api_client(self):
         return create_autospec(YouTubeAPIClient, spec_set=True, instance=True)
 
     @pytest.fixture
-    def svc(self, http_service, api_client):
-        return YouTubeService(
-            enabled=True,
-            api_key=sentinel.api_key,
-            http_service=http_service,
-            api_client=api_client,
-        )
+    def svc(self, api_client):
+        return YouTubeService(enabled=True, api_client=api_client)
 
     @pytest.fixture
     def CaptionTrack(self, patch):
@@ -163,15 +110,13 @@ class TestYouTubeService:
 
 
 class TestFactory:
-    def test_it(self, YouTubeService, YouTubeAPIClient, http_service, pyramid_request):
+    def test_it(self, YouTubeService, YouTubeAPIClient, pyramid_request):
         svc = factory(sentinel.context, pyramid_request)
 
-        YouTubeAPIClient.assert_called_once_with()
+        YouTubeAPIClient.assert_called_once_with(api_key="test_youtube_api_key")
         YouTubeService.assert_called_once_with(
             enabled=True,
             api_client=YouTubeAPIClient.return_value,
-            api_key="test_youtube_api_key",
-            http_service=http_service,
         )
         assert svc == YouTubeService.return_value
 

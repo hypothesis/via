@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
-    <link rel="canonical" href="{{ video_url }}"/>
+    <title>{{ video.title }}</title>
+    <link rel="canonical" href="{{ video.url }}"/>
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     {% for url in asset_urls("video_player_css") %}
     <link rel="stylesheet" href="{{ url }}">
@@ -16,7 +16,7 @@
       {
         "client_config": {{ client_config | tojson }},
         "client_src": "{{ client_embed_url }}",
-        "video_id": "{{ video_id }}",
+        "video_id": "{{ video.id }}",
         "api": {{ api | tojson }}
       }
     </script>

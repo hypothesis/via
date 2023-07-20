@@ -18,13 +18,30 @@ class YouTubeAPIError(Exception):
 class YouTubeAPIClient:
     """A client for interacting with YouTube and manipulating related URLs."""
 
-    def __init__(self):
+    def __init__(self, api_key):
+        self._api_key = api_key
         session = requests.Session()
         # Ensure any translations that Google provides are in English
         session.headers["Accept-Language"] = "en-US"
         self._http = HTTPService(session=session)
 
-    def get_video_info(self, video_id: str) -> Video:
+    def get_video_info(self, video_id: str, with_captions: bool = False):
+        if with_captions:
+            return self._get_video_info_v1(video_id)
+
+        response = self._http.get(
+            "https://www.googleapis.com/youtube/v3/videos",
+            params={
+                "id": video_id,
+                "key": self._api_key,
+                "part": "snippet,contentDetails,status",
+                "maxResults": "1",
+            },
+        )
+
+        return Video.from_v3_json(data=response.json()["items"][0])
+
+    def _get_video_info_v1(self, video_id: str) -> Video:
         """Get information for a given YouTube video."""
 
         response = self._http.post(

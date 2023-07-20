@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 import marshmallow
 from h_matchers import Any
 from h_vialib import Configuration
@@ -6,7 +8,6 @@ from pyramid.view import view_config
 from webargs import fields
 from webargs.pyramidparser import use_kwargs
 
-from via.exceptions import BadURL
 from via.security import ViaSecurityPolicy
 from via.services import YouTubeService
 from via.services.youtube_api import CaptionTrack
@@ -39,30 +40,32 @@ def view_youtube_video(request, url, **kwargs):
     if not youtube_service.enabled:
         raise HTTPUnauthorized()
 
-    video_id = youtube_service.get_video_id(url)
-    if not video_id:
-        raise BadURL(f"Unsupported video URL: {url}", url=url)
-
-    video_url = youtube_service.canonical_video_url(video_id)
-    video_title = youtube_service.get_video_title(video_id)
-
     via_config, client_config = Configuration.extract_from_params(kwargs)
+    transcript_id = via_config.get("video", {}).get("lang")
+
+    video = youtube_service.get_video_info(
+        video_url=url, with_captions=not transcript_id
+    )
+
+    if not transcript_id:
+        if caption_track := video.caption.find_matching_track(
+            CAPTION_TRACK_PREFERENCES
+        ):
+            transcript_id = caption_track.id
+        else:
+            transcript_id = "en.a"
 
     return {
         "client_embed_url": request.registry.settings["client_embed_url"],
         "client_config": client_config,
-        "title": video_title,
-        "video_id": video_id,
-        "video_url": video_url,
+        "video": asdict(video.details),
         "api": {
             "transcript": {
                 "doc": "Get the transcript of the current video",
                 "url": request.route_url(
                     "api.youtube.transcript",
-                    video_id=video_id,
-                    transcript_id=_get_transcript_id(
-                        youtube_service, video_url, via_config
-                    ),
+                    video_id=video.details.id,
+                    transcript_id=transcript_id,
                 ),
                 "method": "GET",
                 "headers": {
@@ -71,20 +74,3 @@ def view_youtube_video(request, url, **kwargs):
             }
         },
     }
-
-
-def _get_transcript_id(youtube_service, url, via_config):
-    # Try the `via.video.lang` param first
-    if transcript_id := via_config.get("video", {}).get("lang"):
-        return transcript_id
-
-    # Then look up a transcript matching our preferences
-    video = youtube_service.get_video_info(video_url=url)
-    if video.has_captions and (
-        caption_track := video.caption.find_matching_track(CAPTION_TRACK_PREFERENCES)
-    ):
-        return caption_track.id
-
-    # This shouldn't be possible to get to if this was an option, but we need a
-    # fall-back. We could also fail here instead?
-    return "en.a"
