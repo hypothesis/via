@@ -19,6 +19,17 @@ class Thumbnail:
     height: int
 
     @classmethod
+    def from_v3_json(cls, items: dict) -> dict:
+        return {
+            key: Thumbnail(
+                url=values["url"],
+                width=values["width"],
+                height=values["height"],
+            )
+            for key, values in items.items()
+        }
+
+    @classmethod
     def from_video_id(cls, video_id) -> dict:
         # V3 Thumbnails are highly predictable, we don't actually need the info
         # from Google. The values in the V1 stuff are all redirects to these
@@ -75,6 +86,18 @@ class VideoDetails:
             channel=Channel(id=data.get("channelId"), name=data.get("author")),
             duration=duration,
             thumbnails=Thumbnail.from_video_id(data.get("videoId")),
+        )
+
+    @classmethod
+    def from_v3_json(cls, data):
+        snippet = data["snippet"]
+
+        return cls(
+            id=data["id"],
+            title=snippet["title"],
+            channel=Channel(id=snippet["channelId"], name=snippet["channelTitle"]),
+            duration=data["contentDetails"]["duration"],
+            thumbnails=Thumbnail.from_v3_json(snippet["thumbnails"]),
         )
 
     def __post_init__(self):
@@ -289,6 +312,16 @@ class PlayabilityStatus:
             ),
         )
 
+    @classmethod
+    def from_v3_json(cls, data):
+        return cls(
+            is_embeddable=safe_get(data, ["status", "embeddable"], False),
+            is_age_restricted=safe_get(
+                data, ["contentDetails", "contentRating", "ytRating"]
+            )
+            == "ytAgeRestricted",
+        )
+
 
 @dataclass
 class Video:
@@ -311,6 +344,14 @@ class Video:
             ),
             details=VideoDetails.from_v1_json(data.get("videoDetails", {})),
             status=PlayabilityStatus.from_v1_json(data),
+        )
+
+    @classmethod
+    def from_v3_json(cls, data):
+        return Video(
+            caption=None,
+            details=VideoDetails.from_v3_json(data),
+            status=PlayabilityStatus.from_v3_json(data),
         )
 
 

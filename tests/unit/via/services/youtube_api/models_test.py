@@ -45,6 +45,25 @@ class TestThumbnails:
             ),
         }
 
+    def test_from_v3_json(self):
+        thumbnails = Thumbnail.from_v3_json(
+            {
+                "medium": {
+                    "url": "https://i.ytimg.com/vi/VIDEO_ID/mqdefault.jpg",
+                    "width": 320,
+                    "height": 180,
+                },
+            }
+        )
+
+        assert thumbnails == {
+            "medium": Thumbnail(
+                url="https://i.ytimg.com/vi/VIDEO_ID/mqdefault.jpg",
+                width=320,
+                height=180,
+            ),
+        }
+
     def test_from_video_id_when_missing(self):
         assert not Thumbnail.from_video_id(None)
 
@@ -76,6 +95,33 @@ class TestVideoDetails:
     def test_from_v1_json_minimal(self):
         # Just check we don't explode.
         assert VideoDetails.from_v1_json({})
+
+    def test_from_v3_json(self, Thumbnail):
+        video_details = VideoDetails.from_v3_json(
+            {
+                "id": "VIDEO_ID",
+                "snippet": {
+                    "title": sentinel.title,
+                    "channelTitle": sentinel.channel_name,
+                    "channelId": sentinel.channel_id,
+                    "thumbnails": sentinel.thumbnails,
+                },
+                "contentDetails": {"duration": "PT14M4S"},
+                "lengthSeconds": 844,
+            }
+        )
+
+        Thumbnail.from_v3_json.assert_called_once_with(sentinel.thumbnails)
+        assert video_details == Any.instance_of(VideoDetails).with_attrs(
+            {
+                "id": "VIDEO_ID",
+                "title": sentinel.title,
+                "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+                "channel": Channel(id=sentinel.channel_id, name=sentinel.channel_name),
+                "thumbnails": Thumbnail.from_v3_json.return_value,
+                "duration": "PT14M4S",
+            }
+        )
 
     @pytest.mark.parametrize(
         "video_id,expected_url",
@@ -297,6 +343,24 @@ class TestPlayabilityStatus:
     def test_from_v1_json(self, data, expected):
         assert PlayabilityStatus.from_v1_json(data) == expected
 
+    @pytest.mark.parametrize(
+        "data,expected",
+        (
+            (
+                {
+                    "status": {"embeddable": True},
+                    "contentDetails": {
+                        "contentRating": {"ytRating": "ytAgeRestricted"}
+                    },
+                },
+                PlayabilityStatus(is_embeddable=True, is_age_restricted=True),
+            ),
+            ({}, PlayabilityStatus(is_embeddable=False, is_age_restricted=False)),
+        ),
+    )
+    def test_from_v3_json(self, data, expected):
+        assert PlayabilityStatus.from_v3_json(data) == expected
+
 
 class TestVideo:
     def test_from_v1_json(self, Captions, VideoDetails, PlayabilityStatus):
@@ -325,6 +389,20 @@ class TestVideo:
         Captions.from_v1_json.assert_called_once_with({})
         VideoDetails.from_v1_json.assert_called_once_with({})
         PlayabilityStatus.from_v1_json.assert_called_once_with({})
+
+    def test_from_v3_json(self, VideoDetails, PlayabilityStatus):
+        video = Video.from_v3_json(sentinel.data)
+
+        VideoDetails.from_v3_json.assert_called_once_with(sentinel.data)
+        PlayabilityStatus.from_v3_json.assert_called_once_with(sentinel.data)
+
+        assert video == Any.instance_of(Video).with_attrs(
+            {
+                "caption": None,
+                "details": VideoDetails.from_v3_json.return_value,
+                "status": PlayabilityStatus.from_v3_json.return_value,
+            }
+        )
 
     @pytest.fixture
     def Captions(self, patch):
