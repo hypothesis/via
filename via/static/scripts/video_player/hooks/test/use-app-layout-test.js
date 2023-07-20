@@ -14,7 +14,11 @@ describe('useAppLayout', () => {
     const myRef = useRef();
     lastAppLayout = useAppLayout(myRef);
     return (
-      <div ref={myRef} style="width:100%" data-testid="appContainer">
+      <div
+        ref={myRef}
+        style={{ width: '100%', height: '100%' }}
+        data-testid="appContainer"
+      >
         <button>Hi</button>
       </div>
     );
@@ -29,6 +33,8 @@ describe('useAppLayout', () => {
   beforeEach(() => {
     container = document.createElement('div');
     container.setAttribute('id', 'container');
+    container.style.width = '800px';
+    container.style.height = '600px';
     document.body.append(container);
 
     wrappers = [];
@@ -59,7 +65,7 @@ describe('useAppLayout', () => {
       if (expected === 'sm') {
         const expectedWidth = Math.min(
           containerWidth,
-          (window.innerHeight / 2) * (16 / 9)
+          (container.clientHeight / 2) * (16 / 9)
         );
         assert.approximately(lastAppLayout.videoWidth, expectedWidth, 1);
       } else {
