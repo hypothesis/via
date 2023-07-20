@@ -170,7 +170,7 @@ pycparser==2.21
     # via
     #   -r prod.txt
     #   cffi
-pygments==2.8.1
+pygments==2.15.0
     # via ipython
 pyjwt==2.7.0
     # via -r prod.txt
