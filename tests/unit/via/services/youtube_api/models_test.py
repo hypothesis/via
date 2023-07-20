@@ -9,13 +9,48 @@ from via.services.youtube_api import (
     CaptionTrack,
     Channel,
     PlayabilityStatus,
+    Thumbnail,
     Video,
     VideoDetails,
 )
 
 
+class TestThumbnails:
+    def test_from_video_id(self):
+        thumbnails = Thumbnail.from_video_id("VIDEO_ID")
+
+        assert thumbnails == {
+            "default": Thumbnail(
+                url="https://i.ytimg.com/vi/VIDEO_ID/default.jpg", width=120, height=90
+            ),
+            "high": Thumbnail(
+                url="https://i.ytimg.com/vi/VIDEO_ID/hqdefault.jpg",
+                width=480,
+                height=360,
+            ),
+            "maxres": Thumbnail(
+                url="https://i.ytimg.com/vi/VIDEO_ID/maxresdefault.jpg",
+                width=1280,
+                height=720,
+            ),
+            "medium": Thumbnail(
+                url="https://i.ytimg.com/vi/VIDEO_ID/mqdefault.jpg",
+                width=320,
+                height=180,
+            ),
+            "standard": Thumbnail(
+                url="https://i.ytimg.com/vi/VIDEO_ID/sddefault.jpg",
+                width=640,
+                height=480,
+            ),
+        }
+
+    def test_from_video_id_when_missing(self):
+        assert not Thumbnail.from_video_id(None)
+
+
 class TestVideoDetails:
-    def test_from_v1_json(self):
+    def test_from_v1_json(self, Thumbnail):
         video_details = VideoDetails.from_v1_json(
             {
                 "videoId": "VIDEO_ID",
@@ -25,12 +60,14 @@ class TestVideoDetails:
             }
         )
 
+        Thumbnail.from_video_id.assert_called_once_with("VIDEO_ID")
         assert video_details == Any.instance_of(VideoDetails).with_attrs(
             {
                 "id": "VIDEO_ID",
                 "title": sentinel.title,
                 "url": "https://www.youtube.com/watch?v=VIDEO_ID",
                 "channel": Channel(id=sentinel.channel_id, name=sentinel.channel_name),
+                "thumbnails": Thumbnail.from_video_id.return_value,
             }
         )
 
@@ -51,6 +88,10 @@ class TestVideoDetails:
     )
     def test_canonical_video_url(self, video_id, expected_url):
         assert expected_url == VideoDetails.canonical_video_url(video_id)
+
+    @pytest.fixture()
+    def Thumbnail(self, patch):
+        return patch("via.services.youtube_api.models.Thumbnail")
 
 
 class TestCaptionTrack:

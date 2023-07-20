@@ -1,12 +1,44 @@
 import base64
 from copy import deepcopy
 from dataclasses import dataclass, field
+from datetime import timedelta
 from itertools import zip_longest
 from operator import attrgetter
-from typing import List, Optional
+from typing import Dict, List, Optional
 from urllib.parse import quote_plus
 
 from via.services.youtube_api._nested_data import safe_get
+
+
+@dataclass
+class Thumbnail:
+    url: str
+    width: int
+    height: int
+
+    @classmethod
+    def from_video_id(cls, video_id) -> dict:
+        # V3 Thumbnails are highly predictable, we don't actually need the info
+        # from Google. The values in the V1 stuff are all redirects to these
+        # new values so the widths and heights are wrong
+
+        if not video_id:
+            return {}
+
+        return {
+            key: Thumbnail(
+                url=f"https://i.ytimg.com/vi/{video_id}/{file_name}",
+                width=width,
+                height=height,
+            )
+            for key, file_name, width, height in (
+                ("default", "default.jpg", 120, 90),
+                ("medium", "mqdefault.jpg", 320, 180),
+                ("high", "hqdefault.jpg", 480, 360),
+                ("standard", "sddefault.jpg", 640, 480),
+                ("maxres", "maxresdefault.jpg", 1280, 720),
+            )
+        }
 
 
 @dataclass
@@ -22,6 +54,7 @@ class VideoDetails:
     id: str = None  # pylint: disable=invalid-name
     title: str = None
     channel: Channel = None
+    thumbnails: Dict[str, Thumbnail] = None
     url: str = None
 
     @classmethod
@@ -32,6 +65,7 @@ class VideoDetails:
             id=data.get("videoId"),
             title=data.get("title"),
             channel=Channel(id=data.get("channelId"), name=data.get("author")),
+            thumbnails=Thumbnail.from_video_id(data.get("videoId")),
         )
 
     def __post_init__(self):
