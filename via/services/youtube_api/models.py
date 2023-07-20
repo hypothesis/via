@@ -7,6 +7,8 @@ from operator import attrgetter
 from typing import Dict, List, Optional
 from urllib.parse import quote_plus
 
+import isodate
+
 from via.services.youtube_api._nested_data import safe_get
 
 
@@ -54,6 +56,7 @@ class VideoDetails:
     id: str = None  # pylint: disable=invalid-name
     title: str = None
     channel: Channel = None
+    duration: str = None
     thumbnails: Dict[str, Thumbnail] = None
     url: str = None
 
@@ -61,10 +64,16 @@ class VideoDetails:
     def from_v1_json(cls, data):
         """Create an instance from the `videoDetails` section of JSON."""
 
+        duration = None
+        if seconds := data.get("lengthSeconds"):
+            # Convert duration to an ISO 8601 duration to match V3
+            duration = isodate.duration_isoformat(timedelta(seconds=int(seconds)))
+
         return VideoDetails(
             id=data.get("videoId"),
             title=data.get("title"),
             channel=Channel(id=data.get("channelId"), name=data.get("author")),
+            duration=duration,
             thumbnails=Thumbnail.from_video_id(data.get("videoId")),
         )
 

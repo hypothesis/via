@@ -57,6 +57,7 @@ class TestVideoDetails:
                 "title": sentinel.title,
                 "author": sentinel.channel_name,
                 "channelId": sentinel.channel_id,
+                "lengthSeconds": 844,
             }
         )
 
@@ -68,6 +69,7 @@ class TestVideoDetails:
                 "url": "https://www.youtube.com/watch?v=VIDEO_ID",
                 "channel": Channel(id=sentinel.channel_id, name=sentinel.channel_name),
                 "thumbnails": Thumbnail.from_video_id.return_value,
+                "duration": "PT14M4S",
             }
         )
 
