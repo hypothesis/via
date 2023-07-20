@@ -7,6 +7,7 @@ from pytest import param
 from via.services.youtube_api import (
     Captions,
     CaptionTrack,
+    Channel,
     PlayabilityStatus,
     Video,
     VideoDetails,
@@ -19,6 +20,8 @@ class TestVideoDetails:
             {
                 "videoId": "VIDEO_ID",
                 "title": sentinel.title,
+                "author": sentinel.channel_name,
+                "channelId": sentinel.channel_id,
             }
         )
 
@@ -27,6 +30,7 @@ class TestVideoDetails:
                 "id": "VIDEO_ID",
                 "title": sentinel.title,
                 "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+                "channel": Channel(id=sentinel.channel_id, name=sentinel.channel_name),
             }
         )
 

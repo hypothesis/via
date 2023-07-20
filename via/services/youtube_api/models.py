@@ -10,18 +10,29 @@ from via.services.youtube_api._nested_data import safe_get
 
 
 @dataclass
+class Channel:
+    id: str  # pylint: disable=invalid-name
+    name: str
+
+
+@dataclass
 class VideoDetails:
     """Metadata for the video."""
 
     id: str = None  # pylint: disable=invalid-name
     title: str = None
+    channel: Channel = None
     url: str = None
 
     @classmethod
     def from_v1_json(cls, data):
         """Create an instance from the `videoDetails` section of JSON."""
 
-        return VideoDetails(id=data.get("videoId"), title=data.get("title"))
+        return VideoDetails(
+            id=data.get("videoId"),
+            title=data.get("title"),
+            channel=Channel(id=data.get("channelId"), name=data.get("author")),
+        )
 
     def __post_init__(self):
         if self.id:
