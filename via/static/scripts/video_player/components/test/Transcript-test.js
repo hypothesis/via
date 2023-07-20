@@ -4,6 +4,8 @@ import { mount } from 'enzyme';
 import Transcript from '../Transcript';
 
 describe('Transcript', () => {
+  let container;
+
   const transcript = {
     segments: [
       {
@@ -20,6 +22,15 @@ describe('Transcript', () => {
       },
     ],
   };
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.append(container);
+  });
+
+  afterEach(() => {
+    container.remove();
+  });
 
   it('renders segments', () => {
     const wrapper = mount(
@@ -76,7 +87,7 @@ describe('Transcript', () => {
           currentTime={5}
           onSelectSegment={selectSegment}
         />,
-        { attachTo: document.body }
+        { attachTo: container }
       );
       const timestamp = wrapper.find('[data-testid="segment"]').at(1).find('p');
 
@@ -110,7 +121,7 @@ describe('Transcript', () => {
     try {
       wrapper = mount(<Transcript transcript={transcript} currentTime={5} />, {
         // Render into document so transcript has a non-zero height.
-        attachTo: document.body,
+        attachTo: container,
       });
       const scrollContainer = wrapper.find(
         'div[data-testid="scroll-container"]'
@@ -148,7 +159,7 @@ describe('Transcript', () => {
     const wrapper = mount(
       <Transcript transcript={transcript} currentTime={5} />,
       {
-        attachTo: document.body,
+        attachTo: container,
       }
     );
     try {
@@ -168,24 +179,89 @@ describe('Transcript', () => {
     }
   });
 
-  it("scrolls transcript when controller's `scrollToCurrentSegment` method is called", () => {
-    const controlsRef = { current: null };
-    const wrapper = mount(
-      <Transcript
-        controlsRef={controlsRef}
-        transcript={transcript}
-        currentTime={5}
-      />
-    );
-    const scrollContainer = wrapper.find('div[data-testid="scroll-container"]');
-    const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
+  describe('scrolling methods', () => {
+    let wrappers;
 
-    assert.ok(controlsRef.current);
-    controlsRef.current.scrollToCurrentSegment();
+    const longTranscript = {
+      segments: Array(20)
+        .fill(0)
+        .map((_, i) => ({
+          start: i * 10,
+          text: `Text of segment ${i}`,
+        })),
+    };
 
-    assert.calledWith(scrollTo, {
-      left: 0,
-      top: 0,
+    function renderTranscript() {
+      const controlsRef = { current: null };
+      const wrapper = mount(
+        <Transcript
+          controlsRef={controlsRef}
+          transcript={longTranscript}
+          currentTime={50}
+        />,
+        { attachTo: container }
+      );
+      const scrollContainer = wrapper.find(
+        'div[data-testid="scroll-container"]'
+      );
+      const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
+
+      wrappers.push(wrapper);
+
+      return { controlsRef, scrollContainer, scrollTo, wrapper };
+    }
+
+    beforeEach(() => {
+      wrappers = [];
+      container.style.height = '400px';
+    });
+
+    afterEach(() => {
+      wrappers.forEach(w => w.unmount());
+    });
+
+    it('scrolls to current segment when `scrollToCurrentSegment` is called', () => {
+      const { controlsRef, scrollTo, scrollContainer, wrapper } =
+        renderTranscript();
+
+      assert.ok(controlsRef.current);
+      controlsRef.current.scrollToCurrentSegment();
+
+      const currentSegment = wrapper.find('[data-testid="segment"]').at(5);
+      assert.isTrue(currentSegment.prop('data-is-current'));
+      assert.calledOnce(scrollTo);
+
+      // Calculate expected position that puts segment towards, but not at,
+      // the top of the container.
+      const expectedTop =
+        currentSegment.getDOMNode().offsetTop -
+        scrollContainer.getDOMNode().clientHeight * (1 / 4);
+      const actualTop = scrollTo.args[0][0].top;
+      assert.approximately(actualTop, expectedTop, 5);
+    });
+
+    it('scrolls to first segment when `scrollToTop` is called', () => {
+      const { controlsRef, scrollTo } = renderTranscript();
+
+      assert.ok(controlsRef.current);
+      controlsRef.current.scrollToTop();
+
+      assert.calledWith(scrollTo, {
+        left: 0,
+        top: 0,
+      });
+    });
+
+    it('scrolls to last segment when `scrollToTop` is called', () => {
+      const { controlsRef, scrollContainer, scrollTo } = renderTranscript();
+
+      assert.ok(controlsRef.current);
+      controlsRef.current.scrollToBottom();
+
+      assert.calledWith(scrollTo, {
+        left: 0,
+        top: scrollContainer.getDOMNode().scrollHeight,
+      });
     });
   });
 

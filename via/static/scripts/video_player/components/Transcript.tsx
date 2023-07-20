@@ -24,6 +24,9 @@ export type TranscriptControls = {
    * is visible.
    */
   scrollToCurrentSegment: () => void;
+
+  scrollToTop: () => void;
+  scrollToBottom: () => void;
 };
 
 export type TranscriptProps = {
@@ -312,6 +315,12 @@ export default function Transcript({
     controlsRef || { current: null },
     () => ({
       scrollToCurrentSegment,
+      scrollToTop: () => scrollRef.current!.scrollTo({ left: 0, top: 0 }),
+      scrollToBottom: () =>
+        scrollRef.current!.scrollTo({
+          left: 0,
+          top: scrollRef.current!.scrollHeight,
+        }),
     }),
     [scrollToCurrentSegment]
   );
