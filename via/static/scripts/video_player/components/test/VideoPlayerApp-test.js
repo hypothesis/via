@@ -194,7 +194,7 @@ describe('VideoPlayerApp', () => {
     });
 
     function findCopyButton(wrapper) {
-      return wrapper.find('button[data-testid="copy-button"]');
+      return wrapper.find('CopyButton');
     }
 
     function findSyncButton(wrapper) {
@@ -204,12 +204,12 @@ describe('VideoPlayerApp', () => {
     it('disables "Copy" and "Sync" buttons while transcript is loading', async () => {
       const wrapper = createVideoPlayerUsingAPI();
 
-      assert.isTrue(findCopyButton(wrapper).prop('disabled'));
+      assert.isNull(findCopyButton(wrapper).prop('transcript'));
       assert.isTrue(findSyncButton(wrapper).prop('disabled'));
 
       await waitForElement(wrapper, 'Transcript');
 
-      assert.isFalse(findCopyButton(wrapper).prop('disabled'));
+      assert.isNotNull(findCopyButton(wrapper).prop('transcript'));
       assert.isFalse(findSyncButton(wrapper).prop('disabled'));
     });
 
@@ -316,53 +316,6 @@ describe('VideoPlayerApp', () => {
     });
     wrapper.update();
     assert.equal(playButton.text().trim(), 'Play');
-  });
-
-  it('copies transcript to clipboard when "Copy" button is pressed', async () => {
-    const fakeClipboard = {
-      writeText: sinon.stub().resolves(),
-    };
-    const clipboardStub = sinon
-      .stub(navigator, 'clipboard')
-      .get(() => fakeClipboard);
-
-    try {
-      const wrapper = createVideoPlayer();
-
-      await wrapper.find('button[data-testid="copy-button"]').prop('onClick')();
-
-      assert.calledWith(fakeClipboard.writeText, 'Hello\nWorld');
-    } finally {
-      clipboardStub.restore();
-    }
-  });
-
-  it('logs a warning if accessing clipboard fails', async () => {
-    const copyError = new Error('Not allowed');
-    const fakeClipboard = {
-      writeText: sinon.stub().rejects(copyError),
-    };
-    const clipboardStub = sinon
-      .stub(navigator, 'clipboard')
-      .get(() => fakeClipboard);
-    const warnStub = sinon.stub(console, 'warn');
-
-    try {
-      const wrapper = createVideoPlayer();
-
-      try {
-        await wrapper
-          .find('button[data-testid="copy-button"]')
-          .prop('onClick')();
-      } catch {
-        /* ignored */
-      }
-
-      assert.calledWith(console.warn, 'Failed to copy transcript', copyError);
-    } finally {
-      clipboardStub.restore();
-      warnStub.restore();
-    }
   });
 
   it('syncs timestamp from player to transcript', () => {
