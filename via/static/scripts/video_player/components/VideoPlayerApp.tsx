@@ -1,7 +1,6 @@
 import {
   Button,
   Checkbox,
-  CopyIcon,
   IconButton,
   LogoIcon,
   Spinner,
@@ -21,7 +20,8 @@ import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
-import { formatTranscript, mergeSegments } from '../utils/transcript';
+import { mergeSegments } from '../utils/transcript';
+import CopyButton from './CopyButton';
 import FilterInput from './FilterInput';
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
@@ -253,18 +253,6 @@ export default function VideoPlayerApp({
     };
   }, [syncTranscript]);
 
-  const copyTranscript = async () => {
-    const formattedTranscript = isTranscript(transcript)
-      ? formatTranscript(transcript.segments)
-      : '';
-    try {
-      await navigator.clipboard.writeText(formattedTranscript);
-    } catch (err) {
-      // TODO: Replace this with a toast message in the UI.
-      console.warn('Failed to copy transcript', err);
-    }
-  };
-
   const bucketContainerId = 'bucket-container';
   const prevSideBySideActive = useRef(sideBySideActive);
   prevSideBySideActive.current = sideBySideActive;
@@ -412,14 +400,8 @@ export default function VideoPlayerApp({
               size="custom"
               classes="p-2"
             />
-            <IconButton
-              onClick={copyTranscript}
-              data-testid="copy-button"
-              disabled={!isTranscript(transcript)}
-              title="Copy transcript"
-              icon={CopyIcon}
-              size="custom"
-              classes="p-2"
+            <CopyButton
+              transcript={isTranscript(transcript) ? transcript : null}
             />
           </div>
           <div
