@@ -87,7 +87,8 @@ type TranscriptSegmentProps = {
 
   isCurrent: boolean;
   onSelect: () => void;
-  time: number;
+  startTime: number;
+  endTime?: number;
   text: string;
 };
 
@@ -101,7 +102,8 @@ function TranscriptSegment({
   matches,
   isCurrent,
   onSelect,
-  time,
+  startTime,
+  endTime,
   text,
 }: TranscriptSegmentProps) {
   const contentRef = useRef<HTMLParagraphElement>(null);
@@ -135,7 +137,7 @@ function TranscriptSegment({
 
   const hadSelectionOnPointerDown = useRef(false);
 
-  const timestamp = formatTimestamp(time);
+  const timestamp = formatTimestamp(startTime);
 
   return (
     <li
@@ -203,6 +205,15 @@ function TranscriptSegment({
           'pr-3'
         )}
         data-testid="transcript-text"
+        // Add attributes used by the client to create media time selectors.
+        //
+        // The precision of these is currently not as good as it could be
+        // because of the grouping of segments from the transcript returned
+        // by the API. We could improve this in future by rendering each
+        // segment of the original transcript as a separate element within this
+        // paragraph.
+        data-time-start={startTime}
+        data-time-end={endTime}
         ref={contentRef}
         // We have a "click" handler here, but don't set a role because
         // this is a secondary way to focus the transcript. The timestamp
@@ -385,22 +396,30 @@ export default function Transcript({
               'bg-grey-3/30'
             )}
           >
-            {transcript.segments.map((segment, index) => (
-              <TranscriptSegment
-                key={index}
-                hidden={
-                  filterMatches
-                    ? !filterMatches.has(index) && index !== currentIndex
-                    : false
-                }
-                highlight={highlight}
-                isCurrent={index === currentIndex}
-                matches={filterMatches?.get(index)}
-                onSelect={() => onSelectSegment?.(segment)}
-                time={segment.start}
-                text={segment.text}
-              />
-            ))}
+            {transcript.segments.map((segment, index, segments) => {
+              const nextSegment =
+                index < segments.length - 1 ? segments[index + 1] : undefined;
+
+              return (
+                <TranscriptSegment
+                  key={index}
+                  hidden={
+                    filterMatches
+                      ? !filterMatches.has(index) && index !== currentIndex
+                      : false
+                  }
+                  highlight={highlight}
+                  isCurrent={index === currentIndex}
+                  matches={filterMatches?.get(index)}
+                  onSelect={() => onSelectSegment?.(segment)}
+                  startTime={segment.start}
+                  // We are currently missing an end time for the last segment
+                  // because we don't know the duration of the video here.
+                  endTime={nextSegment ? nextSegment.start : undefined}
+                  text={segment.text}
+                />
+              );
+            })}
           </ul>
           {children}
         </div>
