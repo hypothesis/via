@@ -53,6 +53,8 @@ def view_youtube_video(request, url, **kwargs):
         ):
             transcript_id = caption_track.id
         else:
+            # This should probably be an error. This won't work. If we were
+            # going to find this transcript we would have
             transcript_id = "en.a"
 
     return {
