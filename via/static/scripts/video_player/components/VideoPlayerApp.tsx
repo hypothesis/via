@@ -324,12 +324,11 @@ export default function VideoPlayerApp({
         <div
           data-testid="embedded-video-container"
           className={classnames(
-            'flex flex-col',
             {
               // Allow video to grow with available horizontal space in
               // multicolumn layouts (NB: It will take up full width in
               // single-column)
-              grow: multicolumn,
+              'flex flex-col grow': multicolumn,
             },
             {
               // Adapt spacing around video for different app sizes
@@ -340,13 +339,25 @@ export default function VideoPlayerApp({
             }
           )}
         >
-          <YouTubeVideoPlayer
-            videoId={videoId}
-            play={playing}
-            time={timestamp}
-            onPlayingChanged={setPlaying}
-            onTimeChanged={setTimestamp}
-          />
+          <div
+            className={classnames({
+              // Limit height of video in single-column views, to leave space
+              // for the transcript. We have to do this by restricting the
+              // width, assuming a 16:9 aspect ratio, rather than the height,
+              // because the video player uses an `AspectRatio` container that
+              // sets the height based on the width. Center the video if it
+              // doesn't fill the full width.
+              'max-w-[calc(40vh*16/9)] mx-auto': !multicolumn,
+            })}
+          >
+            <YouTubeVideoPlayer
+              videoId={videoId}
+              play={playing}
+              time={timestamp}
+              onPlayingChanged={setPlaying}
+              onTimeChanged={setTimestamp}
+            />
+          </div>
         </div>
         <div
           data-testid="transcript-and-controls-container"
