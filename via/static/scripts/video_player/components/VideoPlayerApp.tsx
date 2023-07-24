@@ -218,6 +218,12 @@ export default function VideoPlayerApp({
     pendingScrollToHighlight.current = false;
   }, [isFilterEmpty, syncTranscript]);
 
+  // Dispatch dummy scroll event when filter changes, to update bucket bar to
+  // reflect changes in visibility and position of highlights.
+  useEffect(() => {
+    document.body.dispatchEvent(new Event('scroll'));
+  }, [trimmedFilter]);
+
   // If we transition from paused to playing while autoscroll is active,
   // immediately scroll the current segment into view. Without this, the
   // transcript will not scroll until playback reaches the next segment.

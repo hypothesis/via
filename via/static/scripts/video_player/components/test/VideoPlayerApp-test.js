@@ -445,6 +445,16 @@ describe('VideoPlayerApp', () => {
     assert.equal(transcript.prop('filter'), 'foobar');
   });
 
+  it('dispatches dummy scroll event when filter changes, to update bucket bar', () => {
+    const wrapper = createVideoPlayer();
+    const onScroll = sinon.stub();
+    document.body.addEventListener('scroll', onScroll, { once: true });
+
+    setFilter(wrapper, 'foobar');
+
+    assert.calledOnce(onScroll);
+  });
+
   it('clears filter when Hypothesis client scrolls to a highlight', async () => {
     const wrapper = createVideoPlayer();
     const transcriptController = wrapper.find('Transcript').prop('controlsRef');
