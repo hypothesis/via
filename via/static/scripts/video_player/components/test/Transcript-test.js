@@ -39,14 +39,39 @@ describe('Transcript', () => {
     const segments = wrapper.find('[data-testid="segment"]');
     assert.equal(segments.length, 3);
 
-    assert.equal(segments.at(0).text(), 'Hello and welcome ');
-    assert.isTrue(segments.at(0).prop('data-is-current'));
+    const renderedSegments = [];
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments.at(i);
+      const start = segment.find('p').prop('data-time-start');
+      const end = segment.find('p').prop('data-time-end');
+      renderedSegments.push({
+        text: segment.text(),
+        isCurrent: segment.prop('data-is-current'),
+        startTime: start ? parseFloat(start) : undefined,
+        endTime: end ? parseFloat(end) : undefined,
+      });
+    }
 
-    assert.equal(segments.at(1).text(), 'To this video about ');
-    assert.isFalse(segments.at(1).prop('data-is-current'));
-
-    assert.equal(segments.at(2).text(), 'how to use Hypothesis ');
-    assert.isFalse(segments.at(2).prop('data-is-current'));
+    assert.deepEqual(renderedSegments, [
+      {
+        text: 'Hello and welcome ',
+        isCurrent: true,
+        startTime: 5,
+        endTime: 10,
+      },
+      {
+        text: 'To this video about ',
+        isCurrent: false,
+        startTime: 10,
+        endTime: 20,
+      },
+      {
+        text: 'how to use Hypothesis ',
+        isCurrent: false,
+        startTime: 20,
+        endTime: undefined,
+      },
+    ]);
   });
 
   it('renders segments if none is current', () => {
