@@ -1,5 +1,6 @@
 import { sampleTranscript } from '../../sample-transcript';
 import {
+  clipDurations,
   filterTranscript,
   formatTranscript,
   mergeSegments,
@@ -38,9 +39,55 @@ you saw a playstation 1 game if you were
   });
 });
 
+describe('clipDurations', () => {
+  it('clips durations so that segments do not overlap', () => {
+    const segments = [
+      {
+        start: 1,
+        duration: 3,
+        text: 'One',
+      },
+      {
+        start: 4,
+        duration: 10,
+        text: 'One',
+      },
+      {
+        start: 7,
+        duration: 5,
+        text: 'One',
+      },
+    ];
+
+    const clipped = clipDurations(segments);
+
+    assert.deepEqual(clipped, [
+      {
+        start: 1,
+        duration: 3,
+        text: 'One',
+      },
+      {
+        start: 4,
+        duration: 3,
+        text: 'One',
+      },
+      {
+        start: 7,
+        duration: 5,
+        text: 'One',
+      },
+    ]);
+  });
+});
+
 describe('mergeSegments', () => {
   const captions = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'];
-  const segments = captions.map((text, index) => ({ start: index + 1, text }));
+  const segments = captions.map((text, index) => ({
+    start: index + 1,
+    duration: 1,
+    text,
+  }));
 
   [
     {
@@ -50,18 +97,18 @@ describe('mergeSegments', () => {
     {
       groupSize: 2,
       expected: [
-        { start: 1, text: 'One Two' },
-        { start: 3, text: 'Three Four' },
-        { start: 5, text: 'Five Six' },
-        { start: 7, text: 'Seven' },
+        { start: 1, duration: 2, text: 'One Two' },
+        { start: 3, duration: 2, text: 'Three Four' },
+        { start: 5, duration: 2, text: 'Five Six' },
+        { start: 7, duration: 1, text: 'Seven' },
       ],
     },
     {
       groupSize: 3,
       expected: [
-        { start: 1, text: 'One Two Three' },
-        { start: 4, text: 'Four Five Six' },
-        { start: 7, text: 'Seven' },
+        { start: 1, duration: 3, text: 'One Two Three' },
+        { start: 4, duration: 3, text: 'Four Five Six' },
+        { start: 7, duration: 1, text: 'Seven' },
       ],
     },
   ].forEach(({ groupSize, expected }) => {

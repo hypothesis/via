@@ -10,14 +10,17 @@ describe('Transcript', () => {
     segments: [
       {
         start: 5,
+        duration: 5,
         text: 'Hello and welcome',
       },
       {
         start: 10,
+        duration: 10,
         text: 'To this video about',
       },
       {
         start: 20,
+        duration: 4,
         text: 'how to use Hypothesis',
       },
     ],
@@ -69,7 +72,7 @@ describe('Transcript', () => {
         text: 'how to use Hypothesis ',
         isCurrent: false,
         startTime: 20,
-        endTime: undefined,
+        endTime: 24,
       },
     ]);
   });

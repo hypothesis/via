@@ -28,10 +28,12 @@ export const transcriptsAPIResponse = {
         {
           text: '[Music]',
           start: 0.0,
+          duration: 7.52,
         },
         {
           text: 'how many of you remember the first time',
           start: 5.6,
+          duration: 4.72,
         },
       ],
     },
