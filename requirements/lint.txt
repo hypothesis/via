@@ -29,7 +29,7 @@ cachetools==4.2.2
     #   -r functests.txt
     #   -r tests.txt
     #   google-auth
-certifi==2022.12.7
+certifi==2023.7.22
     # via
     #   -r functests.txt
     #   -r tests.txt
