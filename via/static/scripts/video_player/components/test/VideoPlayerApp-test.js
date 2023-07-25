@@ -9,6 +9,7 @@ import {
 } from '../../../test-util/video-player-fixtures';
 import { delay, waitForElement } from '../../../test-util/wait';
 import { APIError } from '../../utils/api';
+import { clipDurations } from '../../utils/transcript';
 import VideoPlayerApp, { $imports } from '../VideoPlayerApp';
 
 describe('VideoPlayerApp', () => {
@@ -18,10 +19,15 @@ describe('VideoPlayerApp', () => {
     segments: [
       {
         start: 0,
+        // nb. Duration is "too long" here, matching what we might get back
+        // from YouTube. It should be normalized before passing to the
+        // Transcript component.
+        duration: 10,
         text: 'Hello',
       },
       {
         start: 5,
+        duration: 7,
         text: 'World',
       },
     ],
@@ -193,10 +199,14 @@ describe('VideoPlayerApp', () => {
 
       // Transcript should be displayed when loading completes.
       const transcript = await waitForElement(wrapper, 'Transcript');
-      assert.equal(
-        transcript.prop('transcript'),
-        transcriptsAPIResponse.data.attributes
-      );
+
+      const expectedTranscript = {
+        ...transcriptsAPIResponse.data.attributes,
+        segments: clipDurations(
+          transcriptsAPIResponse.data.attributes.segments
+        ),
+      };
+      assert.deepEqual(transcript.prop('transcript'), expectedTranscript);
     });
 
     function findCopyButton(wrapper) {

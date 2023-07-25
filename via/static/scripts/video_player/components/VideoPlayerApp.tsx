@@ -20,7 +20,7 @@ import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
 import type { TranscriptData } from '../utils/transcript';
-import { mergeSegments } from '../utils/transcript';
+import { clipDurations, mergeSegments } from '../utils/transcript';
 import CopyButton from './CopyButton';
 import FilterInput from './FilterInput';
 import HypothesisClient from './HypothesisClient';
@@ -143,6 +143,9 @@ export default function VideoPlayerApp({
     callAPI<JSONAPIObject<TranscriptData>>(transcriptSource)
       .then(response => {
         const transcript = response.data.attributes;
+
+        // Ensure segments do not overlap.
+        transcript.segments = clipDurations(transcript.segments);
 
         // Group segments together for better readability.
         transcript.segments = mergeSegments(transcript.segments, 3);

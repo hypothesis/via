@@ -5,6 +5,18 @@ export type Segment = {
    */
   start: number;
 
+  /**
+   * How long this segment lasts.
+   *
+   * Note that for transcripts from some services (eg. YouTube), `start +
+   * duration` for a segment may be greater than the `start` value of the next
+   * segment. This is because the `duration` field represents how long the
+   * subtitle should be presented on screen, rather than how long the
+   * corresponding audio actually lasts. Segments can be "clipped" using
+   * {@link clipDurations} to ensure they don't overlap.
+   */
+  duration: number;
+
   /** Text of this part of the video. */
   text: string;
 };
@@ -47,6 +59,21 @@ function findMatches(text: string, query: string): Array<MatchOffset> {
 }
 
 /**
+ * Clip the `duration` field of segments so that segment time ranges do not
+ * overlap.
+ */
+export function clipDurations(transcript: Segment[]): Segment[] {
+  return transcript.map((segment, index) => {
+    const { start, text } = segment;
+    const nextSegment: Segment | undefined = transcript[index + 1];
+    const duration = nextSegment
+      ? Math.min(segment.duration, nextSegment.start - start)
+      : segment.duration;
+    return { start, duration, text };
+  });
+}
+
+/**
  * Filter a transcript against a user-supplied query.
  *
  * Returns a map of indices of matching segments to locations of match within
@@ -84,7 +111,9 @@ export function formatTranscript(transcript: Segment[]): string {
 export function mergeSegments(segments: Segment[], n: number): Segment[] {
   return segments.reduce((merged, segment, idx) => {
     if (idx % n !== 0) {
-      merged[merged.length - 1].text += ' ' + segment.text;
+      const last = merged[merged.length - 1];
+      last.text += ' ' + segment.text;
+      last.duration = segment.start + segment.duration - last.start;
     } else {
       // Copy segment so we can modify in subsequent iterations.
       merged.push({ ...segment });

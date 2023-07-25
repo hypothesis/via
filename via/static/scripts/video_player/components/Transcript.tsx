@@ -87,9 +87,7 @@ type TranscriptSegmentProps = {
 
   isCurrent: boolean;
   onSelect: () => void;
-  startTime: number;
-  endTime?: number;
-  text: string;
+  segment: Segment;
 };
 
 function hasSelection() {
@@ -102,9 +100,7 @@ function TranscriptSegment({
   matches,
   isCurrent,
   onSelect,
-  startTime,
-  endTime,
-  text,
+  segment,
 }: TranscriptSegmentProps) {
   const contentRef = useRef<HTMLParagraphElement>(null);
 
@@ -136,8 +132,7 @@ function TranscriptSegment({
   }, [highlight, matches]);
 
   const hadSelectionOnPointerDown = useRef(false);
-
-  const timestamp = formatTimestamp(startTime);
+  const timestamp = formatTimestamp(segment.start);
 
   return (
     <li
@@ -212,8 +207,8 @@ function TranscriptSegment({
         // by the API. We could improve this in future by rendering each
         // segment of the original transcript as a separate element within this
         // paragraph.
-        data-time-start={startTime}
-        data-time-end={endTime}
+        data-time-start={segment.start}
+        data-time-end={segment.start + segment.duration}
         ref={contentRef}
         // We have a "click" handler here, but don't set a role because
         // this is a secondary way to focus the transcript. The timestamp
@@ -230,7 +225,7 @@ function TranscriptSegment({
           }
         }}
       >
-        {text}
+        {segment.text}
         {
           // Add a trailing space at the end of each segment to avoid the last
           // word of a segment being joined with the first word of the next
@@ -396,30 +391,21 @@ export default function Transcript({
               'bg-grey-3/30'
             )}
           >
-            {transcript.segments.map((segment, index, segments) => {
-              const nextSegment =
-                index < segments.length - 1 ? segments[index + 1] : undefined;
-
-              return (
-                <TranscriptSegment
-                  key={index}
-                  hidden={
-                    filterMatches
-                      ? !filterMatches.has(index) && index !== currentIndex
-                      : false
-                  }
-                  highlight={highlight}
-                  isCurrent={index === currentIndex}
-                  matches={filterMatches?.get(index)}
-                  onSelect={() => onSelectSegment?.(segment)}
-                  startTime={segment.start}
-                  // We are currently missing an end time for the last segment
-                  // because we don't know the duration of the video here.
-                  endTime={nextSegment?.start}
-                  text={segment.text}
-                />
-              );
-            })}
+            {transcript.segments.map((segment, index) => (
+              <TranscriptSegment
+                key={index}
+                hidden={
+                  filterMatches
+                    ? !filterMatches.has(index) && index !== currentIndex
+                    : false
+                }
+                highlight={highlight}
+                isCurrent={index === currentIndex}
+                matches={filterMatches?.get(index)}
+                onSelect={() => onSelectSegment?.(segment)}
+                segment={segment}
+              />
+            ))}
           </ul>
           {children}
         </div>
