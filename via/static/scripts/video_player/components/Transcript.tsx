@@ -415,7 +415,7 @@ export default function Transcript({
                   startTime={segment.start}
                   // We are currently missing an end time for the last segment
                   // because we don't know the duration of the video here.
-                  endTime={nextSegment ? nextSegment.start : undefined}
+                  endTime={nextSegment?.start}
                   text={segment.text}
                 />
               );
