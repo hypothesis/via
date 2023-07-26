@@ -1,8 +1,6 @@
-import alembic.command
-import alembic.config
+import sqlalchemy
 import zope.sqlalchemy
-from sqlalchemy import MetaData, create_engine, text
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, Session
 
 
@@ -18,23 +16,13 @@ class Base(MappedAsDataclass, DeclarativeBase):
     )
 
 
-def stamp(engine):  # pragma: no cover
-    """If the DB isn't already stamped then stamp it with the latest revision."""
-    stamped = False
-
-    with engine.connect() as connection:
-        try:
-            if connection.execute(text("select * from alembic_version")).first():
-                stamped = True
-        except ProgrammingError:
-            pass
-
-    if not stamped:
-        alembic.command.stamp(alembic.config.Config("conf/alembic.ini"), "head")
+def create_engine(settings):  # pragma: no cover
+    """Return a SQLAlchemy engine."""
+    return sqlalchemy.create_engine(settings["database_url"])
 
 
 def includeme(config):  # pragma: no cover
-    engine = create_engine(config.registry.settings["database_url"])
+    engine = create_engine(config.registry.settings)
 
     def db_session(request):
         """Return the SQLAlchemy session for the given request."""
@@ -46,11 +34,6 @@ def includeme(config):  # pragma: no cover
         zope.sqlalchemy.register(session, transaction_manager=request.tm)
 
         return session
-
-    if config.registry.settings.get("dev"):
-        # Create the database tables if they don't already exist.
-        Base.metadata.create_all(engine)
-        stamp(engine)
 
     # Make the SQLAlchemy session available as `request.db`.
     # `reify=True` means it'll create only one session per request.
