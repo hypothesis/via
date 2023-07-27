@@ -1,7 +1,8 @@
+import type { TransitionComponent } from '@hypothesis/frontend-shared';
 import { Callout } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import type { ComponentChildren } from 'preact';
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useRef, useState } from 'preact/hooks';
 
 export type ToastMessage = {
   id: string;
@@ -54,6 +55,45 @@ function ToastMessageItem({ message, onDismiss }: ToastMessageItemProps) {
   );
 }
 
+const BaseToastMessageTransition: TransitionComponent = ({
+  direction = 'in',
+  onTransitionEnd,
+  children,
+}) => {
+  const isDismissed = direction === 'out';
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleAnimation = (e: AnimationEvent) => {
+    // Ignore non-relevant animations:
+    // * Happening on children elements
+    // * Animations which are not relevant for toast messages getting "in" or "out"
+    if (
+      e.target !== containerRef.current ||
+      !['slide-in-from-right', 'fade-in', 'fade-out'].includes(e.animationName)
+    ) {
+      return;
+    }
+
+    onTransitionEnd?.(direction);
+  };
+
+  return (
+    <div
+      onAnimationEnd={handleAnimation}
+      ref={containerRef}
+      className={classnames('relative w-full container', {
+        // Only ever slide-from-right if motion-safe is preferred
+        'lg:motion-safe:animate-slide-in-from-right animate-fade-in':
+          !isDismissed,
+        // Only ever fade-in if motion-reduction is preferred
+        'motion-reduce:animate-fade-in': !isDismissed,
+        'animate-fade-out': isDismissed,
+      })}
+    >
+      {children}
+    </div>
+  );
+};
+
 export type ToastMessagesProps = {
   messages: ToastMessage[];
   onMessageDismiss: (id: string) => void;
@@ -71,17 +111,8 @@ export default function ToastMessages({
   const scheduledMessages = useRef(new Set<string>());
 
   const dismissMessage = useCallback(
-    (id: string) => {
-      if (dismissedMessages.includes(id)) {
-        return;
-      }
-
-      // Track that this message has been dismissed, and once animation ends,
-      // actually remove it
-      setDismissedMessages(ids => [...ids, id]);
-      setTimeout(() => onMessageDismiss(id), 500);
-    },
-    [onMessageDismiss, dismissedMessages]
+    (id: string) => setDismissedMessages(ids => [...ids, id]),
+    []
   );
   const scheduleMessageDismiss = useCallback(
     (id: string) => {
@@ -100,14 +131,6 @@ export default function ToastMessages({
     [dismissMessage]
   );
 
-  useEffect(() => {
-    messages.forEach(({ autoDismiss = true, id }) => {
-      if (autoDismiss) {
-        scheduleMessageDismiss(id);
-      }
-    });
-  }, [messages, scheduleMessageDismiss]);
-
   // The `ul` containing any toast messages is absolute-positioned and the full
   // width of the viewport. Each toast message `li` has its position and width
   // constrained by `container` configuration in tailwind.
@@ -121,7 +144,7 @@ export default function ToastMessages({
         const isDismissed = dismissedMessages.includes(message.id);
         return (
           <li
-            className={classnames('relative w-full container', {
+            className={classnames({
               // Add a bottom margin to visible messages only. Typically, we'd
               // use a `space-y-2` class on the parent to space children.
               // Doing that here could cause an undesired top margin on
@@ -129,17 +152,26 @@ export default function ToastMessages({
               // visually-hidden messages before it.
               // See https://tailwindcss.com/docs/space#limitations
               'mb-2': !message.visuallyHidden,
-              // Slide in from right in narrow viewports; fade in larger
-              // viewports to toast message isn't flying too far
-              'lg:motion-safe:animate-slide-in-from-right animate-fade-in':
-                !isDismissed,
-              // Only ever fade in if motion-reduction is preferred
-              'motion-reduce:animate-fade-in': !isDismissed,
-              'animate-fade-out': isDismissed,
             })}
             key={message.id}
           >
-            <ToastMessageItem message={message} onDismiss={dismissMessage} />
+            <BaseToastMessageTransition
+              direction={isDismissed ? 'out' : 'in'}
+              onTransitionEnd={direction => {
+                if (direction === 'in') {
+                  if (message.autoDismiss ?? true) {
+                    scheduleMessageDismiss(message.id);
+                  }
+                } else {
+                  onMessageDismiss(message.id);
+                  setDismissedMessages(ids =>
+                    ids.filter(id => id !== message.id)
+                  );
+                }
+              }}
+            >
+              <ToastMessageItem message={message} onDismiss={dismissMessage} />
+            </BaseToastMessageTransition>
           </li>
         );
       })}
