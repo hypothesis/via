@@ -10,6 +10,7 @@ declare class Highlight {
 
 interface HighlightsRegistry {
   delete(name: string): void;
+  get(name: string): Highlight | undefined;
   set(name: string, highlight: Highlight): void;
 }
 

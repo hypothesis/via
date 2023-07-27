@@ -10,6 +10,7 @@ import {
 } from 'preact/hooks';
 
 import { useScrollAnchor } from '../hooks/use-scroll-anchor';
+import { TextHighlighter } from '../utils/highlighter';
 import { formatTimestamp } from '../utils/time';
 import type { MatchOffset, Segment, TranscriptData } from '../utils/transcript';
 import { filterTranscript } from '../utils/transcript';
@@ -78,11 +79,11 @@ type TranscriptSegmentProps = {
   hidden?: boolean;
 
   /**
-   * CSS highlight used to highlight spans of text specified by {@link matches}.
+   * Highlighter used to highlight matches listed in {@link matches}.
    */
-  highlight?: Highlight;
+  highlighter: TextHighlighter;
 
-  /** Offsets within the segment text to highlight. */
+  /** Spans within the segment text to highlight. */
   matches?: MatchOffset[];
 
   isCurrent: boolean;
@@ -96,7 +97,7 @@ function hasSelection() {
 
 function TranscriptSegment({
   hidden = false,
-  highlight,
+  highlighter,
   matches,
   isCurrent,
   onSelect,
@@ -105,34 +106,27 @@ function TranscriptSegment({
   const contentRef = useRef<HTMLParagraphElement>(null);
 
   // Highlight the text within the segment that matches the current filter
-  // query.
+  // query. The highlights are created manually, rather than using a Preact
+  // component, to avoid damaging highlights added by the Hypothesis client.
   useEffect(() => {
-    if (!highlight || !matches) {
+    const contentEl = contentRef.current;
+    if (!matches || !contentEl) {
       return () => {};
     }
 
-    const ranges = matches.map(({ start, end }) => {
-      const textNode = contentRef.current!.childNodes[0];
-      const range = new Range();
-
-      // FIXME - If the Hypothesis client has inserted highlights, these will
-      // break up the single text node child into multiple children.
-      if (textNode instanceof Text && textNode.length >= end) {
-        range.setStart(textNode, start);
-        range.setEnd(textNode, end);
-      }
-
-      return range;
-    });
-    ranges.forEach(r => highlight.add(r));
-
+    highlighter.highlightSpans(contentEl, matches);
     return () => {
-      ranges.forEach(r => highlight.delete(r));
+      highlighter.removeHighlights(contentEl);
     };
-  }, [highlight, matches]);
+  }, [highlighter, matches]);
 
   const hadSelectionOnPointerDown = useRef(false);
   const timestamp = formatTimestamp(segment.start);
+
+  // Add a trailing space at the end of each segment to avoid the last word of a
+  // segment being joined with the first word of the next segment in annotation
+  // quotes.
+  const text = segment.text + ' ';
 
   return (
     <li
@@ -225,12 +219,11 @@ function TranscriptSegment({
           }
         }}
       >
-        {segment.text}
         {
-          // Add a trailing space at the end of each segment to avoid the last
-          // word of a segment being joined with the first word of the next
-          // segment in annotation quotes.
-          ' '
+          // To avoid highlights from the Hypothesis client or filter matching
+          // being disrupted, it is important that the content here is a single
+          // text string which does not change after the initial render.
+          text
         }
       </p>
     </li>
@@ -331,27 +324,12 @@ export default function Transcript({
     [scrollToCurrentSegment]
   );
 
-  // Use CSS highlights to highlight text in segments that matches the current
-  // filter query.
-  const highlight = useMemo(() => {
-    if (typeof Highlight !== 'function') {
-      return undefined;
-    }
-    return new Highlight();
-  }, []);
-
-  useEffect(() => {
-    if (!highlight) {
-      return () => {};
-    }
-
-    // nb. This assumes there is only one `Transcript` component mounted
-    // at a time.
-    CSS.highlights.set('transcript-filter-match', highlight);
-    return () => {
-      CSS.highlights.delete('transcript-filter-match');
-    };
-  }, [highlight]);
+  // Create highlighter for filter matches. This will use either CSS custom
+  // highlights or `<mark>` if not available.
+  const highlighter = useMemo(
+    () => new TextHighlighter('transcript-filter-match'),
+    []
+  );
 
   const filterMatches = useMemo(() => {
     // Ignore filter unless it is at least 2 chars long. Single-char filters
@@ -399,7 +377,7 @@ export default function Transcript({
                     ? !filterMatches.has(index) && index !== currentIndex
                     : false
                 }
-                highlight={highlight}
+                highlighter={highlighter}
                 isCurrent={index === currentIndex}
                 matches={filterMatches?.get(index)}
                 onSelect={() => onSelectSegment?.(segment)}
