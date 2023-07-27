@@ -15,6 +15,19 @@ describe('CopyButton', () => {
       },
     ],
   };
+  let fakeAppendToastMessage;
+
+  beforeEach(() => {
+    fakeAppendToastMessage = sinon.stub();
+  });
+
+  const createWrapper = () =>
+    mount(
+      <CopyButton
+        transcript={transcript}
+        appendToastMessage={fakeAppendToastMessage}
+      />
+    );
 
   it('copies transcript to clipboard when "Copy" button is pressed', async () => {
     const fakeClipboard = {
@@ -25,7 +38,7 @@ describe('CopyButton', () => {
       .get(() => fakeClipboard);
 
     try {
-      const wrapper = mount(<CopyButton transcript={transcript} />);
+      const wrapper = createWrapper();
 
       await wrapper.find('button[data-testid="copy-button"]').prop('onClick')();
 
@@ -35,7 +48,7 @@ describe('CopyButton', () => {
     }
   });
 
-  it('logs a warning if accessing clipboard fails', async () => {
+  it('appends toast message if accessing clipboard fails', async () => {
     const copyError = new Error('Not allowed');
     const fakeClipboard = {
       writeText: sinon.stub().rejects(copyError),
@@ -43,10 +56,9 @@ describe('CopyButton', () => {
     const clipboardStub = sinon
       .stub(navigator, 'clipboard')
       .get(() => fakeClipboard);
-    const warnStub = sinon.stub(console, 'warn');
 
     try {
-      const wrapper = mount(<CopyButton transcript={transcript} />);
+      const wrapper = createWrapper();
 
       try {
         await wrapper
@@ -56,10 +68,12 @@ describe('CopyButton', () => {
         /* ignored */
       }
 
-      assert.calledWith(console.warn, 'Failed to copy transcript', copyError);
+      assert.calledWith(fakeAppendToastMessage, {
+        type: 'error',
+        message: 'Failed to copy transcript',
+      });
     } finally {
       clipboardStub.restore();
-      warnStub.restore();
     }
   });
 });
