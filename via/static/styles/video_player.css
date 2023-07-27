@@ -26,3 +26,7 @@ CSS entry point for the video player app.
 p::highlight(transcript-filter-match) {
   text-decoration: underline;
 }
+mark.transcript-filter-match {
+  background: none; /* remove default `<mark>` styling */
+  text-decoration: underline;
+}

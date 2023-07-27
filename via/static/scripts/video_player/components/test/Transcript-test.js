@@ -1,10 +1,13 @@
-/* global Highlight */
 import { mount } from 'enzyme';
 
-import Transcript from '../Transcript';
+import Transcript, { $imports } from '../Transcript';
 
 describe('Transcript', () => {
+  let FakeTextHighlighter;
+  let fakeTextHighlighter;
+
   let container;
+  let wrappers;
 
   const transcript = {
     segments: [
@@ -27,13 +30,33 @@ describe('Transcript', () => {
   };
 
   beforeEach(() => {
+    wrappers = [];
     container = document.createElement('div');
     document.body.append(container);
+
+    fakeTextHighlighter = {
+      highlightSpans: sinon.stub(),
+      removeHighlights: sinon.stub(),
+    };
+    FakeTextHighlighter = sinon.stub().returns(fakeTextHighlighter);
+
+    $imports.$mock({
+      '../utils/highlighter': {
+        TextHighlighter: FakeTextHighlighter,
+      },
+    });
   });
 
   afterEach(() => {
     container.remove();
+    wrappers.forEach(w => w.unmount());
   });
+
+  function createTranscript(props = {}) {
+    const wrapper = mount(<Transcript transcript={transcript} {...props} />);
+    wrappers.push(wrapper);
+    return wrapper;
+  }
 
   it('renders segments', () => {
     const wrapper = mount(
@@ -78,22 +101,17 @@ describe('Transcript', () => {
   });
 
   it('renders segments if none is current', () => {
-    const wrapper = mount(
-      <Transcript transcript={transcript} currentTime={0} />
-    );
+    const wrapper = createTranscript({ currentTime: 0 });
     const segments = wrapper.find('[data-testid="segment"]');
     assert.isFalse(segments.at(0).prop('data-is-current'));
   });
 
   it('invokes `onSelectSegment` callback when segment timestamp is clicked', () => {
     const selectSegment = sinon.stub();
-    const wrapper = mount(
-      <Transcript
-        transcript={transcript}
-        currentTime={5}
-        onSelectSegment={selectSegment}
-      />
-    );
+    const wrapper = createTranscript({
+      currentTime: 5,
+      onSelectSegment: selectSegment,
+    });
     const timestamp = wrapper
       .find('[data-testid="segment"]')
       .at(1)
@@ -172,9 +190,7 @@ describe('Transcript', () => {
   });
 
   it('does not scroll to current segment if `autoScroll` is disabled', () => {
-    const wrapper = mount(
-      <Transcript autoScroll={false} transcript={transcript} currentTime={5} />
-    );
+    const wrapper = createTranscript({ autoScroll: false, currentTime: 5 });
     const scrollContainer = wrapper.find('div[data-testid="scroll-container"]');
     const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
 
@@ -208,8 +224,6 @@ describe('Transcript', () => {
   });
 
   describe('scrolling methods', () => {
-    let wrappers;
-
     const longTranscript = {
       segments: Array(20)
         .fill(0)
@@ -219,7 +233,7 @@ describe('Transcript', () => {
         })),
     };
 
-    function renderTranscript() {
+    function createLongTranscript() {
       const controlsRef = { current: null };
       const wrapper = mount(
         <Transcript
@@ -234,23 +248,16 @@ describe('Transcript', () => {
       );
       const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
 
-      wrappers.push(wrapper);
-
       return { controlsRef, scrollContainer, scrollTo, wrapper };
     }
 
     beforeEach(() => {
-      wrappers = [];
       container.style.height = '400px';
-    });
-
-    afterEach(() => {
-      wrappers.forEach(w => w.unmount());
     });
 
     it('scrolls to current segment when `scrollToCurrentSegment` is called', () => {
       const { controlsRef, scrollTo, scrollContainer, wrapper } =
-        renderTranscript();
+        createLongTranscript();
 
       assert.ok(controlsRef.current);
       controlsRef.current.scrollToCurrentSegment();
@@ -269,7 +276,7 @@ describe('Transcript', () => {
     });
 
     it('scrolls to first segment when `scrollToTop` is called', () => {
-      const { controlsRef, scrollTo } = renderTranscript();
+      const { controlsRef, scrollTo } = createLongTranscript();
 
       assert.ok(controlsRef.current);
       controlsRef.current.scrollToTop();
@@ -281,7 +288,7 @@ describe('Transcript', () => {
     });
 
     it('scrolls to last segment when `scrollToTop` is called', () => {
-      const { controlsRef, scrollContainer, scrollTo } = renderTranscript();
+      const { controlsRef, scrollContainer, scrollTo } = createLongTranscript();
 
       assert.ok(controlsRef.current);
       controlsRef.current.scrollToBottom();
@@ -294,18 +301,14 @@ describe('Transcript', () => {
   });
 
   it('does not hide segments when there is no filter', () => {
-    const wrapper = mount(
-      <Transcript transcript={transcript} currentTime={0} />
-    );
+    const wrapper = createTranscript({ currentTime: 0 });
     const segments = wrapper.find('li[data-testid="segment"]');
     assert.equal(segments.length, 3);
     segments.forEach(s => assert.isFalse(s.hasClass('hidden')));
   });
 
   it('hides segments that do not match current filter', () => {
-    const wrapper = mount(
-      <Transcript transcript={transcript} currentTime={5} filter="video" />
-    );
+    const wrapper = createTranscript({ currentTime: 5, filter: 'video' });
     const segments = wrapper.find('li[data-testid="segment"]');
 
     // First segment is not hidden because it matches the current time.
@@ -318,43 +321,32 @@ describe('Transcript', () => {
     assert.isTrue(segments.at(2).hasClass('hidden'));
   });
 
-  if (typeof Highlight === 'function') {
-    it('registers and unregisters custom highlight', () => {
-      sinon.stub(CSS.highlights, 'set');
-      sinon.stub(CSS.highlights, 'delete');
+  it('highlights filter matches in segment text', () => {
+    const filter = 'video';
+    const wrapper = createTranscript({ currentTime: 5, filter });
+    const segments = wrapper.find('TranscriptSegment');
+    const segmentText = transcript.segments[1].text;
+    const expectedSpans = [
+      {
+        start: segmentText.indexOf(filter),
+        end: segmentText.indexOf(filter) + filter.length,
+      },
+    ];
+    assert.deepEqual(segments.at(1).prop('matches'), expectedSpans);
 
-      try {
-        const wrapper = mount(
-          <Transcript transcript={transcript} currentTime={5} filter="video" />
-        );
-        assert.calledWith(
-          CSS.highlights.set,
-          'transcript-filter-match',
-          sinon.match.instanceOf(Highlight)
-        );
+    const highlightCalls = fakeTextHighlighter.highlightSpans.getCalls();
+    assert.equal(
+      highlightCalls.length,
+      1 // Number of segments with matches
+    );
 
-        wrapper.unmount();
+    const [element, spans] = highlightCalls[0].args;
+    assert.equal(element.tagName, 'P');
+    assert.deepEqual(spans, expectedSpans);
 
-        assert.calledOnce(CSS.highlights.delete);
-        assert.calledWith(CSS.highlights.delete, 'transcript-filter-match');
-      } finally {
-        CSS.highlights.set.restore();
-        CSS.highlights.delete.restore();
-      }
-    });
+    wrapper.unmount();
 
-    it("works in browsers that don't support CSS Custom Highlights", () => {
-      const highlightStub = sinon
-        .stub(window, 'Highlight')
-        .get(() => undefined);
-      try {
-        const wrapper = mount(
-          <Transcript transcript={transcript} currentTime={5} filter="video" />
-        );
-        wrapper.unmount();
-      } finally {
-        highlightStub.restore();
-      }
-    });
-  }
+    assert.calledOnce(fakeTextHighlighter.removeHighlights);
+    assert.calledWith(fakeTextHighlighter.removeHighlights, element);
+  });
 });
