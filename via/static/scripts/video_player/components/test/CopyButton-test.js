@@ -43,6 +43,10 @@ describe('CopyButton', () => {
       await wrapper.find('button[data-testid="copy-button"]').prop('onClick')();
 
       assert.calledWith(fakeClipboard.writeText, 'Hello\nWorld');
+      assert.calledWith(fakeAppendToastMessage, {
+        type: 'success',
+        message: 'Transcript copied',
+      });
     } finally {
       clipboardStub.restore();
     }

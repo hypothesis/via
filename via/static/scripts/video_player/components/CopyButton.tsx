@@ -22,6 +22,10 @@ export default function CopyButton({
       : '';
     try {
       await navigator.clipboard.writeText(formattedTranscript);
+      appendToastMessage({
+        type: 'success',
+        message: 'Transcript copied',
+      });
     } catch (err) {
       appendToastMessage({
         type: 'error',
