@@ -10,6 +10,7 @@ import {
 } from 'preact/hooks';
 
 import { useScrollAnchor } from '../hooks/use-scroll-anchor';
+import { useStableCallback } from '../hooks/use-stable-callback';
 import { TextHighlighter } from '../utils/highlighter';
 import { formatTimestamp } from '../utils/time';
 import type { MatchOffset, Segment, TranscriptData } from '../utils/transcript';
@@ -121,112 +122,128 @@ function TranscriptSegment({
   }, [highlighter, matches]);
 
   const hadSelectionOnPointerDown = useRef(false);
-  const timestamp = formatTimestamp(segment.start);
+  const timestamp = useMemo(
+    () => formatTimestamp(segment.start),
+    [segment.start]
+  );
 
   // Add a trailing space at the end of each segment to avoid the last word of a
   // segment being joined with the first word of the next segment in annotation
   // quotes.
   const text = segment.text + ' ';
 
-  return (
-    <li
-      className={classnames(
-        'flex gap-x-3 p-1.5 rounded-[4px]',
-        // Margin needed to provide space for box shadow on current item
-        'mb-1',
-        {
-          'bg-white shadow-md': isCurrent,
-          hidden,
-        }
-      )}
-      data-is-current={isCurrent}
-      data-testid="segment"
-    >
-      <button
-        aria-label={timestamp}
-        onClick={onSelect}
-        className={classnames(
-          // TODO: Use shared Button to get these styles for free
-          'flex transition-colors focus-visible-ring rounded',
-          // `peer` allows Tailwind styling based on sibling state
-          'peer',
-          'font-medium hover:underline',
-          {
-            // Colors are one tick lighter than segment text
-            'text-stone-700': isCurrent,
-            'text-stone-500': !isCurrent,
-            'hover:text-stone-800': true,
-          },
-          // Workaround for a Firefox issue that prevented annotating across
-          // multiple segments [1]. Buttons have a default `user-select: none`
-          // style in FF and selections that include elements with this style
-          // are split into multiple ranges. The Hypothesis client in turn only
-          // uses the first range from a selection (see [2]).
-          //
-          // [1] https://github.com/hypothesis/via/issues/930
-          // [2] https://github.com/hypothesis/client/issues/5485
-          'select-text',
+  const stableOnSelect = useStableCallback(onSelect);
 
-          // The timestamp is rendered using a CSS ::before pseudo-element
-          // so that it does not appear in the selection captured by the Hypothesis
-          // client, when creating an annotation that spans multiple segments.
-          //
-          // We use a combination of padding and margin to create the space
-          // between the timestamp and transcript. The padding region enlarges
-          // the clickable area of the timestamp button. The margin region enlarges
-          // the area in which a user can start a selection of the transcript text.
-          // Without it selecting the left edge of the transcript is fiddly.
-          'before:content-[attr(data-timestamp)]',
-          // Style and position timestamp text
-          'before:px-1 before:pt-[1px] before:text-right before:text-[.8em]'
-        )}
-        data-timestamp={timestamp}
-      />
-      <p
+  return useMemo(
+    () => (
+      <li
         className={classnames(
-          'grow peer-hover:text-stone-900',
+          'flex gap-x-3 p-1.5 rounded-[4px]',
+          // Margin needed to provide space for box shadow on current item
+          'mb-1',
           {
-            'text-stone-600': !isCurrent,
-            'text-stone-800': isCurrent,
-          },
-
-          // Avoid buckets overlapping highlighted text.
-          'pr-3'
-        )}
-        data-testid="transcript-text"
-        // Add attributes used by the client to create media time selectors.
-        //
-        // The precision of these is currently not as good as it could be
-        // because of the grouping of segments from the transcript returned
-        // by the API. We could improve this in future by rendering each
-        // segment of the original transcript as a separate element within this
-        // paragraph.
-        data-time-start={segment.start}
-        data-time-end={segment.start + segment.duration}
-        ref={contentRef}
-        // We have a "click" handler here, but don't set a role because
-        // this is a secondary way to focus the transcript. The timestamp
-        // button is the primary control for this action.
-        onPointerDown={() => {
-          hadSelectionOnPointerDown.current = hasSelection();
-        }}
-        onPointerUp={() => {
-          // Allow the user to easily select a segment by clicking it, but
-          // don't seek the video if they are selecting or de-selecting text
-          // to annotate.
-          if (!hadSelectionOnPointerDown.current && !hasSelection()) {
-            onSelect();
+            'bg-white shadow-md': isCurrent,
+            hidden,
           }
-        }}
+        )}
+        data-is-current={isCurrent}
+        data-testid="segment"
       >
-        {
-          // To avoid highlights from the Hypothesis client or filter matching
-          // being disrupted, it is important that the content here is a single
-          // text string which does not change after the initial render.
-          text
-        }
-      </p>
-    </li>
+        <button
+          aria-label={timestamp}
+          onClick={stableOnSelect}
+          className={classnames(
+            // TODO: Use shared Button to get these styles for free
+            'flex transition-colors focus-visible-ring rounded',
+            // `peer` allows Tailwind styling based on sibling state
+            'peer',
+            'font-medium hover:underline',
+            {
+              // Colors are one tick lighter than segment text
+              'text-stone-700': isCurrent,
+              'text-stone-500': !isCurrent,
+              'hover:text-stone-800': true,
+            },
+            // Workaround for a Firefox issue that prevented annotating across
+            // multiple segments [1]. Buttons have a default `user-select: none`
+            // style in FF and selections that include elements with this style
+            // are split into multiple ranges. The Hypothesis client in turn only
+            // uses the first range from a selection (see [2]).
+            //
+            // [1] https://github.com/hypothesis/via/issues/930
+            // [2] https://github.com/hypothesis/client/issues/5485
+            'select-text',
+
+            // The timestamp is rendered using a CSS ::before pseudo-element
+            // so that it does not appear in the selection captured by the Hypothesis
+            // client, when creating an annotation that spans multiple segments.
+            //
+            // We use a combination of padding and margin to create the space
+            // between the timestamp and transcript. The padding region enlarges
+            // the clickable area of the timestamp button. The margin region enlarges
+            // the area in which a user can start a selection of the transcript text.
+            // Without it selecting the left edge of the transcript is fiddly.
+            'before:content-[attr(data-timestamp)]',
+            // Style and position timestamp text
+            'before:px-1 before:pt-[1px] before:text-right before:text-[.8em]'
+          )}
+          data-timestamp={timestamp}
+        />
+        <p
+          className={classnames(
+            'grow peer-hover:text-stone-900',
+            {
+              'text-stone-600': !isCurrent,
+              'text-stone-800': isCurrent,
+            },
+
+            // Avoid buckets overlapping highlighted text.
+            'pr-3'
+          )}
+          data-testid="transcript-text"
+          // Add attributes used by the client to create media time selectors.
+          //
+          // The precision of these is currently not as good as it could be
+          // because of the grouping of segments from the transcript returned
+          // by the API. We could improve this in future by rendering each
+          // segment of the original transcript as a separate element within this
+          // paragraph.
+          data-time-start={segment.start}
+          data-time-end={segment.start + segment.duration}
+          ref={contentRef}
+          // We have a "click" handler here, but don't set a role because
+          // this is a secondary way to focus the transcript. The timestamp
+          // button is the primary control for this action.
+          onPointerDown={() => {
+            hadSelectionOnPointerDown.current = hasSelection();
+          }}
+          onPointerUp={() => {
+            // Allow the user to easily select a segment by clicking it, but
+            // don't seek the video if they are selecting or de-selecting text
+            // to annotate.
+            if (!hadSelectionOnPointerDown.current && !hasSelection()) {
+              stableOnSelect();
+            }
+          }}
+        >
+          {
+            // To avoid highlights from the Hypothesis client or filter matching
+            // being disrupted, it is important that the content here is a single
+            // text string which does not change after the initial render.
+            text
+          }
+        </p>
+      </li>
+    ),
+    [
+      hidden,
+      isCurrent,
+      segment.duration,
+      segment.start,
+      stableOnSelect,
+      text,
+      timestamp,
+    ]
   );
 }
 
@@ -350,6 +367,43 @@ export default function Transcript({
   );
   useScrollAnchor(scrollRef, getScrollChildren);
 
+  const noop = () => {};
+  const stableOnSelectSegment = useStableCallback(onSelectSegment ?? noop);
+  const segments = useMemo(
+    () => (
+      <ul
+        className={classnames(
+          'grow shadow-r-inner p-2',
+          // Transparency is necessary to avoid obscuring scroll shadows
+          'bg-grey-3/30'
+        )}
+      >
+        {transcript.segments.map((segment, index) => (
+          <TranscriptSegment
+            key={index}
+            hidden={
+              filterMatches
+                ? !filterMatches.has(index) && index !== currentIndex
+                : false
+            }
+            highlighter={highlighter}
+            isCurrent={index === currentIndex}
+            matches={filterMatches?.get(index)}
+            onSelect={() => stableOnSelectSegment(segment)}
+            segment={segment}
+          />
+        ))}
+      </ul>
+    ),
+    [
+      currentIndex,
+      filterMatches,
+      highlighter,
+      stableOnSelectSegment,
+      transcript.segments,
+    ]
+  );
+
   return (
     <ScrollContainer borderless>
       <Scroll
@@ -362,29 +416,7 @@ export default function Transcript({
         elementRef={scrollRef}
       >
         <div className="flex min-h-full">
-          <ul
-            className={classnames(
-              'grow shadow-r-inner p-2',
-              // Transparency is necessary to avoid obscuring scroll shadows
-              'bg-grey-3/30'
-            )}
-          >
-            {transcript.segments.map((segment, index) => (
-              <TranscriptSegment
-                key={index}
-                hidden={
-                  filterMatches
-                    ? !filterMatches.has(index) && index !== currentIndex
-                    : false
-                }
-                highlighter={highlighter}
-                isCurrent={index === currentIndex}
-                matches={filterMatches?.get(index)}
-                onSelect={() => onSelectSegment?.(segment)}
-                segment={segment}
-              />
-            ))}
-          </ul>
+          {segments}
           {children}
         </div>
       </Scroll>
