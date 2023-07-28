@@ -1,13 +1,26 @@
 import { useCallback, useState } from 'preact/hooks';
 
 import type { ToastMessage } from '../components/ToastMessages';
-import { generateHexString } from '../utils/generate-hex-string';
 
-export function useToastMessages() {
+export type ToastMessageData = Omit<ToastMessage, 'id'>;
+
+export type ToastMessageAppender = (toastMessageData: ToastMessageData) => void;
+
+export type ToastMessages = {
+  toastMessages: ToastMessage[];
+  appendToastMessage: ToastMessageAppender;
+  dismissToastMessage: (id: string) => void;
+};
+
+// Keep a global incremental counter to use as unique toast message ID
+let toastMessageCounter = 0;
+
+export function useToastMessages(): ToastMessages {
   const [toastMessages, setToastMessages] = useState<ToastMessage[]>([]);
   const appendToastMessage = useCallback(
-    (toastMessageData: Omit<ToastMessage, 'id'>) => {
-      const id = generateHexString(10);
+    (toastMessageData: ToastMessageData) => {
+      toastMessageCounter++;
+      const id = `${toastMessageCounter}`;
       setToastMessages(messages => [...messages, { ...toastMessageData, id }]);
     },
     []
@@ -22,7 +35,3 @@ export function useToastMessages() {
 
   return { toastMessages, appendToastMessage, dismissToastMessage };
 }
-
-export type ToastMessageAppender = ReturnType<
-  typeof useToastMessages
->['appendToastMessage'];

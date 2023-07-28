@@ -64,7 +64,7 @@ const BaseToastMessageTransition: TransitionComponent = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const handleAnimation = (e: AnimationEvent) => {
     // Ignore non-relevant animations:
-    // * Happening on children elements
+    // * Happening on child elements
     // * Animations which are not relevant for toast messages getting "in" or "out"
     if (
       e.target !== containerRef.current ||
@@ -78,6 +78,7 @@ const BaseToastMessageTransition: TransitionComponent = ({
 
   return (
     <div
+      data-testid="animation-container"
       onAnimationEnd={handleAnimation}
       ref={containerRef}
       className={classnames('relative w-full container', {
@@ -97,6 +98,7 @@ const BaseToastMessageTransition: TransitionComponent = ({
 export type ToastMessagesProps = {
   messages: ToastMessage[];
   onMessageDismiss: (id: string) => void;
+  setTimeout_?: typeof setTimeout;
 };
 
 /**
@@ -106,6 +108,8 @@ export type ToastMessagesProps = {
 export default function ToastMessages({
   messages,
   onMessageDismiss,
+  /* istanbul ignore next - test seam */
+  setTimeout_ = setTimeout,
 }: ToastMessagesProps) {
   const [dismissedMessages, setDismissedMessages] = useState<string[]>([]);
   const scheduledMessages = useRef(new Set<string>());
@@ -123,17 +127,29 @@ export default function ToastMessages({
       // Track that this message has been scheduled to be dismissed. After a
       // period of time, actually dismiss it
       scheduledMessages.current.add(id);
-      setTimeout(() => {
+      setTimeout_(() => {
         dismissMessage(id);
         scheduledMessages.current.delete(id);
       }, 5000);
     },
-    [dismissMessage]
+    [dismissMessage, setTimeout_]
   );
 
-  // The `ul` containing any toast messages is absolute-positioned and the full
-  // width of the viewport. Each toast message `li` has its position and width
-  // constrained by `container` configuration in tailwind.
+  const onTransitionEnd = useCallback(
+    (direction: 'in' | 'out', message: ToastMessage) => {
+      const autoDismiss = message.autoDismiss ?? true;
+      if (direction === 'in' && autoDismiss) {
+        scheduleMessageDismiss(message.id);
+      }
+
+      if (direction === 'out') {
+        onMessageDismiss(message.id);
+        setDismissedMessages(ids => ids.filter(id => id !== message.id));
+      }
+    },
+    [scheduleMessageDismiss, onMessageDismiss]
+  );
+
   return (
     <ul
       aria-live="polite"
@@ -157,18 +173,7 @@ export default function ToastMessages({
           >
             <BaseToastMessageTransition
               direction={isDismissed ? 'out' : 'in'}
-              onTransitionEnd={direction => {
-                if (direction === 'in') {
-                  if (message.autoDismiss ?? true) {
-                    scheduleMessageDismiss(message.id);
-                  }
-                } else {
-                  onMessageDismiss(message.id);
-                  setDismissedMessages(ids =>
-                    ids.filter(id => id !== message.id)
-                  );
-                }
-              }}
+              onTransitionEnd={direction => onTransitionEnd(direction, message)}
             >
               <ToastMessageItem message={message} onDismiss={dismissMessage} />
             </BaseToastMessageTransition>
