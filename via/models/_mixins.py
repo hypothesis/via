@@ -4,6 +4,12 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapped, MappedAsDataclass, mapped_column
 
 
+class AutoincrementingIntegerIDMixin(MappedAsDataclass):
+    id: Mapped[int] = mapped_column(
+        init=False, primary_key=True, autoincrement=True, sort_order=-100
+    )
+
+
 class CreatedUpdatedMixin(MappedAsDataclass):
     created: Mapped[datetime] = mapped_column(
         init=False,
