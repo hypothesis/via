@@ -41,7 +41,9 @@ export default function FilterInput({
           data-testid="clear-filter-button"
           title="Clear filter"
           onClick={() => setFilter('')}
-          classes="absolute right-0 top-[1px]"
+          // Center button vertically within input. Note the button size will be
+          // larger on touch devices.
+          classes="absolute right-0 top-[50%] translate-y-[-50%]"
         />
       )}
     </div>
