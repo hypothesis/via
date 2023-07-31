@@ -17,6 +17,7 @@ import {
 import { useAppLayout } from '../hooks/use-app-layout';
 import { useSideBySideLayout } from '../hooks/use-side-by-side-layout';
 import { useStableCallback } from '../hooks/use-stable-callback';
+import { useToastMessages } from '../hooks/use-toast-messages';
 import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';
@@ -25,6 +26,7 @@ import { clipDurations, mergeSegments } from '../utils/transcript';
 import CopyButton from './CopyButton';
 import FilterInput from './FilterInput';
 import HypothesisClient from './HypothesisClient';
+import ToastMessages from './ToastMessages';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
 import TranscriptError from './TranscriptError';
@@ -285,6 +287,9 @@ export default function VideoPlayerApp({
     };
   }, [baseClientConfig, contentReady, isActive]);
 
+  const { toastMessages, appendToastMessage, dismissToastMessage } =
+    useToastMessages();
+
   return (
     <div
       data-testid="app-container"
@@ -428,6 +433,7 @@ export default function VideoPlayerApp({
             />
             <CopyButton
               transcript={isTranscript(transcript) ? transcript : null}
+              appendToastMessage={appendToastMessage}
             />
             <IconButton
               onClick={scrollToTop}
@@ -456,6 +462,12 @@ export default function VideoPlayerApp({
             })}
             data-testid="transcript-container"
           >
+            <div className="absolute z-2 top-0 w-full p-2 lg:pr-5">
+              <ToastMessages
+                messages={toastMessages}
+                onMessageDismiss={dismissToastMessage}
+              />
+            </div>
             {isLoading && (
               <div className="flex justify-center p-8">
                 <Spinner data-testid="transcript-loading-spinner" size="md" />
