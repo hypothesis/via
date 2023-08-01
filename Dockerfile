@@ -47,6 +47,8 @@ COPY ./conf/nginx/includes /etc/nginx/includes
 COPY ./conf/nginx/envsubst.conf.template /var/lib/hypothesis/nginx_envsubst.conf.template
 COPY . .
 
+ENV PYTHONPATH /var/lib/hypothesis:$PYTHONPATH
+
 USER hypothesis
 
 CMD /usr/bin/envsubst '$${NGINX_SECURE_LINK_SECRET}' < /var/lib/hypothesis/nginx_envsubst.conf.template > /var/lib/hypothesis/nginx_envsubst.conf && /usr/bin/supervisord -c /var/lib/hypothesis/conf/supervisord.conf
