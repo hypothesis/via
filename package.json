@@ -88,5 +88,6 @@
     "test": "gulp test",
     "test:watch": "gulp test --live",
     "typecheck": "tsc --build via/static/scripts/tsconfig.json"
-  }
+  },
+  "packageManager": "yarn@3.6.1"
 }
