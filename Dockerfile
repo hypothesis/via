@@ -1,11 +1,14 @@
 # Stage 1: Build frontend assets
-FROM node:20.3.1-alpine as frontend-build
+FROM node:20.2.0-alpine as frontend-build
 
 ENV NODE_ENV production
-COPY .babelrc rollup.config.mjs gulpfile.mjs package.json tailwind.config.mjs yarn.lock ./
-COPY via/static ./via/static
+RUN mkdir -p /tmp/frontend-build
+COPY .babelrc rollup.config.mjs gulpfile.mjs package.json tailwind.config.mjs .yarnrc.yml yarn.lock /tmp/frontend-build
+COPY .yarn /tmp/frontend-build/.yarn
+COPY via/static /tmp/frontend-build/via/static
 
-RUN yarn install --frozen-lockfile
+WORKDIR /tmp/frontend-build
+RUN yarn install --immutable
 RUN yarn build
 
 # Stage 2: Build the rest of the app using build output from Stage 1.
@@ -39,7 +42,7 @@ RUN apt-get install --yes gcc \
   && apt-get autoremove --yes
 
 # Copy frontend assets.
-COPY --from=frontend-build /build build
+COPY --from=frontend-build /tmp/frontend-build/build build
 
 COPY ./conf/supervisord.conf ./conf/supervisord.conf
 COPY ./conf/nginx/nginx.conf /etc/nginx/nginx.conf
