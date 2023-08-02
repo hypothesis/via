@@ -36,10 +36,20 @@ class TestCaptionTrack:
             (CaptionTrack(language_code="en"), "en"),
             (CaptionTrack(language_code="en", kind="asr"), "en.a"),
             (CaptionTrack(language_code="en", name="Hello"), "en..SGVsbG8="),
-            # Let's try everything at once
             (
-                CaptionTrack(language_code="en-gb", kind="asr", name="Name"),
-                "en-gb.a.TmFtZQ==",
+                CaptionTrack(language_code="en", translated_language_code="fr"),
+                "en...fr",
+            ),
+            # This combination isn't actually possible, but let's try everything at
+            # once
+            (
+                CaptionTrack(
+                    language_code="en-gb",
+                    kind="asr",
+                    name="Name",
+                    translated_language_code="fr",
+                ),
+                "en-gb.a.TmFtZQ==.fr",
             ),
         ),
     )
@@ -52,6 +62,28 @@ class TestCaptionTrack:
 
         caption_track.kind = None
         assert not caption_track.is_auto_generated
+
+    @pytest.mark.parametrize(
+        "caption_track,url",
+        (
+            (
+                CaptionTrack("en", base_url="http://example.com?a=1"),
+                "http://example.com?a=1",
+            ),
+            (
+                CaptionTrack(
+                    "en",
+                    base_url="http://example.com?a=1",
+                    translated_language_code="fr",
+                ),
+                "http://example.com?a=1&tlang=fr",
+            ),
+            (CaptionTrack("en", base_url=None), None),
+            (CaptionTrack("en", base_url=None, translated_language_code="fr"), None),
+        ),
+    )
+    def test_url(self, caption_track, url):
+        assert caption_track.url == url
 
 
 class TestCaptions:
@@ -121,6 +153,23 @@ class TestCaptions:
             if expected_label
             else not caption_track
         )
+
+    def test_find_matching_track_with_translation(self):
+        captions = Captions(tracks=[CaptionTrack("fr", label="plain_fr")])
+
+        caption_track = captions.find_matching_track(
+            [
+                CaptionTrack(
+                    language_code=Any(),
+                    name=Any(),
+                    kind=Any(),
+                    translated_language_code="de",
+                )
+            ]
+        )
+
+        assert caption_track.label == "plain_fr"
+        assert caption_track.translated_language_code == "de"
 
     @pytest.fixture
     def CaptionTrack(self, patch):

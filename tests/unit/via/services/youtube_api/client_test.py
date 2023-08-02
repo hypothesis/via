@@ -50,7 +50,7 @@ class TestYouTubeAPIClient:
 
         transcript = client.get_transcript(caption_track)
 
-        http_session.get.assert_called_once_with(url=caption_track.base_url)
+        http_session.get.assert_called_once_with(url=caption_track.url)
         assert transcript == Transcript(
             track=caption_track,
             text=[

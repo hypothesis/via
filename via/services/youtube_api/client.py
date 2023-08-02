@@ -51,10 +51,10 @@ class YouTubeAPIClient:
         the value before returning it.
         """
 
-        if not caption_track.base_url:
+        if not caption_track.url:
             raise ValueError("Cannot get a transcript without a URL")
 
-        response = self._http.get(url=caption_track.base_url)
+        response = self._http.get(url=caption_track.url)
         xml_elements = ElementTree.fromstring(response.text)
 
         return Transcript(
