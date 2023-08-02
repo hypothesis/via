@@ -2,6 +2,7 @@ from unittest.mock import sentinel
 
 import pytest
 from h_matchers import Any
+from pytest import param
 
 from via.services.youtube_api import Captions, CaptionTrack, Video
 
@@ -67,6 +68,59 @@ class TestCaptions:
 
         assert not captions.tracks
         CaptionTrack.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "preferences,expected_label",
+        (
+            param(
+                [CaptionTrack("en")],
+                "plain_en",
+                id="direct_match",
+            ),
+            param(
+                [CaptionTrack("de"), CaptionTrack("en-gb")],
+                "plain_en_gb",
+                id="miss_then_hit",
+            ),
+            param(
+                [
+                    CaptionTrack("de"),
+                    CaptionTrack(Any.string.matching("^en-.*"), name="Name"),
+                ],
+                "named_en_gb",
+                id="wild_cards",
+            ),
+            param(
+                [CaptionTrack("fr", kind=None), CaptionTrack("en", kind="asr")],
+                "en_auto",
+                id="fallback_to_auto",
+            ),
+            param(
+                [CaptionTrack(Any(), name="Name")],
+                "named_en_gb",
+                id="same_level_sorting",
+            ),
+            param([CaptionTrack("fr")], None, id="miss"),
+        ),
+    )
+    def test_find_matching_track(self, preferences, expected_label):
+        captions = Captions(
+            tracks=[
+                CaptionTrack("en", label="plain_en"),
+                CaptionTrack("en-gb", label="plain_en_gb"),
+                CaptionTrack("en-us", name="Name", label="named_en_us"),
+                CaptionTrack("en-gb", name="Name", label="named_en_gb"),
+                CaptionTrack("en", kind="asr", label="en_auto"),
+            ]
+        )
+
+        caption_track = captions.find_matching_track(preferences)
+
+        assert (
+            caption_track.label == expected_label
+            if expected_label
+            else not caption_track
+        )
 
     @pytest.fixture
     def CaptionTrack(self, patch):
