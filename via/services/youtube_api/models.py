@@ -1,3 +1,4 @@
+import base64
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -36,6 +37,23 @@ class CaptionTrack:
             kind=data.get("kind", None),
             base_url=data["baseUrl"],
         )
+
+    @property
+    def id(self) -> str:  # pylint: disable=invalid-name
+        if self.name:
+            # Ensure our ids don't contain wild characters
+            name = base64.b64encode(self.name.encode("utf-8")).decode("utf-8")
+        else:
+            name = None
+
+        return ".".join(
+            part or ""
+            for part in [
+                self.language_code,
+                "a" if self.is_auto_generated else None,
+                name,
+            ]
+        ).rstrip(".")
 
     @property
     def is_auto_generated(self) -> bool:
