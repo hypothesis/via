@@ -30,29 +30,29 @@ class TestCaptionTrack:
             }
         )
 
-    @pytest.mark.parametrize(
-        "caption_track,id_string",
+    CAPTION_TRACK_IDS = (
+        (CaptionTrack(language_code="en"), "en"),
+        (CaptionTrack(language_code="en", kind="asr"), "en.a"),
+        (CaptionTrack(language_code="en", name="Hello"), "en..SGVsbG8="),
+        (CaptionTrack(language_code="en", translated_language_code="fr"), "en...fr"),
+        # This combination isn't actually possible, but let's try everything at
+        # once
         (
-            (CaptionTrack(language_code="en"), "en"),
-            (CaptionTrack(language_code="en", kind="asr"), "en.a"),
-            (CaptionTrack(language_code="en", name="Hello"), "en..SGVsbG8="),
-            (
-                CaptionTrack(language_code="en", translated_language_code="fr"),
-                "en...fr",
+            CaptionTrack(
+                language_code="en-gb",
+                kind="asr",
+                name="Name",
+                translated_language_code="fr",
             ),
-            # This combination isn't actually possible, but let's try everything at
-            # once
-            (
-                CaptionTrack(
-                    language_code="en-gb",
-                    kind="asr",
-                    name="Name",
-                    translated_language_code="fr",
-                ),
-                "en-gb.a.TmFtZQ==.fr",
-            ),
+            "en-gb.a.TmFtZQ==.fr",
         ),
     )
+
+    @pytest.mark.parametrize("caption_track,id_string", CAPTION_TRACK_IDS)
+    def test_from_id(self, caption_track, id_string):
+        assert CaptionTrack.from_id(id_string) == caption_track
+
+    @pytest.mark.parametrize("caption_track,id_string", CAPTION_TRACK_IDS)
     def test_id(self, caption_track, id_string):
         assert caption_track.id == id_string
 

@@ -1,6 +1,7 @@
 import base64
 from copy import deepcopy
 from dataclasses import dataclass, field
+from itertools import zip_longest
 from operator import attrgetter
 from typing import List, Optional
 
@@ -42,6 +43,30 @@ class CaptionTrack:
             kind=data.get("kind", None),
             base_url=data["baseUrl"],
         )
+
+    @classmethod
+    def from_id(cls, id_string: str):
+        """Create a partially filled out track from and id string."""
+
+        data = dict(
+            zip_longest(
+                [
+                    "language_code",
+                    "auto_generated",
+                    "name",
+                    "translated_language_code",
+                ],
+                [part or None for part in id_string.split(".")],
+            )
+        )
+
+        if name := data.get("name"):
+            data["name"] = base64.b64decode(name.encode("utf-8")).decode("utf-8")
+
+        if data.pop("auto_generated", None):
+            data["kind"] = "asr"
+
+        return cls(**data)
 
     @property
     def id(self) -> str:  # pylint: disable=invalid-name
