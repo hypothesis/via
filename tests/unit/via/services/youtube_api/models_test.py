@@ -29,6 +29,22 @@ class TestCaptionTrack:
             }
         )
 
+    @pytest.mark.parametrize(
+        "caption_track,id_string",
+        (
+            (CaptionTrack(language_code="en"), "en"),
+            (CaptionTrack(language_code="en", kind="asr"), "en.a"),
+            (CaptionTrack(language_code="en", name="Hello"), "en..SGVsbG8="),
+            # Let's try everything at once
+            (
+                CaptionTrack(language_code="en-gb", kind="asr", name="Name"),
+                "en-gb.a.TmFtZQ==",
+            ),
+        ),
+    )
+    def test_id(self, caption_track, id_string):
+        assert caption_track.id == id_string
+
     def test_is_auto_generated(self):
         caption_track = CaptionTrack("en", kind="asr")
         assert caption_track.is_auto_generated
