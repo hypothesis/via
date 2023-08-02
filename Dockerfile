@@ -3,7 +3,7 @@ FROM node:20.2.0-alpine as frontend-build
 
 ENV NODE_ENV production
 RUN mkdir -p /tmp/frontend-build
-COPY .babelrc rollup.config.mjs gulpfile.mjs package.json tailwind.config.mjs .yarnrc.yml yarn.lock /tmp/frontend-build
+COPY .babelrc rollup.config.mjs gulpfile.mjs package.json tailwind.config.mjs .yarnrc.yml yarn.lock /tmp/frontend-build/
 COPY .yarn /tmp/frontend-build/.yarn
 COPY via/static /tmp/frontend-build/via/static
 
