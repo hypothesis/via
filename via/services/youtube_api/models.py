@@ -1,5 +1,7 @@
 import base64
+from copy import deepcopy
 from dataclasses import dataclass, field
+from operator import attrgetter
 from typing import List, Optional
 
 from via.services.youtube_api._nested_data import safe_get
@@ -83,6 +85,45 @@ class Captions:
                 for track in data.get("captionTracks", [])
             ]
         )
+
+    def find_matching_track(
+        self, preferences: List[CaptionTrack]
+    ) -> Optional[CaptionTrack]:
+        """
+        Get a caption track which matching the preferences in order.
+
+        This method takes the provided list of caption track objects and
+        searches the available tracks for those with matching details:
+
+        * language_code
+        * name
+        * is_auto_generated / kind
+
+        Earlier items are higher priority.
+
+        :param preferences: List of partially filled out caption track objects
+            which represent the caption track we would like.
+        """
+
+        def get_key(track: CaptionTrack):
+            return track.language_code, track.kind, track.name
+
+        search_keys = [get_key(preference) for preference in preferences]
+        best_index, best_caption_track = None, None
+
+        # Sort the tracks to keep the algorithm more stable! This only insulates
+        # us from sorting changes, not metadata changes.
+        for caption_track in sorted(self.tracks, key=attrgetter("id")):
+            try:
+                index = search_keys.index(get_key(caption_track))
+            except ValueError:
+                continue
+
+            # Items with lower indexes are first choices for the user
+            if best_index is None or best_index > index:
+                best_index, best_caption_track = index, deepcopy(caption_track)
+
+        return best_caption_track
 
 
 @dataclass
