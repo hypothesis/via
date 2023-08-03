@@ -6,6 +6,7 @@ psycopg2
 alembic
 checkmatelib
 h-assets
+h-matchers
 h-pyramid-sentry
 h-vialib
 importlib_resources
@@ -20,5 +21,4 @@ whitenoise
 google-auth-oauthlib
 marshmallow
 webargs
-youtube-transcript-api
 zope.sqlalchemy

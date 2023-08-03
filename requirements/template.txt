@@ -21,7 +21,7 @@ click==8.1.3
     #   cookiecutter
     #   pip-tools
 cookiecutter==2.1.1
-    # via -r template.in
+    # via -r requirements/template.in
 idna==3.4
     # via requests
 importlib-metadata==6.6.0
@@ -37,10 +37,10 @@ markupsafe==2.1.2
 packaging==23.1
     # via build
 pip-sync-faster==0.0.3
-    # via -r template.in
+    # via -r requirements/template.in
 pip-tools==6.14.0
     # via
-    #   -r template.in
+    #   -r requirements/template.in
     #   pip-sync-faster
 pyproject-hooks==1.0.0
     # via build
