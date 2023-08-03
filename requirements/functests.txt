@@ -87,7 +87,7 @@ importlib-metadata==6.0.0
     #   alembic
     #   h-vialib
     #   pip-sync-faster
-importlib-resources==5.12.0
+importlib-resources==6.0.0
     # via
     #   -r requirements/prod.txt
     #   alembic

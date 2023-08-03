@@ -46,7 +46,7 @@ importlib-metadata==6.0.0
     # via
     #   alembic
     #   h-vialib
-importlib-resources==5.12.0
+importlib-resources==6.0.0
     # via
     #   -r requirements/prod.in
     #   alembic
@@ -117,9 +117,9 @@ pyramid-jinja2==2.10
 pyramid-sanity==1.0.3
     # via -r requirements/prod.in
 pyramid-services==2.2
-    # via -r prod.in
+    # via -r requirements/prod.in
 pyramid-tm==2.5
-    # via -r prod.in
+    # via -r requirements/prod.in
 pyrsistent==0.17.3
     # via jsonschema
 python-jose[cryptography]==3.3.0
@@ -192,7 +192,7 @@ zope-interface==5.2.0
     #   wired
     #   zope-sqlalchemy
 zope-sqlalchemy==3.0
-    # via -r prod.in
+    # via -r requirements/prod.in
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==67.7.2
