@@ -1,6 +1,6 @@
 from datetime import timedelta
 from io import BytesIO
-from unittest.mock import sentinel
+from unittest.mock import create_autospec, sentinel
 
 import pytest
 from h_matchers import Any
@@ -8,29 +8,29 @@ from requests import Response
 from sqlalchemy import select
 
 from via.models import Transcript, Video
-from via.services.youtube import YouTubeDataAPIError, YouTubeService, factory
+from via.services import youtube_api
+from via.services.youtube import (
+    CAPTION_TRACK_PREFERENCES,
+    YouTubeDataAPIError,
+    YouTubeService,
+    factory,
+)
+from via.services.youtube_api import YouTubeAPIClient
 
 
 class TestYouTubeService:
-    @pytest.mark.parametrize(
-        "enabled,api_key,expected",
-        [
-            (False, None, False),
-            (True, None, False),
-            (False, sentinel.api_key, False),
-            (True, sentinel.api_key, True),
-        ],
-    )
-    def test_enabled(self, db_session, enabled, api_key, expected):
-        assert (
-            YouTubeService(
-                db_session=db_session,
-                enabled=enabled,
-                api_key=api_key,
-                http_service=sentinel.http_service,
-            ).enabled
-            == expected
+    @pytest.mark.parametrize("enabled", (True, False))
+    @pytest.mark.parametrize("api_key", (sentinel.api_key, None))
+    def test_enabled(self, enabled, api_key):
+        svc = YouTubeService(
+            db_session=sentinel.db_session,
+            enabled=enabled,
+            api_client=sentinel.api_client,
+            api_key=api_key,
+            http_service=sentinel.http_service,
         )
+
+        assert svc.enabled == bool(enabled and api_key)
 
     @pytest.mark.parametrize(
         "url,expected_video_id",
@@ -94,30 +94,47 @@ class TestYouTubeService:
 
         assert exc_info.value.__cause__ == http_service.get.side_effect
 
-    def test_get_transcript(self, db_session, svc, YouTubeTranscriptApi):
-        YouTubeTranscriptApi.get_transcript.return_value = [
-            {"text": "foo", "start": 0.0, "duration": 1.0},
-            {"text": "bar", "start": 1.0, "duration": 2.0},
-        ]
-
-        returned_transcript = svc.get_transcript("test_video_id")
-
-        YouTubeTranscriptApi.get_transcript.assert_called_once_with(
-            "test_video_id", languages=("en",)
+    def test_get_transcript_from_youtube(self, svc, db_session, youtube_api_client):
+        transcript = youtube_api.Transcript(
+            track=sentinel.track,
+            text=[youtube_api.TranscriptText(text="text", start=1.0, duration=2.0)],
         )
-        assert returned_transcript == YouTubeTranscriptApi.get_transcript.return_value
+        youtube_api_client.get_transcript.return_value = transcript
+        video = youtube_api_client.get_video_info.return_value
+        caption_track = video.caption.find_matching_track.return_value
+        caption_track.id = "CAPTION_TRACK_ID"
+
+        result = svc.get_transcript("VIDEO_ID")
+
+        youtube_api_client.get_video_info.assert_called_once_with(video_id="VIDEO_ID")
+        video.caption.find_matching_track.assert_called_once_with(
+            CAPTION_TRACK_PREFERENCES
+        )
+        youtube_api_client.get_transcript.assert_called_once_with(caption_track)
+
+        assert result == [{"text": "text", "start": 1.0, "duration": 2.0}]
         # It should have cached the transcript in the DB.
         assert db_session.scalars(select(Transcript)).all() == [
             Any.instance_of(Transcript).with_attrs(
                 {
-                    "video_id": "test_video_id",
-                    "transcript": YouTubeTranscriptApi.get_transcript.return_value,
+                    "video_id": "VIDEO_ID",
+                    "transcript_id": "CAPTION_TRACK_ID",
+                    "transcript": [{"text": "text", "start": 1.0, "duration": 2.0}],
                 }
             )
         ]
 
-    def test_get_transcript_returns_cached_transcripts(
-        self, db_session, transcript_factory, svc, YouTubeTranscriptApi
+    def test_get_transcript_from_youtube_errors_if_no_transcripts(
+        self, svc, youtube_api_client
+    ):
+        video = youtube_api_client.get_video_info.return_value
+        video.caption.find_matching_track.return_value = None
+
+        with pytest.raises(YouTubeDataAPIError):
+            svc.get_transcript("VIDEO_ID")
+
+    def test_get_transcript_from_db(
+        self, db_session, transcript_factory, svc, youtube_api_client
     ):
         # Add our decoy first to check we aren't picking by row number
         decoy_transcript = transcript_factory(transcript_id="en-us")
@@ -131,7 +148,7 @@ class TestYouTubeService:
 
         returned_transcript = svc.get_transcript(transcript.video_id)
 
-        YouTubeTranscriptApi.get_transcript.assert_not_called()
+        youtube_api_client.get_video_info.assert_not_called()
         assert returned_transcript == transcript.transcript
 
     @pytest.mark.parametrize(
@@ -149,10 +166,15 @@ class TestYouTubeService:
         assert expected_url == svc.canonical_video_url(video_id)
 
     @pytest.fixture
-    def svc(self, db_session, http_service):
+    def youtube_api_client(self):
+        return create_autospec(YouTubeAPIClient, spec_set=True, instance=True)
+
+    @pytest.fixture
+    def svc(self, db_session, http_service, youtube_api_client):
         return YouTubeService(
             db_session=db_session,
             enabled=True,
+            api_client=youtube_api_client,
             api_key=sentinel.api_key,
             http_service=http_service,
         )
@@ -160,27 +182,29 @@ class TestYouTubeService:
 
 class TestFactory:
     def test_it(
-        self, YouTubeService, youtube_service, pyramid_request, http_service, db_session
+        self,
+        pyramid_request,
+        http_service,
+        db_session,
+        YouTubeService,
+        YouTubeAPIClient,
     ):
         returned = factory(sentinel.context, pyramid_request)
 
+        YouTubeAPIClient.assert_called_once_with()
         YouTubeService.assert_called_once_with(
             db_session=db_session,
             enabled=pyramid_request.registry.settings["youtube_transcripts"],
+            api_client=YouTubeAPIClient.return_value,
             api_key="test_youtube_api_key",
             http_service=http_service,
         )
-        assert returned == youtube_service
+        assert returned == YouTubeService.return_value
+
+    @pytest.fixture(autouse=True)
+    def YouTubeAPIClient(self, patch):
+        return patch("via.services.youtube.YouTubeAPIClient")
 
     @pytest.fixture(autouse=True)
     def YouTubeService(self, patch):
         return patch("via.services.youtube.YouTubeService")
-
-    @pytest.fixture
-    def youtube_service(self, YouTubeService):
-        return YouTubeService.return_value
-
-
-@pytest.fixture(autouse=True)
-def YouTubeTranscriptApi(patch):
-    return patch("via.services.youtube.YouTubeTranscriptApi")

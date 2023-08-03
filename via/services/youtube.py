@@ -1,22 +1,46 @@
+from dataclasses import asdict
 from urllib.parse import parse_qs, quote_plus, urlparse
 
+from h_matchers import Any
 from sqlalchemy import select
-from youtube_transcript_api import YouTubeTranscriptApi
 
 from via.models import Transcript, Video
 from via.services.http import HTTPService
+from via.services.youtube_api import CaptionTrack, YouTubeAPIClient
 
 
 class YouTubeDataAPIError(Exception):
     """A problem with calling the YouTube Data API."""
 
 
+CAPTION_TRACK_PREFERENCES = (
+    # Plain English first
+    CaptionTrack(language_code="en"),
+    # Plain varieties of English
+    CaptionTrack(language_code=Any.string.matching("^en-.*")),
+    # Sub-categories of plain English
+    CaptionTrack(language_code="en", name=Any()),
+    # English varieties with names
+    CaptionTrack(language_code=Any.string.matching("^en-.*"), name=Any()),
+    # Auto generated English
+    CaptionTrack(language_code=Any.string.matching("en"), name=Any(), kind=Any()),
+    # Any auto generated English
+    CaptionTrack(language_code=Any.string.matching("^en-.*"), name=Any(), kind=Any()),
+)
+
+
 class YouTubeService:
-    def __init__(
-        self, db_session, enabled: bool, api_key: str, http_service: HTTPService
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        db_session,
+        enabled: bool,
+        api_client: YouTubeAPIClient,
+        api_key: str,
+        http_service: HTTPService,
     ):
         self._db = db_session
         self._enabled = enabled
+        self._api_client = api_client
         self._api_key = api_key
         self._http_service = http_service
 
@@ -105,12 +129,18 @@ class YouTubeService:
         ).first():
             return transcript_model.transcript
 
-        # If there is no match, retrieve a transcript from YouTube and store it
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=("en",))
-        self._db.add(
-            Transcript(video_id=video_id, transcript_id="en", transcript=transcript)
-        )
+        # Then look up a transcript matching our preferences
+        video = self._api_client.get_video_info(video_id=video_id)
+        caption_track = video.caption.find_matching_track(CAPTION_TRACK_PREFERENCES)
+        if not caption_track:
+            raise YouTubeDataAPIError(f"No transcript found for '{video_id}'")
 
+        transcript = asdict(self._api_client.get_transcript(caption_track))["text"]
+        self._db.add(
+            Transcript(
+                video_id=video_id, transcript_id=caption_track.id, transcript=transcript
+            )
+        )
         return transcript
 
 
@@ -118,6 +148,7 @@ def factory(_context, request):
     return YouTubeService(
         db_session=request.db,
         enabled=request.registry.settings["youtube_transcripts"],
+        api_client=YouTubeAPIClient(),
         api_key=request.registry.settings["youtube_api_key"],
         http_service=request.find_service(HTTPService),
     )
