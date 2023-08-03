@@ -1,3 +1,4 @@
+from datetime import timedelta
 from io import BytesIO
 from unittest.mock import sentinel
 
@@ -115,11 +116,19 @@ class TestYouTubeService:
             )
         ]
 
-    @pytest.mark.usefixtures("db_session")
-    @pytest.mark.parametrize("transcript__transcript_id", ["en"])
     def test_get_transcript_returns_cached_transcripts(
-        self, transcript, svc, YouTubeTranscriptApi
+        self, db_session, transcript_factory, svc, YouTubeTranscriptApi
     ):
+        # Add our decoy first to check we aren't picking by row number
+        decoy_transcript = transcript_factory(transcript_id="en-us")
+        transcript = transcript_factory(
+            video_id=decoy_transcript.video_id, transcript_id="en"
+        )
+        # Flush to generate created dates and move the decoy to have a later
+        # created date
+        db_session.flush()
+        decoy_transcript.created += timedelta(hours=1)
+
         returned_transcript = svc.get_transcript(transcript.video_id)
 
         YouTubeTranscriptApi.get_transcript.assert_not_called()
