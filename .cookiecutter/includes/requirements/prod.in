@@ -8,11 +8,9 @@ pyramid-exclog
 pyramid-jinja2
 pyramid-sanity
 pyramid-services
-pyramid-tm
 requests
 whitenoise
 google-auth-oauthlib
 marshmallow
 webargs
 youtube-transcript-api
-zope.sqlalchemy
