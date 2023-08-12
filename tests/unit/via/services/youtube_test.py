@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import BytesIO
 from unittest.mock import sentinel
 
@@ -116,7 +117,6 @@ class TestYouTubeService:
         ]
 
     @pytest.mark.usefixtures("db_session")
-    @pytest.mark.parametrize("transcript__transcript_id", ["en"])
     def test_get_transcript_returns_cached_transcripts(
         self, transcript, svc, YouTubeTranscriptApi
     ):
@@ -124,6 +124,21 @@ class TestYouTubeService:
 
         YouTubeTranscriptApi.get_transcript.assert_not_called()
         assert returned_transcript == transcript.transcript
+
+    @pytest.mark.usefixtures("db_session")
+    def test_get_transcript_returns_oldest_cached_transcript(
+        self, transcript_factory, svc
+    ):
+        """If there are multiple cached transcripts get_transcript() returns the oldest one."""
+        oldest_transcript, newer_transcript = transcript_factory.create_batch(
+            2, video_id="video_id"
+        )
+        oldest_transcript.created = datetime(2023, 8, 11)
+        newer_transcript.created = datetime(2023, 8, 12)
+
+        returned_transcript = svc.get_transcript("video_id")
+
+        assert returned_transcript == oldest_transcript.transcript
 
     @pytest.mark.parametrize(
         "video_id,expected_url",

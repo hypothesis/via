@@ -1,7 +1,6 @@
 from urllib.parse import parse_qs, quote_plus, urlparse
 
 from sqlalchemy import select
-from sqlalchemy.exc import NoResultFound
 from youtube_transcript_api import YouTubeTranscriptApi
 
 from via.models import Transcript, Video
@@ -95,31 +94,17 @@ class YouTubeService:
         :raise Exception: this method might raise any type of exception that
             YouTubeTranscriptApi raises
         """
-        transcript_id = language_code = "en"
+        if transcript := self._db.scalars(
+            select(Transcript)
+            .where(Transcript.video_id == video_id)
+            .order_by(Transcript.created.asc())
+        ).first():
+            return transcript.transcript
 
-        try:
-            transcript = (
-                self._db.scalars(
-                    select(Transcript).where(
-                        Transcript.video_id == video_id,
-                        Transcript.transcript_id == transcript_id,
-                    )
-                )
-                .one()
-                .transcript
-            )
-        except NoResultFound:
-            transcript = YouTubeTranscriptApi.get_transcript(
-                video_id, languages=(language_code,)
-            )
-            self._db.add(
-                Transcript(
-                    video_id=video_id,
-                    transcript_id=transcript_id,
-                    transcript=transcript,
-                )
-            )
-
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=("en",))
+        self._db.add(
+            Transcript(video_id=video_id, transcript_id="en", transcript=transcript)
+        )
         return transcript
 
 
