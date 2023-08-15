@@ -28,6 +28,7 @@ class TestYouTubeService:
                 enabled=enabled,
                 api_key=api_key,
                 http_service=sentinel.http_service,
+                youtube_transcript_service=sentinel.youtube_transcript_service,
             ).enabled
             == expected
         )
@@ -94,38 +95,45 @@ class TestYouTubeService:
 
         assert exc_info.value.__cause__ == http_service.get.side_effect
 
-    def test_get_transcript(self, db_session, svc, YouTubeTranscriptApi):
-        YouTubeTranscriptApi.get_transcript.return_value = [
-            {"text": "foo", "start": 0.0, "duration": 1.0},
-            {"text": "bar", "start": 1.0, "duration": 2.0},
-        ]
+    def test_get_transcript(
+        self, db_session, svc, youtube_transcript_service, transcript_info
+    ):
+        youtube_transcript_service.pick_default_transcript.return_value = (
+            transcript_info
+        )
+        youtube_transcript_service.get_transcript.return_value = "test_transcript"
 
         returned_transcript = svc.get_transcript("test_video_id")
 
-        YouTubeTranscriptApi.get_transcript.assert_called_once_with(
-            "test_video_id", languages=("en",)
+        youtube_transcript_service.get_transcript_infos.assert_called_once_with(
+            "test_video_id"
         )
-        assert returned_transcript == YouTubeTranscriptApi.get_transcript.return_value
+        youtube_transcript_service.pick_default_transcript.assert_called_once_with(
+            youtube_transcript_service.get_transcript_infos.return_value
+        )
+        youtube_transcript_service.get_transcript.assert_called_once_with(
+            transcript_info
+        )
+        assert returned_transcript == "test_transcript"
         # It should have cached the transcript in the DB.
         assert db_session.scalars(select(Transcript)).all() == [
             Any.instance_of(Transcript).with_attrs(
                 {
                     "video_id": "test_video_id",
-                    "transcript": YouTubeTranscriptApi.get_transcript.return_value,
+                    "transcript_id": transcript_info.id,
+                    "transcript": "test_transcript",
                 }
             )
         ]
 
-    @pytest.mark.usefixtures("db_session")
     def test_get_transcript_returns_cached_transcripts(
-        self, transcript, svc, YouTubeTranscriptApi
+        self, svc, transcript, youtube_transcript_service
     ):
         returned_transcript = svc.get_transcript(transcript.video_id)
 
-        YouTubeTranscriptApi.get_transcript.assert_not_called()
+        youtube_transcript_service.get_transcript.assert_not_called()
         assert returned_transcript == transcript.transcript
 
-    @pytest.mark.usefixtures("db_session")
     def test_get_transcript_returns_oldest_cached_transcript(
         self, transcript_factory, svc
     ):
@@ -155,18 +163,25 @@ class TestYouTubeService:
         assert expected_url == svc.canonical_video_url(video_id)
 
     @pytest.fixture
-    def svc(self, db_session, http_service):
+    def svc(self, db_session, http_service, youtube_transcript_service):
         return YouTubeService(
             db_session=db_session,
             enabled=True,
             api_key=sentinel.api_key,
             http_service=http_service,
+            youtube_transcript_service=youtube_transcript_service,
         )
 
 
 class TestFactory:
     def test_it(
-        self, YouTubeService, youtube_service, pyramid_request, http_service, db_session
+        self,
+        YouTubeService,
+        youtube_service,
+        pyramid_request,
+        http_service,
+        db_session,
+        youtube_transcript_service,
     ):
         returned = factory(sentinel.context, pyramid_request)
 
@@ -175,6 +190,7 @@ class TestFactory:
             enabled=pyramid_request.registry.settings["youtube_transcripts"],
             api_key="test_youtube_api_key",
             http_service=http_service,
+            youtube_transcript_service=youtube_transcript_service,
         )
         assert returned == youtube_service
 
@@ -185,8 +201,3 @@ class TestFactory:
     @pytest.fixture
     def youtube_service(self, YouTubeService):
         return YouTubeService.return_value
-
-
-@pytest.fixture(autouse=True)
-def YouTubeTranscriptApi(patch):
-    return patch("via.services.youtube.YouTubeTranscriptApi")

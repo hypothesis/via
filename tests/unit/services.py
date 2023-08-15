@@ -11,6 +11,7 @@ from via.services import (
     URLDetailsService,
     ViaClientService,
     YouTubeService,
+    YouTubeTranscriptService,
 )
 
 
@@ -69,3 +70,8 @@ def youtube_service(mock_service):
     youtube_service.get_video_id.return_value = None
 
     return youtube_service
+
+
+@pytest.fixture
+def youtube_transcript_service(mock_service):
+    return mock_service(YouTubeTranscriptService)

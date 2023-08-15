@@ -7,7 +7,7 @@ from pytest_factoryboy import register
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from tests.factories import TranscriptFactory, VideoFactory
+from tests.factories import TranscriptFactory, TranscriptInfoFactory, VideoFactory
 from tests.factories.factoryboy_sqlalchemy_session import (
     clear_factoryboy_sqlalchemy_session,
     set_factoryboy_sqlalchemy_session,
@@ -16,6 +16,7 @@ from via.db import Base
 
 # Each factory has to be registered with pytest_factoryboy.
 register(TranscriptFactory)
+register(TranscriptInfoFactory)
 register(VideoFactory)
 
 
