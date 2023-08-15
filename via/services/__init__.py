@@ -12,6 +12,7 @@ from via.services.secure_link import SecureLinkService, has_secure_url_token
 from via.services.url_details import URLDetailsService
 from via.services.via_client import ViaClientService
 from via.services.youtube import YouTubeService
+from via.services.youtube_transcript import YouTubeTranscriptService
 
 
 def includeme(config):  # pragma: no cover
@@ -36,6 +37,9 @@ def includeme(config):  # pragma: no cover
 
     config.register_service_factory(
         "via.services.youtube.factory", iface=YouTubeService
+    )
+    config.register_service_factory(
+        "via.services.youtube_transcript.factory", iface=YouTubeTranscriptService
     )
 
     config.register_service_factory(

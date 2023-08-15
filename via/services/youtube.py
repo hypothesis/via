@@ -1,10 +1,10 @@
 from urllib.parse import parse_qs, quote_plus, urlparse
 
 from sqlalchemy import select
-from youtube_transcript_api import YouTubeTranscriptApi
 
 from via.models import Transcript, Video
 from via.services.http import HTTPService
+from via.services.youtube_transcript import YouTubeTranscriptService
 
 
 class YouTubeDataAPIError(Exception):
@@ -12,13 +12,19 @@ class YouTubeDataAPIError(Exception):
 
 
 class YouTubeService:
-    def __init__(
-        self, db_session, enabled: bool, api_key: str, http_service: HTTPService
+    def __init__(  # pylint:disable=too-many-arguments
+        self,
+        db_session,
+        enabled: bool,
+        api_key: str,
+        http_service: HTTPService,
+        youtube_transcript_service: YouTubeTranscriptService,
     ):
         self._db = db_session
         self._enabled = enabled
         self._api_key = api_key
         self._http_service = http_service
+        self._transcript_svc = youtube_transcript_service
 
     @property
     def enabled(self):
@@ -101,10 +107,18 @@ class YouTubeService:
         ).first():
             return transcript.transcript
 
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=("en",))
+        transcript_infos = self._transcript_svc.get_transcript_infos(video_id)
+        transcript_info = self._transcript_svc.pick_default_transcript(transcript_infos)
+        transcript = self._transcript_svc.get_transcript(transcript_info)
+
         self._db.add(
-            Transcript(video_id=video_id, transcript_id="en", transcript=transcript)
+            Transcript(
+                video_id=video_id,
+                transcript_id=transcript_info.id,
+                transcript=transcript,
+            )
         )
+
         return transcript
 
 
@@ -114,4 +128,5 @@ def factory(_context, request):
         enabled=request.registry.settings["youtube_transcripts"],
         api_key=request.registry.settings["youtube_api_key"],
         http_service=request.find_service(HTTPService),
+        youtube_transcript_service=request.find_service(YouTubeTranscriptService),
     )
