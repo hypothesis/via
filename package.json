@@ -28,7 +28,7 @@
     "focus-visible": "^5.2.0",
     "gulp": "^4.0.2",
     "postcss": "^8.4.27",
-    "preact": "^10.13.2",
+    "preact": "^10.17.1",
     "rollup": "^3.23.1",
     "sass": "^1.63.6",
     "tailwindcss": "^3.3.3",
