@@ -61,7 +61,7 @@ greenlet==2.0.2
     # via
     #   -r requirements/prod.txt
     #   sqlalchemy
-gunicorn==20.1.0
+gunicorn==21.2.0
     # via -r requirements/prod.txt
 h-assets==1.0.5
     # via -r requirements/prod.txt
@@ -132,6 +132,7 @@ packaging==21.3
     # via
     #   -r requirements/prod.txt
     #   build
+    #   gunicorn
     #   marshmallow
     #   pytest
     #   webargs
@@ -326,7 +327,6 @@ pip==23.1.2
 setuptools==67.7.2
     # via
     #   -r requirements/prod.txt
-    #   gunicorn
     #   jsonschema
     #   pastedeploy
     #   pip-tools

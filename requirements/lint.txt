@@ -99,7 +99,7 @@ greenlet==2.0.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   sqlalchemy
-gunicorn==20.1.0
+gunicorn==21.2.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -208,6 +208,7 @@ packaging==21.3
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   build
+    #   gunicorn
     #   marshmallow
     #   pytest
     #   webargs
@@ -499,7 +500,6 @@ setuptools==67.7.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   gunicorn
     #   jsonschema
     #   pastedeploy
     #   pip-tools
