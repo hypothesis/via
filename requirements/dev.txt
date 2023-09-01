@@ -189,7 +189,7 @@ pycparser==2.21
     #   cffi
 pygments==2.15.0
     # via ipython
-pyjwt==2.7.0
+pyjwt==2.8.0
     # via -r requirements/prod.txt
 pyparsing==3.0.7
     # via
