@@ -175,7 +175,7 @@ pycparser==2.21
     # via
     #   -r requirements/prod.txt
     #   cffi
-pyjwt==2.7.0
+pyjwt==2.8.0
     # via -r requirements/prod.txt
 pyparsing==3.0.7
     # via
