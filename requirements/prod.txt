@@ -30,7 +30,7 @@ google-auth-oauthlib==1.0.0
     # via -r requirements/prod.in
 greenlet==2.0.2
     # via sqlalchemy
-gunicorn==20.1.0
+gunicorn==21.2.0
     # via -r requirements/prod.in
 h-assets==1.0.5
     # via -r requirements/prod.in
@@ -74,6 +74,7 @@ oauthlib==3.2.2
     # via requests-oauthlib
 packaging==21.3
     # via
+    #   gunicorn
     #   marshmallow
     #   webargs
     #   zope-sqlalchemy
@@ -194,7 +195,6 @@ zope-sqlalchemy==3.0
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==67.7.2
     # via
-    #   gunicorn
     #   jsonschema
     #   pastedeploy
     #   plaster
