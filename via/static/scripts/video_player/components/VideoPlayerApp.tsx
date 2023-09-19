@@ -466,6 +466,10 @@ export default function VideoPlayerApp({
               <ToastMessages
                 messages={toastMessages}
                 onMessageDismiss={dismissToastMessage}
+                transitionClasses={{
+                  transitionIn:
+                    'lg:motion-safe:animate-slide-in-from-right animate-fade-in motion-reduce:animate-fade-in',
+                }}
               />
             </div>
             {isLoading && (
