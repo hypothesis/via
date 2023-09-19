@@ -7,7 +7,8 @@ on:
 jobs:
   on-failure:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}    steps:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
       - name: Post to Slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
