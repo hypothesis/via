@@ -8,9 +8,6 @@ on:
       qa:
         type: boolean
         description: Redeploy QA
-      staging:
-        type: boolean
-        description: Redeploy Staging
       QA_Edu:
         type: boolean
         description: Redeploy QA (Edu)
@@ -32,18 +29,6 @@ jobs:
       aws_region: us-west-1
       elasticbeanstalk_application: via
       elasticbeanstalk_environment: qa
-    secrets: inherit
-  staging:
-    name: Staging
-    if: inputs.staging
-    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
-    with:
-      operation: redeploy
-      github_environment_name: Staging
-      github_environment_url: https://via.staging.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek
-      aws_region: us-west-1
-      elasticbeanstalk_application: via
-      elasticbeanstalk_environment: staging
     secrets: inherit
   QA_Edu:
     name: QA (Edu)
