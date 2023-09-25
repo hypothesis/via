@@ -123,29 +123,7 @@ describe('ToastMessages', () => {
     assert.equal(fakeOnMessageDismiss.callCount, 1);
   });
 
-  ['slide-in-from-right', 'fade-in', 'fade-out'].forEach(animationName => {
-    it('invokes onTransitionEnd when supported animation is dispatched', () => {
-      const wrapper = createToastMessages(toastMessages, callback =>
-        callback()
-      );
-      const animationContainer = wrapper
-        .find('[data-testid="animation-container"]')
-        .first();
-
-      // Trigger "in" animation for all messages, which will schedule dismiss
-      toastMessages.forEach((_, index) => {
-        triggerAnimationEnd(wrapper, index, 'in');
-      });
-
-      animationContainer
-        .getDOMNode()
-        .dispatchEvent(new AnimationEvent('animationend', { animationName }));
-
-      assert.called(fakeOnMessageDismiss);
-    });
-  });
-
-  it('does not invoke onTransitionEnd for irrelevant animations', () => {
+  it('invokes onTransitionEnd when animation happens on container', () => {
     const wrapper = createToastMessages(toastMessages, callback => callback());
     const animationContainer = wrapper
       .find('[data-testid="animation-container"]')
@@ -158,9 +136,23 @@ describe('ToastMessages', () => {
 
     animationContainer
       .getDOMNode()
-      .dispatchEvent(
-        new AnimationEvent('animationend', { animationName: 'invalid' })
-      );
+      .dispatchEvent(new AnimationEvent('animationend'));
+
+    assert.called(fakeOnMessageDismiss);
+  });
+
+  it('does not invoke onTransitionEnd for animation events bubbling from children', () => {
+    const wrapper = createToastMessages(toastMessages, callback => callback());
+    const invalidAnimationContainer = wrapper.find('Callout').first();
+
+    // Trigger "in" animation for all messages, which will schedule dismiss
+    toastMessages.forEach((_, index) => {
+      triggerAnimationEnd(wrapper, index, 'in');
+    });
+
+    invalidAnimationContainer
+      .getDOMNode()
+      .dispatchEvent(new AnimationEvent('animationend', { bubbles: true }));
 
     assert.notCalled(fakeOnMessageDismiss);
   });

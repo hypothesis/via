@@ -1,8 +1,12 @@
 import type { TransitionComponent } from '@hypothesis/frontend-shared';
 import { Callout } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
-import type { ComponentChildren } from 'preact';
-import { useCallback, useRef, useState } from 'preact/hooks';
+import type {
+  ComponentChildren,
+  ComponentProps,
+  FunctionComponent,
+} from 'preact';
+import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
 
 export type ToastMessage = {
   id: string;
@@ -20,6 +24,13 @@ export type ToastMessage = {
    * Defaults to true.
    */
   autoDismiss?: boolean;
+};
+
+export type ToastMessageTransitionClasses = {
+  /** Classes to apply to a toast message when appended. Defaults to 'animate-fade-in' */
+  transitionIn?: string;
+  /** Classes to apply to a toast message being dismissed. Defaults to 'animate-fade-out' */
+  transitionOut?: string;
 };
 
 type ToastMessageItemProps = {
@@ -55,40 +66,46 @@ function ToastMessageItem({ message, onDismiss }: ToastMessageItemProps) {
   );
 }
 
-const BaseToastMessageTransition: TransitionComponent = ({
+type BaseToastMessageTransitionType = FunctionComponent<
+  ComponentProps<TransitionComponent> & {
+    transitionClasses?: ToastMessageTransitionClasses;
+  }
+>;
+
+const BaseToastMessageTransition: BaseToastMessageTransitionType = ({
   direction = 'in',
   onTransitionEnd,
   children,
+  transitionClasses = {},
 }) => {
   const isDismissed = direction === 'out';
   const containerRef = useRef<HTMLDivElement>(null);
   const handleAnimation = (e: AnimationEvent) => {
-    // Ignore non-relevant animations:
-    // * Happening on child elements
-    // * Animations which are not relevant for toast messages getting "in" or "out"
-    if (
-      e.target !== containerRef.current ||
-      !['slide-in-from-right', 'fade-in', 'fade-out'].includes(e.animationName)
-    ) {
+    // Ignore animations happening on child elements
+    if (e.target !== containerRef.current) {
       return;
     }
 
     onTransitionEnd?.(direction);
   };
+  const classes = useMemo(() => {
+    const {
+      transitionIn = 'animate-fade-in',
+      transitionOut = 'animate-fade-out',
+    } = transitionClasses;
+
+    return {
+      [transitionIn]: !isDismissed,
+      [transitionOut]: isDismissed,
+    };
+  }, [isDismissed, transitionClasses]);
 
   return (
     <div
       data-testid="animation-container"
       onAnimationEnd={handleAnimation}
       ref={containerRef}
-      className={classnames('relative w-full container', {
-        // Only ever slide-from-right if motion-safe is preferred
-        'lg:motion-safe:animate-slide-in-from-right animate-fade-in':
-          !isDismissed,
-        // Only ever fade-in if motion-reduction is preferred
-        'motion-reduce:animate-fade-in': !isDismissed,
-        'animate-fade-out': isDismissed,
-      })}
+      className={classnames('relative w-full container', classes)}
     >
       {children}
     </div>
@@ -98,6 +115,7 @@ const BaseToastMessageTransition: TransitionComponent = ({
 export type ToastMessagesProps = {
   messages: ToastMessage[];
   onMessageDismiss: (id: string) => void;
+  transitionClasses?: ToastMessageTransitionClasses;
   setTimeout_?: typeof setTimeout;
 };
 
@@ -108,6 +126,7 @@ export type ToastMessagesProps = {
 export default function ToastMessages({
   messages,
   onMessageDismiss,
+  transitionClasses,
   /* istanbul ignore next - test seam */
   setTimeout_ = setTimeout,
 }: ToastMessagesProps) {
@@ -174,6 +193,7 @@ export default function ToastMessages({
             <BaseToastMessageTransition
               direction={isDismissed ? 'out' : 'in'}
               onTransitionEnd={direction => onTransitionEnd(direction, message)}
+              transitionClasses={transitionClasses}
             >
               <ToastMessageItem message={message} onDismiss={dismissMessage} />
             </BaseToastMessageTransition>
