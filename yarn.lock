@@ -2222,9 +2222,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:^15.0.2":
-  version: 15.0.2
-  resolution: "@rollup/plugin-node-resolve@npm:15.0.2"
+"@rollup/plugin-node-resolve@npm:^15.2.1":
+  version: 15.2.1
+  resolution: "@rollup/plugin-node-resolve@npm:15.2.1"
   dependencies:
     "@rollup/pluginutils": ^5.0.1
     "@types/resolve": 1.20.2
@@ -2237,7 +2237,7 @@ __metadata:
   peerDependenciesMeta:
     rollup:
       optional: true
-  checksum: 328eafee06ff967a36441b55e77fbd0d4f599d256e5d1977800ee71915846c46bc1b6185df35c7b512ad2b4023b05b65a332be77b8b00b9d8a20f87d056b8166
+  checksum: e8f706db6ab826e80d1c9a85d2d1e736f2f78a34ea5d49dd0004d6603249a504696967674b2f021cd144536b88d24ffa058383f08b61b4b665be3c7bfacc006a
   languageName: node
   linkType: hard
 
@@ -9159,9 +9159,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^3.23.1":
-  version: 3.23.1
-  resolution: "rollup@npm:3.23.1"
+"rollup@npm:^3.29.4":
+  version: 3.29.4
+  resolution: "rollup@npm:3.29.4"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -9169,7 +9169,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 4b3b3bbfd490b41ec5473d1141fe2beb0c86f600b56378fce97e0485192818256f8cbf4d43450b097ee7042e6629fb0187488807e2d15050860718f458c44685
+  checksum: 8bb20a39c8d91130825159c3823eccf4dc2295c9a0a5c4ed851a5bf2167dbf24d9a29f23461a54c955e5506395e6cc188eafc8ab0e20399d7489fb33793b184e
   languageName: node
   linkType: hard
 
@@ -10538,7 +10538,7 @@ __metadata:
     "@hypothesis/frontend-shared": ^6.1.1
     "@rollup/plugin-babel": ^6.0.3
     "@rollup/plugin-commonjs": ^25.0.4
-    "@rollup/plugin-node-resolve": ^15.0.2
+    "@rollup/plugin-node-resolve": ^15.2.1
     "@rollup/plugin-replace": ^5.0.2
     "@rollup/plugin-terser": ^0.4.3
     "@rollup/plugin-virtual": ^3.0.1
@@ -10573,7 +10573,7 @@ __metadata:
     postcss: ^8.4.27
     preact: ^10.17.1
     prettier: ^2.8.8
-    rollup: ^3.23.1
+    rollup: ^3.29.4
     sass: ^1.63.6
     sinon: ^15.2.0
     tailwindcss: ^3.3.3
