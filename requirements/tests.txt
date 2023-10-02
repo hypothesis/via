@@ -247,7 +247,7 @@ six==1.15.0
     #   google-auth
     #   jsonschema
     #   python-dateutil
-sqlalchemy==2.0.19
+sqlalchemy==2.0.21
     # via
     #   -r requirements/prod.txt
     #   alembic
