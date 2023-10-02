@@ -140,7 +140,7 @@ importlib-metadata==6.0.0
     #   alembic
     #   h-vialib
     #   pip-sync-faster
-importlib-resources==6.0.0
+importlib-resources==6.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

@@ -46,7 +46,7 @@ importlib-metadata==6.0.0
     # via
     #   alembic
     #   h-vialib
-importlib-resources==6.0.0
+importlib-resources==6.1.0
     # via
     #   -r requirements/prod.in
     #   alembic
