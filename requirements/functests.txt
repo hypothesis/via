@@ -45,6 +45,8 @@ ecdsa==0.18.0
     #   python-jose
 exceptiongroup==1.0.0rc9
     # via pytest
+execnet==2.0.2
+    # via pytest-xdist
 factory-boy==3.3.0
     # via
     #   -r requirements/functests.in
@@ -162,6 +164,8 @@ plaster-pastedeploy==0.7
     #   pyramid
 pluggy==0.13.1
     # via pytest
+psutil==5.9.5
+    # via pytest-xdist
 psycopg2==2.9.6
     # via -r requirements/prod.txt
 pyasn1==0.4.8
@@ -212,7 +216,10 @@ pytest==7.4.0
     # via
     #   -r requirements/functests.in
     #   pytest-factoryboy
+    #   pytest-xdist
 pytest-factoryboy==2.5.1
+    # via -r requirements/functests.in
+pytest-xdist[psutil]==3.3.1
     # via -r requirements/functests.in
 python-dateutil==2.8.2
     # via faker
