@@ -1,8 +1,8 @@
 pip-tools
 pip-sync-faster
 -r prod.txt
-coverage[toml]
 pytest
+pytest-coverage
 factory-boy
 pytest-factoryboy
 h-matchers

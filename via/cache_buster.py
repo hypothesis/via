@@ -21,7 +21,7 @@ class PathCacheBuster:
     def __init__(self, path):
         self.salt = self._generate_salt(path)
 
-    def __call__(self, request, subpath, kw):  # pylint: disable=invalid-name
+    def __call__(self, request, subpath, kw):
         """Prepend the salt to the path.
 
         Implements the ICacheBuster interface.
