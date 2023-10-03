@@ -45,12 +45,16 @@ ecdsa==0.18.0
     #   python-jose
 exceptiongroup==1.0.0rc9
     # via pytest
+execnet==2.0.2
+    # via pytest-xdist
 factory-boy==3.3.0
     # via
     #   -r requirements/tests.in
     #   pytest-factoryboy
 faker==18.9.0
     # via factory-boy
+filelock==3.12.4
+    # via -r requirements/tests.in
 freezegun==1.2.2
     # via -r requirements/tests.in
 google-auth==2.16.0
@@ -162,6 +166,8 @@ plaster-pastedeploy==0.7
     #   pyramid
 pluggy==0.13.1
     # via pytest
+psutil==5.9.5
+    # via pytest-xdist
 psycopg2==2.9.6
     # via -r requirements/prod.txt
 pyasn1==0.4.8
@@ -213,6 +219,7 @@ pytest==7.4.0
     #   -r requirements/tests.in
     #   pytest-cov
     #   pytest-factoryboy
+    #   pytest-xdist
 pytest-cov==4.1.0
     # via pytest-cover
 pytest-cover==3.0.0
@@ -220,6 +227,8 @@ pytest-cover==3.0.0
 pytest-coverage==0.0
     # via -r requirements/tests.in
 pytest-factoryboy==2.5.1
+    # via -r requirements/tests.in
+pytest-xdist[psutil]==3.3.1
     # via -r requirements/tests.in
 python-dateutil==2.8.2
     # via

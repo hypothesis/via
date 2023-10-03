@@ -2,6 +2,7 @@ from os import environ
 
 import httpretty
 import pytest
+from filelock import FileLock
 from h_matchers import Any
 from pytest_factoryboy import register
 from sqlalchemy import create_engine
@@ -68,11 +69,38 @@ def httpretty_():
 
 
 @pytest.fixture(scope="session")
-def db_engine():
+def db_engine(tmp_path_factory):
     engine = create_engine(environ["DATABASE_URL"])
 
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    # Use a filelock to only init the DB once even though we have multiple
+    # parallel pytest-xdist workers. See:
+    # https://pytest-xdist.readthedocs.io/en/stable/how-to.html#making-session-scoped-fixtures-execute-only-once
+
+    # The temporary directory shared by all pytest-xdist workers.
+    shared_tmpdir = tmp_path_factory.getbasetemp().parent
+
+    # The existence of this file records that a worker has initialized the DB.
+    done_file = shared_tmpdir / "db_initialized.done"
+
+    # The lock file prevents workers from entering the `with` at the same time.
+    lock_file = shared_tmpdir / "db_initialized.lock"
+
+    with FileLock(str(lock_file)):
+        if done_file.is_file():
+            # Another worker already initialized the DB.
+            pass
+        else:
+            # Delete all database tables and re-initialize the database schema
+            # based on the current models. Doing this at the beginning of each
+            # test run ensures that any schema changes made to the models since
+            # the last test run will be applied to the test DB schema before
+            # running the tests again.
+            Base.metadata.drop_all(engine)
+            Base.metadata.create_all(engine)
+
+            # Make sure that no other worker tries to init the DB after we
+            # release the lock file.
+            done_file.touch()
 
     return engine
 

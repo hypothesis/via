@@ -34,6 +34,7 @@
     "__docker_network": "via_default",
     "__github_url": "https://github.com/hypothesis/via",
     "__hdev_project_type": "application",
-    "__copyright_year": "2016"
+    "__copyright_year": "2016",
+    "__parallel_unit_tests": true
   }
 }

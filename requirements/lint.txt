@@ -75,6 +75,10 @@ exceptiongroup==1.0.0rc9
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pytest
+execnet==2.0.2
+    # via
+    #   -r requirements/tests.txt
+    #   pytest-xdist
 factory-boy==3.3.0
     # via
     #   -r requirements/functests.txt
@@ -85,6 +89,10 @@ faker==18.9.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   factory-boy
+filelock==3.12.4
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
 freezegun==1.2.2
     # via -r requirements/tests.txt
 google-auth==2.16.0
@@ -252,6 +260,10 @@ pluggy==0.13.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pytest
+psutil==5.9.5
+    # via
+    #   -r requirements/tests.txt
+    #   pytest-xdist
 psycopg2==2.9.6
     # via
     #   -r requirements/functests.txt
@@ -330,6 +342,7 @@ pytest==7.4.0
     #   -r requirements/tests.txt
     #   pytest-cov
     #   pytest-factoryboy
+    #   pytest-xdist
 pytest-cov==4.1.0
     # via
     #   -r requirements/tests.txt
@@ -344,6 +357,8 @@ pytest-factoryboy==2.5.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
+pytest-xdist[psutil]==3.3.1
+    # via -r requirements/tests.txt
 python-dateutil==2.8.2
     # via
     #   -r requirements/functests.txt
