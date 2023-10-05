@@ -1,7 +1,7 @@
+import { waitFor } from '@hypothesis/frontend-testing';
 import { mount } from 'enzyme';
 import { useRef } from 'preact/hooks';
 
-import { waitFor } from '../../../test-util/wait';
 import { useAppLayout } from '../use-app-layout';
 
 describe('useAppLayout', () => {

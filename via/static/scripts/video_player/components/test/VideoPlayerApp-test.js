@@ -1,13 +1,16 @@
+import {
+  mockImportedComponents,
+  delay,
+  waitForElement,
+} from '@hypothesis/frontend-testing';
 import { mount } from 'enzyme';
 import { useImperativeHandle } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 
-import { mockImportedComponents } from '../../../test-util/mock-imported-components';
 import {
   videoPlayerConfig,
   transcriptsAPIResponse,
 } from '../../../test-util/video-player-fixtures';
-import { delay, waitForElement } from '../../../test-util/wait';
 import { APIError } from '../../utils/api';
 import { clipDurations } from '../../utils/transcript';
 import VideoPlayerApp, { $imports } from '../VideoPlayerApp';
