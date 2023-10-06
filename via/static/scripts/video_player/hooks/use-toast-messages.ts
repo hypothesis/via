@@ -1,6 +1,5 @@
+import type { ToastMessage } from '@hypothesis/frontend-shared';
 import { useCallback, useState } from 'preact/hooks';
-
-import type { ToastMessage } from '../components/ToastMessages';
 
 export type ToastMessageData = Omit<ToastMessage, 'id'>;
 
