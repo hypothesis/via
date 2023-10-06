@@ -4,6 +4,7 @@ import {
   IconButton,
   LogoIcon,
   Spinner,
+  ToastMessages,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import {
@@ -26,7 +27,6 @@ import { clipDurations, mergeSegments } from '../utils/transcript';
 import CopyButton from './CopyButton';
 import FilterInput from './FilterInput';
 import HypothesisClient from './HypothesisClient';
-import ToastMessages from './ToastMessages';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
 import TranscriptError from './TranscriptError';
