@@ -2,7 +2,7 @@ pip-tools
 pip-sync-faster
 -r prod.txt
 pytest
-pytest-coverage
+pytest-cov
 factory-boy
 pytest-factoryboy
 h-matchers
