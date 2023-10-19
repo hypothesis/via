@@ -11,10 +11,10 @@
     "url": "https://github.com/hypothesis/via/issues"
   },
   "dependencies": {
-    "@babel/core": "^7.23.0",
-    "@babel/preset-env": "^7.22.20",
+    "@babel/core": "^7.23.2",
+    "@babel/preset-env": "^7.23.2",
     "@babel/preset-react": "^7.22.15",
-    "@babel/preset-typescript": "^7.23.0",
+    "@babel/preset-typescript": "^7.23.2",
     "@hypothesis/frontend-build": "^2.2.0",
     "@hypothesis/frontend-shared": "^6.8.1",
     "@rollup/plugin-babel": "^6.0.3",
