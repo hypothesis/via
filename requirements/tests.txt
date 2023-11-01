@@ -34,7 +34,9 @@ checkmatelib==1.0.15
 click==8.1.3
     # via pip-tools
 coverage[toml]==7.3.1
-    # via pytest-cov
+    # via
+    #   coverage
+    #   pytest-cov
 cryptography==41.0.4
     # via
     #   -r requirements/prod.txt
@@ -124,7 +126,7 @@ netaddr==0.8.0
     # via
     #   -r requirements/prod.txt
     #   checkmatelib
-newrelic==9.0.0
+newrelic==9.1.1
     # via -r requirements/prod.txt
 oauthlib==3.2.2
     # via
@@ -225,6 +227,7 @@ python-jose[cryptography]==3.3.0
     # via
     #   -r requirements/prod.txt
     #   h-vialib
+    #   python-jose
 requests==2.31.0
     # via
     #   -r requirements/prod.txt
