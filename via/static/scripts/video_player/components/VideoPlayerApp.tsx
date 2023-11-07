@@ -402,7 +402,7 @@ export default function VideoPlayerApp({
                   onClick={() => setPlaying(playing => !playing)}
                   data-testid="play-button"
                   variant="custom"
-                  classes="text-grey-7 hover:text-grey-9 font-semibold"
+                  classes="text-grey-7 hover:text-grey-9 font-semibold rounded"
                 >
                   {playing ? 'Pause' : 'Play'}
                 </Button>

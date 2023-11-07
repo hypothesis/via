@@ -138,7 +138,7 @@ function TranscriptSegment({
     () => (
       <li
         className={classnames(
-          'flex gap-x-3 p-1.5 rounded-[4px]',
+          'flex gap-x-3 p-1.5 rounded',
           // Margin needed to provide space for box shadow on current item
           'mb-1',
           {
