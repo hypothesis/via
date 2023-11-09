@@ -95,7 +95,7 @@ class GoogleDriveAPI:
 
     # Configure all the various types of timeout available to us, with the hope
     # that the shortest one will kick in first
-    TIMEOUT = 30
+    TIMEOUT = 60
 
     def __init__(self, credentials_list, resource_keys):
         """Initialise the service.
