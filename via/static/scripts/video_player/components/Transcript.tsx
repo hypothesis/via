@@ -1,4 +1,8 @@
-import { Scroll, ScrollContainer } from '@hypothesis/frontend-shared';
+import {
+  Scroll,
+  ScrollContainer,
+  useStableCallback,
+} from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import type { ComponentChildren, Ref } from 'preact';
 import {
@@ -10,7 +14,6 @@ import {
 } from 'preact/hooks';
 
 import { useScrollAnchor } from '../hooks/use-scroll-anchor';
-import { useStableCallback } from '../hooks/use-stable-callback';
 import { TextHighlighter } from '../utils/highlighter';
 import { formatTimestamp } from '../utils/time';
 import type { MatchOffset, Segment, TranscriptData } from '../utils/transcript';
