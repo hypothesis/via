@@ -1,7 +1,6 @@
-import { AspectRatio } from '@hypothesis/frontend-shared';
+import { AspectRatio, useStableCallback } from '@hypothesis/frontend-shared';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
-import { useStableCallback } from '../hooks/use-stable-callback';
 import { loadYouTubeIFrameAPI } from '../utils/youtube';
 
 /**
