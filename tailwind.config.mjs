@@ -13,12 +13,6 @@ export default {
         'fade-out': 'fade-out 0.3s forwards',
         'slide-in-from-right': 'slide-in-from-right 0.3s forwards ease-in-out',
       },
-      borderRadius: {
-        // Equivalent to tailwind default.
-        // Remove once frontend-shared preset does not define its own config
-        DEFAULT: '0.25rem',
-        lg: '0.5rem',
-      },
       fontFamily: {
         sans: [
           '"Helvetica Neue"',
