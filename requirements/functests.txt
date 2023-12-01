@@ -210,7 +210,7 @@ pytest==7.4.0
     # via
     #   -r requirements/functests.in
     #   pytest-factoryboy
-pytest-factoryboy==2.5.1
+pytest-factoryboy==2.6.0
     # via -r requirements/functests.in
 python-dateutil==2.8.2
     # via faker
