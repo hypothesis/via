@@ -86,7 +86,7 @@ plaster==1.0
     #   pyramid
 plaster-pastedeploy==0.7
     # via pyramid
-psycopg2==2.9.6
+psycopg2==2.9.9
     # via -r requirements/prod.in
 pyasn1==0.4.8
     # via
