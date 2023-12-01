@@ -1,5 +1,5 @@
 # Stage 1: Build frontend assets
-FROM node:21.1.0-alpine as frontend-build
+FROM node:21.2.0-alpine as frontend-build
 
 ENV NODE_ENV production
 RUN mkdir -p /tmp/frontend-build
