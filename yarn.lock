@@ -2554,10 +2554,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/youtube@npm:^0.0.49":
-  version: 0.0.49
-  resolution: "@types/youtube@npm:0.0.49"
-  checksum: 8ec51dd8407ba6c331d234ca15975aa1804c80bc9ec29953606be630ed9fcd8a9fa3586a26539171bf6dab9a3a405104cf9c00032a6a0dea58acda082c9d448a
+"@types/youtube@npm:^0.0.50":
+  version: 0.0.50
+  resolution: "@types/youtube@npm:0.0.50"
+  checksum: b5249965230dd76f08e2721600d5e0906bcaeb47d8460d98733a8868c0195b55c7e65d864c575b974ca604a90bf5aa85f98fc65414f575ab49362d46e672e308
   languageName: node
   linkType: hard
 
@@ -10836,7 +10836,7 @@ __metadata:
     "@rollup/plugin-terser": ^0.4.4
     "@rollup/plugin-virtual": ^3.0.2
     "@trivago/prettier-plugin-sort-imports": ^4.2.0
-    "@types/youtube": ^0.0.49
+    "@types/youtube": ^0.0.50
     "@typescript-eslint/eslint-plugin": ^6.13.1
     "@typescript-eslint/parser": ^6.13.1
     autoprefixer: ^10.4.16
