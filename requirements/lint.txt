@@ -333,7 +333,7 @@ pytest==7.4.0
     #   pytest-factoryboy
 pytest-cov==4.1.0
     # via -r requirements/tests.txt
-pytest-factoryboy==2.5.1
+pytest-factoryboy==2.6.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
