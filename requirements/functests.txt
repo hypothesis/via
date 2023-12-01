@@ -295,7 +295,7 @@ webtest==3.0.0
     # via -r requirements/functests.in
 wheel==0.38.1
     # via pip-tools
-whitenoise==6.5.0
+whitenoise==6.6.0
     # via -r requirements/prod.txt
 wired==0.3
     # via
