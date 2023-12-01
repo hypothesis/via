@@ -307,7 +307,7 @@ webob==1.8.6
     #   pyramid
 wheel==0.38.1
     # via pip-tools
-whitenoise==6.5.0
+whitenoise==6.6.0
     # via -r requirements/prod.txt
 wired==0.3
     # via
