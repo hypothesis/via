@@ -19,6 +19,7 @@ on:
         default: 'via'
         options:
           - 'via'
+          - 'edu-via'
           - 'lms-via'
       Environment:
         type: choice
@@ -27,6 +28,7 @@ on:
         default: 'qa'
         options:
           - 'qa'
+          - 'staging'
           - 'prod'
       Timeout:
         type: string
