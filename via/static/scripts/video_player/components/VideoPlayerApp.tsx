@@ -6,6 +6,7 @@ import {
   Spinner,
   ToastMessages,
   useStableCallback,
+  useToastMessages,
 } from '@hypothesis/frontend-shared';
 import classnames from 'classnames';
 import {
@@ -18,7 +19,6 @@ import {
 
 import { useAppLayout } from '../hooks/use-app-layout';
 import { useSideBySideLayout } from '../hooks/use-side-by-side-layout';
-import { useToastMessages } from '../hooks/use-toast-messages';
 import { callAPI } from '../utils/api';
 import type { APIMethod, APIError, JSONAPIObject } from '../utils/api';
 import { useNextRender } from '../utils/next-render';

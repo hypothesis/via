@@ -1,12 +1,12 @@
+import type { ToastMessagesState } from '@hypothesis/frontend-shared';
 import { CopyIcon, IconButton } from '@hypothesis/frontend-shared';
 
-import type { ToastMessageAppender } from '../hooks/use-toast-messages';
 import { formatTranscript } from '../utils/transcript';
 import type { TranscriptData } from '../utils/transcript';
 
 export type CopyButtonProps = {
   transcript: TranscriptData | null;
-  appendToastMessage: ToastMessageAppender;
+  appendToastMessage: ToastMessagesState['appendToastMessage'];
 };
 
 /**
