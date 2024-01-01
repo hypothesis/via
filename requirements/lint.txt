@@ -86,7 +86,7 @@ faker==18.9.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   factory-boy
-freezegun==1.2.2
+freezegun==1.4.0
     # via -r requirements/tests.txt
 google-auth==2.16.0
     # via
