@@ -143,7 +143,7 @@ six==1.15.0
     #   ecdsa
     #   google-auth
     #   jsonschema
-sqlalchemy==2.0.21
+sqlalchemy==2.0.24
     # via
     #   -r requirements/prod.in
     #   alembic
