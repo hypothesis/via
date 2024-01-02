@@ -24,7 +24,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-virtual": "^3.0.2",
     "autoprefixer": "^10.4.16",
-    "classnames": "^2.3.2",
+    "classnames": "^2.5.1",
     "focus-visible": "^5.2.0",
     "gulp": "^4.0.2",
     "postcss": "^8.4.31",
