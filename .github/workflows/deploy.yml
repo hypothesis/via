@@ -58,6 +58,32 @@ jobs:
       elasticbeanstalk_environment: qa
       docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
     secrets: inherit
+  staging:
+    name: Staging
+    needs: [docker_hub]
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: deploy
+      github_environment_name: Staging
+      github_environment_url: https://via.staging.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek
+      aws_region: us-west-1
+      elasticbeanstalk_application: via
+      elasticbeanstalk_environment: staging
+      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
+    secrets: inherit
+  staging_edu:
+    name: Staging (Edu)
+    needs: [docker_hub]
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: deploy
+      github_environment_name: Staging (Edu)
+      github_environment_url: https://hypothesis.instructure.com/courses/125/assignments/878
+      aws_region: us-west-1
+      elasticbeanstalk_application: edu-via
+      elasticbeanstalk_environment: staging
+      docker_tag: ${{ needs.Docker_Hub.outputs.docker_tag }}
+    secrets: inherit
   production:
     name: Production
     needs: [docker_hub, qa]
