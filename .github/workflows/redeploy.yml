@@ -11,6 +11,12 @@ on:
       QA_Edu:
         type: boolean
         description: Redeploy QA (Edu)
+      staging:
+        type: boolean
+        description: Redeploy Staging
+      staging_edu:
+        type: boolean
+        description: Redeploy Staging (Edu)
       production:
         type: boolean
         description: Redeploy Production
@@ -41,6 +47,30 @@ jobs:
       aws_region: us-west-1
       elasticbeanstalk_application: lms-via
       elasticbeanstalk_environment: qa
+    secrets: inherit
+  staging:
+    name: Staging
+    if: inputs.staging
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: Staging
+      github_environment_url: https://via.staging.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek
+      aws_region: us-west-1
+      elasticbeanstalk_application: via
+      elasticbeanstalk_environment: staging
+    secrets: inherit
+  staging_edu:
+    name: Staging (Edu)
+    if: inputs.staging_edu
+    uses: hypothesis/workflows/.github/workflows/deploy.yml@main
+    with:
+      operation: redeploy
+      github_environment_name: Staging (Edu)
+      github_environment_url: https://hypothesis.instructure.com/courses/125/assignments/878
+      aws_region: us-west-1
+      elasticbeanstalk_application: edu-via
+      elasticbeanstalk_environment: staging
     secrets: inherit
   production:
     name: Production
