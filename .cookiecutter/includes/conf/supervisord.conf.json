@@ -4,7 +4,7 @@
       "command": "nginx"
     },
     "web": {
-      "command": "newrelic-admin run-program gunicorn --paste conf/production.ini -b unix:/tmp/gunicorn-web.sock"
+      "command": "newrelic-admin run-program gunicorn --paste conf/production.ini --config conf/gunicorn.conf.py"
     }
   }
 }
