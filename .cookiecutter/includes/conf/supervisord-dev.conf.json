@@ -1,7 +1,7 @@
 {
   "programs": {
-    "make_db": {
-      "command": "bin/make_db",
+    "init_db": {
+      "command": "python3 -m via.scripts.init_db --create --stamp",
       "startsecs": "0"
     },
     "web": {
