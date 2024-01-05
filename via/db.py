@@ -16,13 +16,13 @@ class Base(MappedAsDataclass, DeclarativeBase):
     )
 
 
-def create_engine(settings):  # pragma: no cover
+def create_engine(database_url):  # pragma: no cover
     """Return a SQLAlchemy engine."""
-    return sqlalchemy.create_engine(settings["database_url"])
+    return sqlalchemy.create_engine(database_url)
 
 
 def includeme(config):  # pragma: no cover
-    engine = create_engine(config.registry.settings)
+    engine = create_engine(config.registry.settings["database_url"])
 
     def db_session(request):
         """Return the SQLAlchemy session for the given request."""

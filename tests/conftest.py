@@ -12,7 +12,6 @@ from tests.factories.factoryboy_sqlalchemy_session import (
     clear_factoryboy_sqlalchemy_session,
     set_factoryboy_sqlalchemy_session,
 )
-from via.db import Base
 
 # Each factory has to be registered with pytest_factoryboy.
 register(TranscriptFactory)
@@ -69,12 +68,7 @@ def httpretty_():
 
 @pytest.fixture(scope="session")
 def db_engine():
-    engine = create_engine(environ["DATABASE_URL"])
-
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
-
-    return engine
+    return create_engine(environ["DATABASE_URL"])
 
 
 @pytest.fixture(scope="session")
