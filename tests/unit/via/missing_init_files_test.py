@@ -8,9 +8,6 @@ def test_for_missing_init_files():
         if root.endswith("__pycache__"):  # pragma: no cover
             continue
 
-        if root in ["tests/pytest_plugins"]:
-            continue
-
         if "__init__.py" not in files:  # pragma: no cover
             missing.append(root + "/__init__.py")
 
