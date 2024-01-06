@@ -1,7 +1,6 @@
+from h_testkit import set_factoryboy_sqlalchemy_session
+
 from tests import factories
-from tests.factories.factoryboy_sqlalchemy_session import (
-    set_factoryboy_sqlalchemy_session,
-)
 from via import models
 
 
