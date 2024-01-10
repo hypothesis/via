@@ -1,6 +1,6 @@
 """Retrieve details about a resource at a URL."""
-import cgi
 from collections import OrderedDict
+from email.message import Message
 
 from via.requests_tools.headers import add_request_headers, clean_headers
 from via.services.checkmate import CheckmateService
@@ -50,7 +50,9 @@ class URLDetailsService:
         ) as rsp:
             content_type = rsp.headers.get("Content-Type")
             if content_type:
-                mime_type, _ = cgi.parse_header(content_type)
+                message = Message()
+                message["content-type"] = content_type
+                mime_type = message.get_content_type()
             else:
                 mime_type = None
 

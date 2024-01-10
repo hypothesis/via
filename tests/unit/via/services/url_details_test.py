@@ -94,7 +94,7 @@ class TestGetURLDetails:
         result = svc.get_url_details(sentinel.youtube_url)
 
         youtube_service.get_video_id.assert_not_called()
-        assert result == ("dummy", 200)
+        assert result == ("application/x-testing", 200)
 
     def test_it_when_url_blocked_by_checkmate(self, checkmate_service, svc):
         checkmate_service.raise_if_blocked.side_effect = BadURL("Bad URL")
@@ -112,7 +112,7 @@ class TestGetURLDetails:
     def response(self, http_service):
         response = Response()
         response.raw = BytesIO(b"")
-        response.headers = {"Content-Type": "dummy"}
+        response.headers = {"Content-Type": "application/x-testing"}
         response.status_code = 200
         http_service.get.return_value = response
 
