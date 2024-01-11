@@ -15,7 +15,7 @@
     "package_name": "via",
     "slug": "via",
     "short_description": "An app that proxies web pages and PDF files and injects the Hypothesis client so you can annotate them.",
-    "python_version": "3.8.12",
+    "python_version": "3.11.7",
     "port": "9082",
     "github_owner": "hypothesis",
     "visibility": "public",
