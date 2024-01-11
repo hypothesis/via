@@ -5,7 +5,7 @@
 #    pip-compile --allow-unsafe requirements/prod.in
 #
 alembic==1.13.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 attrs==23.2.0
     # via
     #   jsonschema
@@ -21,7 +21,7 @@ cffi==1.16.0
 charset-normalizer==3.3.2
     # via requests
 checkmatelib==1.0.15
-    # via -r requirements/prod.in
+    # via -r prod.in
 cryptography==41.0.7
     # via python-jose
 ecdsa==0.18.0
@@ -29,17 +29,17 @@ ecdsa==0.18.0
 google-auth==2.26.1
     # via google-auth-oauthlib
 google-auth-oauthlib==1.2.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 greenlet==3.0.3
     # via sqlalchemy
 gunicorn==21.2.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-assets==1.0.6
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-pyramid-sentry==1.2.4
-    # via -r requirements/prod.in
+    # via -r prod.in
 h-vialib==1.2.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 hupper==1.12
     # via pyramid
 idna==3.6
@@ -51,12 +51,12 @@ importlib-metadata==7.0.1
     #   h-vialib
 importlib-resources==6.1.1
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   alembic
     #   checkmatelib
     #   jsonschema
     #   jsonschema-specifications
-jinja2==3.1.2
+jinja2==3.1.3
     # via pyramid-jinja2
 jsonschema==4.20.0
     # via checkmatelib
@@ -71,12 +71,12 @@ markupsafe==2.1.3
     #   pyramid-jinja2
 marshmallow==3.20.1
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   webargs
 netaddr==0.10.1
     # via checkmatelib
 newrelic==9.4.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 oauthlib==3.2.2
     # via requests-oauthlib
 packaging==23.2
@@ -96,7 +96,7 @@ plaster==1.1.2
 plaster-pastedeploy==1.0.1
     # via pyramid
 psycopg2==2.9.9
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyasn1==0.5.1
     # via
     #   pyasn1-modules
@@ -107,10 +107,10 @@ pyasn1-modules==0.3.0
 pycparser==2.21
     # via cffi
 pyjwt==2.8.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid==2.0.2
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   h-assets
     #   h-pyramid-sentry
     #   pyramid-exclog
@@ -119,15 +119,15 @@ pyramid==2.0.2
     #   pyramid-services
     #   pyramid-tm
 pyramid-exclog==1.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-jinja2==2.10
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-sanity==1.0.3
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-services==2.2
-    # via -r requirements/prod.in
+    # via -r prod.in
 pyramid-tm==2.5
-    # via -r requirements/prod.in
+    # via -r prod.in
 python-jose[cryptography]==3.3.0
     # via h-vialib
 referencing==0.32.1
@@ -136,7 +136,7 @@ referencing==0.32.1
     #   jsonschema-specifications
 requests==2.31.0
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   checkmatelib
     #   requests-oauthlib
 requests-oauthlib==1.3.1
@@ -155,7 +155,7 @@ six==1.16.0
     # via ecdsa
 sqlalchemy==2.0.25
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   alembic
     #   zope-sqlalchemy
 transaction==4.0
@@ -175,13 +175,13 @@ urllib3==2.1.0
 venusian==3.1.0
     # via pyramid
 webargs==8.4.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 webob==1.8.7
     # via
     #   h-vialib
     #   pyramid
 whitenoise==6.6.0
-    # via -r requirements/prod.in
+    # via -r prod.in
 wired==0.3
     # via pyramid-services
 zipp==3.17.0
@@ -200,7 +200,7 @@ zope-interface==6.1
     #   wired
     #   zope-sqlalchemy
 zope-sqlalchemy==3.1
-    # via -r requirements/prod.in
+    # via -r prod.in
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==69.0.3
