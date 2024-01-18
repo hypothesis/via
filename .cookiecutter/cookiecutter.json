@@ -8,7 +8,8 @@
     "via/app.py",
     "tests/functional/app_test.py",
     "bin/make_devdata",
-    "bin/make_docker_run"
+    "bin/make_docker_run",
+    "via/templates/.gitkeep"
   ],
   "extra_context": {
     "name": "Via",
