@@ -1,18 +1,4 @@
 {
-  "qa": {
-    "github_environment_name": "QA",
-    "github_environment_url": "https://qa-via.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek",
-    "aws_region": "us-west-1",
-    "elasticbeanstalk_application": "via",
-    "elasticbeanstalk_environment": "qa"
-  },
-  "QA_Edu": {
-    "github_environment_name": "QA (Edu)",
-    "github_environment_url": "https://hypothesis.instructure.com/courses/125/assignments/878",
-    "aws_region": "us-west-1",
-    "elasticbeanstalk_application": "lms-via",
-    "elasticbeanstalk_environment": "qa"
-  },
   "staging": {
     "github_environment_name": "Staging",
     "github_environment_url": "https://via.staging.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek",
@@ -28,7 +14,7 @@
     "elasticbeanstalk_environment": "staging"
   },
   "production": {
-    "needs": ["qa"],
+    "needs": ["staging"],
     "github_environment_name": "Production",
     "github_environment_url": "https://via.hypothes.is/https://en.wikipedia.org/api/rest_v1/page/pdf/Comet_Kohoutek",
     "aws_region": "us-west-1",
@@ -36,7 +22,7 @@
     "elasticbeanstalk_environment": "prod"
   },
   "production_edu": {
-    "needs": ["qa_edu"],
+    "needs": ["staging_edu"],
     "github_environment_name": "Production (Edu)",
     "github_environment_url": "https://hypothesis.instructure.com/courses/125/assignments/882",
     "aws_region": "us-west-1",
