@@ -1,5 +1,6 @@
 checkmatelib
 h-assets
+sentry-sdk
 h-pyramid-sentry
 h-vialib
 importlib_resources
