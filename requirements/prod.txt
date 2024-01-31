@@ -144,7 +144,9 @@ rsa==4.9
     #   google-auth
     #   python-jose
 sentry-sdk==1.39.2
-    # via h-pyramid-sentry
+    # via
+    #   -r requirements/prod.in
+    #   h-pyramid-sentry
 six==1.16.0
     # via ecdsa
 sqlalchemy==2.0.25
