@@ -7,7 +7,7 @@ def add_routes(config):  # pragma: no cover
 
     config.add_route("assets", "/assets/*subpath")
     config.add_route("index", "/", factory=QueryURLResource)
-    config.add_route("get_status", "/_status")
+    config.add_route("status", "/_status")
     config.add_route("view_pdf", "/pdf", factory=QueryURLResource)
     config.add_route("youtube", "/video/youtube", factory=QueryURLResource)
     config.add_route("route_by_content", "/route", factory=QueryURLResource)
