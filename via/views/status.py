@@ -1,15 +1,12 @@
-"""Monitoring views."""
-
 from checkmatelib import CheckmateException
 from pyramid import view
+from sentry_sdk import capture_message
 
 from via.services import CheckmateService
 
 
-@view.view_config(route_name="get_status", renderer="json", http_cache=0)
-def get_status(request):
-    """Status endpoint."""
-
+@view.view_config(route_name="status", renderer="json", http_cache=0)
+def status(request):
     body = {"status": "okay"}
 
     if "include-checkmate" in request.params:
@@ -27,5 +24,8 @@ def get_status(request):
     if body.get("down"):
         request.response.status_int = 500
         body["status"] = "down"
+
+    if "sentry" in request.params:
+        capture_message("Test message from Via's status view")
 
     return body
