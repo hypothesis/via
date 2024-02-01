@@ -1,4 +1,5 @@
 """Context objects for views."""
+
 from urllib.parse import unquote, urlparse
 
 from h_vialib import Configuration

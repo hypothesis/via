@@ -1,4 +1,5 @@
 """The main application entrypoint module."""
+
 import os
 from pathlib import Path
 

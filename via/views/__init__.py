@@ -1,4 +1,5 @@
 """The views for the Pyramid app."""
+
 from via.resources import PathURLResource, QueryURLResource
 
 

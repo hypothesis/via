@@ -1,4 +1,5 @@
 """Services for Via."""
+
 import json
 from json import JSONDecodeError
 from pathlib import Path

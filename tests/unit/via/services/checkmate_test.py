@@ -118,9 +118,9 @@ class TestFactory:
         pyramid_request.registry.settings["checkmate_url"] = sentinel.url
         pyramid_request.registry.settings["checkmate_api_key"] = sentinel.api_key
         pyramid_request.registry.settings["checkmate_allow_all"] = sentinel.allow_all
-        pyramid_request.registry.settings[
-            "checkmate_ignore_reasons"
-        ] = sentinel.ignore_reasons
+        pyramid_request.registry.settings["checkmate_ignore_reasons"] = (
+            sentinel.ignore_reasons
+        )
         return pyramid_request
 
     @pytest.fixture(autouse=True)

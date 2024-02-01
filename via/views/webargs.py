@@ -1,4 +1,5 @@
 """Integrate webargs (https://webargs.readthedocs.io/) with Via."""
+
 from marshmallow.exceptions import ValidationError as MarshmallowValidationError
 from webargs.pyramidparser import parser
 

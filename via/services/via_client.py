@@ -1,4 +1,5 @@
 """A thin wrapper around ViaClient to make it a service."""
+
 from h_vialib import ContentType, ViaClient
 
 
