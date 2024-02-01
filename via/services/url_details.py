@@ -1,4 +1,5 @@
 """Retrieve details about a resource at a URL."""
+
 from collections import OrderedDict
 from email.message import Message
 

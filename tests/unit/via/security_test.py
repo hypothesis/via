@@ -41,6 +41,6 @@ class TestViaSecurityPolicy:
 
     @pytest.fixture
     def with_valid_authorization_header(self, pyramid_request):
-        pyramid_request.headers[
-            "Authorization"
-        ] = f"Bearer {ViaSecurityPolicy.encode_jwt(pyramid_request)}"
+        pyramid_request.headers["Authorization"] = (
+            f"Bearer {ViaSecurityPolicy.encode_jwt(pyramid_request)}"
+        )
