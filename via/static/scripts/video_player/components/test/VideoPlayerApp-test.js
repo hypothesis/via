@@ -92,6 +92,12 @@ describe('VideoPlayerApp', () => {
     return wrapper;
   }
 
+  function createVideoPlayerUsingAPI() {
+    return createVideoPlayer({
+      transcriptSource: videoPlayerConfig.api.transcript,
+    });
+  }
+
   function findButton(wrapper, name) {
     return wrapper.find(`button[data-testid="${name}-button"]`);
   }
@@ -184,12 +190,6 @@ describe('VideoPlayerApp', () => {
         .withArgs(videoPlayerConfig.api.transcript)
         .resolves(transcriptsAPIResponse);
     });
-
-    function createVideoPlayerUsingAPI() {
-      return createVideoPlayer({
-        transcriptSource: videoPlayerConfig.api.transcript,
-      });
-    }
 
     it('loads transcript via API', async () => {
       const wrapper = createVideoPlayerUsingAPI();
@@ -564,6 +564,30 @@ describe('VideoPlayerApp', () => {
       const { sideBySide } = wrapper.find('HypothesisClient').prop('config');
 
       assert.equal(sideBySide.isActive(), sideBySideEnabled);
+    });
+  });
+
+  it('appends hidden toast message when transcript is filtered', async () => {
+    fakeCallAPI
+      .withArgs(videoPlayerConfig.api.transcript)
+      .resolves(transcriptsAPIResponse);
+
+    const wrapper = createVideoPlayerUsingAPI();
+    const transcript = await waitForElement(wrapper, 'Transcript');
+    const getToastMessages = () =>
+      wrapper.find('ToastMessages').prop('messages');
+
+    // Toast messages are initially empty
+    assert.equal(getToastMessages().length, 0);
+
+    transcript.props().onFilterMatch('some text', 5);
+    wrapper.update();
+
+    const [toastMessage] = getToastMessages();
+    assert.match(toastMessage, {
+      type: 'success',
+      message: '"some text" returned 5 results',
+      visuallyHidden: true,
     });
   });
 

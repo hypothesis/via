@@ -349,4 +349,17 @@ describe('Transcript', () => {
     assert.calledOnce(fakeTextHighlighter.removeHighlights);
     assert.calledWith(fakeTextHighlighter.removeHighlights, element);
   });
+
+  [
+    { filter: 'video', expectedMatches: 1 },
+    { filter: 'to', expectedMatches: 2 },
+    { filter: 'no match', expectedMatches: 0 },
+  ].forEach(({ filter, expectedMatches }) => {
+    it('notifies when segments are filtered', () => {
+      const onFilterMatch = sinon.stub();
+      createTranscript({ filter, onFilterMatch });
+
+      assert.calledWith(onFilterMatch, filter, expectedMatches);
+    });
+  });
 });

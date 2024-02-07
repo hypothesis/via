@@ -289,6 +289,15 @@ export default function VideoPlayerApp({
 
   const { toastMessages, appendToastMessage, dismissToastMessage } =
     useToastMessages();
+  const onFilterMatch = useCallback(
+    (filter: string, results: number) =>
+      appendToastMessage({
+        type: 'success',
+        message: `"${filter}" returned ${results} results`,
+        visuallyHidden: true,
+      }),
+    [appendToastMessage]
+  );
 
   return (
     <div
@@ -484,6 +493,7 @@ export default function VideoPlayerApp({
                 controlsRef={transcriptControls}
                 currentTime={timestamp}
                 filter={trimmedFilter}
+                onFilterMatch={onFilterMatch}
                 onSelectSegment={segment => {
                   // Clear the filter before jumping to a segment, so the user
                   // can easily read the text that comes before and after it.

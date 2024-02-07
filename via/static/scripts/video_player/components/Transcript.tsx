@@ -67,6 +67,12 @@ export type TranscriptProps = {
   filter?: string;
 
   /**
+   * Invoked when the filter is applied to the transcript segments, with the
+   * amount that matched and the filter itself
+   */
+  onFilterMatch?: (filter: string, results: number) => void;
+
+  /**
    * Callback invoked when the user selects a segment from the transcript.
    */
   onSelectSegment?: (segment: Segment) => void;
@@ -270,6 +276,7 @@ export default function Transcript({
   controlsRef,
   currentTime,
   filter = '',
+  onFilterMatch,
   onSelectSegment,
   transcript,
 }: TranscriptProps) {
@@ -360,6 +367,12 @@ export default function Transcript({
     }
     return filterTranscript(transcript.segments, filter);
   }, [filter, transcript]);
+
+  useEffect(() => {
+    if (filterMatches) {
+      onFilterMatch?.(filter, filterMatches.size);
+    }
+  }, [filter, filterMatches, onFilterMatch]);
 
   // Adjust the scroll position when the transcript container is resized, so the
   // user doesn't lose their place. See
