@@ -422,6 +422,18 @@ export default function Transcript({
           {segments}
           {children}
         </div>
+        <div
+          className="sr-only"
+          aria-live="polite"
+          role="status"
+          data-testid="search-status"
+        >
+          {filterMatches && filter && (
+            <>
+              {filter} returned {filterMatches.size} results
+            </>
+          )}
+        </div>
       </Scroll>
     </ScrollContainer>
   );

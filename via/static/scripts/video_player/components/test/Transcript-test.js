@@ -349,4 +349,17 @@ describe('Transcript', () => {
     assert.calledOnce(fakeTextHighlighter.removeHighlights);
     assert.calledWith(fakeTextHighlighter.removeHighlights, element);
   });
+
+  [
+    { filter: 'video', expectedStatus: 'video returned 1 results' },
+    { filter: 'to', expectedStatus: 'to returned 2 results' },
+    { filter: 'no match', expectedStatus: 'no match returned 0 results' },
+  ].forEach(({ filter, expectedStatus }) => {
+    it('shows search status with amount of matching results', () => {
+      const wrapper = createTranscript({ filter });
+      const status = wrapper.find('[data-testid="search-status"]');
+
+      assert.equal(status.text(), expectedStatus);
+    });
+  });
 });
