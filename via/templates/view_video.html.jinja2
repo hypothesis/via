@@ -16,7 +16,16 @@
       {
         "client_config": {{ client_config | tojson }},
         "client_src": "{{ client_embed_url }}",
+        "player": {{ player | tojson }},
+
+        {% if video_id %}
         "video_id": "{{ video_id }}",
+        {% endif %}
+
+        {% if video_src %}
+        "video_src": {{ video_src | tojson }},
+        {% endif %}
+
         "api": {{ api | tojson }}
       }
     </script>

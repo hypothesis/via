@@ -6,7 +6,7 @@ from marshmallow.exceptions import ValidationError as MarshmallowValidationError
 from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.exceptions import BadURL
-from via.views.view_video import youtube
+from via.views.view_video import video, youtube
 
 # webargs's kwargs injection into view functions falsely triggers Pylint's
 # no-value-for-parameter all the time so just disable it file-wide.
@@ -14,7 +14,7 @@ from via.views.view_video import youtube
 
 
 @pytest.mark.usefixtures("youtube_service")
-class TestViewVideo:
+class TestYouTube:
     def test_it(
         self,
         pyramid_request,
@@ -42,6 +42,7 @@ class TestViewVideo:
         assert response == {
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
+            "player": "youtube",
             "title": youtube_service.get_video_title.return_value,
             "video_id": youtube_service.get_video_id.return_value,
             "video_url": youtube_service.canonical_video_url.return_value,
@@ -100,6 +101,64 @@ class TestViewVideo:
             {"url": video_url, "via.foo": "foo", "via.bar": "bar"}
         )
         return pyramid_request
+
+
+class TestVideo:
+    def test_it(self, pyramid_request, Configuration, ViaSecurityPolicy):
+        video_url = "https://example.com/video.mp4"
+        transcript_url = "https://example.com/transcript.vtt"
+        pyramid_request.params.update({"url": video_url, "transcript": transcript_url})
+
+        response = video(pyramid_request)
+
+        assert response == {
+            "client_embed_url": "http://hypothes.is/embed.js",
+            "client_config": Configuration.extract_from_params.return_value[1],
+            "player": "html-video",
+            "title": "Video",
+            "video_url": "https://example.com/video.mp4",
+            "api": {
+                "transcript": {
+                    "doc": Any.string(),
+                    "url": pyramid_request.route_url(
+                        "api.video.transcript", _query={"url": transcript_url}
+                    ),
+                    "method": "GET",
+                    "headers": {
+                        "Authorization": f"Bearer {ViaSecurityPolicy.encode_jwt.return_value}",
+                    },
+                },
+            },
+            # Fields specific to HTML video player.
+            "video_src": video_url,
+        }
+
+    def test_it_sets_title(self, pyramid_request):
+        video_url = "https://example.com/video.mp4"
+        transcript_url = "https://example.com/transcript.vtt"
+        pyramid_request.params.update(
+            {"url": video_url, "transcript": transcript_url, "title": "Custom title"}
+        )
+
+        response = video(pyramid_request)
+
+        assert response["title"] == "Custom title"
+
+    def test_it_sets_video_src(self, pyramid_request):
+        video_url = "https://example.com/video.mp4"
+        transcript_url = "https://example.com/transcript.vtt"
+        pyramid_request.params.update(
+            {
+                "url": video_url,
+                "transcript": transcript_url,
+                "media_url": "https://cdn.example.com/video.mp4?token=1234",
+            }
+        )
+
+        response = video(pyramid_request)
+
+        assert response["video_url"] == video_url
+        assert response["video_src"] == "https://cdn.example.com/video.mp4?token=1234"
 
 
 @pytest.fixture(autouse=True)
