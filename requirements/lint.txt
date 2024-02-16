@@ -67,6 +67,11 @@ cryptography==42.0.4
     #   python-jose
 dill==0.3.7
     # via pylint
+docopt==0.6.2
+    # via
+    #   -r functests.txt
+    #   -r tests.txt
+    #   webvtt-py
 ecdsa==0.18.0
     # via
     #   -r functests.txt
@@ -445,6 +450,10 @@ webob==1.8.7
     #   webtest
 webtest==3.0.0
     # via -r functests.txt
+webvtt-py==0.4.6
+    # via
+    #   -r functests.txt
+    #   -r tests.txt
 wheel==0.42.0
     # via
     #   -r functests.txt
