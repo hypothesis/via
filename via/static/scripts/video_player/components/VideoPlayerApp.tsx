@@ -26,6 +26,7 @@ import type { TranscriptData } from '../utils/transcript';
 import { clipDurations, mergeSegments } from '../utils/transcript';
 import CopyButton from './CopyButton';
 import FilterInput from './FilterInput';
+import HTMLVideoPlayer from './HTMLVideoPlayer';
 import HypothesisClient from './HypothesisClient';
 import Transcript from './Transcript';
 import type { TranscriptControls } from './Transcript';
@@ -35,13 +36,19 @@ import { DownIcon, PauseIcon, PlayIcon, SyncIcon, UpIcon } from './icons';
 
 export type VideoPlayerAppProps = {
   /** ID of the YouTube video to load. */
-  videoId: string;
+  videoId?: string;
+
+  /** URL of the video to load in a `<video>` element. */
+  videoURL?: string;
 
   /** URL of the boot script for the Hypothesis client. */
   clientSrc: string;
 
   /** JSON-serializable configuration for the Hypothesis client. */
   clientConfig: object;
+
+  /** Media player to use. */
+  player: 'youtube' | 'html-video';
 
   /**
    * The data source for the transcript. Either an API to call when the player
@@ -93,8 +100,10 @@ function isTranscript(value: any): value is TranscriptData {
  */
 export default function VideoPlayerApp({
   videoId,
+  videoURL,
   clientSrc,
   clientConfig: baseClientConfig,
+  player,
   transcriptSource,
 }: VideoPlayerAppProps) {
   // Current play time of the video, in seconds since the start.
@@ -362,13 +371,25 @@ export default function VideoPlayerApp({
               'max-w-[calc(40vh*16/9)] mx-auto': !multicolumn,
             })}
           >
-            <YouTubeVideoPlayer
-              videoId={videoId}
-              play={playing}
-              time={timestamp}
-              onPlayingChanged={setPlaying}
-              onTimeChanged={setTimestamp}
-            />
+            {player === 'youtube' && (
+              <YouTubeVideoPlayer
+                videoId={videoId!}
+                play={playing}
+                time={timestamp}
+                onPlayingChanged={setPlaying}
+                onTimeChanged={setTimestamp}
+              />
+            )}
+            {player === 'html-video' && (
+              <HTMLVideoPlayer
+                videoURL={videoURL!}
+                transcript={isTranscript(transcript) ? transcript : undefined}
+                play={playing}
+                time={timestamp}
+                onPlayingChanged={setPlaying}
+                onTimeChanged={setTimestamp}
+              />
+            )}
           </div>
         </div>
         <div

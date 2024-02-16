@@ -82,6 +82,7 @@ describe('VideoPlayerApp', () => {
         videoId="1234"
         clientSrc="https://dummy.hypothes.is/embed.js"
         clientConfig={{}}
+        player="youtube"
         // By default start with the transcript already loaded, instead of
         // using the API to fetch it.
         transcriptSource={transcriptData}
@@ -300,6 +301,22 @@ describe('VideoPlayerApp', () => {
       const errorDisplay = await waitForElement(wrapper, 'TranscriptError');
 
       assert.equal(errorDisplay.prop('error'), error);
+    });
+  });
+
+  [
+    {
+      player: 'youtube',
+      component: 'YouTubeVideoPlayer',
+    },
+    {
+      player: 'html-video',
+      component: 'HTMLVideoPlayer',
+    },
+  ].forEach(({ player, component }) => {
+    it('renders player component that matches `player` prop', () => {
+      const wrapper = createVideoPlayer({ player });
+      assert.isTrue(wrapper.exists(component));
     });
   });
 
@@ -584,6 +601,7 @@ describe('VideoPlayerApp', () => {
           videoId="1234"
           clientSrc="https://dummy.hypothes.is/embed.js"
           clientConfig={{}}
+          player="youtube"
           transcriptSource={transcriptData}
         />,
         { attachTo: document.body }
