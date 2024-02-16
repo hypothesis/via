@@ -42,6 +42,10 @@ cryptography==42.0.4
     # via
     #   -r prod.txt
     #   python-jose
+docopt==0.6.2
+    # via
+    #   -r prod.txt
+    #   webvtt-py
 ecdsa==0.18.0
     # via
     #   -r prod.txt
@@ -293,6 +297,8 @@ webob==1.8.7
     #   -r prod.txt
     #   h-vialib
     #   pyramid
+webvtt-py==0.4.6
+    # via -r prod.txt
 wheel==0.42.0
     # via pip-tools
 whitenoise==6.6.0
