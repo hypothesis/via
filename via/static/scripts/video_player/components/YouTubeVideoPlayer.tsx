@@ -2,6 +2,7 @@ import { AspectRatio, useStableCallback } from '@hypothesis/frontend-shared';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 import { loadYouTubeIFrameAPI } from '../utils/youtube';
+import type { VideoPlayerProps } from './HTMLVideoPlayer';
 
 /**
  * Playback state values.
@@ -21,35 +22,9 @@ export const PlayerState = {
   CUED: 4,
 };
 
-export type YouTubeVideoPlayerProps = {
+export type YouTubeVideoPlayerProps = VideoPlayerProps & {
   /** ID of the YouTube video to load. */
   videoId: string;
-
-  /**
-   * Whether the video is playing or paused.
-   *
-   * Note that even if this is set to `true` when the component is mounted, the
-   * browser may prevent automatic playback of the video until the user has
-   * interacted with the page.
-   */
-  play?: boolean;
-
-  /**
-   * Current play time of the video, expressed as a number of seconds since
-   * the start.
-   */
-  time?: number;
-
-  /**
-   * Callback invoked at a regular interval (eg. 1 second) when the timestamp
-   * of the video changes.
-   */
-  onTimeChanged?: (timestamp: number) => void;
-
-  /**
-   * Callback invoked when the playing/paused state of the video changes.
-   */
-  onPlayingChanged?: (playing: boolean) => void;
 };
 
 function isPlaying(state: YT.PlayerState) {

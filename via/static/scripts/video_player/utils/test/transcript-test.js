@@ -4,6 +4,7 @@ import {
   filterTranscript,
   formatTranscript,
   mergeSegments,
+  transcriptToCues,
 } from '../transcript';
 
 describe('filterTranscript', () => {
@@ -116,5 +117,35 @@ describe('mergeSegments', () => {
       const merged = mergeSegments(segments, groupSize);
       assert.deepEqual(merged, expected);
     });
+  });
+});
+
+describe('transcriptToCues', () => {
+  it('returns list of VTTCue objects', () => {
+    const segments = [
+      {
+        start: 1,
+        duration: 3,
+        text: 'One',
+      },
+      {
+        start: 4,
+        duration: 2,
+        text: 'Two',
+      },
+      {
+        start: 7,
+        duration: 5,
+        text: 'Three',
+      },
+    ];
+
+    const cues = transcriptToCues({ segments });
+
+    sinon.assert.match(cues, [
+      sinon.match({ startTime: 1, endTime: 4, text: 'One' }),
+      sinon.match({ startTime: 4, endTime: 6, text: 'Two' }),
+      sinon.match({ startTime: 7, endTime: 12, text: 'Three' }),
+    ]);
   });
 });

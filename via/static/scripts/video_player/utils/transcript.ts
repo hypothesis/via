@@ -29,6 +29,17 @@ export type TranscriptData = {
 };
 
 /**
+ * Generate a {@link VTTCue} list from a transcript.
+ *
+ * This can be used to create cues for use with an HTML media element.
+ */
+export function transcriptToCues(transcript: TranscriptData): VTTCue[] {
+  return transcript.segments.map(
+    seg => new VTTCue(seg.start, seg.start + seg.duration, seg.text)
+  );
+}
+
+/**
  * Escape characters in `str` which have a special meaning in a regex pattern.
  *
  * Taken from https://stackoverflow.com/a/6969486.

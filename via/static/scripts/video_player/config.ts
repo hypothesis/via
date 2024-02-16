@@ -7,13 +7,19 @@ export type APIIndex = {
 
 export type ConfigObject = {
   /** ID of the YouTube video to load. */
-  video_id: string;
+  video_id?: string;
 
   /** Configuration for the Hypothesis client. */
   client_config: object;
 
   /** URL of the Hypothesis client to load. */
   client_src: string;
+
+  /** Frontend player to use. */
+  player: 'youtube' | 'html-video';
+
+  /** URL for use with an HTML `<video>` element. */
+  video_src?: string;
 
   /** API index. */
   api: APIIndex;

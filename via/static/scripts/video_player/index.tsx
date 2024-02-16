@@ -16,7 +16,9 @@ export function init() {
     api,
     client_config: clientConfig,
     client_src: clientSrc,
+    player,
     video_id: videoId,
+    video_src: videoURL,
   } = readConfig();
 
   // When content is displayed in an iframe, notify top-level of title and
@@ -42,8 +44,10 @@ export function init() {
   render(
     <VideoPlayerApp
       videoId={videoId}
+      videoURL={videoURL}
       clientConfig={clientConfig}
       clientSrc={clientSrc}
+      player={player}
       transcriptSource={api.transcript}
     />,
     rootEl
