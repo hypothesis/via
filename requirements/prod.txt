@@ -22,7 +22,7 @@ charset-normalizer==3.3.2
     # via requests
 checkmatelib==1.0.15
     # via -r prod.in
-cryptography==42.0.0
+cryptography==42.0.2
     # via python-jose
 ecdsa==0.18.0
     # via python-jose
