@@ -38,7 +38,7 @@ coverage[toml]==7.4.0
     # via
     #   coverage
     #   pytest-cov
-cryptography==42.0.0
+cryptography==42.0.2
     # via
     #   -r prod.txt
     #   python-jose
