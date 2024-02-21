@@ -60,7 +60,7 @@ coverage[toml]==7.4.0
     #   -r tests.txt
     #   coverage
     #   pytest-cov
-cryptography==42.0.2
+cryptography==42.0.4
     # via
     #   -r functests.txt
     #   -r tests.txt
