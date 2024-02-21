@@ -36,7 +36,7 @@ checkmatelib==1.0.15
     # via -r prod.txt
 click==8.1.7
     # via pip-tools
-cryptography==42.0.2
+cryptography==42.0.4
     # via
     #   -r prod.txt
     #   python-jose
