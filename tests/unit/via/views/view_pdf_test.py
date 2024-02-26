@@ -123,6 +123,29 @@ class TestProxyPythonPDF:
             == "public, max-age=43200, stale-while-revalidate=86400"
         )
 
+    @pytest.mark.usefixtures("http_service")
+    def test_includes_secret_query_parameters(
+        self, call_view, Encryption, pyramid_request, http_service
+    ):
+        call_view(
+            "https://one-drive.com",
+            view=proxy_python_pdf,
+            params={"via.secret.query": sentinel.query},
+        )
+
+        Encryption.assert_called_once_with(
+            pyramid_request.registry.settings["via_secret"].encode("utf-8")
+        )
+        Encryption.return_value.decrypt_dict.assert_called_once_with(sentinel.query)
+        http_service.stream.assert_called_once_with(
+            "https://one-drive.com",
+            headers={
+                "X-Abuse-Policy": "https://web.hypothes.is/abuse-policy/",
+                "X-Complaints-To": "https://web.hypothes.is/report-abuse/",
+            },
+            params=Encryption.return_value.decrypt_dict.return_value,
+        )
+
     def test_it_streams_content(self, http_service, call_view):
         # Create a generator and a counter of how many times it's been accessed
         def count_access(i):
@@ -146,6 +169,10 @@ class TestProxyPythonPDF:
         response = call_view("https://one-drive.com", view=proxy_python_pdf)
 
         assert isinstance(response, HTTPNoContent)
+
+    @pytest.fixture
+    def Encryption(self, patch):
+        return patch("via.views.view_pdf.Encryption")
 
 
 @pytest.fixture

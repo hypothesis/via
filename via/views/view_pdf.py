@@ -3,6 +3,7 @@
 from itertools import chain
 
 from h_vialib import Configuration
+from h_vialib.secure import Encryption
 from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
@@ -51,9 +52,15 @@ def proxy_python_pdf(context, request):
     Multiple routes point to this view to allow having separate access logs for each of them.
     """
     url = context.url_from_query()
+    params = {}
+    if "via.secret.query" in request.params:
+        secure_secrets = Encryption(
+            request.registry.settings["via_secret"].encode("utf-8")
+        )
+        params = secure_secrets.decrypt_dict(request.params["via.secret.query"])
 
     content_iterable = request.find_service(HTTPService).stream(
-        url, headers=add_request_headers({}, request=request)
+        url, headers=add_request_headers({}, request=request), params=params
     )
 
     return _iter_pdf_response(request.response, content_iterable)

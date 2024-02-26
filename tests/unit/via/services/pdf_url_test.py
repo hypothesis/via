@@ -117,6 +117,16 @@ class TestPDFURLBuilder:
             "http://example.com/d2l/proxied.pdf?url=http%2F%2Fd2l.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1&via.secret.headers=SECRET-HEADERS"
         )
 
+    def test_python_pdf_with_query(self, svc, pyramid_request, secure_link_service):
+        pyramid_request.params["via.secret.query"] = "SECRET-QUERY"
+
+        svc.get_pdf_url("http//d2l.com/content/topics/FILEID/file?stream=1")
+
+        secure_link_service.sign_url.assert_called_once_with(
+            # pylint:disable=line-too-long
+            "http://example.com/d2l/proxied.pdf?url=http%2F%2Fd2l.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1&via.secret.query=SECRET-QUERY"
+        )
+
     def test_nginx_file_url(self, svc):
         pdf_url = svc.get_pdf_url("http://nginx/document.pdf")
 
