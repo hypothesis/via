@@ -102,6 +102,10 @@ class PDFURLBuilder:
             # Pass headers of the original request back to the PDF endpoint
             query_params["via.secret.headers"] = headers
 
+        if query := self.request.params.get("via.secret.query"):
+            # Pass extra query params to the PDF endpoint
+            query_params["via.secret.query"] = query
+
         url = self.secure_link_service.sign_url(
             self.route_url(route, _query=query_params)
         )
