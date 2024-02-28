@@ -99,6 +99,11 @@ class TestPDFURLBuilder:
                 "http//some-other-d2l-instance.com/content/topics/FILEID/file?stream=1",
                 "http://example.com/d2l/proxied.pdf?url=http%2F%2Fsome-other-d2l-instance.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1",
             ),
+            # Moodle
+            (
+                "http//moodle-instance.com/webservice/modfiles/FILEID/file.pdf?forcedownload=1",
+                "http://example.com/proxied.pdf?url=http%2F%2Fmoodle-instance.com%2Fwebservice%2Fmodfiles%2FFILEID%2Ffile.pdf%3Fforcedownload%3D1",
+            ),
         ),
     )
     def test_python_pdf_urls(self, svc, secure_link_service, url, endpoint_url):

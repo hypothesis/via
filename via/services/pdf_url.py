@@ -65,6 +65,8 @@ class PDFURLBuilder:
 
     _D2L_URL = (re.compile(r".*\/content\/topics\/\w+\/file\?stream=1$"),)
 
+    _MOODLE_URL = (re.compile(r".*\/webservice/.*?forcedownload=1$"),)
+
     def get_pdf_url(self, url):
         """Build a signed URL to the corresponding Via route for proxing the PDF at `url`.
 
@@ -80,6 +82,9 @@ class PDFURLBuilder:
         if self._is_d2l_url(url):
             return self._proxy_python_pdf(url, route="proxy_d2l_pdf")
 
+        if self._is_moodle_url(url):
+            return self._proxy_python_pdf(url, route="proxy_python_pdf")
+
         return self.nginx_signer.sign_url(url, nginx_path="/proxy/static/")
 
     @classmethod
@@ -89,6 +94,10 @@ class PDFURLBuilder:
     @classmethod
     def _is_d2l_url(cls, url):
         return any(regexp.match(url) for regexp in cls._D2L_URL)
+
+    @classmethod
+    def _is_moodle_url(cls, url):
+        return any(regexp.match(url) for regexp in cls._MOODLE_URL)
 
     def _proxy_python_pdf(self, url, route="proxy_python_pdf"):
         """Return the URL to proxy the pdf in `url` with python instead of nginx.
