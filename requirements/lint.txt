@@ -204,7 +204,7 @@ netaddr==0.10.1
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   checkmatelib
-newrelic==9.6.0
+newrelic==9.7.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
