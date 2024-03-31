@@ -58,7 +58,6 @@ click==8.1.7
 coverage[toml]==7.4.0
     # via
     #   -r requirements/tests.txt
-    #   coverage
     #   pytest-cov
 cryptography==42.0.4
     # via
@@ -330,7 +329,7 @@ pytest==8.1.0
     #   -r requirements/tests.txt
     #   pytest-cov
     #   pytest-factoryboy
-pytest-cov==4.1.0
+pytest-cov==5.0.0
     # via -r requirements/tests.txt
 pytest-factoryboy==2.6.0
     # via
@@ -347,7 +346,6 @@ python-jose[cryptography]==3.3.0
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   h-vialib
-    #   python-jose
 referencing==0.32.1
     # via
     #   -r requirements/functests.txt
