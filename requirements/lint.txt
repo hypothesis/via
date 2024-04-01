@@ -220,6 +220,7 @@ packaging==23.2
     #   gunicorn
     #   marshmallow
     #   pytest
+    #   pytest-factoryboy
     #   webargs
     #   zope-sqlalchemy
 pastedeploy==3.1.0
@@ -331,7 +332,7 @@ pytest==8.1.0
     #   pytest-factoryboy
 pytest-cov==5.0.0
     # via -r requirements/tests.txt
-pytest-factoryboy==2.6.0
+pytest-factoryboy==2.7.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt

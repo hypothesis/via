@@ -143,6 +143,7 @@ packaging==23.2
     #   gunicorn
     #   marshmallow
     #   pytest
+    #   pytest-factoryboy
     #   webargs
     #   zope-sqlalchemy
 pastedeploy==3.1.0
@@ -210,7 +211,7 @@ pytest==8.1.0
     # via
     #   -r requirements/functests.in
     #   pytest-factoryboy
-pytest-factoryboy==2.6.0
+pytest-factoryboy==2.7.0
     # via -r requirements/functests.in
 python-dateutil==2.8.2
     # via faker
@@ -218,7 +219,6 @@ python-jose[cryptography]==3.3.0
     # via
     #   -r requirements/prod.txt
     #   h-vialib
-    #   python-jose
 referencing==0.32.1
     # via
     #   -r requirements/prod.txt
