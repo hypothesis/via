@@ -151,7 +151,7 @@ sentry-sdk==1.40.6
     #   h-pyramid-sentry
 six==1.16.0
     # via ecdsa
-sqlalchemy==2.0.25
+sqlalchemy==2.0.29
     # via
     #   -r requirements/prod.in
     #   alembic

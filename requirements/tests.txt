@@ -259,7 +259,7 @@ six==1.16.0
     #   -r requirements/prod.txt
     #   ecdsa
     #   python-dateutil
-sqlalchemy==2.0.25
+sqlalchemy==2.0.29
     # via
     #   -r requirements/prod.txt
     #   alembic
