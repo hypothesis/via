@@ -26,7 +26,7 @@
     "autoprefixer": "^10.4.16",
     "classnames": "^2.5.1",
     "focus-visible": "^5.2.0",
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.0",
     "postcss": "^8.4.31",
     "preact": "^10.17.1",
     "rollup": "^4.13.2",
