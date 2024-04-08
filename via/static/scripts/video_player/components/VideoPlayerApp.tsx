@@ -35,6 +35,11 @@ import YouTubeVideoPlayer from './YouTubeVideoPlayer';
 import { DownIcon, PauseIcon, PlayIcon, SyncIcon, UpIcon } from './icons';
 
 export type VideoPlayerAppProps = {
+  /**
+   * Whether to allow download of the video, if supported by the player.
+   */
+  allowDownload?: boolean;
+
   /** ID of the YouTube video to load. */
   videoId?: string;
 
@@ -99,6 +104,7 @@ function isTranscript(value: any): value is TranscriptData {
  * client so the user can annotate the transcript.
  */
 export default function VideoPlayerApp({
+  allowDownload,
   videoId,
   videoURL,
   clientSrc,
@@ -382,6 +388,7 @@ export default function VideoPlayerApp({
             )}
             {player === 'html-video' && (
               <HTMLVideoPlayer
+                allowDownload={allowDownload}
                 videoURL={videoURL!}
                 transcript={isTranscript(transcript) ? transcript : undefined}
                 play={playing}

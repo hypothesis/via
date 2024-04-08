@@ -112,6 +112,7 @@ class TestVideo:
         response = video(pyramid_request)
 
         assert response == {
+            "allow_download": True,
             "client_embed_url": "http://hypothes.is/embed.js",
             "client_config": Configuration.extract_from_params.return_value[1],
             "player": "html-video",
@@ -159,6 +160,28 @@ class TestVideo:
 
         assert response["video_url"] == video_url
         assert response["video_src"] == "https://cdn.example.com/video.mp4?token=1234"
+
+    @pytest.mark.parametrize(
+        "allow_download,expected",
+        [
+            ("0", False),
+            ("1", True),
+        ],
+    )
+    def test_it_sets_allow_download(self, pyramid_request, allow_download, expected):
+        video_url = "https://example.com/video.mp4"
+        transcript_url = "https://example.com/transcript.vtt"
+        pyramid_request.params.update(
+            {
+                "url": video_url,
+                "transcript": transcript_url,
+                "allow_download": allow_download,
+            }
+        )
+
+        response = video(pyramid_request)
+
+        assert response["allow_download"] is expected
 
 
 @pytest.fixture(autouse=True)

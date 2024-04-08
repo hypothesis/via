@@ -14,6 +14,7 @@
     <div id="app"></div>
     <script type="application/json" class="js-config">
       {
+        "allow_download": {{ allow_download | tojson }},
         "client_config": {{ client_config | tojson }},
         "client_src": "{{ client_embed_url }}",
         "player": {{ player | tojson }},
