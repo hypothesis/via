@@ -48,12 +48,20 @@ export type HTMLVideoPlayerProps = VideoPlayerProps & {
    * This is used to generate a caption `<track>` for the video.
    */
   transcript?: TranscriptData;
+
+  /**
+   * Whether to enable download controls for the video.
+   *
+   * Defaults to true.
+   */
+  allowDownload?: boolean;
 };
 
 /**
  * Video player built on the browser's native `<video>` element.
  */
 export default function HTMLVideoPlayer({
+  allowDownload,
   videoURL,
   transcript,
   play = false,
@@ -108,11 +116,22 @@ export default function HTMLVideoPlayer({
     };
   }, [transcript]);
 
+  const controlsList = !allowDownload ? 'nodownload' : '';
+
   return (
     <AspectRatio>
       <video
         ref={videoRef}
         controls
+        // Disable UI controls to download videos if requested. This is only
+        // a "soft" block since the video URL can easily be obtained via
+        // developer tools.
+        controlsList={controlsList}
+        onContextMenu={e => {
+          if (!allowDownload) {
+            e.preventDefault();
+          }
+        }}
         src={videoURL}
         onTimeUpdate={event => {
           const video = event.target as HTMLVideoElement;

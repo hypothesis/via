@@ -105,4 +105,26 @@ describe('HTMLVideoPlayer', () => {
 
     assert.equal(track.cues.length, 3);
   });
+
+  [true, false].forEach(allowDownload => {
+    it('should disable download controls if `allowDownload` is false', () => {
+      const wrapper = createPlayer({
+        videoURL: 'test-video.mp4',
+        transcript: { segments: [] },
+        allowDownload,
+      });
+      const video = wrapper.find('video').getDOMNode();
+
+      if ('controlsList' in video) {
+        assert.deepEqual(
+          Array.from(video.controlsList.values()),
+          allowDownload ? [] : ['nodownload']
+        );
+      }
+
+      const contextEvent = new Event('contextmenu', { cancelable: true });
+      video.dispatchEvent(contextEvent);
+      assert.equal(contextEvent.defaultPrevented, !allowDownload);
+    });
+  });
 });

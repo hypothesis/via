@@ -65,11 +65,13 @@ def youtube(request, url, **kwargs):
         "media_url": fields.Url(required=False),
         "transcript": fields.Url(required=True),
         "title": fields.Str(required=False),
+        "allow_download": fields.Boolean(required=False),
     },
     location="query",
     unknown=marshmallow.INCLUDE,
 )
 def video(request, **kwargs):
+    allow_download = kwargs.get("allow_download", True)
     url = kwargs["url"]
     media_url = kwargs.get("media_url")
     transcript = kwargs["transcript"]
@@ -96,5 +98,6 @@ def video(request, **kwargs):
             },
         },
         # Fields specific to HTML video player.
+        "allow_download": allow_download,
         "video_src": media_url,
     }

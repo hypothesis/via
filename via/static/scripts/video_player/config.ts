@@ -23,6 +23,9 @@ export type ConfigObject = {
 
   /** API index. */
   api: APIIndex;
+
+  /** Whether to enable download controls for the video. */
+  allow_download?: boolean;
 };
 
 /**

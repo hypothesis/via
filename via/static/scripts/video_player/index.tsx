@@ -13,6 +13,7 @@ export function init() {
   }
 
   const {
+    allow_download: allowDownload = true,
     api,
     client_config: clientConfig,
     client_src: clientSrc,
@@ -43,6 +44,7 @@ export function init() {
 
   render(
     <VideoPlayerApp
+      allowDownload={allowDownload}
       videoId={videoId}
       videoURL={videoURL}
       clientConfig={clientConfig}
