@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Via",
   "private": true,
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hypothesis/via.git"
