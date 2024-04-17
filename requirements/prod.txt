@@ -34,7 +34,7 @@ google-auth-oauthlib==1.2.0
     # via -r prod.in
 greenlet==3.0.3
     # via sqlalchemy
-gunicorn==21.2.0
+gunicorn==22.0.0
     # via -r prod.in
 h-assets==1.0.6
     # via -r prod.in
