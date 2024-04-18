@@ -70,11 +70,14 @@ describe('Transcript', () => {
       const segment = segments.at(i);
       const start = segment.find('p').prop('data-time-start');
       const end = segment.find('p').prop('data-time-end');
+      const timestamp = segment.find('button[data-timestamp]');
       renderedSegments.push({
         text: segment.text(),
         isCurrent: segment.prop('data-is-current'),
         startTime: start ? parseFloat(start) : undefined,
         endTime: end ? parseFloat(end) : undefined,
+        timestamp: timestamp.prop('data-timestamp'),
+        timestampDescription: timestamp.prop('aria-label'),
       });
     }
 
@@ -84,18 +87,24 @@ describe('Transcript', () => {
         isCurrent: true,
         startTime: 5,
         endTime: 10,
+        timestamp: '0:05',
+        timestampDescription: '5 seconds',
       },
       {
         text: 'To this video about ',
         isCurrent: false,
         startTime: 10,
         endTime: 20,
+        timestamp: '0:10',
+        timestampDescription: '10 seconds',
       },
       {
         text: 'how to use Hypothesis ',
         isCurrent: false,
         startTime: 20,
         endTime: 24,
+        timestamp: '0:20',
+        timestampDescription: '20 seconds',
       },
     ]);
   });

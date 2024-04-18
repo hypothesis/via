@@ -125,8 +125,11 @@ function TranscriptSegment({
   }, [highlighter, matches]);
 
   const hadSelectionOnPointerDown = useRef(false);
-  const timestamp = useMemo(
-    () => formatTimestamp(segment.start),
+  const [timestamp, timestampDescription] = useMemo(
+    () => [
+      formatTimestamp(segment.start, 'digits'),
+      formatTimestamp(segment.start, 'description'),
+    ],
     [segment.start]
   );
 
@@ -153,7 +156,7 @@ function TranscriptSegment({
         data-testid="segment"
       >
         <button
-          aria-label={timestamp}
+          aria-label={timestampDescription}
           onClick={stableOnSelect}
           className={classnames(
             // TODO: Use shared Button to get these styles for free
@@ -246,6 +249,7 @@ function TranscriptSegment({
       stableOnSelect,
       text,
       timestamp,
+      timestampDescription,
     ]
   );
 }
