@@ -2129,14 +2129,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/frontend-testing@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@hypothesis/frontend-testing@npm:1.0.1"
+"@hypothesis/frontend-testing@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "@hypothesis/frontend-testing@npm:1.2.2"
   dependencies:
     axe-core: ^4.8.2
     enzyme: ^3.11.0
     preact: ^10.18.1
-  checksum: fafd09a34503262adaa52ccd31040ea6fd1c41e8ee947f38b2649ba5323c1618338964d4d10ba344df6571561f268249e0a91cb4390de420b9eada21de750d44
+  checksum: b3892f6f1db87387aa60a420f0d2a7c89c5031a1375273cce6777aba335f5d01b223a5fee499f1fbf418044eea6c85684d8488647e8b353d9637c05ba29d15de
   languageName: node
   linkType: hard
 
@@ -9916,7 +9916,7 @@ __metadata:
     "@babel/preset-typescript": ^7.24.1
     "@hypothesis/frontend-build": ^3.0.0
     "@hypothesis/frontend-shared": ^7.2.0
-    "@hypothesis/frontend-testing": ^1.0.1
+    "@hypothesis/frontend-testing": ^1.2.2
     "@rollup/plugin-babel": ^6.0.4
     "@rollup/plugin-commonjs": ^25.0.7
     "@rollup/plugin-node-resolve": ^15.2.3
