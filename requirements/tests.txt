@@ -225,7 +225,7 @@ referencing==0.32.1
     #   -r prod.txt
     #   jsonschema
     #   jsonschema-specifications
-requests==2.31.0
+requests==2.32.0
     # via
     #   -r prod.txt
     #   checkmatelib
