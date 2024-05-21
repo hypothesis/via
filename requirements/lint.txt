@@ -346,7 +346,7 @@ referencing==0.32.1
     #   -r tests.txt
     #   jsonschema
     #   jsonschema-specifications
-requests==2.31.0
+requests==2.32.0
     # via
     #   -r functests.txt
     #   -r tests.txt
