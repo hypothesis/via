@@ -2236,15 +2236,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hypothesis/frontend-shared@npm:^7.2.0":
-  version: 7.2.0
-  resolution: "@hypothesis/frontend-shared@npm:7.2.0"
+"@hypothesis/frontend-shared@npm:^7.10.0":
+  version: 7.10.0
+  resolution: "@hypothesis/frontend-shared@npm:7.10.0"
   dependencies:
     highlight.js: ^11.6.0
-    wouter-preact: ^2.10.0-alpha.1
+    wouter-preact: ^3.0.0
   peerDependencies:
     preact: ^10.4.0
-  checksum: fe4b515e0f856dcb6c9876e52aba2a262d1bf6cebb13176b6ee2a676df719e2331106ee1595e2de057843fe7ebe8ac03f3a8f568fb03f50b3ea0622496da2ead
+  checksum: 22b88111452b83a9a4c6987e47071b167e0c653e22519321eea871d4ffe7f0f38555b88572227e960abade87c62b1b4e46a01ed8d2f827ed05447bc4a886400c
   languageName: node
   linkType: hard
 
@@ -7491,6 +7491,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mitt@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "mitt@npm:3.0.1"
+  checksum: b55a489ac9c2949ab166b7f060601d3b6d893a852515ae9eca4e11df01c013876df777ea109317622b5c1c60e8aae252558e33c8c94e14124db38f64a39614b1
+  languageName: node
+  linkType: hard
+
 "mkdirp@npm:^0.5.5":
   version: 0.5.6
   resolution: "mkdirp@npm:0.5.6"
@@ -8554,6 +8561,13 @@ __metadata:
     es-errors: ^1.3.0
     set-function-name: ^2.0.1
   checksum: d7f333667d5c564e2d7a97c56c3075d64c722c9bb51b2b4df6822b2e8096d623a5e63088fb4c83df919b6951ef8113841de8b47de7224872fa6838bc5d8a7d64
+  languageName: node
+  linkType: hard
+
+"regexparam@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "regexparam@npm:3.0.0"
+  checksum: c8649af1538ccc12b5c5d250525f61bd370227dce41f4fb908433a9651e18b7be21dd8f8518c322dd9ebd75f7caaaea4921e374c39a469c11d4f9d0c738043e0
   languageName: node
   linkType: hard
 
@@ -10044,7 +10058,7 @@ __metadata:
     "@babel/preset-react": ^7.24.1
     "@babel/preset-typescript": ^7.24.1
     "@hypothesis/frontend-build": ^3.0.0
-    "@hypothesis/frontend-shared": ^7.2.0
+    "@hypothesis/frontend-shared": ^7.10.0
     "@hypothesis/frontend-testing": ^1.2.2
     "@rollup/plugin-babel": ^6.0.4
     "@rollup/plugin-commonjs": ^25.0.7
@@ -10279,12 +10293,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wouter-preact@npm:^2.10.0-alpha.1":
-  version: 2.11.0
-  resolution: "wouter-preact@npm:2.11.0"
+"wouter-preact@npm:^3.0.0":
+  version: 3.2.0
+  resolution: "wouter-preact@npm:3.2.0"
+  dependencies:
+    mitt: ^3.0.1
+    regexparam: ^3.0.0
   peerDependencies:
     preact: ^10.0.0
-  checksum: c4dd3f995dc664ecc2043a3ece6a415b85e88261a47f52a690354ee38a957eb8b03eac479a165dd464d867d1903774afa5c31b574c6fb0bfb991d191caea7243
+  checksum: 4daeefac1b25ae9df7cf95e03cb158ede179ef90690d77da212f0fa028ee5fe27152d30f18d671a70464b02ef430a1a0efeb7ceb7bb16e9bfeb5dffb577b6af9
   languageName: node
   linkType: hard
 
