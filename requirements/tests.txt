@@ -153,7 +153,7 @@ pastedeploy==3.1.0
     #   plaster-pastedeploy
 pip-sync-faster==0.0.3
     # via -r requirements/tests.in
-pip-tools==7.3.0
+pip-tools==7.4.1
     # via
     #   -r requirements/tests.in
     #   pip-sync-faster
@@ -186,7 +186,9 @@ pycparser==2.21
 pyjwt==2.8.0
     # via -r requirements/prod.txt
 pyproject-hooks==1.0.0
-    # via build
+    # via
+    #   build
+    #   pip-tools
 pyramid==2.0.2
     # via
     #   -r requirements/prod.txt
