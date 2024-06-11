@@ -22,4 +22,3 @@ whitenoise
 google-auth-oauthlib
 marshmallow
 webargs
-webvtt-py

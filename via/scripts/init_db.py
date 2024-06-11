@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# mypy: disable-error-code="attr-defined"
 """
 Initialize the DB.
 
@@ -107,7 +108,7 @@ def main():
         stamped = is_stamped(engine)
 
     if args.create:
-        if stamped:
+        if stamped:  # pylint:disable=possibly-used-before-assignment
             log.warning("Not creating tables because the DB is stamped by Alembic")
         else:
             create(engine)
