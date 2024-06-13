@@ -135,6 +135,24 @@ good-names = [
 output-format = "colorized"
 score = "no"
 
+[tool.mypy]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+disable_error_code = [
+    # https://mypy.readthedocs.io/en/stable/error_code_list.html#code-import-untyped
+    "import-untyped",
+]
+
+[[tool.mypy.overrides]]
+module= [
+  # Don't try to typecheck the tests for now
+  "tests.*",
+]
+ignore_errors = true
+
+
 [tool.hdev]
 project_name = "via"
 project_type = "application"

@@ -38,9 +38,10 @@ def pyramid_settings():
 
 def assert_cache_control(headers, cache_parts):
     """Assert that all parts of the Cache-Control header are present."""
-    assert dict(headers) == Any.dict.containing({"Cache-Control": Any.string()})
+    assert dict(headers) == Any.dict().containing({"Cache-Control": Any.string()})
     assert (
-        headers["Cache-Control"].split(", ") == Any.list.containing(cache_parts).only()
+        headers["Cache-Control"].split(", ")
+        == Any.list().containing(cache_parts).only()
     )
 
 

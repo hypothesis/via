@@ -123,7 +123,7 @@ class TestGoogleDriveAPI:
         AuthorizedSession.return_value.request.assert_called_once_with(
             "GET",
             Any(),
-            headers=Any.dict.containing(
+            headers=Any.dict().containing(
                 {
                     "X-Goog-Drive-Resource-Keys": "FILE_ID/SPECIFIED_RESOURCE_ID",
                 }

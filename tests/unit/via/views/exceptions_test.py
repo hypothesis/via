@@ -46,9 +46,9 @@ class TestOtherExceptions:
 
         values = other_exceptions(exception, pyramid_request)
 
-        assert values == Any.dict.containing(
+        assert values == Any.dict().containing(
             {
-                "exception": Any.dict.containing(
+                "exception": Any.dict().containing(
                     {"class": exception.__class__.__name__, "details": "details string"}
                 ),
                 "status_code": status_code,
@@ -72,7 +72,7 @@ class TestOtherExceptions:
 
         values = other_exceptions(exception, pyramid_request)
 
-        assert values["exception"] == Any.dict.containing(
+        assert values["exception"] == Any.dict().containing(
             EXCEPTION_MAP[mapped_exception]
         )
 
