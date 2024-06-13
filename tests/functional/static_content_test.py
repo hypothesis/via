@@ -20,7 +20,7 @@ class TestStaticContent:
     def test_get_static_content(self, url, mime_type, test_app):
         response = test_app.get(url)
 
-        assert dict(response.headers) == Any.dict.containing(
+        assert dict(response.headers) == Any.dict().containing(
             {"Content-Type": Any.string.containing(mime_type), "ETag": Any.string()}
         )
 

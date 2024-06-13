@@ -36,7 +36,7 @@ class TestHTTPService:
 
         assert response.status_code == 200
         assert response.text == "test_response"
-        assert httpretty.last_request() == Any.object.with_attrs(
+        assert httpretty.last_request() == Any.object().with_attrs(
             {"url": url, "method": method}
         )
 
@@ -46,28 +46,28 @@ class TestHTTPService:
 
         getattr(svc, method.lower())(url)
 
-        assert httpretty.last_request() == Any.object.with_attrs(
+        assert httpretty.last_request() == Any.object().with_attrs(
             {"url": url, "method": method}
         )
 
     def test_it_sends_request_params(self, svc, url):
         svc.request("GET", url, params={"test_param": "test_value"})
 
-        assert httpretty.last_request() == Any.object.with_attrs(
+        assert httpretty.last_request() == Any.object().with_attrs(
             {"url": f"{url}?test_param=test_value"}
         )
 
     def test_it_sends_request_data(self, svc, url):
         svc.request("GET", url, data={"test_key": "test_value"})
 
-        assert httpretty.last_request() == Any.object.with_attrs(
+        assert httpretty.last_request() == Any.object().with_attrs(
             {"body": b"test_key=test_value"}
         )
 
     def test_it_sends_request_json(self, svc, url):
         svc.request("GET", url, json={"test_key": "test_value"})
 
-        assert httpretty.last_request() == Any.object.with_attrs(
+        assert httpretty.last_request() == Any.object().with_attrs(
             {"body": b'{"test_key": "test_value"}'}
         )
 
