@@ -1,4 +1,4 @@
-from h_testkit import set_factoryboy_sqlalchemy_session
+from h_testkit import set_factoryboy_sqlalchemy_session  # type: ignore
 
 from tests import factories
 from via import models
