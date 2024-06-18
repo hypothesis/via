@@ -1,7 +1,6 @@
 from io import StringIO
 
 from webvtt import WebVTT
-from webvtt.parsers import SRTParser
 
 from via.services.http import HTTPService
 
@@ -34,15 +33,11 @@ class TranscriptService:
 
         # See https://www.w3.org/TR/webvtt1/#file-structure
         if content.startswith("WEBVTT"):
-            return WebVTT.read_buffer(content_buf)
+            content_format = "vtt"
+        else:
+            content_format = "srt"
 
-        # If video is not WebVTT, assume SRT.
-
-        # `WebVTT.read_buffer` only supports WebVTT format, and
-        # `WebVTT.from_srt` only supports file paths. We have to use the
-        # underlying parser directly to import SRT from a buffer.
-        parser = SRTParser().read_from_buffer(content_buf)
-        return WebVTT(captions=parser.captions)
+        return WebVTT.from_buffer(content_buf, format=content_format)
 
 
 def factory(_context, request):
