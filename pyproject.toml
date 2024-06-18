@@ -136,6 +136,9 @@ output-format = "colorized"
 score = "no"
 
 [tool.mypy]
+allow_untyped_globals = true
+error_summary = false
+pretty = true
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
