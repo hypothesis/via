@@ -30,7 +30,7 @@
     "postgres": "yes",
     "docker": "yes",
     "__postgres_port": "4433",
-    "__postgres_version": "15.3-alpine",
+    "__postgres_version": "15.5-alpine",
     "__docker_namespace": "hypothesis",
     "__docker_network": "via_default",
     "__github_url": "https://github.com/hypothesis/via",
