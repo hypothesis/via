@@ -306,7 +306,7 @@ pyramid-jinja2==2.10.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pyramid-sanity==1.0.3
+pyramid-sanity==1.0.4
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
