@@ -113,7 +113,7 @@ pyramid-exclog==1.1
     # via -r requirements/prod.in
 pyramid-jinja2==2.10.1
     # via -r requirements/prod.in
-pyramid-sanity==1.0.3
+pyramid-sanity==1.0.4
     # via -r requirements/prod.in
 pyramid-services==2.2
     # via -r requirements/prod.in
