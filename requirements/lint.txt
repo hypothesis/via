@@ -46,7 +46,7 @@ charset-normalizer==3.3.2
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   requests
-checkmatelib==1.0.15
+checkmatelib==1.0.17
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -192,7 +192,7 @@ marshmallow==3.21.1
     #   webargs
 mccabe==0.7.0
     # via pylint
-netaddr==0.10.1
+netaddr==1.3.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
