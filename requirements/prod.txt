@@ -20,7 +20,7 @@ cffi==1.16.0
     # via cryptography
 charset-normalizer==3.3.2
     # via requests
-checkmatelib==1.0.15
+checkmatelib==1.0.17
     # via -r requirements/prod.in
 cryptography==42.0.4
     # via joserfc
@@ -67,7 +67,7 @@ marshmallow==3.21.1
     # via
     #   -r requirements/prod.in
     #   webargs
-netaddr==0.10.1
+netaddr==1.3.0
     # via checkmatelib
 newrelic==9.11.0
     # via -r requirements/prod.in
