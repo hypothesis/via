@@ -52,7 +52,7 @@ describe('VideoPlayerApp', () => {
         scrollToCurrentSegment: sinon.stub(),
         scrollToTop: sinon.stub(),
       }),
-      []
+      [],
     );
     return <div />;
   }
@@ -87,7 +87,7 @@ describe('VideoPlayerApp', () => {
         // using the API to fetch it.
         transcriptSource={transcriptData}
         {...props}
-      />
+      />,
     );
     wrappers.push(wrapper);
     return wrapper;
@@ -198,7 +198,7 @@ describe('VideoPlayerApp', () => {
 
       // App should initially be in a loading state.
       assert.isTrue(
-        wrapper.exists('[data-testid="transcript-loading-spinner"]')
+        wrapper.exists('[data-testid="transcript-loading-spinner"]'),
       );
 
       // Transcript should be displayed when loading completes.
@@ -207,7 +207,7 @@ describe('VideoPlayerApp', () => {
       const expectedTranscript = {
         ...transcriptsAPIResponse.data.attributes,
         segments: clipDurations(
-          transcriptsAPIResponse.data.attributes.segments
+          transcriptsAPIResponse.data.attributes.segments,
         ),
       };
       assert.deepEqual(transcript.prop('transcript'), expectedTranscript);
@@ -370,7 +370,7 @@ describe('VideoPlayerApp', () => {
     const wrapper = createVideoPlayer();
     act(() => {
       wrapper.find('Transcript').prop('onSelectSegment')(
-        transcriptData.segments[1]
+        transcriptData.segments[1],
       );
     });
     wrapper.update();
@@ -387,7 +387,7 @@ describe('VideoPlayerApp', () => {
 
     act(() => {
       wrapper.find('Transcript').prop('onSelectSegment')(
-        transcriptData.segments[1]
+        transcriptData.segments[1],
       );
     });
     wrapper.update();
@@ -604,7 +604,7 @@ describe('VideoPlayerApp', () => {
           player="youtube"
           transcriptSource={transcriptData}
         />,
-        { attachTo: document.body }
+        { attachTo: document.body },
       );
       wrappers.push(wrapper);
       return wrapper;
@@ -613,7 +613,7 @@ describe('VideoPlayerApp', () => {
     function sendKey(wrapper, key, target = document.body) {
       act(() => {
         target.dispatchEvent(
-          new KeyboardEvent('keyup', { key, bubbles: true })
+          new KeyboardEvent('keyup', { key, bubbles: true }),
         );
       });
       wrapper.update();

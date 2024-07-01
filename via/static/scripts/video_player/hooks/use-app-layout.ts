@@ -28,7 +28,7 @@ const transcriptWidths = {
  * NB: This hook will not update if `appContainer.current` changes.
  */
 export function useAppLayout(
-  appContainer: RefObject<HTMLDivElement | null>
+  appContainer: RefObject<HTMLDivElement | null>,
 ): AppLayoutInfo {
   const lastContainerSize = useRef<AppSize>('sm');
   const [layoutInfo, setLayoutInfo] = useState<AppLayoutInfo>({

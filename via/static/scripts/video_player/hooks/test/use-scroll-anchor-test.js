@@ -15,7 +15,7 @@ describe('useScrollAnchor', () => {
     const container = useRef(null);
     const getChildren = useCallback(
       () => container.current.querySelectorAll('.child'),
-      []
+      [],
     );
 
     useScrollAnchor(container, getChildren);
@@ -88,7 +88,7 @@ describe('useScrollAnchor', () => {
     assert.equal(
       wrapper.find('[data-testid="container"]').getDOMNode().style
         .overflowAnchor,
-      'none'
+      'none',
     );
   });
 

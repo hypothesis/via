@@ -5,7 +5,7 @@ function pad(value: number): string {
 function formatTimePiece(
   value: number,
   singular: string,
-  plural: string
+  plural: string,
 ): string {
   if (value === 1) {
     return `${value} ${singular}`;
@@ -30,7 +30,7 @@ function formatTimePiece(
  */
 export function formatTimestamp(
   time: number,
-  format: 'digits' | 'description' = 'digits'
+  format: 'digits' | 'description' = 'digits',
 ): string {
   if (!isFinite(time) || time < 0) {
     return '';

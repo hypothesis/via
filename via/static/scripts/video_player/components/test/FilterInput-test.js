@@ -16,7 +16,7 @@ describe('FilterInput', () => {
         filter={filter}
         setFilter={fakeSetFilter}
         elementRef={createRef()}
-      />
+      />,
     );
 
   it('sets initial filter', () => {

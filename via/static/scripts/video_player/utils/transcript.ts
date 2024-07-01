@@ -35,7 +35,7 @@ export type TranscriptData = {
  */
 export function transcriptToCues(transcript: TranscriptData): VTTCue[] {
   return transcript.segments.map(
-    seg => new VTTCue(seg.start, seg.start + seg.duration, seg.text)
+    seg => new VTTCue(seg.start, seg.start + seg.duration, seg.text),
   );
 }
 
@@ -92,7 +92,7 @@ export function clipDurations(transcript: Segment[]): Segment[] {
  */
 export function filterTranscript(
   transcript: Segment[],
-  query: string
+  query: string,
 ): Map<number, MatchOffset[]> {
   const result = new Map<number, MatchOffset[]>();
   for (const [index, segment] of transcript.entries()) {

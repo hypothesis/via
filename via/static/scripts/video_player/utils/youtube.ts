@@ -4,7 +4,7 @@
  * See https://developers.google.com/youtube/iframe_api_reference.
  */
 export async function loadYouTubeIFrameAPI(
-  scriptSrc = 'https://www.youtube.com/iframe_api'
+  scriptSrc = 'https://www.youtube.com/iframe_api',
 ): Promise<typeof window.YT> {
   if (typeof window.YT?.Player === 'function') {
     return window.YT;

@@ -35,7 +35,7 @@ describe('formatTranscript', () => {
 [Music]
 how many of you remember the first time
 you saw a playstation 1 game if you were
-`.trim()
+`.trim(),
     );
   });
 });

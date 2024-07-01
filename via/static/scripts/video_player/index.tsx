@@ -38,7 +38,7 @@ export function init() {
           title: document.title,
         },
       },
-      '*'
+      '*',
     );
   }
 
@@ -52,7 +52,7 @@ export function init() {
       player={player}
       transcriptSource={api.transcript}
     />,
-    rootEl
+    rootEl,
   );
 }
 

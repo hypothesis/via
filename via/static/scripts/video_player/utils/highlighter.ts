@@ -15,7 +15,7 @@ export function resolveOffsets(
   let nextOffset = offsets.shift();
   const nodeIter = element.ownerDocument.createNodeIterator(
     element,
-    NodeFilter.SHOW_TEXT
+    NodeFilter.SHOW_TEXT,
   );
   const results = [];
 
@@ -98,7 +98,7 @@ export class TextHighlighter {
    */
   highlightSpans(
     element: HTMLElement,
-    spans: Array<{ start: number; end: number }>
+    spans: Array<{ start: number; end: number }>,
   ) {
     let ranges = this._ranges.get(element);
     if (!ranges) {

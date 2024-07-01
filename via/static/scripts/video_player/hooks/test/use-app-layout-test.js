@@ -53,7 +53,7 @@ describe('useAppLayout', () => {
     it('should provide relative app size when component is rendered', () => {
       container.style.width = `${containerWidth}px`;
       const appContainerEl = renderComponent().find(
-        '[data-testid="appContainer"]'
+        '[data-testid="appContainer"]',
       );
       assert.equal(appContainerEl.prop('data-app-size'), expected);
     });

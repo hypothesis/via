@@ -6,11 +6,11 @@ import TranscriptError from '../TranscriptError';
 describe('TranscriptError', () => {
   it('displays just `Error.message` if there are no error details', () => {
     const wrapper = mount(
-      <TranscriptError error={new Error('Something went wrong')} />
+      <TranscriptError error={new Error('Something went wrong')} />,
     );
     assert.equal(
       wrapper.text(),
-      ['Unable to load transcript', 'Something went wrong'].join('')
+      ['Unable to load transcript', 'Something went wrong'].join(''),
     );
   });
 
@@ -23,7 +23,7 @@ describe('TranscriptError', () => {
     const wrapper = mount(<TranscriptError error={error} />);
     assert.equal(
       wrapper.text(),
-      ['Unable to load transcript', 'The video was not found'].join('')
+      ['Unable to load transcript', 'The video was not found'].join(''),
     );
   });
 });

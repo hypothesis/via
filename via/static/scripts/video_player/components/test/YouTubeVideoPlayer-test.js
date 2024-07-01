@@ -89,7 +89,7 @@ describe('YouTubeVideoPlayer', () => {
     const origin = encodeURIComponent(window.origin);
     assert.equal(
       iframe.prop('src'),
-      `https://www.youtube.com/embed/abcdef?enablejsapi=1&origin=${origin}&rel=0`
+      `https://www.youtube.com/embed/abcdef?enablejsapi=1&origin=${origin}&rel=0`,
     );
   });
 
@@ -104,7 +104,7 @@ describe('YouTubeVideoPlayer', () => {
     assert.isTrue(wrapper.exists('[data-testid="load-error"]'));
     assert.include(
       wrapper.text(),
-      'There was an error loading this video. Try reloading the page.'
+      'There was an error loading this video. Try reloading the page.',
     );
   });
 
@@ -114,7 +114,7 @@ describe('YouTubeVideoPlayer', () => {
       <YouTubeVideoPlayer
         videoId="abcdef"
         onPlayingChanged={onPlayingChanged}
-      />
+      />,
     );
 
     await initPlayer();
@@ -128,7 +128,7 @@ describe('YouTubeVideoPlayer', () => {
       <YouTubeVideoPlayer
         videoId="abcdef"
         onPlayingChanged={onPlayingChanged}
-      />
+      />,
     );
 
     await initPlayer();
@@ -144,7 +144,7 @@ describe('YouTubeVideoPlayer', () => {
   it('calls `onTimeChanged` callback when video progress changes', async () => {
     const onTimeChanged = sinon.stub();
     mount(
-      <YouTubeVideoPlayer videoId="abcdef" onTimeChanged={onTimeChanged} />
+      <YouTubeVideoPlayer videoId="abcdef" onTimeChanged={onTimeChanged} />,
     );
     await initPlayer();
 
