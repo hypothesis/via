@@ -130,7 +130,7 @@ function TranscriptSegment({
       formatTimestamp(segment.start, 'digits'),
       formatTimestamp(segment.start, 'description'),
     ],
-    [segment.start]
+    [segment.start],
   );
 
   // Add a trailing space at the end of each segment to avoid the last word of a
@@ -150,7 +150,7 @@ function TranscriptSegment({
           {
             'bg-white shadow-md': isCurrent,
             hidden,
-          }
+          },
         )}
         data-is-current={isCurrent}
         data-testid="segment"
@@ -191,7 +191,7 @@ function TranscriptSegment({
             // Without it selecting the left edge of the transcript is fiddly.
             'before:content-[attr(data-timestamp)]',
             // Style and position timestamp text
-            'before:px-1 before:pt-[1px] before:text-right before:text-[.8em]'
+            'before:px-1 before:pt-[1px] before:text-right before:text-[.8em]',
           )}
           data-timestamp={timestamp}
         />
@@ -204,7 +204,7 @@ function TranscriptSegment({
             },
 
             // Avoid buckets overlapping highlighted text.
-            'pr-3'
+            'pr-3',
           )}
           data-testid="transcript-text"
           // Add attributes used by the client to create media time selectors.
@@ -250,7 +250,7 @@ function TranscriptSegment({
       text,
       timestamp,
       timestampDescription,
-    ]
+    ],
   );
 }
 
@@ -283,13 +283,13 @@ export default function Transcript({
     (segment, index) =>
       currentTime >= segment.start &&
       (index === transcript.segments.length - 1 ||
-        currentTime < transcript.segments[index + 1].start)
+        currentTime < transcript.segments[index + 1].start),
   );
 
   const scrollToCurrentSegment = useCallback(() => {
     const scrollContainer = scrollRef.current!;
     const currentSegment = scrollContainer.querySelector(
-      '[data-is-current=true]'
+      '[data-is-current=true]',
     ) as HTMLElement | null;
     if (!currentSegment) {
       return;
@@ -316,7 +316,7 @@ export default function Transcript({
     // back from the current position.
     const currentSegmentOffset = offsetRelativeTo(
       currentSegment,
-      scrollContainer
+      scrollContainer,
     );
 
     const scrollTarget =
@@ -345,14 +345,14 @@ export default function Transcript({
           top: scrollRef.current!.scrollHeight,
         }),
     }),
-    [scrollToCurrentSegment]
+    [scrollToCurrentSegment],
   );
 
   // Create highlighter for filter matches. This will use either CSS custom
   // highlights or `<mark>` if not available.
   const highlighter = useMemo(
     () => new TextHighlighter('transcript-filter-match'),
-    []
+    [],
   );
 
   const filterMatches = useMemo(() => {
@@ -370,7 +370,7 @@ export default function Transcript({
   // https://github.com/hypothesis/via/issues/1021.
   const getScrollChildren = useCallback(
     (element: HTMLElement) => element.querySelectorAll('li'),
-    []
+    [],
   );
   useScrollAnchor(scrollRef, getScrollChildren);
 
@@ -382,7 +382,7 @@ export default function Transcript({
         className={classnames(
           'grow shadow-r-inner p-2',
           // Transparency is necessary to avoid obscuring scroll shadows
-          'bg-grey-3/30'
+          'bg-grey-3/30',
         )}
       >
         {transcript.segments.map((segment, index) => (
@@ -408,7 +408,7 @@ export default function Transcript({
       highlighter,
       stableOnSelectSegment,
       transcript.segments,
-    ]
+    ],
   );
 
   return (
@@ -417,7 +417,7 @@ export default function Transcript({
         classes={classnames(
           // Make element positioned for use with `offsetRelativeTo`.
           'relative',
-          'border-y'
+          'border-y',
         )}
         data-testid="scroll-container"
         elementRef={scrollRef}

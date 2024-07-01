@@ -43,7 +43,7 @@ export const TOOLBAR_WIDTH = 22;
 export function useSideBySideLayout(container = document.body): boolean {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sufficientSpace, setSufficientSpace] = useState(
-    container.clientWidth >= SIDEBYSIDE_THRESHOLD
+    container.clientWidth >= SIDEBYSIDE_THRESHOLD,
   );
   const [sidebarWidth, setSidebarWidth] = useState(0);
   const sideBySideActive = sufficientSpace && sidebarOpen;
@@ -79,13 +79,13 @@ export function useSideBySideLayout(container = document.body): boolean {
 
     document.body.addEventListener(
       'hypothesis:layoutchange',
-      updateSidebarState
+      updateSidebarState,
     );
     window.addEventListener('resize', onResize);
     return () => {
       document.body.removeEventListener(
         'hypothesis:layoutchange',
-        updateSidebarState
+        updateSidebarState,
       );
       window.removeEventListener('resize', onResize);
     };

@@ -26,7 +26,7 @@ describe('CopyButton', () => {
       <CopyButton
         transcript={transcript}
         appendToastMessage={fakeAppendToastMessage}
-      />
+      />,
     );
 
   it('copies transcript to clipboard when "Copy" button is pressed', async () => {

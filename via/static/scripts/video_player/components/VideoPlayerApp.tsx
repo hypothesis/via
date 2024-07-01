@@ -212,15 +212,15 @@ export default function VideoPlayerApp({
 
   const syncTranscript = useCallback(
     () => transcriptControls.current?.scrollToCurrentSegment(),
-    []
+    [],
   );
   const scrollToTop = useCallback(
     () => transcriptControls.current?.scrollToTop(),
-    []
+    [],
   );
   const scrollToBottom = useCallback(
     () => transcriptControls.current?.scrollToBottom(),
-    []
+    [],
   );
 
   // After clearing the filter, scroll the current segment into view, unless
@@ -259,7 +259,7 @@ export default function VideoPlayerApp({
     const keyListener = (e: KeyboardEvent) => {
       // Disable single letter shortcuts if focused element is a text input.
       const enableSingleKey = !['input', 'select', 'textarea'].includes(
-        (e.target as Element).tagName.toLowerCase()
+        (e.target as Element).tagName.toLowerCase(),
       );
       const matchesKey = (key: string) => enableSingleKey && e.key === key;
 
@@ -315,7 +315,7 @@ export default function VideoPlayerApp({
           data-testid="top-bar"
           className={classnames(
             'h-[40px] min-h-[40px] w-full flex items-center gap-x-3',
-            'pl-2 border-b bg-grey-0'
+            'pl-2 border-b bg-grey-0',
           )}
         >
           <HypothesisLogo />
@@ -327,7 +327,7 @@ export default function VideoPlayerApp({
               // Put space to the right of the filter input so it is not
               // overlaid by sidebar controls. NB: Cannot use margin because it
               // gets "consumed" in side-by-side mode
-              'pr-4'
+              'pr-4',
             )}
             style={{ width: transcriptWidth }}
           >
@@ -363,7 +363,7 @@ export default function VideoPlayerApp({
               'p-1': appSize === 'md',
               'py-2 px-3': appSize === 'lg',
               'py-2 px-4': appSize === 'xl',
-            }
+            },
           )}
         >
           <div
@@ -420,7 +420,7 @@ export default function VideoPlayerApp({
                 // by sidebar controls
                 'px-1.5': !multicolumn,
                 'pr-4': multicolumn,
-              }
+              },
             )}
           >
             {multicolumn && (
@@ -529,7 +529,7 @@ export default function VideoPlayerApp({
                     // Provide a backdrop for bucket bar buttons. 20px of this
                     // is overlaid by the sidebar's semi-transparent bucket
                     // channel.
-                    'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]'
+                    'bg-gradient-to-r from-white to-grey-1 border-l w-[40px]',
                   )}
                 />
               </Transcript>
@@ -554,7 +554,7 @@ export default function VideoPlayerApp({
                   // Leave room for sidebar toolbar buttons at top of buckets
                   // in multi-column layouts
                   'h-[calc(100%-24px)]': multicolumn,
-                }
+                },
               )}
             />
           </div>

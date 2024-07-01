@@ -60,7 +60,7 @@ describe('Transcript', () => {
 
   it('renders segments', () => {
     const wrapper = mount(
-      <Transcript transcript={transcript} currentTime={5} />
+      <Transcript transcript={transcript} currentTime={5} />,
     );
     const segments = wrapper.find('[data-testid="segment"]');
     assert.equal(segments.length, 3);
@@ -142,7 +142,7 @@ describe('Transcript', () => {
           currentTime={5}
           onSelectSegment={selectSegment}
         />,
-        { attachTo: container }
+        { attachTo: container },
       );
       const timestamp = wrapper.find('[data-testid="segment"]').at(1).find('p');
 
@@ -179,7 +179,7 @@ describe('Transcript', () => {
         attachTo: container,
       });
       const scrollContainer = wrapper.find(
-        'div[data-testid="scroll-container"]'
+        'div[data-testid="scroll-container"]',
       );
       const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
       const segment = wrapper.find('[data-testid="segment"]').at(1);
@@ -213,11 +213,11 @@ describe('Transcript', () => {
       <Transcript transcript={transcript} currentTime={5} />,
       {
         attachTo: container,
-      }
+      },
     );
     try {
       const scrollContainer = wrapper.find(
-        'div[data-testid="scroll-container"]'
+        'div[data-testid="scroll-container"]',
       );
       const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
 
@@ -250,10 +250,10 @@ describe('Transcript', () => {
           transcript={longTranscript}
           currentTime={50}
         />,
-        { attachTo: container }
+        { attachTo: container },
       );
       const scrollContainer = wrapper.find(
-        'div[data-testid="scroll-container"]'
+        'div[data-testid="scroll-container"]',
       );
       const scrollTo = sinon.spy(scrollContainer.getDOMNode(), 'scrollTo');
 
@@ -346,7 +346,7 @@ describe('Transcript', () => {
     const highlightCalls = fakeTextHighlighter.highlightSpans.getCalls();
     assert.equal(
       highlightCalls.length,
-      1 // Number of segments with matches
+      1, // Number of segments with matches
     );
 
     const [element, spans] = highlightCalls[0].args;

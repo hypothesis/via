@@ -82,7 +82,7 @@ describe('TextHighlighter', () => {
         ]);
         assert.equal(
           container.innerHTML,
-          `<mark class="${highlightName}">Foo</mark> <b>bar</b> <mark class="${highlightName}">baz</mark>`
+          `<mark class="${highlightName}">Foo</mark> <b>bar</b> <mark class="${highlightName}">baz</mark>`,
         );
       });
     });

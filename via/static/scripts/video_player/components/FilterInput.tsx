@@ -22,7 +22,7 @@ export default function FilterInput({
           // Match height of search input in sidebar
           'h-[32px]',
           // Extra padding right to prevent text and "clear" button overlapping
-          'pr-8'
+          'pr-8',
         )}
         elementRef={elementRef}
         onKeyUp={e => {

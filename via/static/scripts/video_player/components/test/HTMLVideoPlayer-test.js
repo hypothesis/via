@@ -118,7 +118,7 @@ describe('HTMLVideoPlayer', () => {
       if ('controlsList' in video) {
         assert.deepEqual(
           Array.from(video.controlsList.values()),
-          allowDownload ? [] : ['nodownload']
+          allowDownload ? [] : ['nodownload'],
         );
       }
 

@@ -40,7 +40,7 @@ export function rectContains(rectA: DOMRect, rectB: DOMRect) {
  */
 export function useScrollAnchor(
   scrollRef: MutableRef<HTMLElement | null>,
-  getChildren: (element: HTMLElement) => NodeListOf<HTMLElement>
+  getChildren: (element: HTMLElement) => NodeListOf<HTMLElement>,
 ) {
   useEffect(() => {
     /* istanbul ignore next */
@@ -74,7 +74,7 @@ export function useScrollAnchor(
     const updateScrollAnchor = () => {
       const scrollRect = scrollElement.getBoundingClientRect();
       const newScrollAnchor = Array.from(getChildren(scrollElement)).find(
-        child => rectContains(scrollRect, child.getBoundingClientRect())
+        child => rectContains(scrollRect, child.getBoundingClientRect()),
       );
 
       if (!newScrollAnchor) {

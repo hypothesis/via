@@ -15,7 +15,7 @@ describe('loadYouTubeIFrameAPI', () => {
 
   it('adds YouTube IFrame API script to page', async () => {
     const scriptURL = URL.createObjectURL(
-      new Blob([], { type: 'text/javascript' })
+      new Blob([], { type: 'text/javascript' }),
     );
     const YT = loadYouTubeIFrameAPI(scriptURL.toString());
 
@@ -29,7 +29,7 @@ describe('loadYouTubeIFrameAPI', () => {
     loadPlayerAPI();
 
     const scriptURL = URL.createObjectURL(
-      new Blob([], { type: 'text/javascript' })
+      new Blob([], { type: 'text/javascript' }),
     );
     const YT = await loadYouTubeIFrameAPI(scriptURL.toString());
     assert.equal(await YT, window.YT);
