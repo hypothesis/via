@@ -82,7 +82,7 @@
       }
     ]
   },
-  "browserslist": "chrome 70, firefox 70, safari 11.1",
+  "browserslist": "chrome 92, firefox 90, safari 14.1",
   "scripts": {
     "build": "gulp build",
     "checkformatting": "prettier --cache --check via/**/*.{js,ts,tsx}",
