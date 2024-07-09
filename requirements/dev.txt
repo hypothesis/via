@@ -300,7 +300,7 @@ wired==0.3
     # via
     #   -r prod.txt
     #   pyramid-services
-zipp==3.17.0
+zipp==3.19.1
     # via
     #   -r prod.txt
     #   importlib-metadata

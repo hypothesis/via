@@ -454,7 +454,7 @@ wired==0.3
     #   -r functests.txt
     #   -r tests.txt
     #   pyramid-services
-zipp==3.17.0
+zipp==3.19.1
     # via
     #   -r functests.txt
     #   -r tests.txt
