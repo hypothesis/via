@@ -247,7 +247,7 @@ sentry-sdk==2.8.0
     #   h-pyramid-sentry
 six==1.16.0
     # via python-dateutil
-sqlalchemy==2.0.29
+sqlalchemy==2.0.31
     # via
     #   -r requirements/prod.txt
     #   alembic
