@@ -61,7 +61,7 @@
     "mocha": "^10.5.2",
     "prettier": "^3.3.2",
     "sinon": "^17.0.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.5.4"
   },
   "prettier": {
     "arrowParens": "avoid",
