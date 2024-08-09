@@ -30,6 +30,7 @@ PARAMETERS = {
     "youtube_transcripts": {"formatter": asbool},
     "api_jwt_secret": {"required": True},
     "youtube_api_key": {},
+    "youtube_proxy": {},
 }
 
 
