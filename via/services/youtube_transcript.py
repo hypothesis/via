@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import Dict, List
 from xml.etree import ElementTree
 
+import requests
+
 from via.services.http import HTTPService
 
 
@@ -145,4 +147,8 @@ class YouTubeTranscriptService:
 
 
 def factory(_context, request):
-    return YouTubeTranscriptService(http_service=request.find_service(HTTPService))
+    session = requests.Session()
+    if youtube_proxy := request.registry.settings.get("youtube_proxy"):
+        session.proxies["https"] = youtube_proxy
+    http_svc = HTTPService(session=session)
+    return YouTubeTranscriptService(http_service=http_svc)

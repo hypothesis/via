@@ -289,11 +289,42 @@ class TestYouTubeTranscriptService:
 
 
 class TestFactory:
-    def test_factory(self, YouTubeTranscriptService, http_service, pyramid_request):
+    def test_factory_without_proxy(
+        self, YouTubeTranscriptService, pyramid_request, HTTPService
+    ):
         svc = factory(sentinel.context, pyramid_request)
 
-        YouTubeTranscriptService.assert_called_once_with(http_service=http_service)
+        HTTPService.assert_called_once()
+        session = HTTPService.call_args[1]["session"]
+        assert session.proxies == {}
+
+        YouTubeTranscriptService.assert_called_once_with(
+            http_service=HTTPService.return_value
+        )
+
         assert svc == YouTubeTranscriptService.return_value
+
+    def test_factory_with_proxy(
+        self, YouTubeTranscriptService, pyramid_request, HTTPService
+    ):
+        proxy_server = "http://proxy_user@proxy_pass:proxy_host.com:123"
+        pyramid_request.registry.settings["youtube_proxy"] = proxy_server
+
+        svc = factory(sentinel.context, pyramid_request)
+
+        HTTPService.assert_called_once()
+        session = HTTPService.call_args[1]["session"]
+        assert session.proxies == {"https": proxy_server}
+
+        YouTubeTranscriptService.assert_called_once_with(
+            http_service=HTTPService.return_value
+        )
+
+        assert svc == YouTubeTranscriptService.return_value
+
+    @pytest.fixture
+    def HTTPService(self, patch):
+        return patch("via.services.youtube_transcript.HTTPService")
 
     @pytest.fixture
     def YouTubeTranscriptService(self, patch):
