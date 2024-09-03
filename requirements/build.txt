@@ -12,11 +12,11 @@ importlib-metadata==7.0.1
     # via pip-sync-faster
 packaging==23.2
     # via build
-pip-sync-faster==0.0.3
-    # via -r build.in
+pip-sync-faster==0.0.4
+    # via -r requirements/build.in
 pip-tools==7.4.1
     # via
-    #   -r build.in
+    #   -r requirements/build.in
     #   pip-sync-faster
 pyproject-hooks==1.0.0
     # via
@@ -25,7 +25,7 @@ pyproject-hooks==1.0.0
 wheel==0.42.0
     # via pip-tools
 whitenoise==6.6.0
-    # via -r build.in
+    # via -r requirements/build.in
 zipp==3.19.1
     # via importlib-metadata
 
