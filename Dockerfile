@@ -18,7 +18,7 @@ RUN yarn build
 # reverted back to Alpine when Musl v1.2.4 is released.
 #
 # See https://github.com/hypothesis/product-backlog/issues/1409
-FROM python:3.11.9-slim-bullseye
+FROM python:3.11.10-slim-bullseye
 LABEL maintainer="Hypothes.is Project and contributors"
 
 RUN apt-get update && apt-get install --yes nginx nginx-extras gettext-base supervisor libpq-dev \
