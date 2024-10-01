@@ -10,7 +10,7 @@ click==8.1.7
     # via pip-tools
 importlib-metadata==7.0.1
     # via pip-sync-faster
-importlib-resources==6.4.0
+importlib-resources==6.4.5
     # via -r requirements/updatepdfjs.in
 packaging==23.2
     # via build
