@@ -140,7 +140,7 @@ sentry-sdk==2.13.0
     # via
     #   -r requirements/prod.in
     #   h-pyramid-sentry
-sqlalchemy==2.0.31
+sqlalchemy==2.0.35
     # via
     #   -r requirements/prod.in
     #   alembic
