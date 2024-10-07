@@ -40,7 +40,7 @@ cryptography==43.0.1
     # via
     #   -r requirements/prod.txt
     #   joserfc
-factory-boy==3.3.0
+factory-boy==3.3.1
     # via
     #   -r requirements/functests.in
     #   pytest-factoryboy
