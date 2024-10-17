@@ -43,7 +43,7 @@ export function readConfig(): ConfigObject {
   try {
     const config = JSON.parse(configEl.textContent!);
     return config;
-  } catch (err) {
+  } catch {
     throw new Error('Failed to parse frontend configuration');
   }
 }
