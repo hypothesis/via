@@ -26,7 +26,7 @@ export default function CopyButton({
         type: 'success',
         message: 'Transcript copied',
       });
-    } catch (err) {
+    } catch {
       appendToastMessage({
         type: 'error',
         message: 'Failed to copy transcript',
