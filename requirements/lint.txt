@@ -422,7 +422,7 @@ waitress==2.1.2
     # via
     #   -r requirements/functests.txt
     #   webtest
-webargs==8.4.0
+webargs==8.6.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
