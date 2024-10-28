@@ -32,7 +32,7 @@ greenlet==3.0.3
     # via sqlalchemy
 gunicorn==22.0.0
     # via -r requirements/prod.in
-h-assets==1.0.6
+h-assets==1.0.7
     # via -r requirements/prod.in
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.in
@@ -42,8 +42,6 @@ hupper==1.12
     # via pyramid
 idna==3.7
     # via requests
-importlib-metadata==7.0.1
-    # via h-assets
 importlib-resources==6.4.5
     # via
     #   -r requirements/prod.in
@@ -173,8 +171,6 @@ whitenoise==6.6.0
     # via -r requirements/prod.in
 wired==0.3
     # via pyramid-services
-zipp==3.19.1
-    # via importlib-metadata
 zope-deprecation==5.0
     # via
     #   pyramid
