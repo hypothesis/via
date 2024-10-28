@@ -60,7 +60,7 @@ greenlet==3.0.3
     #   sqlalchemy
 gunicorn==22.0.0
     # via -r requirements/prod.txt
-h-assets==1.0.6
+h-assets==1.0.7
     # via -r requirements/prod.txt
 h-matchers==1.2.15
     # via -r requirements/tests.in
@@ -81,10 +81,7 @@ idna==3.7
     #   -r requirements/prod.txt
     #   requests
 importlib-metadata==7.0.1
-    # via
-    #   -r requirements/prod.txt
-    #   h-assets
-    #   pip-sync-faster
+    # via pip-sync-faster
 importlib-resources==6.4.5
     # via
     #   -r requirements/prod.txt
@@ -294,9 +291,7 @@ wired==0.3
     #   -r requirements/prod.txt
     #   pyramid-services
 zipp==3.19.1
-    # via
-    #   -r requirements/prod.txt
-    #   importlib-metadata
+    # via importlib-metadata
 zope-deprecation==5.0
     # via
     #   -r requirements/prod.txt

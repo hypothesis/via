@@ -96,7 +96,7 @@ gunicorn==22.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-assets==1.0.6
+h-assets==1.0.7
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
@@ -134,7 +134,6 @@ importlib-metadata==7.0.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-    #   h-assets
     #   pip-sync-faster
 importlib-resources==6.4.5
     # via
