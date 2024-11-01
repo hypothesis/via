@@ -433,7 +433,7 @@ webob==1.8.8
     #   h-vialib
     #   pyramid
     #   webtest
-webtest==3.0.0
+webtest==3.0.1
     # via -r requirements/functests.txt
 webvtt-py==0.5.1
     # via
