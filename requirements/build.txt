@@ -24,7 +24,7 @@ pyproject-hooks==1.0.0
     #   pip-tools
 wheel==0.42.0
     # via pip-tools
-whitenoise==6.6.0
+whitenoise==6.8.2
     # via -r requirements/build.in
 zipp==3.19.1
     # via importlib-metadata
