@@ -34,7 +34,7 @@ checkmatelib==1.0.17
     # via -r requirements/prod.txt
 click==8.1.7
     # via pip-tools
-coverage[toml]==7.4.0
+coverage[toml]==7.6.4
     # via pytest-cov
 cryptography==43.0.1
     # via
@@ -207,7 +207,7 @@ pytest==8.3.3
     #   -r requirements/tests.in
     #   pytest-cov
     #   pytest-factoryboy
-pytest-cov==5.0.0
+pytest-cov==6.0.0
     # via -r requirements/tests.in
 pytest-factoryboy==2.7.0
     # via -r requirements/tests.in
