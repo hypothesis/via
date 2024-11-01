@@ -42,7 +42,7 @@ google-auth==2.26.2
     # via
     #   -r requirements/prod.txt
     #   google-auth-oauthlib
-google-auth-oauthlib==1.2.0
+google-auth-oauthlib==1.2.1
     # via -r requirements/prod.txt
 greenlet==3.0.3
     # via
