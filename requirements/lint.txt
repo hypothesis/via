@@ -55,7 +55,7 @@ click==8.1.7
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   pip-tools
-coverage[toml]==7.4.0
+coverage[toml]==7.6.4
     # via
     #   -r requirements/tests.txt
     #   pytest-cov
@@ -323,7 +323,7 @@ pytest==8.3.3
     #   -r requirements/tests.txt
     #   pytest-cov
     #   pytest-factoryboy
-pytest-cov==5.0.0
+pytest-cov==6.0.0
     # via -r requirements/tests.txt
 pytest-factoryboy==2.7.0
     # via
