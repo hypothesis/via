@@ -284,7 +284,7 @@ webvtt-py==0.5.1
     # via -r requirements/prod.txt
 wheel==0.42.0
     # via pip-tools
-whitenoise==6.6.0
+whitenoise==6.8.2
     # via -r requirements/prod.txt
 wired==0.3
     # via
