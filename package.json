@@ -28,7 +28,7 @@
     "classnames": "^2.5.1",
     "focus-visible": "^5.2.1",
     "gulp": "^5.0.0",
-    "postcss": "^8.4.47",
+    "postcss": "^8.4.49",
     "preact": "^10.24.3",
     "rollup": "^4.24.4",
     "sass": "^1.77.4",
