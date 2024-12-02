@@ -32,7 +32,7 @@
     "preact": "^10.24.3",
     "rollup": "^4.28.0",
     "sass": "^1.77.4",
-    "tailwindcss": "^3.4.13",
+    "tailwindcss": "^3.4.15",
     "terser": "^5.36.0"
   },
   "devDependencies": {
