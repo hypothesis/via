@@ -8,7 +8,7 @@ alembic==1.13.2
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-astroid==3.2.2
+astroid==3.3.5
     # via pylint
 attrs==23.2.0
     # via
@@ -278,7 +278,7 @@ pyjwt==2.9.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pylint==3.2.3
+pylint==3.3.1
     # via -r requirements/lint.in
 pyproject-hooks==1.0.0
     # via
