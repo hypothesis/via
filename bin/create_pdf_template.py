@@ -39,6 +39,7 @@ def _insert_jinja2_blocks(contents):
 
 
 if __name__ == "__main__":
+    # pylint: disable=invalid-name
     with open(SOURCE_FILE, encoding="utf8") as handle:
         template = _insert_jinja2_blocks(handle.read())
         template = _insert(
