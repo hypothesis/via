@@ -1,8 +1,5 @@
 from via.views.api.transcript import get_transcript
 
-# Ignore false positive with `use_kwargs`.
-# pylint: disable=no-value-for-parameter
-
 
 class TestGetTranscript:
     def test_it(self, pyramid_request, transcript_service):

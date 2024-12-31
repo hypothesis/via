@@ -1,3 +1,5 @@
+# ruff: noqa: SLF001
+
 from unittest.mock import Mock, create_autospec, sentinel
 
 import httpretty
@@ -209,7 +211,6 @@ class TestHTTPService:
         ),
     )
     def test_stream_bytes(self, svc, response, input_bytes, output):
-        # pylint:disable=protected-access
         response.iter_content.return_value = input_bytes
 
         results = svc._stream_bytes(response, min_chunk_size=9)

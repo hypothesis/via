@@ -124,7 +124,7 @@ def _serialise_requests_info(request, response):
         try:
             data["text"] = response.text[:5000]
 
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # noqa: BLE001
             # Use super broad exceptions so we can't fail here
             data["text"] = "... cannot retrieve ..."
 

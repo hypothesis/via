@@ -6,7 +6,7 @@ import pytest
 from pyramid import testing
 from pyramid.request import apply_request_extensions
 
-from tests.unit.services import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from tests.unit.services import *  # noqa: F403
 from via.views import add_routes
 
 
@@ -14,7 +14,7 @@ def autopatcher(request, target, **kwargs):
     """Patch and cleanup automatically. Wraps :py:func:`mock.patch`."""
     options = {"autospec": True}
     options.update(kwargs)
-    patcher = mock.patch(target, **options)
+    patcher = mock.patch(target, **options)  # noqa: F405
     obj = patcher.start()
     request.addfinalizer(patcher.stop)
     return obj
@@ -35,10 +35,7 @@ def pyramid_config(pyramid_settings):
 
 
 @pytest.fixture
-def pyramid_request(
-    db_session,
-    pyramid_config,  # pylint:disable=unused-argument
-):
+def pyramid_request(db_session, pyramid_config):  # noqa: ARG001
     pyramid_request = testing.DummyRequest()
     apply_request_extensions(pyramid_request)
     pyramid_request.db = db_session

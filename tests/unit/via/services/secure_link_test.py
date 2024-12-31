@@ -1,3 +1,5 @@
+# ruff: noqa: SLF001
+
 from datetime import timedelta
 from unittest.mock import create_autospec, sentinel
 
@@ -6,8 +8,6 @@ from h_vialib.exceptions import TokenException
 from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.services.secure_link import SecureLinkService, factory, has_secure_url_token
-
-# pylint: disable=protected-access
 
 
 class TestHasSecureURLToken:

@@ -20,14 +20,7 @@ class TestGetURLDetails:
         ),
     )
     def test_it_calls_get_for_normal_urls(
-        # pylint: disable=too-many-arguments
-        self,
-        response,
-        content_type,
-        mime_type,
-        status_code,
-        http_service,
-        svc,
+        self, response, content_type, mime_type, status_code, http_service, svc
     ):
         if content_type:
             response.headers = {"Content-Type": content_type}

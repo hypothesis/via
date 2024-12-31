@@ -80,7 +80,6 @@ class TestPDFURLBuilder:
     @pytest.mark.parametrize(
         "url,endpoint_url",
         (
-            # pylint:disable=line-too-long
             # One Drive
             (
                 "https://my-sharepoint.sharepoint.com/FILE_ID/?download=1",
@@ -118,7 +117,6 @@ class TestPDFURLBuilder:
         svc.get_pdf_url("http//d2l.com/content/topics/FILEID/file?stream=1")
 
         secure_link_service.sign_url.assert_called_once_with(
-            # pylint:disable=line-too-long
             "http://example.com/d2l/proxied.pdf?url=http%2F%2Fd2l.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1&via.secret.headers=SECRET-HEADERS"
         )
 
@@ -128,7 +126,6 @@ class TestPDFURLBuilder:
         svc.get_pdf_url("http//d2l.com/content/topics/FILEID/file?stream=1")
 
         secure_link_service.sign_url.assert_called_once_with(
-            # pylint:disable=line-too-long
             "http://example.com/d2l/proxied.pdf?url=http%2F%2Fd2l.com%2Fcontent%2Ftopics%2FFILEID%2Ffile%3Fstream%3D1&via.secret.query=SECRET-QUERY"
         )
 
