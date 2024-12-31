@@ -43,11 +43,11 @@ class _NGINXSigner:
         sec = sec.replace(b"+", b"-")
         sec = sec.replace(b"/", b"_")
         sec = sec.replace(b"=", b"")
-        sec = sec.decode()
+        sec_str = sec.decode()
 
         # Construct the URL, inserting sec and exp where our NGINX config file
         # expects to find them.
-        return f"{self.nginx_server}{nginx_path}{sec}/{exp}/{url}"
+        return f"{self.nginx_server}{nginx_path}{sec_str}/{exp}/{url}"
 
 
 @dataclass

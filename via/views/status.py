@@ -7,7 +7,7 @@ from via.services import CheckmateService
 
 @view.view_config(route_name="status", renderer="json", http_cache=0)
 def status(request):
-    body = {"status": "okay"}
+    body: dict[str, str | list] = {"status": "okay"}
 
     if "include-checkmate" in request.params:
         checkmate_service = request.find_service(CheckmateService)
