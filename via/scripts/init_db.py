@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # mypy: disable-error-code="attr-defined"
 """
+
 Initialize the DB.
 
 Usage:
@@ -8,7 +9,8 @@ Usage:
     python3 -m via.scripts.init_db --help
 
 """
-# pylint:disable=import-outside-toplevel,unused-import
+
+# ruff: noqa: PLC0415, F401
 import argparse
 import logging
 from os import environ
@@ -48,7 +50,13 @@ def delete(engine: Engine) -> None:
     else:
         pre_delete(engine)
 
-    Base.metadata.drop_all(engine)
+    with engine.connect() as connection:
+        # Delete the DB "public" schema directly.
+        # We do this instead of using SQLAlchemy's drop_all because we want to delete all tables in the current DB.
+        # For example, this will delete tables created by migrations in other branches, not only the ones SQLAlchemy know about in the current code base.
+        connection.execute(text("DROP SCHEMA PUBLIC CASCADE;"))
+        connection.execute(text("CREATE SCHEMA PUBLIC;"))
+        connection.execute(text("COMMIT;"))
 
     try:
         from via.db import post_delete
@@ -108,7 +116,7 @@ def main():
         stamped = is_stamped(engine)
 
     if args.create:
-        if stamped:  # pylint:disable=possibly-used-before-assignment
+        if stamped:
             log.warning("Not creating tables because the DB is stamped by Alembic")
         else:
             create(engine)
