@@ -12,7 +12,7 @@ class YouTubeDataAPIError(Exception):
 
 
 class YouTubeService:
-    def __init__(  # pylint:disable=too-many-arguments,too-many-positional-arguments
+    def __init__(
         self,
         db_session,
         enabled: bool,
@@ -49,7 +49,7 @@ class YouTubeService:
         if parsed.netloc == "youtu.be" and len(path_parts) >= 2 and not path_parts[0]:
             return path_parts[1]
 
-        if parsed.netloc not in ["www.youtube.com", "youtube.com", "m.youtube.com"]:
+        if parsed.netloc not in {"www.youtube.com", "youtube.com", "m.youtube.com"}:
             return None
 
         query_params = parse_qs(parsed.query)
@@ -64,7 +64,7 @@ class YouTubeService:
         if (
             len(path_parts) >= 3
             and not path_parts[0]
-            and path_parts[1] in ["v", "embed", "shorts", "live"]
+            and path_parts[1] in {"v", "embed", "shorts", "live"}
         ):
             return path_parts[2]
 

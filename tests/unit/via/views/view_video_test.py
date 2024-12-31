@@ -8,10 +8,6 @@ from pyramid.httpexceptions import HTTPUnauthorized
 from via.exceptions import BadURL
 from via.views.view_video import video, youtube
 
-# webargs's kwargs injection into view functions falsely triggers Pylint's
-# no-value-for-parameter all the time so just disable it file-wide.
-# pylint: disable=no-value-for-parameter
-
 
 @pytest.mark.usefixtures("youtube_service")
 class TestYouTube:

@@ -186,7 +186,6 @@ class TestGoogleDriveAPI:
     def test_iter_file_catches_specific_google_exceptions(
         self, api, kwargs, error_class, status_code, AuthorizedSession
     ):
-        # pylint: disable=line-too-long
         AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = make_requests_exception(
             HTTPError, **kwargs
         )

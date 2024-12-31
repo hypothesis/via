@@ -7,8 +7,6 @@ from argparse import ArgumentParser
 from glob import glob
 from subprocess import check_output
 
-# pylint: disable=too-few-public-methods
-
 PARSER = ArgumentParser()
 PARSER.add_argument(
     "-c",
