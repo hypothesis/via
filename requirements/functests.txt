@@ -264,7 +264,7 @@ venusian==3.1.0
     # via
     #   -r requirements/prod.txt
     #   pyramid
-waitress==3.0.1
+waitress==3.0.2
     # via webtest
 webargs==8.6.0
     # via -r requirements/prod.txt
@@ -274,7 +274,7 @@ webob==1.8.8
     #   h-vialib
     #   pyramid
     #   webtest
-webtest==3.0.1
+webtest==3.0.2
     # via -r requirements/functests.in
 webvtt-py==0.5.1
     # via -r requirements/prod.txt
