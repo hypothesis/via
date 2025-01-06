@@ -1,7 +1,7 @@
 import re
 from json import JSONDecodeError
 from logging import getLogger
-from typing import ByteString, Iterator
+from typing import Iterator
 from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport.requests import AuthorizedSession
@@ -157,7 +157,7 @@ class GoogleDriveAPI:
 
         return data
 
-    def iter_file(self, file_id, resource_key=None) -> Iterator[ByteString]:
+    def iter_file(self, file_id, resource_key=None) -> Iterator[bytes]:
         """Get a generator of chunks of bytes for the specified file.
 
         :param file_id: Google Drive file id to retrieve

@@ -54,10 +54,6 @@ google-auth==2.26.2
     #   google-auth-oauthlib
 google-auth-oauthlib==1.2.1
     # via -r requirements/prod.txt
-greenlet==3.0.3
-    # via
-    #   -r requirements/prod.txt
-    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-assets==1.0.7
