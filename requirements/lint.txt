@@ -87,11 +87,6 @@ google-auth-oauthlib==1.2.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-greenlet==3.0.3
-    # via
-    #   -r requirements/functests.txt
-    #   -r requirements/tests.txt
-    #   sqlalchemy
 gunicorn==23.0.0
     # via
     #   -r requirements/functests.txt
