@@ -202,7 +202,7 @@ pyramid-services==2.2
     # via -r requirements/prod.txt
 pyramid-tm==2.5
     # via -r requirements/prod.txt
-pytest==8.3.3
+pytest==8.3.4
     # via
     #   -r requirements/tests.in
     #   pytest-cov
