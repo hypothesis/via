@@ -56,6 +56,10 @@ show_missing = true
 precision = 2
 fail_under = 100.00
 skip_covered = true
+exclude_also = [
+    # `if TYPE_CHECKING:` blocks are only executed while running mypy.
+    "if TYPE_CHECKING:",
+]
 
 [tool.isort]
 multi_line_output = 3
@@ -150,8 +154,8 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
-module= [
-  # Don't try to typecheck the tests for now
+module = [
+  # Don't try to typecheck the tests for now.
   "tests.*",
 ]
 ignore_errors = true
