@@ -274,7 +274,7 @@ pycparser==2.21
     #   cffi
 pydocstyle==6.3.0
     # via -r requirements/lint.in
-pyjwt==2.9.0
+pyjwt==2.10.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
