@@ -12,7 +12,7 @@ class YouTubeDataAPIError(Exception):
 
 
 class YouTubeService:
-    def __init__(  # pylint:disable=too-many-arguments,too-many-positional-arguments
+    def __init__(
         self,
         db_session,
         enabled: bool,

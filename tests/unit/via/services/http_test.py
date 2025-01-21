@@ -209,10 +209,9 @@ class TestHTTPService:
         ),
     )
     def test_stream_bytes(self, svc, response, input_bytes, output):
-        # pylint:disable=protected-access
         response.iter_content.return_value = input_bytes
 
-        results = svc._stream_bytes(response, min_chunk_size=9)
+        results = svc._stream_bytes(response, min_chunk_size=9)  # noqa: SLF001
 
         assert list(results) == output
         response.iter_content.assert_called_once_with(chunk_size=9)

@@ -20,7 +20,6 @@ class TestGetURLDetails:
         ),
     )
     def test_it_calls_get_for_normal_urls(
-        # pylint: disable=too-many-arguments
         self,
         response,
         content_type,

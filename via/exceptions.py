@@ -1,4 +1,4 @@
-class RequestBasedException(Exception):
+class RequestBasedException(Exception):  # noqa: N818
     """An exception based on a requests error."""
 
     def __init__(self, message, requests_err=None):
@@ -47,13 +47,13 @@ class UpstreamServiceError(RequestBasedException):
     status_int = 409
 
 
-class UnhandledUpstreamException(UpstreamServiceError):
+class UnhandledUpstreamException(UpstreamServiceError):  # noqa: N818
     """Something we did not plan for went wrong."""
 
     status_int = 417
 
 
-class UpstreamTimeout(UpstreamServiceError):
+class UpstreamTimeout(UpstreamServiceError):  # noqa: N818
     """We timed out waiting for an upstream service."""
 
     # "504 - Gateway Timeout" is the correct thing to raise, but this

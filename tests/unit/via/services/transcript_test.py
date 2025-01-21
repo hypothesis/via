@@ -45,7 +45,6 @@ EXAMPLE_TRANSCRIPT = [
 
 
 class TestTranscriptService:
-
     @pytest.mark.parametrize(
         "url,content,expected",
         [

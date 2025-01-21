@@ -7,8 +7,6 @@ from pyramid.httpexceptions import HTTPUnauthorized
 
 from via.services.secure_link import SecureLinkService, factory, has_secure_url_token
 
-# pylint: disable=protected-access
-
 
 class TestHasSecureURLToken:
     def test_it_with_valid_token(self, view, pyramid_request, secure_link_service):
@@ -40,7 +38,7 @@ class TestSecureLinkService:
         assert service.request_is_valid(pyramid_request)
 
     def test_request_is_valid_can_fail(self, service, pyramid_request):
-        service._via_secure_url.verify.side_effect = TokenException
+        service._via_secure_url.verify.side_effect = TokenException  # noqa: SLF001
 
         assert not service.request_is_valid(pyramid_request)
 
@@ -50,15 +48,15 @@ class TestSecureLinkService:
     ):
         assert service.request_is_valid(pyramid_request)
 
-        service._via_secure_url.verify.assert_not_called()
+        service._via_secure_url.verify.assert_not_called()  # noqa: SLF001
 
     def test_sign_url(self, service):
         result = service.sign_url(sentinel.url)
 
-        service._via_secure_url.create.assert_called_once_with(
+        service._via_secure_url.create.assert_called_once_with(  # noqa: SLF001
             sentinel.url, max_age=timedelta(hours=25)
         )
-        assert result == service._via_secure_url.create.return_value
+        assert result == service._via_secure_url.create.return_value  # noqa: SLF001
 
     @pytest.mark.usefixtures("with_signed_urls_not_required")
     def test_sign_url_if_signatures_not_required(self, service):
@@ -72,7 +70,7 @@ class TestSecureLinkService:
 
     @pytest.fixture
     def with_signed_urls_not_required(self, service):
-        service._signed_urls_required = False
+        service._signed_urls_required = False  # noqa: SLF001
 
     @pytest.fixture(autouse=True)
     def ViaSecureURL(self, patch):

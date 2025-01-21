@@ -186,7 +186,6 @@ class TestGoogleDriveAPI:
     def test_iter_file_catches_specific_google_exceptions(
         self, api, kwargs, error_class, status_code, AuthorizedSession
     ):
-        # pylint: disable=line-too-long
         AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = make_requests_exception(
             HTTPError, **kwargs
         )
@@ -213,9 +212,7 @@ class TestGoogleDriveAPI:
         }
         attrs.update(kwargs)
         exception = make_requests_exception(**attrs)
-        AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = (
-            exception
-        )
+        AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = exception
 
         with pytest.raises(UnhandledUpstreamException):
             list(api.iter_file(sentinel.file_id))
@@ -223,9 +220,7 @@ class TestGoogleDriveAPI:
     def test_iter_file_has_no_issue_with_errors_without_responses(
         self, api, AuthorizedSession
     ):
-        AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = (
-            HTTPError()
-        )
+        AuthorizedSession.return_value.request.return_value.raise_for_status.side_effect = HTTPError()
         with pytest.raises(UnhandledUpstreamException):
             list(api.iter_file(sentinel.file_id))
 
