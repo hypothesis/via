@@ -35,6 +35,7 @@
     "__docker_network": "via_default",
     "__github_url": "https://github.com/hypothesis/via",
     "__copyright_year": "2016",
-    "__gunicorn_bind": "unix:/tmp/gunicorn-web.sock"
+    "__gunicorn_bind": "unix:/tmp/gunicorn-web.sock",
+    "linter": "ruff"
   }
 }

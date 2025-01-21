@@ -28,8 +28,6 @@ google-auth==2.26.2
     # via google-auth-oauthlib
 google-auth-oauthlib==1.2.1
     # via -r requirements/prod.in
-greenlet==3.0.3
-    # via sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.in
 h-assets==1.0.7
