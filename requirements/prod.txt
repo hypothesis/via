@@ -28,6 +28,8 @@ google-auth==2.26.2
     # via google-auth-oauthlib
 google-auth-oauthlib==1.2.1
     # via -r requirements/prod.in
+greenlet==3.1.1
+    # via sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.in
 h-assets==1.0.7
@@ -93,7 +95,7 @@ pyasn1-modules==0.3.0
     # via google-auth
 pycparser==2.21
     # via cffi
-pyjwt==2.9.0
+pyjwt==2.10.1
     # via -r requirements/prod.in
 pyramid==2.0.2
     # via

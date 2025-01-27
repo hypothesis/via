@@ -54,6 +54,10 @@ google-auth==2.26.2
     #   google-auth-oauthlib
 google-auth-oauthlib==1.2.1
     # via -r requirements/prod.txt
+greenlet==3.1.1
+    # via
+    #   -r requirements/prod.txt
+    #   sqlalchemy
 gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-assets==1.0.7
@@ -172,7 +176,7 @@ pycparser==2.21
     # via
     #   -r requirements/prod.txt
     #   cffi
-pyjwt==2.9.0
+pyjwt==2.10.1
     # via -r requirements/prod.txt
 pyproject-hooks==1.0.0
     # via
