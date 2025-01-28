@@ -32,7 +32,7 @@ class TestCleanHeaders:
 
         assert header_name not in result
 
-    @pytest.mark.parametrize("header_name,default_value", HEADER_DEFAULTS.items())
+    @pytest.mark.parametrize("header_name,default_value", HEADER_DEFAULTS.items())  # noqa: PT006
     def test_we_assign_to_defaults_if_present(self, header_name, default_value):
         result = clean_headers({header_name: "some custom default"})
 
@@ -44,7 +44,7 @@ class TestCleanHeaders:
 
         assert header_name not in result
 
-    @pytest.mark.parametrize("header_name,mapped_name", HEADER_MAP.items())
+    @pytest.mark.parametrize("header_name,mapped_name", HEADER_MAP.items())  # noqa: PT006
     def test_we_map_mangled_header_names(self, header_name, mapped_name):
         result = clean_headers({header_name: "value"})
 

@@ -35,7 +35,7 @@ def pyramid_config(pyramid_settings):
 
 
 @pytest.fixture
-def pyramid_request(db_session, pyramid_config):
+def pyramid_request(db_session, pyramid_config):  # noqa: ARG001
     pyramid_request = testing.DummyRequest()
     apply_request_extensions(pyramid_request)
     pyramid_request.db = db_session

@@ -8,7 +8,7 @@ from via.services.via_client import ViaClientService, factory
 
 class TestViaClientService:
     @pytest.mark.parametrize(
-        "mime_type,expected_content_type",
+        "mime_type,expected_content_type",  # noqa: PT006
         [
             ("application/x-pdf", ContentType.PDF),
             ("application/pdf", ContentType.PDF),
@@ -20,7 +20,7 @@ class TestViaClientService:
         assert svc.content_type(mime_type) == expected_content_type
 
     @pytest.mark.parametrize(
-        "mime_type,expected_content_type",
+        "mime_type,expected_content_type",  # noqa: PT006
         [
             ("application/pdf", ContentType.PDF),
             ("text/html", ContentType.HTML),

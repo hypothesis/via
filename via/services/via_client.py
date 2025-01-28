@@ -6,7 +6,7 @@ from h_vialib import ContentType, ViaClient
 class ViaClientService:
     """A wrapper service for h_vialib.ViaClient."""
 
-    _mime_types_content_type = {
+    _mime_types_content_type = {  # noqa: RUF012
         "application/x-pdf": ContentType.PDF,
         "application/pdf": ContentType.PDF,
         "video/x-youtube": ContentType.YOUTUBE,

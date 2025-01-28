@@ -24,14 +24,14 @@ def youtube(request, url, **kwargs):
     youtube_service = request.find_service(YouTubeService)
 
     if not youtube_service.enabled:
-        raise HTTPUnauthorized()
+        raise HTTPUnauthorized()  # noqa: RSE102
 
     video_id = youtube_service.get_video_id(url)
     video_url = youtube_service.canonical_video_url(video_id)
     video_title = youtube_service.get_video_title(video_id)
 
     if not video_id:
-        raise BadURL(f"Unsupported video URL: {url}", url=url)
+        raise BadURL(f"Unsupported video URL: {url}", url=url)  # noqa: EM102, TRY003
 
     _, client_config = Configuration.extract_from_params(kwargs)
 

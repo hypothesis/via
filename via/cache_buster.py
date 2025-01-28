@@ -21,7 +21,7 @@ class PathCacheBuster:
     def __init__(self, path):
         self.salt = self._generate_salt(path)
 
-    def __call__(self, request, subpath, kw):
+    def __call__(self, request, subpath, kw):  # noqa: ARG002
         """Prepend the salt to the path.
 
         Implements the ICacheBuster interface.
@@ -48,7 +48,7 @@ class PathCacheBuster:
 
         This ensures we only change salt when at least one file has changed.
         """
-        hasher = hashlib.md5()
+        hasher = hashlib.md5()  # noqa: S324
 
         for base_dir, dirs, file_names in os.walk(path, topdown=True):
             # os.walk will respect our order as long as topdown=True. This
@@ -56,7 +56,7 @@ class PathCacheBuster:
             dirs.sort()
 
             for file_name in sorted(file_names):
-                with open(os.path.join(base_dir, file_name), "rb") as handle:
+                with open(os.path.join(base_dir, file_name), "rb") as handle:  # noqa: PTH118, PTH123
                     hasher.update(handle.read())
 
         return hasher.hexdigest()

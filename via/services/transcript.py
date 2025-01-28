@@ -32,7 +32,7 @@ class TranscriptService:
         content_buf = StringIO(content)
 
         # See https://www.w3.org/TR/webvtt1/#file-structure
-        if content.startswith("WEBVTT"):
+        if content.startswith("WEBVTT"):  # noqa: SIM108
             content_format = "vtt"
         else:
             content_format = "srt"

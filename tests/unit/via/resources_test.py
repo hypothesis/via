@@ -26,17 +26,17 @@ NORMALISED_URLS = [
     # requests can't.%D0%BA%D0%B0%D0%BB%D0%BE%D1%88%D0%B8
     (
         "http://%D1%81%D0%BA%D0%B0.%D1%80%D1%84/%D0%BA%D0%B0%D0%BB/%3F%D1%81%3D%D1%8F",
-        "http://ска.рф/кал/?с=я",
+        "http://ска.рф/кал/?с=я",  # noqa: RUF001
     ),
     # We can also handle completely URL encoded URLs
     (
         "http%3A%2F%2F%D1%81%D0%BA%D0%B0.%D1%80%D1%84%2F%D0%BA%D0%B0%D0%BB%2F%3F%D1%81%3D%D1%8F",
-        "http://ска.рф/кал/?с=я",
+        "http://ска.рф/кал/?с=я",  # noqa: RUF001
     ),
     # Our missing scheme defaults should still work
     (
         "%D1%81%D0%BA%D0%B0.%D1%80%D1%84/%D0%BA%D0%B0%D0%BB/%3F%D1%81%3D%D1%8F",
-        "https://ска.рф/кал/?с=я",
+        "https://ска.рф/кал/?с=я",  # noqa: RUF001
     ),
     # ... or double encoded
     (
@@ -54,13 +54,13 @@ BAD_URLS = ("https://]", "https://%5D")
 
 
 class TestQueryURLResource:
-    @pytest.mark.parametrize("url,expected", NORMALISED_URLS)
+    @pytest.mark.parametrize("url,expected", NORMALISED_URLS)  # noqa: PT006
     def test_url_from_query_returns_url(self, context, pyramid_request, url, expected):
         pyramid_request.params["url"] = url
 
         assert context.url_from_query() == expected
 
-    @pytest.mark.parametrize("params", ({}, {"urk": "foo"}, {"url": ""}))
+    @pytest.mark.parametrize("params", ({}, {"urk": "foo"}, {"url": ""}))  # noqa: PT007
     def test_url_from_query_raises_HTTPBadRequest_for_bad_urls(
         self, context, pyramid_request, params
     ):
@@ -84,13 +84,13 @@ class TestQueryURLResource:
 
 
 class TestPathURLResource:
-    @pytest.mark.parametrize("url,expected", NORMALISED_URLS)
+    @pytest.mark.parametrize("url,expected", NORMALISED_URLS)  # noqa: PT006
     def test_url_from_path_returns_url(self, context, pyramid_request, url, expected):
         pyramid_request.path_qs = f"/{url}"
 
         assert context.url_from_path() == expected
 
-    @pytest.mark.parametrize("bad_path", ("/", "/  "))
+    @pytest.mark.parametrize("bad_path", ("/", "/  "))  # noqa: PT007
     def test_url_from_path_raises_HTTPBadRequest_for_missing_urls(
         self, context, pyramid_request, bad_path
     ):
@@ -121,7 +121,8 @@ class TestGetOriginalURL:
         )
 
     @pytest.mark.parametrize(
-        "exc,expected", ((HTTPBadRequest, None), (BadURL("message", url="url"), "url"))
+        "exc,expected",  # noqa: PT006
+        ((HTTPBadRequest, None), (BadURL("message", url="url"), "url")),  # noqa: PT007
     )
     def test_it_with_bad_paths(self, path_url_resource, exc, expected):
         path_url_resource.url_from_path.side_effect = exc
@@ -135,7 +136,8 @@ class TestGetOriginalURL:
         )
 
     @pytest.mark.parametrize(
-        "exc,expected", ((HTTPBadRequest, None), (BadURL("message", url="url"), "url"))
+        "exc,expected",  # noqa: PT006
+        ((HTTPBadRequest, None), (BadURL("message", url="url"), "url")),  # noqa: PT007
     )
     def test_it_with_bad_queries(self, query_url_resource, exc, expected):
         query_url_resource.url_from_query.side_effect = exc

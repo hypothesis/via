@@ -11,7 +11,7 @@ from pyramid.httpexceptions import (
     HTTPUnsupportedMediaType,
 )
 from pyramid.testing import DummyRequest
-from pytest import param
+from pytest import param  # noqa: PT013
 from requests import HTTPError, Request, Response
 
 from via.exceptions import (
@@ -29,8 +29,8 @@ from via.views.exceptions import (
 
 class TestOtherExceptions:
     @pytest.mark.parametrize(
-        "exception_class,status_code",
-        (
+        "exception_class,status_code",  # noqa: PT006
+        (  # noqa: PT007
             param(
                 HTTPUnsupportedMediaType,
                 HTTPUnsupportedMediaType.code,
@@ -58,8 +58,8 @@ class TestOtherExceptions:
         assert pyramid_request.response.status_int == status_code
 
     @pytest.mark.parametrize(
-        "exception_class,mapped_exception",
-        (
+        "exception_class,mapped_exception",  # noqa: PT006
+        (  # noqa: PT007
             param(BadURL, BadURL, id="Mapped directly"),
             param(HTTPUnsupportedMediaType, HTTPClientError, id="Inherited"),
             param(BlockingIOError, UnhandledUpstreamException, id="Unmapped"),
@@ -102,8 +102,8 @@ class TestOtherExceptions:
         assert values["url"]["original"] is None
 
     @pytest.mark.parametrize(
-        "exception_class,should_report",
-        (
+        "exception_class,should_report",  # noqa: PT006
+        (  # noqa: PT007
             (UpstreamServiceError, False),
             (UnhandledUpstreamException, False),
             (BadURL, False),
@@ -125,8 +125,8 @@ class TestOtherExceptions:
             h_pyramid_sentry.report_exception.assert_not_called()
 
     @pytest.mark.parametrize(
-        "exception_class,should_report",
-        (
+        "exception_class,should_report",  # noqa: PT006
+        (  # noqa: PT007
             (HTTPNotFound, False),
             (UnhandledUpstreamException, True),
             (BadURL, True),
@@ -193,7 +193,8 @@ class TestGoogleDriveExceptions:
         assert pyramid_request.response.status_int == 419
 
     @pytest.mark.parametrize(
-        "raw,expected_text", ((123456, "... cannot retrieve ..."), (None, ""))
+        "raw,expected_text",  # noqa: PT006
+        ((123456, "... cannot retrieve ..."), (None, "")),  # noqa: PT007
     )
     def test_it_with_bad_response(self, pyramid_request, raw, expected_text):
         response = Response()

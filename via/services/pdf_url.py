@@ -1,9 +1,9 @@
 import hashlib
 import re
 from base64 import b64encode
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Callable
 
 from h_vialib.secure import quantized_expiry
 from requests import Request
@@ -36,7 +36,7 @@ class _NGINXSigner:
         # This implements the NGINX secure link module's hashing algorithm:
         #
         # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-        hash_ = hashlib.md5()
+        hash_ = hashlib.md5()  # noqa: S324
         hash_.update(hash_expression.encode("utf-8"))
         sec = hash_.digest()
         sec = b64encode(sec)

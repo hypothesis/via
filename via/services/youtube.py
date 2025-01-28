@@ -15,7 +15,7 @@ class YouTubeService:
     def __init__(
         self,
         db_session,
-        enabled: bool,
+        enabled: bool,  # noqa: FBT001
         api_key: str,
         http_service: HTTPService,
         youtube_transcript_service: YouTubeTranscriptService,
@@ -87,7 +87,7 @@ class YouTubeService:
                 },
             ).json()["items"][0]["snippet"]["title"]
         except Exception as exc:
-            raise YouTubeDataAPIError("getting the video title failed") from exc
+            raise YouTubeDataAPIError("getting the video title failed") from exc  # noqa: EM101, TRY003
 
         self._db.add(Video(video_id=video_id, title=title))
 

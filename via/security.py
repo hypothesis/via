@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from pyramid.security import Allowed, Denied
@@ -29,7 +29,7 @@ class ViaSecurityPolicy:
     @classmethod
     def encode_jwt(cls, request):
         return jwt.encode(
-            {"exp": datetime.now(tz=timezone.utc) + timedelta(hours=48)},
+            {"exp": datetime.now(tz=UTC) + timedelta(hours=48)},
             cls._get_jwt_secret(request),
             algorithm="HS256",
         )

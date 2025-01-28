@@ -2,7 +2,7 @@ import json
 from io import BytesIO
 from json import JSONDecodeError
 from unittest.mock import sentinel
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # noqa: ICN001
 
 import pytest
 from h_matchers import Any
@@ -19,7 +19,7 @@ from via.services.youtube_transcript import (
 
 class TestTranscriptInfo:
     @pytest.mark.parametrize(
-        "transcript_info,expected_id",
+        "transcript_info,expected_id",  # noqa: PT006
         [
             (
                 TranscriptInfoFactory(),
@@ -106,7 +106,7 @@ class TestYouTubeTranscriptService:
             svc.get_transcript_infos("test_video_id")
 
     @pytest.mark.parametrize(
-        "response_body,exception_class",
+        "response_body,exception_class",  # noqa: PT006
         [
             (b"foo", JSONDecodeError),  # Not valid JSON.
             (b"[]", TypeError),  # Not a dict.
@@ -167,7 +167,7 @@ class TestYouTubeTranscriptService:
             svc.get_transcript_infos("test_video_id")
 
     @pytest.mark.parametrize(
-        "transcript_infos,expected_default_transcript_index",
+        "transcript_infos,expected_default_transcript_index",  # noqa: PT006
         [
             (
                 [

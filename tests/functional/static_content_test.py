@@ -10,8 +10,8 @@ from tests.conftest import assert_cache_control
 
 class TestStaticContent:
     @pytest.mark.parametrize(
-        "url,mime_type",
-        (
+        "url,mime_type",  # noqa: PT006
+        (  # noqa: PT007
             ("/favicon.ico", "image/x-icon"),
             ("/js/pdfjs-init.js", "text/javascript"),
         ),

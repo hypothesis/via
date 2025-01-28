@@ -139,7 +139,7 @@ class TestHTTPService:
             {"status_code": status}
         )
 
-    @pytest.mark.parametrize("request_exception,expected_exception", EXCEPTION_MAP)
+    @pytest.mark.parametrize("request_exception,expected_exception", EXCEPTION_MAP)  # noqa: PT006
     def test_request_with_error_translator_defaults(
         self,
         error_translator,
@@ -155,7 +155,7 @@ class TestHTTPService:
         with pytest.raises(expected_exception):
             svc.request("GET", url)
 
-    @pytest.mark.parametrize("generator_exception,expected_exception", EXCEPTION_MAP)
+    @pytest.mark.parametrize("generator_exception,expected_exception", EXCEPTION_MAP)  # noqa: PT006
     def test_stream_with_error_translator_defaults(
         self,
         error_translator,
@@ -188,7 +188,7 @@ class TestHTTPService:
 
         session.request.side_effect = ValueError
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             svc.request("GET", url)
 
     def test_stream_with_regular_exceptions(self, error_translator, session, url):
@@ -196,12 +196,12 @@ class TestHTTPService:
 
         session.request.return_value.iter_content.side_effect = ValueError
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             list(svc.stream("GET", url))
 
     @pytest.mark.parametrize(
-        "input_bytes,output",
-        (
+        "input_bytes,output",  # noqa: PT006
+        (  # noqa: PT007
             ([b"longer_than_chunk_size"], [b"longer_than_chunk_size"]),
             ([b"chunksize"], [b"chunksize"]),
             ([b"chunk", b"size"], [b"chunksize"]),

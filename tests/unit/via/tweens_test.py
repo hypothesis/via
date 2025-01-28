@@ -7,7 +7,7 @@ from via.tweens import robots_tween_factory
 
 class TestRobotsTween:
     @pytest.mark.parametrize(
-        "existing_header,expected_header",
+        "existing_header,expected_header",  # noqa: PT006
         [
             (None, "noindex, nofollow"),
             ("all", "all"),

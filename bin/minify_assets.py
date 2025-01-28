@@ -17,13 +17,13 @@ PARSER.add_argument(
 
 
 def minify_js(file_name):
-    return check_output(
+    return check_output(  # noqa: S603
         ["./node_modules/.bin/terser", "--compress", "--safari10", file_name]
     ).decode("utf-8")
 
 
 def minify_css(file_name):
-    return check_output(
+    return check_output(  # noqa: S603
         ["./node_modules/.bin/sass", "--style=compressed", file_name]
     ).decode("utf-8")
 
@@ -31,7 +31,7 @@ def minify_css(file_name):
 class Minifier:
     """Minifier for CSS, Javascript and HTML."""
 
-    handlers = {"js": minify_js, "css": minify_css}
+    handlers = {"js": minify_js, "css": minify_css}  # noqa: RUF012
 
     @classmethod
     def minify(cls, instructions):
@@ -52,10 +52,10 @@ class Minifier:
 
     @classmethod
     def _ext(cls, filename):
-        if not os.path.isfile(filename):
+        if not os.path.isfile(filename):  # noqa: PTH113
             return None
 
-        base = os.path.basename(filename)
+        base = os.path.basename(filename)  # noqa: PTH119
         if "." not in base:
             return None
 
@@ -64,7 +64,7 @@ class Minifier:
     @classmethod
     def _find_files(cls, instructions):
         for pattern, settings in instructions.items():
-            for filename in glob(pattern, recursive=True):
+            for filename in glob(pattern, recursive=True):  # noqa: PTH207
                 ext = cls._ext(filename)
 
                 if filename.endswith(f".min.{ext}"):
@@ -77,12 +77,12 @@ class Minifier:
                 yield filename, handler, settings
 
     @classmethod
-    def _execute(cls, path, handler, in_place=False):
-        with open(path, encoding="utf8") as handle:
+    def _execute(cls, path, handler, in_place=False):  # noqa: FBT002
+        with open(path, encoding="utf8") as handle:  # noqa: PTH123
             content = handle.read()
 
         if not content:
-            print("NOO", path)
+            print("NOO", path)  # noqa: T201
             return
 
         minified = handler(path)
@@ -93,14 +93,14 @@ class Minifier:
             target = re.sub(f"\\.{ext}$", f".min.{ext}", target)
 
         percent = int(1000 * len(minified) / len(content)) / 10.0
-        print(path)
-        print(f"\t-> {target} {len(content)} -> {len(minified)} ({percent}%)")
+        print(path)  # noqa: T201
+        print(f"\t-> {target} {len(content)} -> {len(minified)} ({percent}%)")  # noqa: T201
 
         if len(minified) > len(content):
-            print("\tRe-using old content (it's no smaller)")
+            print("\tRe-using old content (it's no smaller)")  # noqa: T201
             minified = content
 
-        with open(target, "w", encoding="utf8") as handle:
+        with open(target, "w", encoding="utf8") as handle:  # noqa: PTH123
             handle.write(minified)
 
 
@@ -110,9 +110,9 @@ def main():
     args = PARSER.parse_args()
     config_file = args.config_file
 
-    print(f"Loading config from {config_file}...")
+    print(f"Loading config from {config_file}...")  # noqa: T201
 
-    with open(config_file, encoding="utf8") as handle:
+    with open(config_file, encoding="utf8") as handle:  # noqa: PTH123
         config = json.load(handle)
 
     Minifier.minify(config)

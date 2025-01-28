@@ -20,7 +20,7 @@ def _insert(contents, where, pattern, new_content):
     if where == "after":
         index += len(pattern)
 
-    print(f"Inserting content {where} {pattern} at index: {index}")
+    print(f"Inserting content {where} {pattern} at index: {index}")  # noqa: T201
     before, after = contents[:index], contents[index:]
 
     return f"{before}{new_content}{after}"
@@ -39,7 +39,7 @@ def _insert_jinja2_blocks(contents):
 
 
 if __name__ == "__main__":
-    with open(SOURCE_FILE, encoding="utf8") as handle:
+    with open(SOURCE_FILE, encoding="utf8") as handle:  # noqa: PTH123
         template = _insert_jinja2_blocks(handle.read())
         template = _insert(
             template,
@@ -51,11 +51,11 @@ if __name__ == "__main__":
 
     for item in ITEMS_TO_REMOVE:
         if item not in template:
-            raise ValueError(f"Expected to find '{item}'")
-        print(f"Removing: {item}")
+            raise ValueError(f"Expected to find '{item}'")  # noqa: EM102, TRY003
+        print(f"Removing: {item}")  # noqa: T201
         template = template.replace(item, f"<!-- {item} -->")
 
-    with open(TARGET_FILE, "w", encoding="utf8") as handle:
+    with open(TARGET_FILE, "w", encoding="utf8") as handle:  # noqa: PTH123
         handle.write(template)
 
-    print(f"Created {TARGET_FILE} from {SOURCE_FILE}")
+    print(f"Created {TARGET_FILE} from {SOURCE_FILE}")  # noqa: T201

@@ -67,10 +67,10 @@ def clean_headers(headers):
             continue
 
         # Map to standard names for things
-        header_name = HEADER_MAP.get(header_name, header_name)
+        header_name = HEADER_MAP.get(header_name, header_name)  # noqa: PLW2901
 
         # Add in defaults for certain fields
-        value = HEADER_DEFAULTS.get(header_name, value)
+        value = HEADER_DEFAULTS.get(header_name, value)  # noqa: PLW2901
 
         clean[header_name] = value
 

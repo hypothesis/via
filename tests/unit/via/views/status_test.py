@@ -6,7 +6,7 @@ from via.views.status import status
 
 class TestStatusRoute:
     @pytest.mark.parametrize(
-        "include_checkmate,checkmate_fails,expected_status,expected_body",
+        "include_checkmate,checkmate_fails,expected_status,expected_body",  # noqa: PT006
         [
             (False, False, 200, {"status": "okay"}),
             (False, True, 200, {"status": "okay"}),

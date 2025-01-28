@@ -69,7 +69,7 @@ class PathURLResource(_URLResource):
 
         url = self._request.path_qs[1:].strip()
         if not url:
-            raise HTTPBadRequest("Required path part 'url` is missing")
+            raise HTTPBadRequest("Required path part 'url` is missing")  # noqa: EM101, TRY003
 
         return self._normalise_url(url)
 
@@ -87,10 +87,10 @@ class QueryURLResource(_URLResource):
         try:
             url = self._request.params["url"].strip()
         except KeyError as err:
-            raise HTTPBadRequest("Required parameter 'url' missing") from err
+            raise HTTPBadRequest("Required parameter 'url' missing") from err  # noqa: EM101, TRY003
 
         if not url:
-            raise HTTPBadRequest("Required parameter 'url' is blank")
+            raise HTTPBadRequest("Required parameter 'url' is blank")  # noqa: EM101, TRY003
 
         return self._normalise_url(url)
 
