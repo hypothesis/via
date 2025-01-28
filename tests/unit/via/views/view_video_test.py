@@ -158,7 +158,7 @@ class TestVideo:
         assert response["video_src"] == "https://cdn.example.com/video.mp4?token=1234"
 
     @pytest.mark.parametrize(
-        "allow_download,expected",
+        "allow_download,expected",  # noqa: PT006
         [
             ("0", False),
             ("1", True),

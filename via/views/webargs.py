@@ -22,7 +22,7 @@ def handle_error(error: MarshmallowValidationError, *_args, **_kwargs):
 
     """
     # Make the HTTP status for Marshmallow validation error responses be 400.
-    error.status_int = 400  # type: ignore
+    error.status_int = 400  # type: ignore  # noqa: PGH003
 
     # Re-raise the original Marshmallow validation error so that our exception
     # views have direct access to it.

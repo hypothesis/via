@@ -11,8 +11,8 @@ from via.services.url_details import URLDetailsService, factory
 
 class TestGetURLDetails:
     @pytest.mark.parametrize(
-        "content_type,mime_type,status_code",
-        (
+        "content_type,mime_type,status_code",  # noqa: PT006
+        (  # noqa: PT007
             ("text/html", "text/html", 501),
             ("application/pdf", "application/pdf", 200),
             ("application/pdf; qs=0.001", "application/pdf", 201),

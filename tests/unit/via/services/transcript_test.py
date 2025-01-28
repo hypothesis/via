@@ -46,7 +46,7 @@ EXAMPLE_TRANSCRIPT = [
 
 class TestTranscriptService:
     @pytest.mark.parametrize(
-        "url,content,expected",
+        "url,content,expected",  # noqa: PT006
         [
             ("https://example.com/transcript.vtt", EXAMPLE_WEBVTT, EXAMPLE_TRANSCRIPT),
             ("https://example.com/transcript.srt", EXAMPLE_SRT, EXAMPLE_TRANSCRIPT),

@@ -1,7 +1,7 @@
 import re
+from collections.abc import ByteString, Iterator  # noqa: PYI057
 from json import JSONDecodeError
 from logging import getLogger
-from typing import ByteString, Iterator  # noqa: PYI057
 from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport.requests import AuthorizedSession
@@ -86,7 +86,7 @@ def translate_google_error(error):
 class GoogleDriveAPI:
     """Simplified interface for interacting with Google Drive."""
 
-    SCOPES = [
+    SCOPES = [  # noqa: RUF012
         # If we want metadata
         "https://www.googleapis.com/auth/drive.metadata.readonly",
         # To actually get the file
@@ -118,8 +118,8 @@ class GoogleDriveAPI:
                 credentials_list[0], scopes=self.SCOPES
             )
         except ValueError as exc:
-            raise ConfigurationError(
-                "The Google Drive service account information is invalid"
+            raise ConfigurationError(  # noqa: TRY003
+                "The Google Drive service account information is invalid"  # noqa: EM101
             ) from exc
 
         self._http_service = HTTPService(

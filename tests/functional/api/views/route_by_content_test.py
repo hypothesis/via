@@ -8,7 +8,7 @@ from tests.conftest import assert_cache_control
 
 
 class TestRouteByContent:
-    DEFAULT_OPTIONS = {
+    DEFAULT_OPTIONS = {  # noqa: RUF012
         "via.client.ignoreOtherConfiguration": "1",
         "via.client.openSidebar": "1",
         "via.external_link_mode": "new-tab",

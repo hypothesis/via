@@ -13,7 +13,7 @@ from via.services.youtube import YouTubeDataAPIError, YouTubeService, factory
 
 class TestYouTubeService:
     @pytest.mark.parametrize(
-        "enabled,api_key,expected",
+        "enabled,api_key,expected",  # noqa: PT006
         [
             (False, None, False),
             (True, None, False),
@@ -34,7 +34,7 @@ class TestYouTubeService:
         )
 
     @pytest.mark.parametrize(
-        "url,expected_video_id",
+        "url,expected_video_id",  # noqa: PT006
         [
             ("not_an_url", None),
             ("https://notyoutube:1000000", None),
@@ -141,15 +141,15 @@ class TestYouTubeService:
         oldest_transcript, newer_transcript = transcript_factory.create_batch(
             2, video_id="video_id"
         )
-        oldest_transcript.created = datetime(2023, 8, 11)
-        newer_transcript.created = datetime(2023, 8, 12)
+        oldest_transcript.created = datetime(2023, 8, 11)  # noqa: DTZ001
+        newer_transcript.created = datetime(2023, 8, 12)  # noqa: DTZ001
 
         returned_transcript = svc.get_transcript("video_id")
 
         assert returned_transcript == oldest_transcript.transcript
 
     @pytest.mark.parametrize(
-        "video_id,expected_url",
+        "video_id,expected_url",  # noqa: PT006
         [
             ("x8TO-nrUtSI", "https://www.youtube.com/watch?v=x8TO-nrUtSI"),
             # YouTube video IDs don't actually contain any characters that

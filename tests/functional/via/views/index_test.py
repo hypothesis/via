@@ -4,7 +4,7 @@ from tests.functional.matchers import temporary_redirect_to
 
 
 @pytest.mark.parametrize(
-    "url,expected_redirect_location",
+    "url,expected_redirect_location",  # noqa: PT006
     [
         # When you submit the form on the front page it redirects you to the
         # page that will proxy the URL that you entered.
