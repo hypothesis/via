@@ -180,7 +180,7 @@ pyramid-sanity==1.0.4
     # via -r requirements/prod.txt
 pyramid-services==2.2
     # via -r requirements/prod.txt
-pyramid-tm==2.5
+pyramid-tm==2.6
     # via -r requirements/prod.txt
 referencing==0.32.1
     # via
