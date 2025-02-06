@@ -27,7 +27,7 @@ class TestConfigureJinja2Assets:
 
 
 def test_settings_raise_value_error_if_environment_variable_is_not_set():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         load_settings({})
 
 

@@ -48,8 +48,8 @@ class TestNGINXSigner:
 
 class TestPDFURLBuilder:
     @pytest.mark.parametrize(
-        "file_details,url",
-        (
+        "file_details,url",  # noqa: PT006
+        (  # noqa: PT007
             (
                 {"file_id": "FILE_ID"},
                 "http://example.com/google_drive/FILE_ID/proxied.pdf"
@@ -78,8 +78,8 @@ class TestPDFURLBuilder:
         assert pdf_url == secure_link_service.sign_url.return_value
 
     @pytest.mark.parametrize(
-        "url,endpoint_url",
-        (
+        "url,endpoint_url",  # noqa: PT006
+        (  # noqa: PT007
             # One Drive
             (
                 "https://my-sharepoint.sharepoint.com/FILE_ID/?download=1",

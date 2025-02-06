@@ -36,7 +36,7 @@ class _NGINXSigner:
         # This implements the NGINX secure link module's hashing algorithm:
         #
         # http://nginx.org/en/docs/http/ngx_http_secure_link_module.html#secure_link_md5
-        hash_ = hashlib.md5()
+        hash_ = hashlib.md5()  # noqa: S324
         hash_.update(hash_expression.encode("utf-8"))
         sec = hash_.digest()
         sec = b64encode(sec)

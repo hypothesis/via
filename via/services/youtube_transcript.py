@@ -1,7 +1,7 @@
 import re
 from base64 import b64encode
 from dataclasses import dataclass
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # noqa: ICN001
 
 import requests
 
@@ -127,11 +127,11 @@ class YouTubeTranscriptService:
     def get_transcript(self, transcript_info: TranscriptInfo) -> list[dict]:
         """Download and return the actual transcript text for `transcript_info`."""
         response = self._http_service.get(transcript_info.url)
-        xml_elements = ElementTree.fromstring(response.text)
+        xml_elements = ElementTree.fromstring(response.text)  # noqa: S314
 
         def strip_html(xml_string):
             return "".join(
-                ElementTree.fromstring(f"<span>{xml_string}</span>").itertext()
+                ElementTree.fromstring(f"<span>{xml_string}</span>").itertext()  # noqa: S314
             ).strip()
 
         return [

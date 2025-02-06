@@ -58,7 +58,7 @@ def load_settings(settings):
         )
 
         if value is None and options.get("required"):
-            raise ValueError(f"Param {param} must be provided.")
+            raise ValueError(f"Param {param} must be provided.")  # noqa: EM102, TRY003
 
     # Configure sentry
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
@@ -90,7 +90,7 @@ def create_app(_=None, **settings):  # pragma: no cover
     # Configure Pyramid so we can generate static URLs
     static_path = str(importlib_resources.files("via") / "static")
     cache_buster = PathCacheBuster(static_path)
-    print(f"Cache buster salt: {cache_buster.salt}")
+    print(f"Cache buster salt: {cache_buster.salt}")  # noqa: T201
 
     config.add_static_view(name="static", path="via:static")
     config.add_cache_buster("via:static", cachebust=cache_buster)

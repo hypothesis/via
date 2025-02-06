@@ -6,7 +6,7 @@ import pytest
 from h_matchers import Any
 from marshmallow import ValidationError
 from pyramid.httpexceptions import HTTPNotFound
-from pytest import param
+from pytest import param  # noqa: PT013
 from requests import TooManyRedirects
 from requests.exceptions import HTTPError, InvalidJSONError
 
@@ -137,7 +137,7 @@ class TestGoogleDriveAPI:
         # We aren't going to go crazy here as `iter_handle_errors` is better
         # tested elsewhere
         def explode():
-            raise TooManyRedirects("Request went wrong")
+            raise TooManyRedirects("Request went wrong")  # noqa: EM101, TRY003
 
         AuthorizedSession.return_value.request.side_effect = (
             explode() for _ in range(1)
@@ -147,8 +147,8 @@ class TestGoogleDriveAPI:
             list(api.iter_file(sentinel.file_id))
 
     @pytest.mark.parametrize(
-        "kwargs,error_class,status_code",
-        (
+        "kwargs,error_class,status_code",  # noqa: PT006
+        (  # noqa: PT007
             (
                 {
                     "status_code": 404,
@@ -197,7 +197,7 @@ class TestGoogleDriveAPI:
 
     @pytest.mark.parametrize(
         "kwargs",
-        (
+        (  # noqa: PT007
             param({"error_class": InvalidJSONError}, id="unexpected class"),
             param({"status_code": 503}, id="unexpected status code"),
             param({"json_data": None}, id="no json"),
@@ -225,8 +225,8 @@ class TestGoogleDriveAPI:
             list(api.iter_file(sentinel.file_id))
 
     @pytest.mark.parametrize(
-        "url,expected",
-        (
+        "url,expected",  # noqa: PT006
+        (  # noqa: PT007
             (
                 "https://drive.google.com/uc?id=FILE_ID",
                 {"file_id": "FILE_ID", "resource_key": None},

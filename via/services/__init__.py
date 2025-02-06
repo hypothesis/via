@@ -2,7 +2,7 @@
 
 import json
 from json import JSONDecodeError
-from pathlib import Path
+from pathlib import Path  # noqa: TC003
 
 from via.exceptions import ConfigurationError
 from via.services.checkmate import CheckmateService
@@ -80,10 +80,10 @@ def load_injected_json(settings, file_name):
     resource = data_directory / file_name
 
     if not resource.exists():
-        raise ConfigurationError(f"Expected data file '{resource}' not found")
+        raise ConfigurationError(f"Expected data file '{resource}' not found")  # noqa: EM102, TRY003
 
     with resource.open(encoding="utf-8") as handle:
         try:
             return json.load(handle)
         except JSONDecodeError as exc:
-            raise ConfigurationError(f"Invalid data file format: '{resource}'") from exc
+            raise ConfigurationError(f"Invalid data file format: '{resource}'") from exc  # noqa: EM102, TRY003
