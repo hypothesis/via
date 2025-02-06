@@ -193,7 +193,7 @@ class TestGoogleDriveExceptions:
         assert pyramid_request.response.status_int == 419
 
     @pytest.mark.parametrize(
-        "raw,expected_text",
+        "raw,expected_text",  # noqa: PT006
         ((123456, "... cannot retrieve ..."), (None, "")),  # noqa: PT007
     )
     def test_it_with_bad_response(self, pyramid_request, raw, expected_text):
