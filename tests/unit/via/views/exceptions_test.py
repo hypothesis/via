@@ -194,7 +194,7 @@ class TestGoogleDriveExceptions:
 
     @pytest.mark.parametrize(
         "raw,expected_text",
-        ((123456, "... cannot retrieve ..."), (None, "")),  # noqa: PT006, PT007
+        ((123456, "... cannot retrieve ..."), (None, "")),  # noqa: PT007
     )
     def test_it_with_bad_response(self, pyramid_request, raw, expected_text):
         response = Response()
