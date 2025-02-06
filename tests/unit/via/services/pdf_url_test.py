@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import sentinel
 
 import pytest
@@ -41,7 +41,7 @@ class TestNGINXSigner:
                 hour=17,
                 minute=30,
                 second=21,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         )
 

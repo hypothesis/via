@@ -1,7 +1,7 @@
 import re
+from collections.abc import ByteString, Iterator  # noqa: PYI057
 from json import JSONDecodeError
 from logging import getLogger
-from typing import ByteString, Iterator  # noqa: PYI057
 from urllib.parse import parse_qs, urlparse
 
 from google.auth.transport.requests import AuthorizedSession
