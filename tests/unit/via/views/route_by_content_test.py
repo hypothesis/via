@@ -12,7 +12,7 @@ from via.views.route_by_content import route_by_content
 @pytest.mark.usefixtures("via_client_service")
 class TestRouteByContent:
     @pytest.mark.parametrize(
-        "content_type,status_code,expected_cache_control_header",
+        "content_type,status_code,expected_cache_control_header",  # noqa: PT006
         [
             (ContentType.PDF, 200, "public, max-age=300, stale-while-revalidate=86400"),
             (

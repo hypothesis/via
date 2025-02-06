@@ -1,4 +1,4 @@
-import requests
+import requests  # noqa: A005
 from requests import RequestException, exceptions
 
 from via.exceptions import (
@@ -49,7 +49,7 @@ class HTTPService:
     def delete(self, *args, **kwargs):
         return self.request("DELETE", *args, **kwargs)
 
-    def request(self, method, url, timeout=(10, 10), raise_for_status=True, **kwargs):
+    def request(self, method, url, timeout=(10, 10), raise_for_status=True, **kwargs):  # noqa: FBT002
         r"""Send a request with `requests`.
 
         :param method: The HTTP method to use, one of "GET", "PUT", "POST",

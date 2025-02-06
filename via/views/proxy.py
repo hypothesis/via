@@ -8,7 +8,7 @@ from via.services import URLDetailsService, ViaClientService, has_secure_url_tok
 def static_fallback(_context, _request):
     """Make sure we don't try to proxy out of date static content."""
 
-    raise HTTPGone("It appears you have requested out of date content")
+    raise HTTPGone("It appears you have requested out of date content")  # noqa: EM101, TRY003
 
 
 @view_config(

@@ -7,8 +7,8 @@ from via.exceptions import RequestBasedException
 
 class TestRequestBasedException:
     @pytest.mark.parametrize(
-        "error_params,expected_string",
-        (
+        "error_params,expected_string",  # noqa: PT006
+        (  # noqa: PT007
             (
                 {
                     "status_code": 400,

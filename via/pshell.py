@@ -1,4 +1,4 @@
-from h_testkit import set_factoryboy_sqlalchemy_session  # type: ignore
+from h_testkit import set_factoryboy_sqlalchemy_session  # type: ignore  # noqa: PGH003
 
 from tests import factories
 from via import models
