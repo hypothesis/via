@@ -1,7 +1,6 @@
 import re
 from base64 import b64encode
 from dataclasses import dataclass
-from typing import Dict, List
 from xml.etree import ElementTree
 
 import requests
@@ -78,7 +77,7 @@ class YouTubeTranscriptService:
     def __init__(self, http_service: HTTPService):
         self._http_service = http_service
 
-    def get_transcript_infos(self, video_id: str) -> List[TranscriptInfo]:
+    def get_transcript_infos(self, video_id: str) -> list[TranscriptInfo]:
         """Return the list of available transcripts for `video_id`."""
         response = self._http_service.post(
             "https://youtubei.googleapis.com/youtubei/v1/player",
@@ -107,7 +106,7 @@ class YouTubeTranscriptService:
         ]
 
     def pick_default_transcript(
-        self, transcript_infos: List[TranscriptInfo]
+        self, transcript_infos: list[TranscriptInfo]
     ) -> TranscriptInfo:
         """Return a choice of default transcript from `transcript_infos`."""
 
@@ -125,7 +124,7 @@ class YouTubeTranscriptService:
 
         return transcript_infos[0]
 
-    def get_transcript(self, transcript_info: TranscriptInfo) -> List[Dict]:
+    def get_transcript(self, transcript_info: TranscriptInfo) -> list[dict]:
         """Download and return the actual transcript text for `transcript_info`."""
         response = self._http_service.get(transcript_info.url)
         xml_elements = ElementTree.fromstring(response.text)

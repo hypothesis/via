@@ -1,9 +1,9 @@
 import hashlib
 import re
 from base64 import b64encode
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Callable
 
 from h_vialib.secure import quantized_expiry
 from requests import Request

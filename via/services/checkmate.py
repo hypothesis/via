@@ -1,4 +1,3 @@
-from typing import Optional
 
 from checkmatelib import BadURL as CheckmateBadURL
 from checkmatelib import CheckmateClient, CheckmateException
@@ -15,7 +14,7 @@ class CheckmateService:
         self._blocked_for = blocked_for
         self._ignore_reasons = ignore_reasons
 
-    def check_url(self, url) -> Optional[BlockResponse]:
+    def check_url(self, url) -> BlockResponse | None:
         """Check whether the given URL is blocked by Checkmate.
 
         Return a BlockResponse object if the URL is blocked,
