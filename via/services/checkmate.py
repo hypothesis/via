@@ -1,4 +1,3 @@
-
 from checkmatelib import BadURL as CheckmateBadURL
 from checkmatelib import CheckmateClient, CheckmateException
 from checkmatelib.client import BlockResponse
