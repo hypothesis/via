@@ -121,7 +121,7 @@ class TestGetOriginalURL:
         )
 
     @pytest.mark.parametrize(
-        "exc,expected",
+        "exc,expected",  # noqa: PT006
         ((HTTPBadRequest, None), (BadURL("message", url="url"), "url")),  # noqa: PT007
     )
     def test_it_with_bad_paths(self, path_url_resource, exc, expected):
@@ -136,7 +136,7 @@ class TestGetOriginalURL:
         )
 
     @pytest.mark.parametrize(
-        "exc,expected",
+        "exc,expected",  # noqa: PT006
         ((HTTPBadRequest, None), (BadURL("message", url="url"), "url")),  # noqa: PT007
     )
     def test_it_with_bad_queries(self, query_url_resource, exc, expected):
