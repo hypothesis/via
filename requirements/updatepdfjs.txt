@@ -14,7 +14,7 @@ importlib-resources==6.5.2
     # via -r requirements/updatepdfjs.in
 packaging==23.2
     # via build
-pip-sync-faster==0.0.4
+pip-sync-faster==0.0.5
     # via -r requirements/updatepdfjs.in
 pip-tools==7.4.1
     # via
