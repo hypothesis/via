@@ -60,7 +60,7 @@ gunicorn==23.0.0
     # via -r requirements/prod.txt
 h-assets==1.0.7
     # via -r requirements/prod.txt
-h-matchers==1.2.16
+h-matchers==1.2.17
     # via -r requirements/functests.in
 h-pyramid-sentry==1.2.4
     # via -r requirements/prod.txt
