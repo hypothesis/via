@@ -46,7 +46,7 @@ importlib-resources==6.5.2
     # via
     #   -r prod.in
     #   checkmatelib
-jinja2==3.1.5
+jinja2==3.1.6
     # via pyramid-jinja2
 joserfc==0.9.0
     # via h-vialib
