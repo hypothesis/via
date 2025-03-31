@@ -8397,10 +8397,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.25.1":
-  version: 10.25.1
-  resolution: "preact@npm:10.25.1"
-  checksum: 7b31f82acfc5eaccc70c19b55ff2bc8edb3d636dfb84e254c9258871c69e1652876efe4bb3a5f21bf521386b001bc6c8831e535d41eecbe0f31c13a0e2a062a3
+"preact@npm:^10.26.4":
+  version: 10.26.4
+  resolution: "preact@npm:10.26.4"
+  checksum: 38e92630a86fbaa43a2b085f12275abebecba72165bab56b70f209116dae694ade056aadb2df3aead004e50e5f94848d730a0accf052e2c0f27afc09bafd256c
   languageName: node
   linkType: hard
 
@@ -10515,7 +10515,7 @@ __metadata:
     karma-source-map-support: ^1.4.0
     mocha: ^10.8.2
     postcss: ^8.4.49
-    preact: ^10.25.1
+    preact: ^10.26.4
     prettier: ^3.3.2
     rollup: ^4.34.9
     sass: ^1.77.4
