@@ -116,7 +116,7 @@ export default function HTMLVideoPlayer({
     };
   }, [transcript]);
 
-  const controlsList = !allowDownload ? 'nodownload' : '';
+  const controlsList = !allowDownload ? 'nodownload' : undefined;
 
   return (
     <AspectRatio>
