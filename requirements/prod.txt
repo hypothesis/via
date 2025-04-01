@@ -167,7 +167,7 @@ webob==1.8.8
     #   pyramid
 webvtt-py==0.5.1
     # via -r requirements/prod.in
-whitenoise==6.8.2
+whitenoise==6.9.0
     # via -r requirements/prod.in
 wired==0.3
     # via pyramid-services
