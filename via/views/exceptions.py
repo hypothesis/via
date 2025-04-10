@@ -137,7 +137,7 @@ def other_exceptions(exc, request):
 
     # We don't want to log errors from upstream services or things which are
     # the user goofing about making bad queries.
-    if not isinstance(exc, (UpstreamServiceError, BadURL, HTTPClientError)):  # noqa: UP038
+    if not isinstance(exc, (UpstreamServiceError, BadURL, HTTPClientError)):
         h_pyramid_sentry.report_exception(exc)
 
     return _get_error_body(exc, request)
