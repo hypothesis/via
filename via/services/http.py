@@ -1,4 +1,4 @@
-import requests  # noqa: A005
+import requests
 from requests import RequestException, exceptions
 
 from via.exceptions import (
