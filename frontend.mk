@@ -1,5 +1,6 @@
 node_modules/.uptodate: package.json yarn.lock
 	yarn install
+	yarn playwright install chromium
 	@touch $@
 
 dev: node_modules/.uptodate
