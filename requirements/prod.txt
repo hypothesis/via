@@ -20,7 +20,7 @@ cffi==1.16.0
     # via cryptography
 charset-normalizer==3.3.2
     # via requests
-checkmatelib==1.0.17
+checkmatelib==1.0.18
     # via -r requirements/prod.in
 cryptography==44.0.1
     # via joserfc

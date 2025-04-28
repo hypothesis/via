@@ -30,7 +30,7 @@ charset-normalizer==3.3.2
     # via
     #   -r requirements/prod.txt
     #   requests
-checkmatelib==1.0.17
+checkmatelib==1.0.18
     # via -r requirements/prod.txt
 click==8.1.7
     # via pip-tools
