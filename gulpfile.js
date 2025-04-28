@@ -1,5 +1,3 @@
-import { mkdirSync } from 'fs';
-
 import {
   buildCSS,
   buildJS,
@@ -7,6 +5,7 @@ import {
   runTests,
   watchJS,
 } from '@hypothesis/frontend-build';
+import { mkdirSync } from 'fs';
 import gulp from 'gulp';
 
 import tailwindConfig from './tailwind.config.js';
@@ -15,7 +14,7 @@ gulp.task('build-js', () => buildJS('./rollup.config.js'));
 gulp.task('watch-js', () => watchJS('./rollup.config.js'));
 
 gulp.task('build-css', () =>
-  buildCSS(['./via/static/styles/video_player.css'], { tailwindConfig })
+  buildCSS(['./via/static/styles/video_player.css'], { tailwindConfig }),
 );
 
 gulp.task('watch-css', () => {
@@ -25,7 +24,7 @@ gulp.task('watch-css', () => {
       './via/static/scripts/**/*.{js,ts,tsx}',
     ],
     { ignoreInitial: false },
-    gulp.series('build-css')
+    gulp.series('build-css'),
   );
 });
 
@@ -47,9 +46,9 @@ gulp.task(
   gulp.parallel('build-css', () =>
     runTests({
       bootstrapFile: 'via/static/scripts/setup-tests.js',
-      karmaConfig: 'via/static/scripts/karma.config.cjs',
+      vitestConfig: 'vitest.config.js',
       rollupConfig: 'rollup-tests.config.js',
       testsPattern: 'via/static/scripts/**/*-test.js',
-    })
-  )
+    }),
+  ),
 );

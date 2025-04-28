@@ -17,7 +17,6 @@
     // Tests and test infrastructure
     "**/test/*.js",
     "setup-tests.js",
-    "karma.config.js",
     "test-util/*.js"
   ]
 }
