@@ -21,7 +21,7 @@ RUN yarn build
 FROM python:3.11.11-slim-bullseye
 LABEL maintainer="Hypothes.is Project and contributors"
 
-RUN apt-get update && apt-get install --yes nginx nginx-extras gettext-base supervisor libpq-dev \
+RUN apt-get update && apt-get install --yes nginx nginx-extras gettext-base git supervisor libpq-dev \
   && apt-get clean
 
 # Create the hypothesis user, group, home directory and package directory.
