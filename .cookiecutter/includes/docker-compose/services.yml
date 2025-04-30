@@ -1,5 +1,5 @@
 nginx-proxy:
-  image: nginx:1.17.6-alpine
+  image: nginx:1.26.3-alpine
   ports:
     - '9083:9083'
   environment:

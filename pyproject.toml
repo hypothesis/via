@@ -69,6 +69,7 @@ parallel = true
 source = ["via", "tests/unit"]
 omit = [
     "*/via/__main__.py",
+    "*/via/_version.py",
     "*/via/scripts/init_db.py",
     "via/pshell.py",
 ]
