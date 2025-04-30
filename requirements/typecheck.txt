@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe requirements/typecheck.in
 #
-alembic==1.13.2
+alembic==1.15.2
     # via -r requirements/prod.txt
 attrs==23.2.0
     # via
@@ -223,7 +223,7 @@ translationstring==1.4
     # via
     #   -r requirements/prod.txt
     #   pyramid
-typing-extensions==4.9.0
+typing-extensions==4.13.2
     # via
     #   -r requirements/prod.txt
     #   alembic
