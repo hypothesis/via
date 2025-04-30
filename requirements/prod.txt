@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe requirements/prod.in
 #
-alembic==1.13.2
+alembic==1.15.2
     # via -r requirements/prod.in
 attrs==23.2.0
     # via
@@ -149,7 +149,7 @@ transaction==4.0
     #   zope-sqlalchemy
 translationstring==1.4
     # via pyramid
-typing-extensions==4.9.0
+typing-extensions==4.13.2
     # via
     #   alembic
     #   sqlalchemy
