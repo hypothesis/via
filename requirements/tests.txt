@@ -207,7 +207,7 @@ pytest==8.3.4
     #   -r requirements/tests.in
     #   pytest-cov
     #   pytest-factoryboy
-pytest-cov==6.0.0
+pytest-cov==6.1.1
     # via -r requirements/tests.in
 pytest-factoryboy==2.7.0
     # via -r requirements/tests.in
