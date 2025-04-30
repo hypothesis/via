@@ -8,6 +8,7 @@ import pyramid.config
 from pyramid.settings import asbool
 from whitenoise import WhiteNoise
 
+from via._version import get_version
 from via.cache_buster import PathCacheBuster
 from via.security import ViaSecurityPolicy
 from via.sentry_filters import SENTRY_FILTERS
@@ -62,6 +63,7 @@ def load_settings(settings):
 
     # Configure sentry
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
+    settings["h_pyramid_sentry.init.release"] = get_version()
 
     return settings
 
