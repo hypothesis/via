@@ -63,6 +63,15 @@ def load_settings(settings):
 
     # Configure sentry
     settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
+    # Enable Sentry's "Releases" feature, see:
+    # https://docs.sentry.io/platforms/python/configuration/options/#release
+    #
+    # h_pyramid_sentry passes any h_pyramid_sentry.init.* Pyramid settings
+    # through to sentry_sdk.init(), see:
+    # https://github.com/hypothesis/h-pyramid-sentry?tab=readme-ov-file#settings
+    #
+    # For the full list of options that sentry_sdk.init() supports see:
+    # https://docs.sentry.io/platforms/python/configuration/options/
     settings["h_pyramid_sentry.init.release"] = get_version()
 
     return settings
