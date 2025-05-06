@@ -1,25 +1,24 @@
 import hypothesisBase from 'eslint-config-hypothesis/base';
 import hypothesisJSX from 'eslint-config-hypothesis/jsx';
 import hypothesisTS from 'eslint-config-hypothesis/ts';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 
-export default [
-  {
-    ignores: [
-      '.tox/**/*',
-      '.yalc/**/*',
-      '.yarn/**/*',
-      'build/**/*',
-      '**/vendor/**/*.js',
-      '**/coverage/**/*',
-      'docs/_build/*',
-      'via/static/js/**',
-    ],
-  },
+export default defineConfig(
+  globalIgnores([
+    '.tox/**/*',
+    '.yalc/**/*',
+    '.yarn/**/*',
+    'build/**/*',
+    '**/vendor/**/*.js',
+    '**/coverage/**/*',
+    'docs/_build/*',
+    'via/static/js/**',
+  ]),
 
-  ...hypothesisBase,
-  ...hypothesisJSX,
-  ...hypothesisTS,
+  hypothesisBase,
+  hypothesisJSX,
+  hypothesisTS,
 
   // Icons
   {
@@ -57,4 +56,4 @@ export default [
       },
     },
   },
-];
+);
