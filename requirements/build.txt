@@ -13,10 +13,10 @@ importlib-metadata==7.0.1
 packaging==23.2
     # via build
 pip-sync-faster==0.0.5
-    # via -r requirements/build.in
+    # via -r build.in
 pip-tools==7.4.1
     # via
-    #   -r requirements/build.in
+    #   -r build.in
     #   pip-sync-faster
 pyproject-hooks==1.0.0
     # via
@@ -25,12 +25,12 @@ pyproject-hooks==1.0.0
 wheel==0.42.0
     # via pip-tools
 whitenoise==6.9.0
-    # via -r requirements/build.in
+    # via -r build.in
 zipp==3.19.1
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==23.3.2
     # via pip-tools
-setuptools==70.0.0
+setuptools==78.1.1
     # via pip-tools
