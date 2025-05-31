@@ -2542,10 +2542,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/youtube@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@types/youtube@npm:0.1.0"
-  checksum: bd38928c40251773296d9fc3b811af8a8f4a1b2ec5341e53ac8ab970aa678c889513e58f06cd300fee167dcfc6bacb2027b20808cf4e1a299a7cba7e81229412
+"@types/youtube@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@types/youtube@npm:0.1.2"
+  checksum: d91604d5df20b7fcf35aac9540ce9af0eb0c019edcc0bc93b4373353104aa140e0b7115aa5b0c83f34ee7aa6c807ef30e08586777633f9a94afab9e32535b782
   languageName: node
   linkType: hard
 
@@ -9147,7 +9147,7 @@ __metadata:
     "@rollup/plugin-terser": ^0.4.4
     "@rollup/plugin-virtual": ^3.0.2
     "@trivago/prettier-plugin-sort-imports": ^4.3.0
-    "@types/youtube": ^0.1.0
+    "@types/youtube": ^0.1.2
     "@vitest/browser": ^3.1.2
     "@vitest/coverage-istanbul": ^3.1.2
     "@vitest/eslint-plugin": ^1.1.44
