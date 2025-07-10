@@ -1,6 +1,5 @@
 from unittest.mock import Mock, create_autospec, sentinel
 
-import httpretty
 import pytest
 import requests
 from h_matchers import Any
@@ -29,57 +28,67 @@ EXCEPTION_MAP = (
 
 class TestHTTPService:
     @pytest.mark.parametrize("method", ["GET", "PUT", "POST", "PATCH", "DELETE"])
-    def test_it_sends_the_request_and_returns_the_response(self, svc, method, url):
-        httpretty.register_uri(method, url, body="test_response")
+    def test_it_sends_the_request_and_returns_the_response(
+        self, svc, method, url, responses_
+    ):
+        responses_.add(method, url, body="test_response")
 
         response = svc.request(method, url)
 
         assert response.status_code == 200
         assert response.text == "test_response"
-        assert httpretty.last_request() == Any.object().with_attrs(
+        assert responses_.calls[-1].request == Any.object().with_attrs(
             {"url": url, "method": method}
         )
 
     @pytest.mark.parametrize("method", ["GET", "PUT", "POST", "PATCH", "DELETE"])
-    def test_convenience_methods(self, svc, url, method):
-        httpretty.register_uri(method, url, body="test_response")
+    def test_convenience_methods(self, svc, url, method, responses_):
+        responses_.add(method, url, body="test_response")
 
         getattr(svc, method.lower())(url)
 
-        assert httpretty.last_request() == Any.object().with_attrs(
+        assert responses_.calls[-1].request == Any.object().with_attrs(
             {"url": url, "method": method}
         )
 
-    def test_it_sends_request_params(self, svc, url):
+    def test_it_sends_request_params(self, svc, url, responses_):
+        responses_.add("GET", url, body="test_response")
         svc.request("GET", url, params={"test_param": "test_value"})
 
-        assert httpretty.last_request() == Any.object().with_attrs(
+        assert responses_.calls[-1].request == Any.object().with_attrs(
             {"url": f"{url}?test_param=test_value"}
         )
 
-    def test_it_sends_request_data(self, svc, url):
+    def test_it_sends_request_data(self, svc, url, responses_):
+        responses_.add("GET", url, body="test_response")
         svc.request("GET", url, data={"test_key": "test_value"})
 
-        assert httpretty.last_request() == Any.object().with_attrs(
-            {"body": b"test_key=test_value"}
+        assert responses_.calls[-1].request == Any.object().with_attrs(
+            {"body": "test_key=test_value"}
         )
 
-    def test_it_sends_request_json(self, svc, url):
+    def test_it_sends_request_json(self, svc, url, responses_):
+        responses_.add("GET", url, body="test_response")
         svc.request("GET", url, json={"test_key": "test_value"})
 
-        assert httpretty.last_request() == Any.object().with_attrs(
+        assert responses_.calls[-1].request == Any.object().with_attrs(
             {"body": b'{"test_key": "test_value"}'}
         )
 
-    def test_it_sends_request_headers(self, svc, url):
+    def test_it_sends_request_headers(self, svc, url, responses_):
+        responses_.add("GET", url, body="test_response")
         svc.request("GET", url, headers={"HEADER_KEY": "HEADER_VALUE"})
 
-        assert httpretty.last_request().headers["HEADER_KEY"] == "HEADER_VALUE"
+        assert responses_.calls[-1].request.headers["HEADER_KEY"] == "HEADER_VALUE"
 
-    def test_it_sends_request_auth(self, svc, url):
+    def test_it_sends_request_auth(self, svc, url, responses_):
+        responses_.add("GET", url, body="test_response")
         svc.request("GET", url, auth=("user", "pass"))
 
-        assert httpretty.last_request().headers["Authorization"] == "Basic dXNlcjpwYXNz"
+        assert (
+            responses_.calls[-1].request.headers["Authorization"]
+            == "Basic dXNlcjpwYXNz"
+        )
 
     def test_it_uses_custom_timeouts(self, session):
         svc = HTTPService(session)
@@ -116,8 +125,8 @@ class TestHTTPService:
         assert exc_info.value.__cause__ == exception
 
     @pytest.mark.parametrize("status", [400, 401, 403, 404, 500])
-    def test_it_raises_if_the_response_is_an_error(self, svc, url, status):
-        httpretty.register_uri("GET", url, status=status)
+    def test_it_raises_if_the_response_is_an_error(self, svc, url, status, responses_):
+        responses_.add("GET", url, status=status)
 
         with pytest.raises(UnhandledUpstreamException) as exc_info:
             svc.request("GET", url)
@@ -129,9 +138,9 @@ class TestHTTPService:
 
     @pytest.mark.parametrize("status", [400, 401, 403, 404, 500])
     def test_it_doesnt_raise_if_the_response_is_an_error_when_disabled(
-        self, svc, url, status
+        self, svc, url, status, responses_
     ):
-        httpretty.register_uri("GET", url, status=status)
+        responses_.add("GET", url, status=status)
 
         response = svc.request("GET", url, raise_for_status=False)
 
@@ -220,12 +229,6 @@ class TestHTTPService:
     def url(self):
         """Return the URL that we'll be sending test requests to."""
         return "https://example.com/example"
-
-    @pytest.fixture(autouse=True)
-    def test_response(self, url):
-        httpretty.register_uri(
-            "GET", url, body='{"test_response_key": "test_response_value"}', priority=-1
-        )
 
     @pytest.fixture
     def session(self):

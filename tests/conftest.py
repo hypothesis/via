@@ -1,7 +1,7 @@
 from os import environ
 
-import httpretty
 import pytest
+import responses
 from h_matchers import Any
 from pytest_factoryboy import register
 
@@ -46,16 +46,7 @@ def assert_cache_control(headers, cache_parts):
 
 
 @pytest.fixture(autouse=True)
-def httpretty_():
-    """Monkey-patch Python's socket core module to mock all HTTP responses.
-
-    We never want real HTTP requests to be sent by the tests so replace them
-    all with mock responses. This handles requests sent using the standard
-    urllib2 library and the third-party httplib2 and requests libraries.
-    """
-    httpretty.enable(allow_net_connect=False)
-
-    yield
-
-    httpretty.disable()
-    httpretty.reset()
+def responses_():
+    """Mock HTTP requests made using the `requests` library."""
+    with responses.RequestsMock() as rsps:
+        yield rsps

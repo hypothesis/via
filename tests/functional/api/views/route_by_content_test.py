@@ -1,7 +1,7 @@
 from urllib.parse import quote_plus
 
-import httpretty
 import pytest
+import responses
 from h_matchers import Any
 
 from tests.conftest import assert_cache_control
@@ -44,19 +44,19 @@ class TestRouteByContent:
         )
 
     @pytest.fixture
-    def html_response(self):
-        httpretty.register_uri(
-            httpretty.GET,
-            "http://example.com",
+    def html_response(self, responses_):
+        responses_.add(
+            responses.GET,
+            "http://example.com/",
             status=204,
-            adding_headers={"Content-Type": "text/html"},
+            headers={"Content-Type": "text/html"},
         )
 
     @pytest.fixture
-    def pdf_response(self):
-        httpretty.register_uri(
-            httpretty.GET,
-            "http://example.com",
+    def pdf_response(self, responses_):
+        responses_.add(
+            responses.GET,
+            "http://example.com/",
             status=204,
-            adding_headers={"Content-Type": "application/pdf"},
+            headers={"Content-Type": "application/pdf"},
         )
