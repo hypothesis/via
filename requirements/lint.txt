@@ -92,7 +92,7 @@ gunicorn==23.0.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-h-assets==1.0.7
+h-assets==1.1.0
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
