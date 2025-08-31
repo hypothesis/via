@@ -261,6 +261,11 @@ pycparser==2.21
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
     #   cffi
+pygments==2.19.2
+    # via
+    #   -r requirements/functests.txt
+    #   -r requirements/tests.txt
+    #   pytest
 pyjwt==2.10.1
     # via
     #   -r requirements/functests.txt
@@ -302,7 +307,7 @@ pyramid-tm==2.6
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
-pytest==8.3.4
+pytest==8.4.1
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
