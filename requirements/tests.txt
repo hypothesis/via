@@ -178,6 +178,8 @@ pycparser==2.21
     # via
     #   -r requirements/prod.txt
     #   cffi
+pygments==2.19.2
+    # via pytest
 pyjwt==2.10.1
     # via -r requirements/prod.txt
 pyproject-hooks==1.0.0
@@ -204,7 +206,7 @@ pyramid-services==2.2
     # via -r requirements/prod.txt
 pyramid-tm==2.6
     # via -r requirements/prod.txt
-pytest==8.3.4
+pytest==8.4.1
     # via
     #   -r requirements/tests.in
     #   pytest-cov
