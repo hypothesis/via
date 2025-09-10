@@ -160,7 +160,7 @@ function TranscriptSegment({
           onClick={stableOnSelect}
           className={classnames(
             // TODO: Use shared Button to get these styles for free
-            'flex transition-colors focus-visible-ring rounded',
+            'flex transition-colors focus-visible:ring focus-visible:outline-none rounded',
             // `peer` allows Tailwind styling based on sibling state
             'peer',
             'font-medium hover:underline',
