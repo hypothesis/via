@@ -8,13 +8,11 @@ import {
 import { mkdirSync } from 'fs';
 import gulp from 'gulp';
 
-import tailwindConfig from './tailwind.config.js';
-
 gulp.task('build-js', () => buildJS('./rollup.config.js'));
 gulp.task('watch-js', () => watchJS('./rollup.config.js'));
 
 gulp.task('build-css', () =>
-  buildCSS(['./via/static/styles/video_player.css'], { tailwindConfig }),
+  buildCSS(['./via/static/styles/video_player.css'], { tailwind: true }),
 );
 
 gulp.task('watch-css', () => {

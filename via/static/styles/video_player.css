@@ -2,9 +2,9 @@
 CSS entry point for the video player app.
 */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss' source(none);
+
+@config '../../../tailwind.config.js';
 
 @layer base {
   body {
@@ -21,6 +21,18 @@ CSS entry point for the video player app.
       font-size: max(16px, 100%);
     }
   }
+
+  /* See https://tailwindcss.com/docs/upgrade-guide#default-border-color. */
+  * {
+    border-color: #dbdbdb;
+  }
+}
+
+
+/* See https://tailwindcss.com/docs/upgrade-guide#default-ring-width-and-color. */
+@theme {
+  --default-ring-width: 2px;
+  --default-ring-color: #59a7e8;
 }
 
 p::highlight(transcript-filter-match) {
