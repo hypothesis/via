@@ -25,7 +25,6 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-virtual": "^3.0.2",
     "@tailwindcss/postcss": "^4.1.13",
-    "autoprefixer": "^10.4.20",
     "classnames": "^2.5.1",
     "gulp": "^5.0.0",
     "postcss": "^8.4.49",
