@@ -12,7 +12,7 @@ gulp.task('build-js', () => buildJS('./rollup.config.js'));
 gulp.task('watch-js', () => watchJS('./rollup.config.js'));
 
 gulp.task('build-css', () =>
-  buildCSS(['./via/static/styles/video_player.css'], { autoprefixer: false, tailwind: true }),
+  buildCSS(['./via/static/styles/video_player.css'], { tailwind: true }),
 );
 
 gulp.task('watch-css', () => {
