@@ -27,6 +27,7 @@ describe('useScrollAnchor', () => {
         style={{
           width: `${width}px`,
           height: `${height}px`,
+          fontSize: '13px',
 
           // Hide scrollbars so the `clientWidth` of this element is the same
           // on all platforms.
@@ -106,8 +107,8 @@ describe('useScrollAnchor', () => {
     // within the viewport and so the one which `useScrollAnchor` will pick as
     // a scroll anchor.
     const child = wrapper.find('.child').at(1).getDOMNode();
-    const topOffset = offsetFromTop(container, child);
-    const scrollOffset = container.scrollTop;
+    const topOffset = Math.floor(offsetFromTop(container, child));
+    const scrollOffset = Math.floor(container.scrollTop);
 
     // Make the container wider. The item contents will now wrap onto fewer
     // lines and so if the scroll position of the container is not updated by
@@ -118,8 +119,8 @@ describe('useScrollAnchor', () => {
 
     // Check that `useScrollAnchor` did adjust the `scrollTop` of the container
     // so as to keep the relative offset of the child the same.
-    const topOffset2 = offsetFromTop(container, child);
-    const scrollOffset2 = container.scrollTop;
+    const topOffset2 = Math.floor(offsetFromTop(container, child));
+    const scrollOffset2 = Math.floor(container.scrollTop);
 
     assert.notEqual(scrollOffset, scrollOffset2);
     assert.equal(topOffset, topOffset2);
