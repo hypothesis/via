@@ -4,7 +4,9 @@ CSS entry point for the video player app.
 
 @import 'tailwindcss' source(none);
 
-@config '../../../tailwind.config.js';
+@import '@hypothesis/frontend-shared/tailwind-config.css';
+@source '../**/*.{js,ts,tsx}';
+@source '../../../node_modules/@hypothesis/frontend-shared/**/*.js';
 
 @layer base {
   body {
