@@ -11,7 +11,7 @@ from whitenoise import WhiteNoise
 from via._version import get_version
 from via.cache_buster import PathCacheBuster
 from via.security import ViaSecurityPolicy
-from via.sentry_filters import SENTRY_FILTERS
+from via.sentry_filters import SENTRY_FILTERS, sentry_before_send_log
 
 PARAMETERS = {
     "client_embed_url": {"required": True},
@@ -62,17 +62,24 @@ def load_settings(settings):
             raise ValueError(f"Param {param} must be provided.")  # noqa: EM102, TRY003
 
     # Configure sentry
-    settings["h_pyramid_sentry.filters"] = SENTRY_FILTERS
-    # Enable Sentry's "Releases" feature, see:
-    # https://docs.sentry.io/platforms/python/configuration/options/#release
-    #
-    # h_pyramid_sentry passes any h_pyramid_sentry.init.* Pyramid settings
-    # through to sentry_sdk.init(), see:
-    # https://github.com/hypothesis/h-pyramid-sentry?tab=readme-ov-file#settings
-    #
-    # For the full list of options that sentry_sdk.init() supports see:
-    # https://docs.sentry.io/platforms/python/configuration/options/
-    settings["h_pyramid_sentry.init.release"] = get_version()
+    settings.update(
+        {
+            "h_pyramid_sentry.filters": SENTRY_FILTERS,
+            "h_pyramid_sentry.sqlalchemy_support": True,
+            # Enable Sentry's "Releases" feature, see:
+            # https://docs.sentry.io/platforms/python/configuration/options/#release
+            #
+            # h_pyramid_sentry passes any h_pyramid_sentry.init.* Pyramid settings
+            # through to sentry_sdk.init(), see:
+            # https://github.com/hypothesis/h-pyramid-sentry?tab=readme-ov-file#settings
+            #
+            # For the full list of options that sentry_sdk.init() supports see:
+            # https://docs.sentry.io/platforms/python/configuration/options/
+            "h_pyramid_sentry.init.release": get_version(),
+            "h_pyramid_sentry.init.enable_logs": True,
+            "h_pyramid_sentry.init.before_send_log": sentry_before_send_log,
+        }
+    )
 
     return settings
 
