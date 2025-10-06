@@ -249,7 +249,7 @@ sqlalchemy==2.0.40
     #   zope-sqlalchemy
 stack-data==0.6.3
     # via ipython
-supervisor==4.2.5
+supervisor==4.3.0
     # via -r requirements/dev.in
 traitlets==5.14.1
     # via
@@ -323,7 +323,6 @@ setuptools==78.1.1
     #   -r requirements/prod.txt
     #   pip-tools
     #   pyramid
-    #   supervisor
     #   zope-deprecation
     #   zope-interface
     #   zope-sqlalchemy
