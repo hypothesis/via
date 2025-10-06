@@ -67,7 +67,7 @@ marshmallow==3.26.1
     #   webargs
 netaddr==1.3.0
     # via checkmatelib
-newrelic==10.12.0
+newrelic==11.0.0
     # via -r requirements/prod.in
 oauthlib==3.2.2
     # via requests-oauthlib
