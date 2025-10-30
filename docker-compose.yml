@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15.3-alpine
+    image: postgres:15.10-alpine
     ports:
       - "127.0.0.1:4433:5432"
     healthcheck:
