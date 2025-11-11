@@ -276,8 +276,10 @@ zope-sqlalchemy==3.1
     # via -r prod.txt
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==25.3
-    # via pip-tools
+pip==25.2
+    # via
+    #   -r prod.txt
+    #   pip-tools
 setuptools==78.1.1
     # via
     #   -r prod.txt

@@ -216,13 +216,13 @@ pastedeploy==3.1.0
 pip-sync-faster==0.0.5
     # via
     #   -r functests.txt
-    #   -r lint.in
     #   -r tests.txt
+    #   -r lint.in
 pip-tools==7.4.1
     # via
     #   -r functests.txt
-    #   -r lint.in
     #   -r tests.txt
+    #   -r lint.in
     #   pip-sync-faster
 plaster==1.1.2
     # via
@@ -465,7 +465,7 @@ zope-sqlalchemy==3.1
     #   -r tests.txt
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==25.3
+pip==25.2
     # via
     #   -r functests.txt
     #   -r tests.txt
