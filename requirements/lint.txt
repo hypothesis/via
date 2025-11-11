@@ -241,7 +241,7 @@ pluggy==1.5.0
     #   -r requirements/tests.txt
     #   pytest
     #   pytest-cov
-psycopg2==2.9.10
+psycopg2==2.9.11
     # via
     #   -r requirements/functests.txt
     #   -r requirements/tests.txt
