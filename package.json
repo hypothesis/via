@@ -39,6 +39,7 @@
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/youtube": "^0.1.2",
     "@vitest/browser": "^4.0.8",
+    "@vitest/browser-playwright": "^4.0.8",
     "@vitest/coverage-istanbul": "^4.0.8",
     "@vitest/eslint-plugin": "^1.4.2",
     "babel-plugin-istanbul": "^7.0.0",
