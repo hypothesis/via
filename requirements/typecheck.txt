@@ -130,7 +130,7 @@ pathspec==0.12.1
     # via mypy
 pip-sync-faster==0.0.5
     # via -r typecheck.in
-pip-tools==7.5.1
+pip-tools==7.5.2
     # via
     #   -r typecheck.in
     #   pip-sync-faster
