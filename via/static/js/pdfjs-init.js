@@ -25,6 +25,10 @@ function onViewerLoaded() {
   // Wait for the PDF viewer to be fully initialized and then load the Hypothesis client.
   const app = PDFViewerApplication;
   app.initializedPromise.then(() => {
+    // Disable range requesting, since Canvas signs their file URLs with a one-time
+    // token, making subsequent attempts fail
+    PDFViewerApplicationOptions.set('disableRange', true);
+
     // Load the Hypothesis client.
     const embedScript = document.createElement('script');
     embedScript.src = clientEmbedUrl;
