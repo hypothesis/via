@@ -17,7 +17,7 @@
 
     .proxied-content-iframe {
       position: fixed;
-      top: 0;
+      top: 40px;
       left: 0;
       bottom: 0;
       right: 0;
@@ -98,6 +98,14 @@
         opacity: 0.0;
       }
     }
+
+    .decommission-banner {
+        padding: 10px 15px;
+        background: #fceedb;
+        position: relative;
+        font-weight: bold;
+        border: 1px solid #fbc168;
+    }
   </style>
 
   <script>
@@ -154,10 +162,23 @@
       history.replaceState(null, document.title, viaURL);
     }
   });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const frame = /** @type {HTMLElement} */  document.getElementById('proxied-content-iframe');
+    const banner = document.getElementById('decommission-banner');
+    const observer = new ResizeObserver(() => {
+      const { height } = banner.getBoundingClientRect();
+      frame.style.top = `${height}px`;
+    });
+    observer.observe(frame);
+  });
   </script>
 </head>
   <body>
-    <iframe class="js-content-frame proxied-content-iframe" allow="clipboard-write" src={{ src }}></iframe>
+    <div class="decommission-banner" id="decommission-banner">
+        Access to Via is being restricted as of Monday, February 2nd, 2026. You can find information <a href="https://web.hypothes.is/blog/changes-to-via-hypothesis-proxy-server-for-annotation/" target="_blank">here</a>, and you can <a href="https://web.hypothes.is/get-help/" target="_blank">reach our team here</a>.
+    </div>
+    <iframe id="proxied-content-iframe" class="js-content-frame proxied-content-iframe" allow="clipboard-write" src={{ src }}></iframe>
 
     {# Loading indicator.
 
