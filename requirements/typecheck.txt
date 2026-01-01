@@ -102,7 +102,7 @@ marshmallow==3.26.1
     # via
     #   -r requirements/prod.txt
     #   webargs
-mypy==1.19.0
+mypy==1.19.1
     # via -r requirements/typecheck.in
 mypy-extensions==1.0.0
     # via mypy
