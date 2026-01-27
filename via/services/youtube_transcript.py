@@ -90,7 +90,7 @@ class YouTubeTranscriptService:
                         "client": {
                             "hl": "en",
                             "clientName": "WEB",
-                            "clientVersion": "2.20210721.00.00",
+                            "clientVersion": "2.20250331.00.00",
                         }
                     },
                     "videoId": video_id,
