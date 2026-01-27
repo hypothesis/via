@@ -1,7 +1,7 @@
 import json
 from io import BytesIO
 from json import JSONDecodeError
-from unittest.mock import sentinel
+from unittest.mock import MagicMock, sentinel
 from xml.etree import ElementTree  # noqa: ICN001
 
 import pytest
@@ -293,6 +293,60 @@ class TestYouTubeTranscriptService:
         http_service.get.return_value.text = "foo"
 
         with pytest.raises(ElementTree.ParseError):
+            svc.get_transcript(transcript_info)
+
+    def test_get_transcript_infos_crashes_during_proxy_lookup(self):
+        http_service = MagicMock()
+        http_service.post.side_effect = Exception("Boom")
+
+        class BrokenSession:
+            @property
+            def proxies(self):
+                raise TypeError("oops")
+
+        http_service._session = BrokenSession()
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception):
+            svc.get_transcript_infos("video_id")
+
+    def test_get_transcript_infos_with_proxy(self):
+        http_service = MagicMock()
+        http_service.post.side_effect = Exception("Boom")
+        http_service._session = MagicMock()
+        http_service._session.proxies = {"https": "http://proxy.com"}
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception):
+            svc.get_transcript_infos("video_id")
+
+    def test_get_transcript_crashes_during_proxy_lookup(self, transcript_info):
+        http_service = MagicMock()
+        http_service.get.side_effect = Exception("Boom")
+
+        class BrokenSession:
+            @property
+            def proxies(self):
+                raise TypeError("oops")
+
+        http_service._session = BrokenSession()
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception):
+            svc.get_transcript(transcript_info)
+
+    def test_get_transcript_with_proxy(self, transcript_info):
+        http_service = MagicMock()
+        http_service.get.side_effect = Exception("Boom")
+        http_service._session = MagicMock()
+        http_service._session.proxies = {"https": "http://proxy.com"}
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception):
             svc.get_transcript(transcript_info)
 
     @pytest.fixture
