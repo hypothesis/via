@@ -108,7 +108,7 @@ class YouTubeTranscriptService:
                 )
                 for caption_track_dict in dicts
             ]
-        except Exception as err:
+        except Exception:
             proxy_info = "without proxy"
             try:
                 session = getattr(self._http_service, "_session", None)
@@ -120,12 +120,10 @@ class YouTubeTranscriptService:
                     proxy_info = session.proxies.get("https") or "without proxy"
             except (AttributeError, TypeError):
                 pass
-            LOG.error(
-                "YouTubeTranscriptService.get_transcript_infos failed for video_id=%s (proxy=%s): %s",
+            LOG.exception(
+                "YouTubeTranscriptService.get_transcript_infos failed for video_id=%s (proxy=%s)",
                 video_id,
                 proxy_info,
-                err,
-                exc_info=True,
             )
             raise
 
@@ -169,7 +167,7 @@ class YouTubeTranscriptService:
                 for xml_element in xml_elements
                 if xml_element.text is not None
             ]
-        except Exception as err:
+        except Exception:
             proxy_info = "without proxy"
             try:
                 session = getattr(self._http_service, "_session", None)
@@ -181,12 +179,10 @@ class YouTubeTranscriptService:
                     proxy_info = session.proxies.get("https") or "without proxy"
             except (AttributeError, TypeError):
                 pass
-            LOG.error(
-                "YouTubeTranscriptService.get_transcript failed for url=%s (proxy=%s): %s",
+            LOG.exception(
+                "YouTubeTranscriptService.get_transcript failed for url=%s (proxy=%s)",
                 transcript_info.url,
                 proxy_info,
-                err,
-                exc_info=True,
             )
             raise
 
