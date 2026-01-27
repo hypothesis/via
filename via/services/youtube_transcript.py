@@ -98,6 +98,7 @@ class YouTubeTranscriptService:
             )
             response.raise_for_status()
             json = response.json()
+            LOG.info("YouTube API response: %s", json)
             dicts = json["captions"]["playerCaptionsTracklistRenderer"]["captionTracks"]
             return [
                 TranscriptInfo(
