@@ -165,10 +165,12 @@ class TestYouTubeTranscriptService:
         response.status_code = 200
         response.encoding = "utf-8"
         response.raw = BytesIO(response_body)
+
         # Configure json() to parse the response_body when called
         # This will raise JSONDecodeError for invalid JSON, or return the parsed dict
         def json_method():
             return json.loads(response_body.decode("utf-8"))
+
         response.json = json_method
 
         with pytest.raises(exception_class):

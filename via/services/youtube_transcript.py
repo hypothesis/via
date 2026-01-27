@@ -80,7 +80,6 @@ class YouTubeTranscriptService:
     def __init__(self, http_service: HTTPService):
         self._http_service = http_service
 
-
     def get_transcript_infos(self, video_id: str) -> list[TranscriptInfo]:
         """Return the list of available transcripts for `video_id`."""
         try:
@@ -113,7 +112,11 @@ class YouTubeTranscriptService:
             proxy_info = "without proxy"
             try:
                 session = getattr(self._http_service, "_session", None)
-                if session and hasattr(session, "proxies") and isinstance(session.proxies, dict):
+                if (
+                    session
+                    and hasattr(session, "proxies")
+                    and isinstance(session.proxies, dict)
+                ):
                     proxy_info = session.proxies.get("https") or "without proxy"
             except (AttributeError, TypeError):
                 pass
@@ -170,7 +173,11 @@ class YouTubeTranscriptService:
             proxy_info = "without proxy"
             try:
                 session = getattr(self._http_service, "_session", None)
-                if session and hasattr(session, "proxies") and isinstance(session.proxies, dict):
+                if (
+                    session
+                    and hasattr(session, "proxies")
+                    and isinstance(session.proxies, dict)
+                ):
                     proxy_info = session.proxies.get("https") or "without proxy"
             except (AttributeError, TypeError):
                 pass
