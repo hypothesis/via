@@ -1,7 +1,7 @@
 import json
 from io import BytesIO
 from json import JSONDecodeError
-from unittest.mock import sentinel
+from unittest.mock import MagicMock, sentinel
 from xml.etree import ElementTree  # noqa: ICN001
 
 import pytest
@@ -57,6 +57,8 @@ class TestYouTubeTranscriptService:
             }
         }
         response = http_service.post.return_value = Response()
+        response.status_code = 200
+        response.json = lambda: response_json
         response.raw = BytesIO(json.dumps(response_json).encode("utf-8"))
 
         transcript_infos = svc.get_transcript_infos("test_video_id")
@@ -160,8 +162,16 @@ class TestYouTubeTranscriptService:
     ):
         """It crashes if the response body isn't what we expect."""
         response = http_service.post.return_value = Response()
+        response.status_code = 200
         response.encoding = "utf-8"
         response.raw = BytesIO(response_body)
+
+        # Configure json() to parse the response_body when called
+        # This will raise JSONDecodeError for invalid JSON, or return the parsed dict
+        def json_method():
+            return json.loads(response_body.decode("utf-8"))
+
+        response.json = json_method
 
         with pytest.raises(exception_class):
             svc.get_transcript_infos("test_video_id")
@@ -247,6 +257,7 @@ class TestYouTubeTranscriptService:
         )
 
     def test_get_transcript(self, svc, transcript_info, http_service):
+        http_service.get.return_value.status_code = 200
         http_service.get.return_value.text = """
             <transcript>
                 <text start="0.21" dur="1.387">Hey there guys,</text>
@@ -278,9 +289,64 @@ class TestYouTubeTranscriptService:
     def test_get_transcript_unexpected_response(
         self, svc, transcript_info, http_service
     ):
+        http_service.get.return_value.status_code = 200
         http_service.get.return_value.text = "foo"
 
         with pytest.raises(ElementTree.ParseError):
+            svc.get_transcript(transcript_info)
+
+    def test_get_transcript_infos_crashes_during_proxy_lookup(self):
+        http_service = MagicMock()
+        http_service.post.side_effect = Exception("Boom")
+
+        class BrokenSession:
+            @property
+            def proxies(self):
+                raise TypeError("oops")  # noqa: EM101
+
+        http_service._session = BrokenSession()  # noqa: SLF001
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception, match="Boom"):
+            svc.get_transcript_infos("video_id")
+
+    def test_get_transcript_infos_with_proxy(self):
+        http_service = MagicMock()
+        http_service.post.side_effect = Exception("Boom")
+        http_service._session = MagicMock()  # noqa: SLF001
+        http_service._session.proxies = {"https": "http://proxy.com"}  # noqa: SLF001
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception, match="Boom"):
+            svc.get_transcript_infos("video_id")
+
+    def test_get_transcript_crashes_during_proxy_lookup(self, transcript_info):
+        http_service = MagicMock()
+        http_service.get.side_effect = Exception("Boom")
+
+        class BrokenSession:
+            @property
+            def proxies(self):
+                raise TypeError("oops")  # noqa: EM101
+
+        http_service._session = BrokenSession()  # noqa: SLF001
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception, match="Boom"):
+            svc.get_transcript(transcript_info)
+
+    def test_get_transcript_with_proxy(self, transcript_info):
+        http_service = MagicMock()
+        http_service.get.side_effect = Exception("Boom")
+        http_service._session = MagicMock()  # noqa: SLF001
+        http_service._session.proxies = {"https": "http://proxy.com"}  # noqa: SLF001
+
+        svc = YouTubeTranscriptService(http_service)
+
+        with pytest.raises(Exception, match="Boom"):
             svc.get_transcript(transcript_info)
 
     @pytest.fixture
