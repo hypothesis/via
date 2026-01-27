@@ -302,24 +302,24 @@ class TestYouTubeTranscriptService:
         class BrokenSession:
             @property
             def proxies(self):
-                raise TypeError("oops")
+                raise TypeError("oops")  # noqa: EM101
 
-        http_service._session = BrokenSession()
+        http_service._session = BrokenSession()  # noqa: SLF001
 
         svc = YouTubeTranscriptService(http_service)
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Boom"):
             svc.get_transcript_infos("video_id")
 
     def test_get_transcript_infos_with_proxy(self):
         http_service = MagicMock()
         http_service.post.side_effect = Exception("Boom")
-        http_service._session = MagicMock()
-        http_service._session.proxies = {"https": "http://proxy.com"}
+        http_service._session = MagicMock()  # noqa: SLF001
+        http_service._session.proxies = {"https": "http://proxy.com"}  # noqa: SLF001
 
         svc = YouTubeTranscriptService(http_service)
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Boom"):
             svc.get_transcript_infos("video_id")
 
     def test_get_transcript_crashes_during_proxy_lookup(self, transcript_info):
@@ -329,24 +329,24 @@ class TestYouTubeTranscriptService:
         class BrokenSession:
             @property
             def proxies(self):
-                raise TypeError("oops")
+                raise TypeError("oops")  # noqa: EM101
 
-        http_service._session = BrokenSession()
+        http_service._session = BrokenSession()  # noqa: SLF001
 
         svc = YouTubeTranscriptService(http_service)
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Boom"):
             svc.get_transcript(transcript_info)
 
     def test_get_transcript_with_proxy(self, transcript_info):
         http_service = MagicMock()
         http_service.get.side_effect = Exception("Boom")
-        http_service._session = MagicMock()
-        http_service._session.proxies = {"https": "http://proxy.com"}
+        http_service._session = MagicMock()  # noqa: SLF001
+        http_service._session.proxies = {"https": "http://proxy.com"}  # noqa: SLF001
 
         svc = YouTubeTranscriptService(http_service)
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Boom"):
             svc.get_transcript(transcript_info)
 
     @pytest.fixture
