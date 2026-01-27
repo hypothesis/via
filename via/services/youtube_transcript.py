@@ -89,8 +89,8 @@ class YouTubeTranscriptService:
                     "context": {
                         "client": {
                             "hl": "en",
-                            "clientName": "WEB",
-                            "clientVersion": "2.20250331.00.00",
+                            "clientName": "ANDROID",
+                            "clientVersion": "17.31.35",
                         }
                     },
                     "videoId": video_id,
