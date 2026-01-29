@@ -159,7 +159,7 @@ plaster-pastedeploy==1.0.1
     #   pyramid
 prompt-toolkit==3.0.43
     # via ipython
-psycopg2-binary==2.9.11
+psycopg2==2.9.11
     # via -r prod.txt
 ptyprocess==0.7.0
     # via pexpect

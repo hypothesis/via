@@ -2,7 +2,7 @@ pyramid
 gunicorn
 newrelic
 sqlalchemy
-psycopg2-binary
+psycopg2
 alembic
 pyramid-tm
 zope.sqlalchemy

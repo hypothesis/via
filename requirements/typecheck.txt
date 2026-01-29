@@ -145,7 +145,7 @@ plaster-pastedeploy==1.0.1
     # via
     #   -r prod.txt
     #   pyramid
-psycopg2-binary==2.9.11
+psycopg2==2.9.11
     # via -r prod.txt
 pyasn1==0.5.1
     # via
