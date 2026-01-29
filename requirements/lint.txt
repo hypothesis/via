@@ -241,7 +241,7 @@ pluggy==1.5.0
     #   -r tests.txt
     #   pytest
     #   pytest-cov
-psycopg2==2.9.11
+psycopg2-binary==2.9.11
     # via
     #   -r functests.txt
     #   -r tests.txt

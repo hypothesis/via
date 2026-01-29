@@ -32,6 +32,7 @@ def pyramid_settings():
         "youtube_transcripts": True,
         "api_jwt_secret": "secret",
         "youtube_api_key": "test_youtube_api_key",
+        "supadata_api_key": "test_supadata_api_key",
         "database_url": environ["DATABASE_URL"],
     }
 
