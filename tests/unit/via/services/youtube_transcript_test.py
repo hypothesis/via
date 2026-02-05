@@ -11,6 +11,7 @@ from tests.factories import TranscriptInfoFactory
 from via.services.youtube_transcript import (
     TranscriptInfo,
     YouTubeTranscriptService,
+    _get_language_name,
     factory,
 )
 
@@ -31,6 +32,27 @@ class TestTranscriptInfo:
     )
     def test_id(self, transcript_info, expected_id):
         assert transcript_info.id == expected_id
+
+
+class TestGetLanguageName:
+    @pytest.mark.parametrize(
+        "language_code,expected_name",
+        [
+            # Known language codes
+            ("en", "English"),
+            ("en-us", "English (United States)"),
+            ("EN-US", "English (United States)"),  # Case insensitive
+            # Unknown variant with known base language
+            ("en-xx", "English (XX)"),
+            ("es-foo", "Spanish (FOO)"),
+            ("fr-bar", "French (BAR)"),
+            # Completely unknown language code
+            ("xyz", "XYZ"),
+            ("unknown", "UNKNOWN"),
+        ],
+    )
+    def test_get_language_name(self, language_code, expected_name):
+        assert _get_language_name(language_code) == expected_name
 
 
 class TestYouTubeTranscriptService:

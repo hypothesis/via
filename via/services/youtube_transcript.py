@@ -85,14 +85,12 @@ def _get_language_name(language_code: str) -> str:
     code_lower = language_code.lower()
     if code_lower in LANGUAGE_NAMES:
         return LANGUAGE_NAMES[code_lower]
-    # Try base language (e.g., "en" from "en-US")
+    # Try base language (e.g., "en" from "en-US") for unknown variants
     base_code = code_lower.split("-")[0]
-    if base_code in LANGUAGE_NAMES:
+    if base_code in LANGUAGE_NAMES and "-" in language_code:
         # Format as "Language (Code)" for unknown variants
         base_name = LANGUAGE_NAMES[base_code]
-        if "-" in language_code:
-            return f"{base_name} ({language_code.upper().split('-')[1]})"
-        return base_name
+        return f"{base_name} ({language_code.upper().split('-')[1]})"
     # Fallback: capitalize the code
     return language_code.upper()
 
