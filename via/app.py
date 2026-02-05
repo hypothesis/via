@@ -32,6 +32,7 @@ PARAMETERS = {
     "api_jwt_secret": {"required": True},
     "youtube_api_key": {},
     "youtube_proxy": {},
+    "supadata_api_key": {},
 }
 
 
