@@ -36,7 +36,7 @@ class TestTranscriptInfo:
 
 class TestGetLanguageName:
     @pytest.mark.parametrize(
-        "language_code,expected_name",
+        ("language_code", "expected_name"),
         [
             # Known language codes
             ("en", "English"),
