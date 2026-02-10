@@ -238,13 +238,16 @@ class YouTubeTranscriptService:
         # Use original lang code from URL (preserves case for API call)
         original_lang = parts[3] if len(parts) > 3 else transcript_info.language_code
 
+        # Build params, only including lang if it's a valid non-empty value
+        # (omitting lang lets Supadata default to first available language)
+        params = {"url": f"https://youtu.be/{transcript_info.video_id}"}
+        if original_lang and original_lang.lower() != "none":
+            params["lang"] = original_lang
+
         try:
             response = self._http_service.get(
                 self.SUPADATA_API_URL,
-                params={
-                    "url": f"https://youtu.be/{transcript_info.video_id}",
-                    "lang": original_lang,
-                },
+                params=params,
                 headers={"x-api-key": self._api_key},
             )
             response.raise_for_status()
