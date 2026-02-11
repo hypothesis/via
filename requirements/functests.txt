@@ -24,7 +24,7 @@ certifi==2024.7.4
     #   -r prod.txt
     #   requests
     #   sentry-sdk
-cffi==1.16.0
+cffi==2.0.0
     # via
     #   -r prod.txt
     #   cryptography
@@ -36,7 +36,7 @@ checkmatelib==1.0.18
     # via -r prod.txt
 click==8.1.7
     # via pip-tools
-cryptography==44.0.1
+cryptography==46.0.5
     # via
     #   -r prod.txt
     #   joserfc
@@ -312,9 +312,7 @@ zope-sqlalchemy==3.1
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
-    # via
-    #   -r prod.txt
-    #   pip-tools
+    # via pip-tools
 setuptools==78.1.1
     # via
     #   -r prod.txt
