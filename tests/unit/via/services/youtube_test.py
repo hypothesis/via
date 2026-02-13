@@ -135,12 +135,15 @@ class TestYouTubeService:
         assert returned_transcript == transcript.transcript
 
     def test_get_transcript_retries_when_cached_transcript_is_empty(
-        self, svc, db_session, transcript_factory, youtube_transcript_service, transcript_info
+        self,
+        svc,
+        db_session,
+        transcript_factory,
+        youtube_transcript_service,
+        transcript_info,
     ):
         """If the cached transcript has empty segments, delete it and retry from the API."""
-        empty_transcript = transcript_factory.create(
-            video_id="test_video_id", transcript=[]
-        )
+        transcript_factory.create(video_id="test_video_id", transcript=[])
         youtube_transcript_service.pick_default_transcript.return_value = (
             transcript_info
         )
