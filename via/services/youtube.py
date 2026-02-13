@@ -105,19 +105,23 @@ class YouTubeService:
             .where(Transcript.video_id == video_id)
             .order_by(Transcript.created.asc())
         ).first():
-            return transcript.transcript
+            if transcript.transcript:
+                return transcript.transcript
+            # Cached transcript is empty, delete it and retry from the API.
+            self._db.delete(transcript)
 
         transcript_infos = self._transcript_svc.get_transcript_infos(video_id)
         transcript_info = self._transcript_svc.pick_default_transcript(transcript_infos)
         transcript = self._transcript_svc.get_transcript(transcript_info)
 
-        self._db.add(
-            Transcript(
-                video_id=video_id,
-                transcript_id=transcript_info.id,
-                transcript=transcript,
+        if transcript:
+            self._db.add(
+                Transcript(
+                    video_id=video_id,
+                    transcript_id=transcript_info.id,
+                    transcript=transcript,
+                )
             )
-        )
 
         return transcript
 

@@ -134,6 +134,45 @@ class TestYouTubeService:
         youtube_transcript_service.get_transcript.assert_not_called()
         assert returned_transcript == transcript.transcript
 
+    def test_get_transcript_retries_when_cached_transcript_is_empty(
+        self, svc, db_session, transcript_factory, youtube_transcript_service, transcript_info
+    ):
+        """If the cached transcript has empty segments, delete it and retry from the API."""
+        empty_transcript = transcript_factory.create(
+            video_id="test_video_id", transcript=[]
+        )
+        youtube_transcript_service.pick_default_transcript.return_value = (
+            transcript_info
+        )
+        youtube_transcript_service.get_transcript.return_value = "fresh_transcript"
+
+        returned_transcript = svc.get_transcript("test_video_id")
+
+        # It should have called the API to get a fresh transcript.
+        youtube_transcript_service.get_transcript_infos.assert_called_once_with(
+            "test_video_id"
+        )
+        assert returned_transcript == "fresh_transcript"
+        # The empty cached transcript should have been deleted and replaced.
+        transcripts = db_session.scalars(select(Transcript)).all()
+        assert len(transcripts) == 1
+        assert transcripts[0].transcript == "fresh_transcript"
+
+    def test_get_transcript_does_not_cache_empty_transcript(
+        self, svc, db_session, youtube_transcript_service, transcript_info
+    ):
+        """If the API returns an empty transcript, don't cache it."""
+        youtube_transcript_service.pick_default_transcript.return_value = (
+            transcript_info
+        )
+        youtube_transcript_service.get_transcript.return_value = []
+
+        returned_transcript = svc.get_transcript("test_video_id")
+
+        assert returned_transcript == []
+        # Nothing should have been cached in the DB.
+        assert db_session.scalars(select(Transcript)).all() == []
+
     def test_get_transcript_returns_oldest_cached_transcript(
         self, transcript_factory, svc
     ):
