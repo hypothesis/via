@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Via Access Restricted – Hypothesis</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <style>
+    html {
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+    }
+
+    body {
+      max-width: 620px;
+      padding: 32px 28px;
+      margin: 40px 16px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #3f3f3f;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 16px;
+      color: #bd1c2b;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    .target-url {
+      display: inline-block;
+      word-break: break-all;
+      font-weight: bold;
+    }
+
+    a {
+      color: #3f3f3f;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #bd1c2b;
+    }
+
+    .link-visit {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 10px 20px;
+      background-color: #3f3f3f;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 3px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .link-visit:hover {
+      background-color: #bd1c2b;
+      color: #fff;
+    }
+
+    .resources {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .resources h2 {
+      font-size: 16px;
+      margin: 0 0 12px;
+    }
+
+    .resources ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .resources li {
+      margin-bottom: 8px;
+    }
+
+    .resources li::before {
+      content: "→ ";
+      color: #bd1c2b;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <a href="https://hypothes.is">
+      <svg xmlns="http://www.w3.org/2000/svg"
+        width="80" height="80"
+        viewBox="0 0 24 28"
+        aria-labelledby="logo-title">
+        <title id="logo-title">Hypothesis</title>
+        <g fill="none" fill-rule="evenodd">
+          <path fill="#FFF" fill-rule="nonzero" d="M3.886 3.945H21.03v16.047H3.886z"/>
+          <path d="M0 2.005C0 .898.897 0 2.005 0h19.99C23.102 0 24 .897 24 2.005v19.99A2.005 2.005 0 0 1 21.995 24H2.005A2.005 2.005 0 0 1 0 21.995V2.005zM9 24h6l-3 4-3-4zM7.008 4H4v16h3.008v-4.997C7.008 12.005 8.168 12.01 9 12c1 .007 2.019.06 2.019 2.003V20h3.008v-6.891C14.027 10 12 9.003 10 9.003c-1.99 0-2 0-2.992 1.999V4zM19 19.987c1.105 0 2-.893 2-1.994A1.997 1.997 0 0 0 19 16c-1.105 0-2 .892-2 1.993s.895 1.994 2 1.994z" fill="#3F3F3F"/>
+        </g>
+      </svg>
+    </a>
+  </div>
+
+  <h1>Access to Via is now restricted</h1>
+
+  {% if target_url %}
+  <p>
+    The page you were trying to annotate:<br>
+    <a href="{{ target_url }}" class="target-url">{{ target_url }}</a>
+  </p>
+
+  <p>
+    <a href="{{ target_url }}" class="link-visit">Go to page</a>
+  </p>
+  {% endif %}
+
+  <p>
+    You can still view and create annotations in your browser using our
+    Chrome extension, our Bookmarklet, and on sites that embed Hypothesis.
+  </p>
+
+  <div class="resources">
+    <h2>Learn more</h2>
+    <ul>
+      <li>
+        <a href="https://web.hypothes.is/blog/changes-to-via-hypothesis-proxy-server-for-annotation/">
+          Announcement: Changes to Via proxy server
+        </a>
+      </li>
+      <li>
+        <a href="https://web.hypothes.is/help/installing-the-chrome-extension/">
+          Install the Chrome extension
+        </a>
+      </li>
+      <li>
+        <a href="https://web.hypothes.is/help/installing-the-bookmarklet/">
+          Install the Bookmarklet
+        </a>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>
