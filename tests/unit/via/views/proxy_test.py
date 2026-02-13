@@ -14,22 +14,19 @@ class TestStaticFallback:
 
 
 class TestProxy:
-    def test_it(
-        self, context, pyramid_request, url_details_service, via_client_service
-    ):
-        url_details_service.get_url_details.return_value = (
-            sentinel.mime_type,
-            sentinel.status_code,
-        )
+    def test_it_returns_restricted_page_with_target_url(self, context, pyramid_request):
         url = context.url_from_path.return_value = "/https://example.org?a=1"
 
         result = proxy(context, pyramid_request)
 
-        url_details_service.get_url_details.assert_called_once_with(url)
-        via_client_service.url_for.assert_called_once_with(
-            url, sentinel.mime_type, pyramid_request.params
-        )
-        assert result == {"src": via_client_service.url_for.return_value}
+        assert result == {"target_url": url}
+
+    def test_it_returns_none_target_url_on_error(self, context, pyramid_request):
+        context.url_from_path.side_effect = Exception("bad url")
+
+        result = proxy(context, pyramid_request)
+
+        assert result == {"target_url": None}
 
     @pytest.fixture
     def context(self):

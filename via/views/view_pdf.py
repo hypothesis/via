@@ -1,107 +1,52 @@
 """View presenting the PDF viewer."""
 
-from itertools import chain
-
-from h_vialib import Configuration
-from h_vialib.secure import Encryption
-from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
-from via.requests_tools.headers import add_request_headers
-from via.services import CheckmateService, GoogleDriveAPI, HTTPService
-from via.services.pdf_url import PDFURLBuilder
-from via.services.secure_link import has_secure_url_token
-
 
 @view_config(
-    renderer="via:templates/pdf_viewer.html.jinja2",
+    renderer="via:templates/restricted.html.jinja2",
     route_name="view_pdf",
-    # We have to keep the leash short here for caching so we can pick up new
-    # immutable assets when they are deployed
-    http_cache=0,
-    decorator=(has_secure_url_token,),
 )
-def view_pdf(context, request):
-    """HTML page with client and the PDF embedded."""
-
-    url = context.url_from_query()
-    checkmate_service = request.find_service(CheckmateService)
-
-    checkmate_service.raise_if_blocked(url)
-
-    _, h_config = Configuration.extract_from_params(request.params)
-
-    return {
-        # The upstream PDF URL that should be associated with any annotations.
-        "pdf_url": url,
-        # The CORS-proxied PDF URL which the viewer should actually load the
-        # PDF from.
-        "proxy_pdf_url": request.find_service(PDFURLBuilder).get_pdf_url(url),
-        "client_embed_url": request.registry.settings["client_embed_url"],
-        "static_url": request.static_url,
-        "hypothesis_config": h_config,
-    }
-
-
-@view_config(route_name="proxy_onedrive_pdf", decorator=(has_secure_url_token,))
-@view_config(route_name="proxy_d2l_pdf", decorator=(has_secure_url_token,))
-@view_config(route_name="proxy_python_pdf", decorator=(has_secure_url_token,))
-def proxy_python_pdf(context, request):
-    """Proxy a pdf with python (as opposed to nginx).
-
-    Multiple routes point to this view to allow having separate access logs for each of them.
-    """
-    url = context.url_from_query()
-    params = {}
-    if "via.secret.query" in request.params:
-        secure_secrets = Encryption(
-            request.registry.settings["via_secret"].encode("utf-8")
-        )
-        params = secure_secrets.decrypt_dict(request.params["via.secret.query"])
-
-    content_iterable = request.find_service(HTTPService).stream(
-        url, headers=add_request_headers({}, request=request), params=params
-    )
-
-    return _iter_pdf_response(request.response, content_iterable)
-
-
-@view_config(route_name="proxy_google_drive_file", decorator=(has_secure_url_token,))
-@view_config(
-    route_name="proxy_google_drive_file:resource_key", decorator=(has_secure_url_token,)
-)
-def proxy_google_drive_file(request):
-    """Proxy a file from Google Drive."""
-
-    # Add an iterable to stream the content instead of holding it all in memory
-    content_iterable = request.find_service(GoogleDriveAPI).iter_file(
-        file_id=request.matchdict["file_id"],
-        resource_key=request.matchdict.get("resource_key"),
-    )
-
-    return _iter_pdf_response(request.response, content_iterable)
-
-
-def _iter_pdf_response(response, content_iterable):
+def view_pdf(context, _request):
+    """Show restricted access page instead of the PDF viewer."""
     try:
-        # This takes a potentially lazy generator, and ensures the first item is
-        # called now. This is so any errors or problems that come from starting the
-        # process happen immediately, rather than whenever the iterable is evaluated.
-        content_iterable = chain((next(content_iterable),), content_iterable)
-    except StopIteration:
-        # Respond with 204 no content for empty files. This means they won't be
-        # cached by Cloudflare and gives the user a chance to fix the problem.
-        return HTTPNoContent()
+        target_url = context.url_from_query()
+    except Exception:  # noqa: BLE001
+        target_url = None
 
-    response.headers.update(
-        {
-            "Content-Disposition": "inline",
-            "Content-Type": "application/pdf",
-            # Add a very generous caching policy of half a day max-age, full
-            # day stale while revalidate.
-            "Cache-Control": "public, max-age=43200, stale-while-revalidate=86400",
-        }
-    )
+    return {"target_url": target_url}
 
-    response.app_iter = content_iterable
-    return response
+
+@view_config(
+    route_name="proxy_onedrive_pdf",
+    renderer="via:templates/restricted.html.jinja2",
+)
+@view_config(
+    route_name="proxy_d2l_pdf",
+    renderer="via:templates/restricted.html.jinja2",
+)
+@view_config(
+    route_name="proxy_python_pdf",
+    renderer="via:templates/restricted.html.jinja2",
+)
+def proxy_python_pdf(context, _request):
+    """Show restricted access page instead of proxying PDF."""
+    try:
+        target_url = context.url_from_query()
+    except Exception:  # noqa: BLE001
+        target_url = None
+
+    return {"target_url": target_url}
+
+
+@view_config(
+    route_name="proxy_google_drive_file",
+    renderer="via:templates/restricted.html.jinja2",
+)
+@view_config(
+    route_name="proxy_google_drive_file:resource_key",
+    renderer="via:templates/restricted.html.jinja2",
+)
+def proxy_google_drive_file(_request):
+    """Show restricted access page instead of proxying Google Drive file."""
+    return {"target_url": None}
