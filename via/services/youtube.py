@@ -100,24 +100,32 @@ class YouTubeService:
         :raise Exception: this method might raise any type of exception that
             YouTubeTranscriptApi raises
         """
-        if transcript := self._db.scalars(
+        existing_transcript = self._db.scalars(
             select(Transcript)
             .where(Transcript.video_id == video_id)
             .order_by(Transcript.created.asc())
-        ).first():
-            return transcript.transcript
+        ).first()
+
+        if existing_transcript and existing_transcript.transcript:
+            return existing_transcript.transcript
 
         transcript_infos = self._transcript_svc.get_transcript_infos(video_id)
         transcript_info = self._transcript_svc.pick_default_transcript(transcript_infos)
         transcript = self._transcript_svc.get_transcript(transcript_info)
 
-        self._db.add(
-            Transcript(
-                video_id=video_id,
-                transcript_id=transcript_info.id,
-                transcript=transcript,
-            )
-        )
+        if transcript:
+            if existing_transcript:
+                # Update the existing empty transcript record.
+                existing_transcript.transcript_id = transcript_info.id
+                existing_transcript.transcript = transcript
+            else:
+                self._db.add(
+                    Transcript(
+                        video_id=video_id,
+                        transcript_id=transcript_info.id,
+                        transcript=transcript,
+                    )
+                )
 
         return transcript
 
