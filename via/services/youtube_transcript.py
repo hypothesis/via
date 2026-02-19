@@ -238,11 +238,30 @@ class YouTubeTranscriptService:
         # Use original lang code from URL (preserves case for API call)
         original_lang = parts[3] if len(parts) > 3 else transcript_info.language_code
 
-        # Build params, only including lang if it's a valid non-empty value
-        # (omitting lang lets Supadata default to first available language)
-        params = {"url": f"https://youtu.be/{transcript_info.video_id}"}
-        if original_lang and original_lang.lower() != "none":
-            params["lang"] = original_lang
+        # Always try English first if the selected language isn't English.
+        # Some videos have English transcripts available even when not listed
+        # in availableLangs (e.g. auto-generated English subtitles).
+        if original_lang and not original_lang.lower().startswith("en"):
+            try:
+                english_transcript = self._fetch_transcript_from_api(
+                    transcript_info.video_id, "en"
+                )
+                if english_transcript:
+                    return english_transcript
+            except Exception:
+                LOG.info(
+                    "English transcript not available for video_id=%s, falling back to %s",
+                    transcript_info.video_id,
+                    original_lang,
+                )
+
+        return self._fetch_transcript_from_api(transcript_info.video_id, original_lang)
+
+    def _fetch_transcript_from_api(self, video_id: str, lang: str | None) -> list[dict]:
+        """Fetch transcript from the Supadata API for a specific language."""
+        params: dict[str, str] = {"url": f"https://youtu.be/{video_id}"}
+        if lang and lang.lower() != "none":
+            params["lang"] = lang
 
         try:
             response = self._http_service.get(
@@ -254,7 +273,6 @@ class YouTubeTranscriptService:
             data = response.json()
 
             # Convert Supadata format (milliseconds) to our format (seconds)
-            # Old format: {"text": "...", "start": float, "duration": float}
             return [
                 {
                     "text": segment["text"],
@@ -266,8 +284,8 @@ class YouTubeTranscriptService:
         except Exception:
             LOG.exception(
                 "YouTubeTranscriptService.get_transcript failed for video_id=%s lang=%s",
-                transcript_info.video_id,
-                original_lang,
+                video_id,
+                lang,
             )
             raise
 
