@@ -142,8 +142,8 @@ class TestYouTubeService:
         youtube_transcript_service,
         transcript_info,
     ):
-        """If the cached transcript has empty segments, delete it and retry from the API."""
-        transcript_factory.create(video_id="test_video_id", transcript=[])
+        """If the cached transcript has empty segments, update it from the API."""
+        existing = transcript_factory.create(video_id="test_video_id", transcript=[])
         youtube_transcript_service.pick_default_transcript.return_value = (
             transcript_info
         )
@@ -156,10 +156,12 @@ class TestYouTubeService:
             "test_video_id"
         )
         assert returned_transcript == "fresh_transcript"
-        # The empty cached transcript should have been deleted and replaced.
+        # The empty cached transcript should have been updated in place.
         transcripts = db_session.scalars(select(Transcript)).all()
         assert len(transcripts) == 1
+        assert transcripts[0].id == existing.id
         assert transcripts[0].transcript == "fresh_transcript"
+        assert transcripts[0].transcript_id == transcript_info.id
 
     def test_get_transcript_does_not_cache_empty_transcript(
         self, svc, db_session, youtube_transcript_service, transcript_info
