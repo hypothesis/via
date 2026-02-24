@@ -15,7 +15,7 @@ class IndexViews:
 
     def _is_lms_request(self):
         """Check if request comes from LMS (has a valid signed URL)."""
-        return self.request.find_service(SecureLinkService).request_is_valid(
+        return self.request.find_service(SecureLinkService).request_has_valid_token(
             self.request
         )
 

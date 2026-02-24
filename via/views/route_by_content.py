@@ -16,7 +16,7 @@ def route_by_content(context, request):
     """
     secure_link_service = request.find_service(SecureLinkService)
 
-    if not secure_link_service.request_is_valid(request):
+    if not secure_link_service.request_has_valid_token(request):
         try:
             target_url = context.url_from_query()
         except Exception:  # noqa: BLE001

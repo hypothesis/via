@@ -14,7 +14,7 @@ from via.services.pdf_url import PDFURLBuilder
 
 def _is_lms_request(request):
     """Check if request comes from LMS (has a valid signed URL)."""
-    return request.find_service(SecureLinkService).request_is_valid(request)
+    return request.find_service(SecureLinkService).request_has_valid_token(request)
 
 
 def _restricted_response(request, context=None):
