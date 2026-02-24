@@ -14,19 +14,37 @@ class TestStaticFallback:
 
 
 class TestProxy:
-    def test_it_returns_restricted_page_with_target_url(self, context, pyramid_request):
+    def test_it_returns_restricted_page_when_not_lms(
+        self, context, pyramid_request, secure_link_service
+    ):
+        secure_link_service.request_is_valid.return_value = False
         url = context.url_from_path.return_value = "/https://example.org?a=1"
 
         result = proxy(context, pyramid_request)
 
         assert result == {"target_url": url}
+        assert pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
 
-    def test_it_returns_none_target_url_on_error(self, context, pyramid_request):
+    def test_it_returns_restricted_none_url_on_error_when_not_lms(
+        self, context, pyramid_request, secure_link_service
+    ):
+        secure_link_service.request_is_valid.return_value = False
         context.url_from_path.side_effect = Exception("bad url")
 
         result = proxy(context, pyramid_request)
 
         assert result == {"target_url": None}
+
+    def test_it_proxies_when_lms(
+        self, context, pyramid_request, secure_link_service, url_details_service, via_client_service
+    ):
+        secure_link_service.request_is_valid.return_value = True
+        context.url_from_path.return_value = "http://example.com/page"
+
+        result = proxy(context, pyramid_request)
+
+        url_details_service.get_url_details.assert_called_once_with("http://example.com/page")
+        assert "src" in result
 
     @pytest.fixture
     def context(self):
