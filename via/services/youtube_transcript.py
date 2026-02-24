@@ -248,7 +248,7 @@ class YouTubeTranscriptService:
                 )
                 if english_transcript:
                     return english_transcript
-            except Exception:
+            except Exception:  # noqa: BLE001
                 LOG.info(
                     "English transcript not available for video_id=%s, falling back to %s",
                     transcript_info.video_id,
