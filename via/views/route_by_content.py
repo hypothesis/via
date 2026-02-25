@@ -7,7 +7,10 @@ from pyramid import view
 from via.services import SecureLinkService, URLDetailsService, ViaClientService
 
 
-@view.view_config(route_name="route_by_content")
+@view.view_config(
+    route_name="route_by_content",
+    renderer="via:templates/restricted.html.jinja2",
+)
 def route_by_content(context, request):
     """Routes the request according to the Content-Type header.
 

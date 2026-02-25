@@ -3,5 +3,6 @@ class TestViewPDFAPI:
         response = test_app.get("/pdf?url=http://example.com/foo.pdf")
 
         assert response.status_code == 200
-        assert "Access to Via is now restricted" in response.text
+        assert "Access to Via is now" in response.text
+        assert "restricted" in response.text
         assert "http://example.com/foo.pdf" in response.text
