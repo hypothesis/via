@@ -1,6 +1,7 @@
 from unittest.mock import create_autospec
 
 import pytest
+from h_vialib import ContentType
 from pyramid.httpexceptions import HTTPFound
 
 from via.resources import QueryURLResource
@@ -48,6 +49,66 @@ class TestRouteByContent:
         result = route_by_content(context, pyramid_request)
 
         assert isinstance(result, HTTPFound)
+
+    def test_it_uses_caching_headers_for_pdf(
+        self,
+        context,
+        pyramid_request,
+        secure_link_service,
+        url_details_service,
+        via_client_service,
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        context.url_from_query.return_value = "http://example.com/doc.pdf"
+        pyramid_request.params["url"] = "http://example.com/doc.pdf"
+        url_details_service.get_url_details.return_value = ("application/pdf", 200)
+        via_client_service.content_type.return_value = ContentType.PDF
+        via_client_service.url_for.return_value = "http://via/routed"
+
+        result = route_by_content(context, pyramid_request)
+
+        assert isinstance(result, HTTPFound)
+        assert "max-age=300" in result.headers["Cache-Control"]
+
+    def test_it_returns_no_cache_for_server_errors(
+        self,
+        context,
+        pyramid_request,
+        secure_link_service,
+        url_details_service,
+        via_client_service,
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        context.url_from_query.return_value = "http://example.com/page"
+        pyramid_request.params["url"] = "http://example.com/page"
+        url_details_service.get_url_details.return_value = ("text/html", 500)
+        via_client_service.content_type.return_value = ContentType.HTML
+        via_client_service.url_for.return_value = "http://via/routed"
+
+        result = route_by_content(context, pyramid_request)
+
+        assert isinstance(result, HTTPFound)
+        assert result.headers["Cache-Control"] == "no-cache"
+
+    def test_it_returns_short_cache_for_404(
+        self,
+        context,
+        pyramid_request,
+        secure_link_service,
+        url_details_service,
+        via_client_service,
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        context.url_from_query.return_value = "http://example.com/page"
+        pyramid_request.params["url"] = "http://example.com/page"
+        url_details_service.get_url_details.return_value = ("text/html", 404)
+        via_client_service.content_type.return_value = ContentType.HTML
+        via_client_service.url_for.return_value = "http://via/routed"
+
+        result = route_by_content(context, pyramid_request)
+
+        assert isinstance(result, HTTPFound)
+        assert "max-age=60" in result.headers["Cache-Control"]
 
     @pytest.fixture
     def context(self):

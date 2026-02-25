@@ -1,6 +1,8 @@
 from unittest.mock import create_autospec
 
 import pytest
+from h_vialib.secure import Encryption
+from pyramid.httpexceptions import HTTPNoContent
 
 from via.resources import QueryURLResource
 from via.views.view_pdf import proxy_google_drive_file, proxy_python_pdf, view_pdf
@@ -75,6 +77,17 @@ class TestProxyGoogleDriveFile:
             file_id="test_file_id", resource_key=None
         )
 
+    def test_it_returns_no_content_for_empty_stream(
+        self, pyramid_request, secure_link_service, google_drive_api
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        pyramid_request.matchdict = {"file_id": "test_file_id"}
+        google_drive_api.iter_file.return_value = iter([])
+
+        result = proxy_google_drive_file(pyramid_request)
+
+        assert isinstance(result, HTTPNoContent)
+
 
 class TestProxyPythonPDF:
     def test_it_returns_restricted_page_when_not_lms(
@@ -95,6 +108,24 @@ class TestProxyPythonPDF:
         context = create_autospec(QueryURLResource, spec_set=True, instance=True)
         context.url_from_query.return_value = "https://one-drive.com"
         http_service.stream.return_value = iter([b"pdf content"])
+
+        proxy_python_pdf(context, pyramid_request)
+
+        http_service.stream.assert_called_once()
+
+    def test_it_decrypts_secret_query_params(
+        self, pyramid_request, secure_link_service, http_service
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        context = create_autospec(QueryURLResource, spec_set=True, instance=True)
+        context.url_from_query.return_value = "https://one-drive.com"
+        http_service.stream.return_value = iter([b"pdf content"])
+
+        secret = pyramid_request.registry.settings["via_secret"]
+        encryption = Encryption(secret.encode("utf-8"))
+        pyramid_request.params["via.secret.query"] = encryption.encrypt_dict(
+            {"key": "value"}
+        )
 
         proxy_python_pdf(context, pyramid_request)
 
