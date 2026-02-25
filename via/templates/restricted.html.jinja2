@@ -57,48 +57,7 @@
       color: #bd1c2b;
     }
 
-    .link-visit {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 10px 20px;
-      background-color: #3f3f3f;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 3px;
-      font-size: 15px;
-      font-weight: 600;
-    }
 
-    .link-visit:hover {
-      background-color: #bd1c2b;
-      color: #fff;
-    }
-
-    .resources {
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #e0e0e0;
-    }
-
-    .resources h2 {
-      font-size: 16px;
-      margin: 0 0 12px;
-    }
-
-    .resources ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .resources li {
-      margin-bottom: 8px;
-    }
-
-    .resources li::before {
-      content: "→ ";
-      color: #bd1c2b;
-    }
   </style>
 </head>
 <body>
@@ -117,43 +76,21 @@
     </a>
   </div>
 
-  <h1>Access to Via is now restricted</h1>
+  <h1>Access to Via is now <a href="https://web.hypothes.is/blog/changes-to-via-hypothesis-proxy-server-for-annotation/">restricted</a></h1>
 
   {% if target_url %}
   <p>
-    The page you were trying to annotate:<br>
+    This Via link displayed annotations on this page:<br>
     <a href="{{ target_url }}" class="target-url">{{ target_url }}</a>
-  </p>
-
-  <p>
-    <a href="{{ target_url }}" class="link-visit">Go to page</a>
   </p>
   {% endif %}
 
   <p>
-    You can still view and create annotations in your browser using our
-    Chrome extension, our Bookmarklet, and on sites that embed Hypothesis.
+    You can view annotations on this site and others using our
+    <a href="https://web.hypothes.is/help/installing-the-chrome-extension/">Chrome extension</a>,
+    our <a href="https://web.hypothes.is/help/installing-the-bookmarklet/">Bookmarklet</a>,
+    and on sites that
+    <a href="https://web.hypothes.is/help/embedding-hypothesis-in-websites-and-platforms/">embed Hypothesis</a>.
   </p>
-
-  <div class="resources">
-    <h2>Learn more</h2>
-    <ul>
-      <li>
-        <a href="https://web.hypothes.is/blog/changes-to-via-hypothesis-proxy-server-for-annotation/">
-          Announcement: Changes to Via proxy server
-        </a>
-      </li>
-      <li>
-        <a href="https://web.hypothes.is/help/installing-the-chrome-extension/">
-          Install the Chrome extension
-        </a>
-      </li>
-      <li>
-        <a href="https://web.hypothes.is/help/installing-the-bookmarklet/">
-          Install the Bookmarklet
-        </a>
-      </li>
-    </ul>
-  </div>
 </body>
 </html>
