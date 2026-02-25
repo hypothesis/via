@@ -2,10 +2,12 @@
 
 import re
 
+import importlib_resources
 import pytest
 from h_matchers import Any
 
 from tests.conftest import assert_cache_control
+from via.cache_buster import PathCacheBuster
 
 
 class TestStaticContent:
@@ -48,10 +50,6 @@ class TestStaticContent:
             # The restricted template doesn't reference /static/ paths,
             # so read the salt directly from stdout capture during app startup.
             # Fall back to getting it from the cache buster.
-            import importlib_resources
-
-            from via.cache_buster import PathCacheBuster
-
             static_path = str(importlib_resources.files("via") / "static")
             cache_buster = PathCacheBuster(static_path)
             return cache_buster.salt

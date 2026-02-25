@@ -16,7 +16,9 @@ class TestRouteByContent:
         result = route_by_content(context, pyramid_request)
 
         assert result == {"target_url": context.url_from_query.return_value}
-        assert pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        assert (
+            pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        )
 
     def test_it_returns_restricted_none_url_on_error_when_not_lms(
         self, context, pyramid_request, secure_link_service
@@ -29,7 +31,12 @@ class TestRouteByContent:
         assert result == {"target_url": None}
 
     def test_it_routes_when_lms(
-        self, context, pyramid_request, secure_link_service, url_details_service, via_client_service
+        self,
+        context,
+        pyramid_request,
+        secure_link_service,
+        url_details_service,
+        via_client_service,
     ):
         secure_link_service.request_has_valid_token.return_value = True
         context.url_from_query.return_value = "http://example.com/doc.pdf"

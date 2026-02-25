@@ -8,7 +8,12 @@ from pyramid.httpexceptions import HTTPNoContent
 from pyramid.view import view_config
 
 from via.requests_tools.headers import add_request_headers
-from via.services import CheckmateService, GoogleDriveAPI, HTTPService, SecureLinkService
+from via.services import (
+    CheckmateService,
+    GoogleDriveAPI,
+    HTTPService,
+    SecureLinkService,
+)
 from via.services.pdf_url import PDFURLBuilder
 
 

@@ -1,8 +1,3 @@
-from unittest.mock import create_autospec
-
-import pytest
-
-from via.resources import QueryURLResource
 from via.views.view_video import video, youtube
 
 
@@ -16,7 +11,9 @@ class TestYouTube:
         result = youtube(pyramid_request, url="https://youtube.com/watch?v=abc")
 
         assert result == {"target_url": "https://youtube.com/watch?v=abc"}
-        assert pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        assert (
+            pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        )
 
     def test_it_serves_video_when_lms(
         self, pyramid_request, secure_link_service, youtube_service
@@ -24,7 +21,9 @@ class TestYouTube:
         secure_link_service.request_has_valid_token.return_value = True
         pyramid_request.params["url"] = "https://youtube.com/watch?v=abc123"
         youtube_service.get_video_id.return_value = "abc123"
-        youtube_service.canonical_video_url.return_value = "https://youtube.com/watch?v=abc123"
+        youtube_service.canonical_video_url.return_value = (
+            "https://youtube.com/watch?v=abc123"
+        )
         youtube_service.get_video_title.return_value = "Test Video"
 
         result = youtube(pyramid_request, url="https://youtube.com/watch?v=abc123")
@@ -48,7 +47,9 @@ class TestVideo:
         )
 
         assert result == {"target_url": "https://example.com/video.mp4"}
-        assert pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        assert (
+            pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        )
 
     def test_it_serves_video_when_lms(self, pyramid_request, secure_link_service):
         secure_link_service.request_has_valid_token.return_value = True

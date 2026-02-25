@@ -17,7 +17,9 @@ class TestIndexGet:
         result = views.get()
 
         assert result == {"target_url": None}
-        assert pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        assert (
+            pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        )
 
     def test_it_returns_page_when_lms(
         self, context, pyramid_request, secure_link_service
@@ -56,9 +58,7 @@ class TestIndexPost:
 
         assert result == {"target_url": None}
 
-    def test_it_redirects_when_lms(
-        self, context, pyramid_request, secure_link_service
-    ):
+    def test_it_redirects_when_lms(self, context, pyramid_request, secure_link_service):
         secure_link_service.request_has_valid_token.return_value = True
         context.url_from_query.return_value = "http://example.com/page?q=1"
         views = IndexViews(context, pyramid_request)

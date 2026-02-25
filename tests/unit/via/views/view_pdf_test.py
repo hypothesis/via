@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec, sentinel
+from unittest.mock import create_autospec
 
 import pytest
 
@@ -16,7 +16,9 @@ class TestViewPDF:
         result = view_pdf(context, pyramid_request)
 
         assert result == {"target_url": "http://example.com/foo.pdf"}
-        assert pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        assert (
+            pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        )
 
     def test_it_returns_restricted_none_url_on_error_when_not_lms(
         self, context, pyramid_request, secure_link_service
@@ -29,7 +31,12 @@ class TestViewPDF:
         assert result == {"target_url": None}
 
     def test_it_serves_pdf_when_lms(
-        self, context, pyramid_request, secure_link_service, checkmate_service, pdf_url_builder_service
+        self,
+        context,
+        pyramid_request,
+        secure_link_service,
+        checkmate_service,  # noqa: ARG002
+        pdf_url_builder_service,  # noqa: ARG002
     ):
         secure_link_service.request_has_valid_token.return_value = True
         context.url_from_query.return_value = "http://example.com/foo.pdf"
@@ -62,7 +69,7 @@ class TestProxyGoogleDriveFile:
         pyramid_request.matchdict = {"file_id": "test_file_id"}
         google_drive_api.iter_file.return_value = iter([b"pdf content"])
 
-        result = proxy_google_drive_file(pyramid_request)
+        proxy_google_drive_file(pyramid_request)
 
         google_drive_api.iter_file.assert_called_once_with(
             file_id="test_file_id", resource_key=None
@@ -89,6 +96,6 @@ class TestProxyPythonPDF:
         context.url_from_query.return_value = "https://one-drive.com"
         http_service.stream.return_value = iter([b"pdf content"])
 
-        result = proxy_python_pdf(context, pyramid_request)
+        proxy_python_pdf(context, pyramid_request)
 
         http_service.stream.assert_called_once()
