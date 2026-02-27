@@ -2,12 +2,10 @@
 
 import re
 
-import importlib_resources
 import pytest
 from h_matchers import Any
 
 from tests.conftest import assert_cache_control
-from via.cache_buster import PathCacheBuster
 
 
 class TestStaticContent:
@@ -40,18 +38,12 @@ class TestStaticContent:
     def get_salt(self, test_app):
         """Get the salt value being used by the app.
 
-        We use the proxy route to scrape for the salt since the PDF viewer
-        is now restricted. Any page that includes static assets will work.
+        The most sure fire way to get the exact salt value being used is to
+        actually make a call with immutable assets and then scrape the HTML
+        for the salt value.
         """
-        # Use a URL that will hit the proxy route and return the restricted page
-        response = test_app.get("/https://example.com")
+        response = test_app.get("/pdf?url=http://example.com")
         static_match = re.search("/static/([^/]+)/", response.text)
-        if not static_match:
-            # The restricted template doesn't reference /static/ paths,
-            # so read the salt directly from stdout capture during app startup.
-            # Fall back to getting it from the cache buster.
-            static_path = str(importlib_resources.files("via") / "static")
-            cache_buster = PathCacheBuster(static_path)
-            return cache_buster.salt
+        assert static_match
 
         return static_match.group(1)

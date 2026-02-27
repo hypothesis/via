@@ -1,8 +1,13 @@
+import pytest
+
+from tests.conftest import assert_cache_control
+
+
 class TestViewPDFAPI:
-    def test_pdf_shows_restricted_page(self, test_app):
+    @pytest.mark.usefixtures("checkmate_pass")
+    def test_caching_is_disabled(self, test_app):
         response = test_app.get("/pdf?url=http://example.com/foo.pdf")
 
-        assert response.status_code == 200
-        assert "Access to Via is now" in response.text
-        assert "restricted" in response.text
-        assert "http://example.com/foo.pdf" in response.text
+        assert_cache_control(
+            response.headers, ["max-age=0", "must-revalidate", "no-cache", "no-store"]
+        )
