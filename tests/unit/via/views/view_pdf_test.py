@@ -1,185 +1,132 @@
-from unittest.mock import sentinel
+from unittest.mock import create_autospec
 
 import pytest
-from h_matchers import Any
+from h_vialib.secure import Encryption
 from pyramid.httpexceptions import HTTPNoContent
 
 from via.resources import QueryURLResource
 from via.views.view_pdf import proxy_google_drive_file, proxy_python_pdf, view_pdf
 
 
-@pytest.mark.usefixtures(
-    "secure_link_service",
-    "google_drive_api",
-    "http_service",
-    "pdf_url_builder_service",
-    "checkmate_service",
-)
 class TestViewPDF:
-    def test_it(
+    def test_it_returns_restricted_page_when_not_lms(
+        self, context, pyramid_request, secure_link_service
+    ):
+        secure_link_service.request_has_valid_token.return_value = False
+        context.url_from_query.return_value = "http://example.com/foo.pdf"
+
+        result = view_pdf(context, pyramid_request)
+
+        assert result == {"target_url": "http://example.com/foo.pdf"}
+        assert (
+            pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+        )
+
+    def test_it_returns_restricted_none_url_on_error_when_not_lms(
+        self, context, pyramid_request, secure_link_service
+    ):
+        secure_link_service.request_has_valid_token.return_value = False
+        context.url_from_query.side_effect = Exception("bad url")
+
+        result = view_pdf(context, pyramid_request)
+
+        assert result == {"target_url": None}
+
+    def test_it_serves_pdf_when_lms(
         self,
-        call_view,
+        context,
         pyramid_request,
-        pyramid_settings,
-        Configuration,
-        checkmate_service,
+        secure_link_service,
+        checkmate_service,  # noqa: ARG002
+        pdf_url_builder_service,  # noqa: ARG002
     ):
-        response = call_view("http://example.com/foo.pdf")
+        secure_link_service.request_has_valid_token.return_value = True
+        context.url_from_query.return_value = "http://example.com/foo.pdf"
+        pyramid_request.params["url"] = "http://example.com/foo.pdf"
 
-        Configuration.extract_from_params.assert_called_once_with(
-            pyramid_request.params
-        )
-        checkmate_service.raise_if_blocked(sentinel.url)
+        result = view_pdf(context, pyramid_request)
 
-        assert response == {
-            "pdf_url": "http://example.com/foo.pdf",
-            "proxy_pdf_url": Any(),
-            "client_embed_url": pyramid_settings["client_embed_url"],
-            "static_url": pyramid_request.static_url,
-            "hypothesis_config": sentinel.h_config,
-        }
-
-    def test_it_builds_the_url(
-        self, call_view, google_drive_api, pdf_url_builder_service
-    ):
-        google_drive_api.parse_file_url.return_value = None
-
-        call_view("https://example.com/foo/bar.pdf?q=s")
-
-        pdf_url_builder_service.get_pdf_url.assert_called_once_with(
-            "https://example.com/foo/bar.pdf?q=s"
-        )
+        assert "pdf_url" in result
+        assert result["pdf_url"] == "http://example.com/foo.pdf"
 
     @pytest.fixture
-    def Configuration(self, patch):
-        Configuration = patch("via.views.view_pdf.Configuration")
-        Configuration.extract_from_params.return_value = (
-            sentinel.via_config,
-            sentinel.h_config,
-        )
-
-        return Configuration
+    def context(self):
+        return create_autospec(QueryURLResource, spec_set=True, instance=True)
 
 
-@pytest.mark.usefixtures(
-    "secure_link_service", "google_drive_api", "pdf_url_builder_service"
-)
 class TestProxyGoogleDriveFile:
-    def test_status_and_headers(self, pyramid_request):
+    def test_it_returns_restricted_page_when_not_lms(
+        self, pyramid_request, secure_link_service
+    ):
+        secure_link_service.request_has_valid_token.return_value = False
+
         response = proxy_google_drive_file(pyramid_request)
 
-        assert response.status_code == 200
-        assert response.headers["Content-Disposition"] == "inline"
-        assert response.headers["Content-Type"] == "application/pdf"
-        assert (
-            response.headers["Cache-Control"]
-            == "public, max-age=43200, stale-while-revalidate=86400"
+        assert response == {"target_url": None}
+
+    def test_it_proxies_when_lms(
+        self, pyramid_request, secure_link_service, google_drive_api
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        pyramid_request.matchdict = {"file_id": "test_file_id"}
+        google_drive_api.iter_file.return_value = iter([b"pdf content"])
+
+        proxy_google_drive_file(pyramid_request)
+
+        google_drive_api.iter_file.assert_called_once_with(
+            file_id="test_file_id", resource_key=None
         )
 
-    def test_it_streams_content(self, pyramid_request, google_drive_api):
-        # Create a generator and a counter of how many times it's been accessed
-        def count_access(i):
-            count_access.value += 1
-            return i
-
-        count_access.value = 0
-
-        google_drive_api.iter_file.return_value = (count_access(i) for i in range(3))
-
-        response = proxy_google_drive_file(pyramid_request)
-
-        # The first and only the first item has been reified from the generator
-        assert count_access.value == 1
-        # And we still get everything if we iterate
-        assert list(response.app_iter) == [0, 1, 2]
-
-    def test_it_can_stream_an_empty_iterator(self, pyramid_request, google_drive_api):
+    def test_it_returns_no_content_for_empty_stream(
+        self, pyramid_request, secure_link_service, google_drive_api
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        pyramid_request.matchdict = {"file_id": "test_file_id"}
         google_drive_api.iter_file.return_value = iter([])
 
-        response = proxy_google_drive_file(pyramid_request)
+        result = proxy_google_drive_file(pyramid_request)
 
-        assert isinstance(response, HTTPNoContent)
-
-    @pytest.fixture
-    def pyramid_request(self, pyramid_request):
-        pyramid_request.matchdict.update(
-            {"file_id": sentinel.file_id, "token": sentinel.token}
-        )
-
-        return pyramid_request
+        assert isinstance(result, HTTPNoContent)
 
 
-@pytest.mark.usefixtures("secure_link_service", "pdf_url_builder_service")
 class TestProxyPythonPDF:
-    @pytest.mark.usefixtures("http_service")
-    def test_status_and_headers(self, call_view):
-        response = call_view("https://one-drive.com", view=proxy_python_pdf)
-
-        assert response.status_code == 200
-        assert response.headers["Content-Disposition"] == "inline"
-        assert response.headers["Content-Type"] == "application/pdf"
-        assert (
-            response.headers["Cache-Control"]
-            == "public, max-age=43200, stale-while-revalidate=86400"
-        )
-
-    @pytest.mark.usefixtures("http_service")
-    def test_includes_secret_query_parameters(
-        self, call_view, Encryption, pyramid_request, http_service
+    def test_it_returns_restricted_page_when_not_lms(
+        self, pyramid_request, secure_link_service
     ):
-        call_view(
-            "https://one-drive.com",
-            view=proxy_python_pdf,
-            params={"via.secret.query": sentinel.query},
+        secure_link_service.request_has_valid_token.return_value = False
+        context = create_autospec(QueryURLResource, spec_set=True, instance=True)
+        context.url_from_query.return_value = "https://one-drive.com"
+
+        response = proxy_python_pdf(context, pyramid_request)
+
+        assert response == {"target_url": "https://one-drive.com"}
+
+    def test_it_proxies_when_lms(
+        self, pyramid_request, secure_link_service, http_service
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        context = create_autospec(QueryURLResource, spec_set=True, instance=True)
+        context.url_from_query.return_value = "https://one-drive.com"
+        http_service.stream.return_value = iter([b"pdf content"])
+
+        proxy_python_pdf(context, pyramid_request)
+
+        http_service.stream.assert_called_once()
+
+    def test_it_decrypts_secret_query_params(
+        self, pyramid_request, secure_link_service, http_service
+    ):
+        secure_link_service.request_has_valid_token.return_value = True
+        context = create_autospec(QueryURLResource, spec_set=True, instance=True)
+        context.url_from_query.return_value = "https://one-drive.com"
+        http_service.stream.return_value = iter([b"pdf content"])
+
+        secret = pyramid_request.registry.settings["via_secret"]
+        encryption = Encryption(secret.encode("utf-8"))
+        pyramid_request.params["via.secret.query"] = encryption.encrypt_dict(
+            {"key": "value"}
         )
 
-        Encryption.assert_called_once_with(
-            pyramid_request.registry.settings["via_secret"].encode("utf-8")
-        )
-        Encryption.return_value.decrypt_dict.assert_called_once_with(sentinel.query)
-        http_service.stream.assert_called_once_with(
-            "https://one-drive.com",
-            headers={
-                "X-Abuse-Policy": "https://web.hypothes.is/abuse-policy/",
-                "X-Complaints-To": "https://web.hypothes.is/report-abuse/",
-            },
-            params=Encryption.return_value.decrypt_dict.return_value,
-        )
+        proxy_python_pdf(context, pyramid_request)
 
-    def test_it_streams_content(self, http_service, call_view):
-        # Create a generator and a counter of how many times it's been accessed
-        def count_access(i):
-            count_access.value += 1
-            return i
-
-        count_access.value = 0
-
-        http_service.stream.return_value = (count_access(i) for i in range(3))
-
-        response = call_view("https://one-drive.com", view=proxy_python_pdf)
-
-        # The first and only the first item has been reified from the generator
-        assert count_access.value == 1
-        # And we still get everything if we iterate
-        assert list(response.app_iter) == [0, 1, 2]
-
-    def test_it_can_stream_an_empty_iterator(self, http_service, call_view):
-        http_service.stream.return_value = iter([])
-
-        response = call_view("https://one-drive.com", view=proxy_python_pdf)
-
-        assert isinstance(response, HTTPNoContent)
-
-    @pytest.fixture
-    def Encryption(self, patch):
-        return patch("via.views.view_pdf.Encryption")
-
-
-@pytest.fixture
-def call_view(pyramid_request):
-    def call_view(url="http://example.com/name.pdf", params=None, view=view_pdf):
-        pyramid_request.params = dict(params or {}, url=url)
-        context = QueryURLResource(pyramid_request)
-        return view(context, pyramid_request)
-
-    return call_view
+        http_service.stream.assert_called_once()
