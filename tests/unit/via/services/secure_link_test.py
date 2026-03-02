@@ -50,6 +50,25 @@ class TestSecureLinkService:
 
         service._via_secure_url.verify.assert_not_called()  # noqa: SLF001
 
+    def test_request_has_valid_token(self, service, pyramid_request):
+        assert service.request_has_valid_token(pyramid_request)
+
+    def test_request_has_valid_token_can_fail(self, service, pyramid_request):
+        service._via_secure_url.verify.side_effect = TokenException  # noqa: SLF001
+
+        assert not service.request_has_valid_token(pyramid_request)
+
+    @pytest.mark.usefixtures("with_signed_urls_not_required")
+    def test_request_has_valid_token_always_checks_signature(
+        self, service, pyramid_request
+    ):
+        """request_has_valid_token always verifies the token, even when signed URLs aren't required."""
+        service._via_secure_url.verify.side_effect = TokenException  # noqa: SLF001
+
+        assert not service.request_has_valid_token(pyramid_request)
+
+        service._via_secure_url.verify.assert_called_once_with(pyramid_request.url)  # noqa: SLF001
+
     def test_sign_url(self, service):
         result = service.sign_url(sentinel.url)
 
