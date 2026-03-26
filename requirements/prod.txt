@@ -121,7 +121,7 @@ referencing==0.32.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.5
+requests==2.33.0
     # via
     #   -r prod.in
     #   checkmatelib
@@ -186,8 +186,6 @@ zope-sqlalchemy==3.1
     # via -r prod.in
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==25.3
-    # via -r prod.in
 setuptools==78.1.1
     # via
     #   pyramid
