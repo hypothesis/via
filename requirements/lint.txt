@@ -261,7 +261,7 @@ pycparser==2.21
     #   -r functests.txt
     #   -r tests.txt
     #   cffi
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   -r functests.txt
     #   -r tests.txt
