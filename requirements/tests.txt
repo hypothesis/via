@@ -206,7 +206,7 @@ pyramid-services==2.2
     # via -r prod.txt
 pyramid-tm==2.6
     # via -r prod.txt
-pytest==8.4.2
+pytest==9.0.3
     # via
     #   -r tests.in
     #   pytest-cov
