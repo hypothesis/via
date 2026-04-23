@@ -4,12 +4,30 @@ from h_vialib import ContentType
 from pyramid import httpexceptions as exc
 from pyramid import view
 
-from via.services import URLDetailsService, ViaClientService, has_secure_url_token
+from via.services import SecureLinkService, URLDetailsService, ViaClientService
 
 
-@view.view_config(route_name="route_by_content", decorator=(has_secure_url_token,))
+@view.view_config(
+    route_name="route_by_content",
+    renderer="via:templates/restricted.html.jinja2",
+)
 def route_by_content(context, request):
-    """Routes the request according to the Content-Type header."""
+    """Routes the request according to the Content-Type header.
+
+    If the request comes through LMS (has a valid signed URL), serve the
+    original routing logic. Otherwise, show the restricted access page.
+    """
+    secure_link_service = request.find_service(SecureLinkService)
+
+    if not secure_link_service.request_has_valid_token(request):
+        try:
+            target_url = context.url_from_query()
+        except Exception:  # noqa: BLE001
+            target_url = None
+
+        request.override_renderer = "via:templates/restricted.html.jinja2"
+        return {"target_url": target_url}
+
     url = context.url_from_query()
 
     mime_type, status_code = request.find_service(URLDetailsService).get_url_details(
@@ -32,22 +50,15 @@ def route_by_content(context, request):
 
 def _cache_headers_for_http(status_code):
     if status_code == 404:
-        # 404 - A rare case we may want to handle differently, as unusually
-        # for a 4xx error, trying again can help if it becomes available
         return _caching_headers(max_age=60)
 
     if status_code < 500:
-        # 2xx - OK
-        # 3xx - we follow it, so this shouldn't happen
-        # 4xx - no point in trying again quickly
         return _caching_headers(max_age=60)
 
-    # 5xx - Errors should not be cached
     return {"Cache-Control": "no-cache"}
 
 
 def _caching_headers(max_age, stale_while_revalidate=86400):
-    # I tried using webob.CacheControl for this but it's total rubbish
     header = (
         f"public, max-age={max_age}, stale-while-revalidate={stale_while_revalidate}"
     )
