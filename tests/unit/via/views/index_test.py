@@ -1,102 +1,60 @@
-from unittest.mock import create_autospec
-
 import pytest
-from pyramid.httpexceptions import HTTPBadRequest, HTTPFound, HTTPNotFound
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 
 from tests.unit.matchers import temporary_redirect_to
 from via.resources import QueryURLResource
+from via.views.exceptions import BadURL
 from via.views.index import IndexViews
 
 
-class TestIndexGet:
-    def test_it_returns_restricted_page_when_not_lms(
-        self, context, pyramid_request, secure_link_service
-    ):
-        secure_link_service.request_has_valid_token.return_value = False
-        views = IndexViews(context, pyramid_request)
+class TestIndexViews:
+    def test_get(self, views):
+        assert views.get() == {}
 
-        result = views.get()
+    def test_post(self, views, pyramid_request):
+        pyramid_request.params["url"] = "//site.org?q1=value1&q2=value2"
 
-        assert result == {"target_url": None}
+        redirect = views.post()
+
+        assert isinstance(redirect, HTTPFound)
         assert (
-            pyramid_request.override_renderer == "via:templates/restricted.html.jinja2"
+            redirect.location
+            == "http://example.com/https://site.org?q1=value1&q2=value2"
         )
 
-    def test_it_returns_page_when_lms(
-        self, context, pyramid_request, secure_link_service
-    ):
-        secure_link_service.request_has_valid_token.return_value = True
-        views = IndexViews(context, pyramid_request)
+    def test_post_with_no_url(self, views, pyramid_request):
+        assert "url" not in pyramid_request.params
 
-        result = views.get()
+        redirect = views.post()
 
-        assert result == {}
-
-    def test_it_returns_not_found_when_front_page_disabled(
-        self, context, pyramid_request, secure_link_service
-    ):
-        secure_link_service.request_has_valid_token.return_value = True
-        pyramid_request.registry.settings["enable_front_page"] = False
-        views = IndexViews(context, pyramid_request)
-
-        result = views.get()
-
-        assert isinstance(result, HTTPNotFound)
-
-    @pytest.fixture
-    def context(self):
-        return create_autospec(QueryURLResource, spec_set=True, instance=True)
-
-
-class TestIndexPost:
-    def test_it_returns_restricted_page_when_not_lms(
-        self, context, pyramid_request, secure_link_service
-    ):
-        secure_link_service.request_has_valid_token.return_value = False
-        views = IndexViews(context, pyramid_request)
-
-        result = views.post()
-
-        assert result == {"target_url": None}
-
-    def test_it_returns_not_found_when_front_page_disabled(
-        self, context, pyramid_request, secure_link_service
-    ):
-        secure_link_service.request_has_valid_token.return_value = True
-        pyramid_request.registry.settings["enable_front_page"] = False
-        views = IndexViews(context, pyramid_request)
-
-        result = views.post()
-
-        assert isinstance(result, HTTPNotFound)
-
-    def test_it_redirects_when_lms(self, context, pyramid_request, secure_link_service):
-        secure_link_service.request_has_valid_token.return_value = True
-        context.url_from_query.return_value = "http://example.com/page?q=1"
-        views = IndexViews(context, pyramid_request)
-
-        result = views.post()
-
-        assert isinstance(result, HTTPFound)
-        assert result == temporary_redirect_to(
-            pyramid_request.route_url(
-                route_name="proxy",
-                url="http://example.com/page",
-                _query="q=1",
-            )
+        assert redirect == temporary_redirect_to(
+            pyramid_request.route_url(route_name="index")
         )
 
-    def test_it_redirects_to_index_on_bad_url(
-        self, context, pyramid_request, secure_link_service
-    ):
-        secure_link_service.request_has_valid_token.return_value = True
-        context.url_from_query.side_effect = HTTPBadRequest("bad url")
-        views = IndexViews(context, pyramid_request)
+    def test_post_raises_if_url_invalid(self, views, pyramid_request):
+        # Set a `url` that causes `urlparse` to throw.
+        pyramid_request.params["url"] = "http://::12.34.56.78]/"
 
-        result = views.post()
+        with pytest.raises(BadURL):
+            views.post()
 
-        assert isinstance(result, HTTPFound)
+    @pytest.mark.usefixtures("disable_front_page")
+    @pytest.mark.parametrize("view", ["get", "post"])
+    def test_it_404s_if_the_front_page_isnt_enabled(self, view, views):
+        view = getattr(views, view)
+
+        response = view()
+
+        assert isinstance(response, HTTPNotFound)
 
     @pytest.fixture
-    def context(self):
-        return create_autospec(QueryURLResource, spec_set=True, instance=True)
+    def disable_front_page(self, pyramid_settings):
+        pyramid_settings["enable_front_page"] = False
+
+    @pytest.fixture
+    def views(self, context, pyramid_request):
+        return IndexViews(context, pyramid_request)
+
+    @pytest.fixture
+    def context(self, pyramid_request):
+        return QueryURLResource(pyramid_request)

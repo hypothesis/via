@@ -3,8 +3,6 @@ from urllib.parse import urlparse
 from pyramid.httpexceptions import HTTPBadRequest, HTTPFound, HTTPNotFound
 from pyramid.view import view_config, view_defaults
 
-from via.services import SecureLinkService
-
 
 @view_defaults(route_name="index")
 class IndexViews:
@@ -13,19 +11,8 @@ class IndexViews:
         self.request = request
         self.enabled = request.registry.settings["enable_front_page"]
 
-    def _is_lms_request(self):
-        """Check if request comes from LMS (has a valid signed URL)."""
-        return self.request.find_service(SecureLinkService).request_has_valid_token(
-            self.request
-        )
-
     @view_config(request_method="GET", renderer="via:templates/index.html.jinja2")
     def get(self):
-        # Allow LMS access, otherwise show restricted page
-        if not self._is_lms_request():
-            self.request.override_renderer = "via:templates/restricted.html.jinja2"
-            return {"target_url": None}
-
         if not self.enabled:
             return HTTPNotFound()
 
@@ -35,19 +22,23 @@ class IndexViews:
 
     @view_config(request_method="POST")
     def post(self):
-        # Allow LMS access, otherwise show restricted page
-        if not self._is_lms_request():
-            self.request.override_renderer = "via:templates/restricted.html.jinja2"
-            return {"target_url": None}
-
         if not self.enabled:
             return HTTPNotFound()
 
         try:
             url = self.context.url_from_query()
         except HTTPBadRequest:
+            # If we don't get a URL redirect the user to the index page
             return HTTPFound(self.request.route_url(route_name="index"))
 
+        # In order to replicate the URL structure from original Via we need to
+        # create a path like this:
+        # http://via.host/http://proxied.site?query=1
+        # This means we need to pop off the query string and then add it
+        # separately from the URL, otherwise we'll get the query string encoded
+        # inside the URL portion of the path.
+
+        # `context.url_from_query` protects us from parsing failing
         parsed = urlparse(url)
         url_without_query = parsed._replace(query="", fragment="").geturl()
 

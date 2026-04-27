@@ -44,20 +44,6 @@ class SecureLinkService:
 
         return True
 
-    def request_has_valid_token(self, request) -> bool:
-        """Check whether a request has a valid signed URL token.
-
-        Unlike request_is_valid, this ALWAYS checks for a valid token
-        regardless of whether signed URLs are required. Use this to
-        distinguish LMS requests from public requests.
-        """
-        try:
-            self._via_secure_url.verify(request.url)
-        except TokenException:
-            return False
-
-        return True
-
     def sign_url(self, url):
         """Get a signed URL (if URL signing is enabled)."""
 

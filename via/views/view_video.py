@@ -7,18 +7,7 @@ from webargs.pyramidparser import use_kwargs
 
 from via.exceptions import BadURL
 from via.security import ViaSecurityPolicy
-from via.services import SecureLinkService, YouTubeService
-
-
-def _is_lms_request(request):
-    """Check if request comes from LMS (has a valid signed URL)."""
-    return request.find_service(SecureLinkService).request_has_valid_token(request)
-
-
-def _restricted_response(request, target_url=None):
-    """Return the restricted access page response."""
-    request.override_renderer = "via:templates/restricted.html.jinja2"
-    return {"target_url": target_url}
+from via.services import YouTubeService
 
 
 def _api_headers(request):
@@ -32,14 +21,6 @@ def _api_headers(request):
     {"url": fields.Url(required=True)}, location="query", unknown=marshmallow.INCLUDE
 )
 def youtube(request, url, **kwargs):
-    """YouTube video viewer.
-
-    If the request comes through LMS (valid signed URL), serve the viewer.
-    Otherwise, show the restricted access page.
-    """
-    if not _is_lms_request(request):
-        return _restricted_response(request, target_url=url)
-
     youtube_service = request.find_service(YouTubeService)
 
     if not youtube_service.enabled:
@@ -55,6 +36,7 @@ def youtube(request, url, **kwargs):
     _, client_config = Configuration.extract_from_params(kwargs)
 
     return {
+        # Common video player fields
         "client_embed_url": request.registry.settings["client_embed_url"],
         "client_config": client_config,
         "player": "youtube",
@@ -68,6 +50,7 @@ def youtube(request, url, **kwargs):
                 "headers": _api_headers(request),
             }
         },
+        # Fields specific to YouTube video player
         "video_id": video_id,
     }
 
@@ -88,15 +71,6 @@ def youtube(request, url, **kwargs):
     unknown=marshmallow.INCLUDE,
 )
 def video(request, **kwargs):
-    """HTML video viewer.
-
-    If the request comes through LMS (valid signed URL), serve the viewer.
-    Otherwise, show the restricted access page.
-    """
-    if not _is_lms_request(request):
-        target_url = kwargs.get("url")
-        return _restricted_response(request, target_url=target_url)
-
     allow_download = kwargs.get("allow_download", True)
     url = kwargs["url"]
     media_url = kwargs.get("media_url")
@@ -107,6 +81,7 @@ def video(request, **kwargs):
     _, client_config = Configuration.extract_from_params(kwargs)
 
     return {
+        # Common video player fields
         "client_embed_url": request.registry.settings["client_embed_url"],
         "client_config": client_config,
         "player": "html-video",
@@ -122,6 +97,7 @@ def video(request, **kwargs):
                 "headers": _api_headers(request),
             },
         },
+        # Fields specific to HTML video player.
         "allow_download": allow_download,
         "video_src": media_url,
     }
