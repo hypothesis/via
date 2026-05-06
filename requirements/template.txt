@@ -54,7 +54,7 @@ python-slugify==8.0.1
     # via cookiecutter
 pyyaml==6.0.1
     # via cookiecutter
-requests==2.32.5
+requests==2.33.0
     # via cookiecutter
 rich==13.7.0
     # via cookiecutter
@@ -73,8 +73,6 @@ zipp==3.19.1
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
-    # via
-    #   -r template.in
-    #   pip-tools
+    # via pip-tools
 setuptools==78.1.1
     # via pip-tools
