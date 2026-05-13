@@ -307,7 +307,7 @@ pyramid-tm==2.6
     # via
     #   -r functests.txt
     #   -r tests.txt
-pytest==8.4.2
+pytest==9.0.3
     # via
     #   -r functests.txt
     #   -r tests.txt
