@@ -30,7 +30,7 @@ def pyramid_settings():
         "data_directory": "tests/data_directory",
         "dev": False,
         "youtube_transcripts": True,
-        "api_jwt_secret": "secret",
+        "api_jwt_secret": "test_api_jwt_secret_at_least_32_bytes_long",
         "youtube_api_key": "test_youtube_api_key",
         "supadata_api_key": "test_supadata_api_key",
         "database_url": environ["DATABASE_URL"],
