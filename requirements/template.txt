@@ -22,10 +22,8 @@ click==8.1.7
     #   pip-tools
 cookiecutter==2.6.0
     # via -r template.in
-idna==3.7
+idna==3.15
     # via requests
-importlib-metadata==7.0.1
-    # via pip-sync-faster
 jinja2==3.1.6
     # via cookiecutter
 markdown-it-py==3.0.0
@@ -68,8 +66,6 @@ urllib3==2.7.0
     # via requests
 wheel==0.42.0
     # via pip-tools
-zipp==3.19.1
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==25.3
