@@ -56,6 +56,8 @@ def httpretty_():
     """
     httpretty.enable(allow_net_connect=False)
 
+    httpretty.core.fakesock.socket.shutdown = None
+
     yield
 
     httpretty.disable()
