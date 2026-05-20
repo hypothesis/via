@@ -85,7 +85,7 @@ class TestSecureLinkService:
 
     @pytest.fixture
     def service(self):
-        return SecureLinkService(secret="not_a_secret", signed_urls_required=True)  # noqa: S106
+        return SecureLinkService(secret="not_a_real_secret", signed_urls_required=True)  # noqa: S106
 
     @pytest.fixture
     def with_signed_urls_not_required(self, service):

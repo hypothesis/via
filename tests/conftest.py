@@ -21,7 +21,7 @@ def pyramid_settings():
         "via_html_url": "https://viahtml.hypothes.is/proxy",
         "checkmate_url": "http://localhost:9099",
         "nginx_secure_link_secret": "not_a_secret",
-        "via_secret": "not_a_secret",
+        "via_secret": "not_a_real_secret",
         "signed_urls_required": False,
         "checkmate_api_key": "dev_api_key",
         "checkmate_ignore_reasons": None,
