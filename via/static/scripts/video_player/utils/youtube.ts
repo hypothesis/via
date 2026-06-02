@@ -1,3 +1,5 @@
+/// <reference types="youtube" />
+
 /**
  * Load the YouTube IFrame Player API.
  *
