@@ -272,7 +272,7 @@ waitress==3.0.2
     # via webtest
 webargs==8.7.0
     # via -r prod.txt
-webob==1.8.8
+webob==1.8.10
     # via
     #   -r prod.txt
     #   h-vialib
