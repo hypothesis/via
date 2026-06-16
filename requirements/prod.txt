@@ -22,7 +22,7 @@ charset-normalizer==3.3.2
     # via requests
 checkmatelib==1.0.18
     # via -r prod.in
-cryptography==46.0.7
+cryptography==48.0.1
     # via joserfc
 google-auth==2.26.2
     # via google-auth-oauthlib
