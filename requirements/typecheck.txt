@@ -158,7 +158,7 @@ pycparser==2.21
     # via
     #   -r prod.txt
     #   cffi
-pyjwt==2.12.0
+pyjwt==2.13.0
     # via -r prod.txt
 pyproject-hooks==1.1.0
     # via
