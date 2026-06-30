@@ -38,9 +38,9 @@
     "@hypothesis/frontend-testing": "^1.8.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/youtube": "^0.1.2",
-    "@vitest/browser": "^4.1.8",
-    "@vitest/browser-playwright": "^4.1.7",
-    "@vitest/coverage-istanbul": "^4.1.7",
+    "@vitest/browser": "^4.1.9",
+    "@vitest/browser-playwright": "^4.1.9",
+    "@vitest/coverage-istanbul": "^4.1.9",
     "@vitest/eslint-plugin": "^1.6.18",
     "babel-plugin-istanbul": "^7.0.0",
     "babel-plugin-mockable-imports": "^2.0.1",
@@ -58,7 +58,7 @@
     "sinon": "^19.0.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.53.1",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.9"
   },
   "prettier": {
     "arrowParens": "avoid",
