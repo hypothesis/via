@@ -360,7 +360,7 @@ six==1.16.0
     #   -r functests.txt
     #   -r tests.txt
     #   python-dateutil
-soupsieve==2.5
+soupsieve==2.8.4
     # via
     #   -r functests.txt
     #   beautifulsoup4
