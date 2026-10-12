@@ -2,6 +2,20 @@ import { mount } from 'enzyme';
 
 import HTMLVideoPlayer from '../HTMLVideoPlayer';
 
+function waitForTrackLoad(trackEl) {
+  if (trackEl.readyState === HTMLTrackElement.LOADED) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve, reject) => {
+    trackEl.addEventListener('load', resolve, { once: true });
+    trackEl.addEventListener(
+      'error',
+      () => reject(new Error('Caption track failed to load')),
+      { once: true },
+    );
+  });
+}
+
 describe('HTMLVideoPlayer', () => {
   let players;
 
@@ -72,7 +86,7 @@ describe('HTMLVideoPlayer', () => {
     assert.calledWith(currentTimeSpy.set, 5);
   });
 
-  it('should populate caption track', () => {
+  it('should populate caption track', async () => {
     const transcript = {
       segments: [
         {
@@ -97,13 +111,43 @@ describe('HTMLVideoPlayer', () => {
     const video = wrapper.find('video').getDOMNode();
     assert.equal(video.textTracks.length, 1);
 
+    // The captions are loaded via `src` so that the track counts as a real,
+    // toggleable caption track in the browser's native controls.
+    const trackEl = wrapper.find('track').getDOMNode();
+    assert.match(trackEl.src, /^blob:/);
+
     const track = video.textTracks[0];
 
     // The `cues` property returns `null` unless the mode is set, although the
     // browser may still show the track.
     track.mode = 'showing';
 
+    await waitForTrackLoad(trackEl);
+    assert.equal(trackEl.readyState, HTMLTrackElement.LOADED);
     assert.equal(track.cues.length, 3);
+    assert.deepEqual(
+      Array.from(track.cues).map(cue => cue.text),
+      ['One', 'Two', 'Three'],
+    );
+  });
+
+  it('should remove caption track source on unmount', () => {
+    const revokeObjectURL = sinon.spy(URL, 'revokeObjectURL');
+    try {
+      const wrapper = createPlayer({
+        videoURL: 'test-video.mp4',
+        transcript: { segments: [{ start: 1, duration: 3, text: 'One' }] },
+      });
+      const trackEl = wrapper.find('track').getDOMNode();
+      const vttURL = trackEl.src;
+
+      wrapper.unmount();
+
+      assert.isFalse(trackEl.hasAttribute('src'));
+      assert.calledWith(revokeObjectURL, vttURL);
+    } finally {
+      revokeObjectURL.restore();
+    }
   });
 
   [true, false].forEach(allowDownload => {

@@ -2,7 +2,7 @@ import { AspectRatio } from '@hypothesis/frontend-shared';
 import { useEffect, useRef } from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
-import { transcriptToCues } from '../utils/transcript';
+import { transcriptToVTT } from '../utils/transcript';
 
 /**
  * Common props for different video player components.
@@ -97,6 +97,10 @@ export default function HTMLVideoPlayer({
   }, [time]);
 
   // Populate caption track for the video.
+  //
+  // The transcript is loaded through the track's `src` rather than added as
+  // cues with `addCue`. A `<track>` with no `src` fails to load, and the
+  // browser's native controls then hide the captions toggle.
   const trackRef = useRef<HTMLTrackElement>(null);
   useEffect(() => {
     const trackEl = trackRef.current;
@@ -104,15 +108,13 @@ export default function HTMLVideoPlayer({
       return () => {};
     }
 
-    const cues = transcriptToCues(transcript);
-    for (const cue of cues) {
-      trackEl.track.addCue(cue);
-    }
+    const vtt = new Blob([transcriptToVTT(transcript)], { type: 'text/vtt' });
+    const vttURL = URL.createObjectURL(vtt);
+    trackEl.src = vttURL;
 
     return () => {
-      for (const cue of cues) {
-        trackEl.track.removeCue(cue);
-      }
+      trackEl.removeAttribute('src');
+      URL.revokeObjectURL(vttURL);
     };
   }, [transcript]);
 
@@ -140,7 +142,7 @@ export default function HTMLVideoPlayer({
         onPlay={() => onPlayingChanged?.(true)}
         onPause={() => onPlayingChanged?.(false)}
       >
-        <track default kind="captions" ref={trackRef} />
+        <track default kind="captions" label="Captions" ref={trackRef} />
       </video>
     </AspectRatio>
   );
