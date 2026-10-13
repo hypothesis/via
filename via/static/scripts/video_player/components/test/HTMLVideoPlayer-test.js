@@ -2,6 +2,20 @@ import { mount } from 'enzyme';
 
 import HTMLVideoPlayer from '../HTMLVideoPlayer';
 
+function waitForTrackLoad(trackEl) {
+  if (trackEl.readyState === HTMLTrackElement.LOADED) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve, reject) => {
+    trackEl.addEventListener('load', resolve, { once: true });
+    trackEl.addEventListener(
+      'error',
+      () => reject(new Error('Caption track failed to load')),
+      { once: true },
+    );
+  });
+}
+
 describe('HTMLVideoPlayer', () => {
   let players;
 
@@ -72,7 +86,7 @@ describe('HTMLVideoPlayer', () => {
     assert.calledWith(currentTimeSpy.set, 5);
   });
 
-  it('should populate caption track', () => {
+  it('should populate caption track', async () => {
     const transcript = {
       segments: [
         {
@@ -97,13 +111,56 @@ describe('HTMLVideoPlayer', () => {
     const video = wrapper.find('video').getDOMNode();
     assert.equal(video.textTracks.length, 1);
 
+    // The track is rendered with a loadable `src` from the start. Chrome only
+    // shows the captions toggle for tracks that exist when the video
+    // initializes and never fail to load.
+    const trackEl = wrapper.find('track').getDOMNode();
+    assert.match(trackEl.getAttribute('src'), /^blob:/);
+
     const track = video.textTracks[0];
 
     // The `cues` property returns `null` unless the mode is set, although the
     // browser may still show the track.
     track.mode = 'showing';
 
+    await waitForTrackLoad(trackEl);
+    assert.equal(trackEl.readyState, HTMLTrackElement.LOADED);
     assert.equal(track.cues.length, 3);
+    assert.deepEqual(
+      Array.from(track.cues).map(cue => cue.text),
+      ['One', 'Two', 'Three'],
+    );
+  });
+
+  it('should render an empty caption track without a transcript', async () => {
+    const wrapper = createPlayer({ videoURL: 'test-video.mp4' });
+    const video = wrapper.find('video').getDOMNode();
+    const trackEl = wrapper.find('track').getDOMNode();
+    assert.match(trackEl.getAttribute('src'), /^blob:/);
+
+    const track = video.textTracks[0];
+    track.mode = 'showing';
+
+    await waitForTrackLoad(trackEl);
+    assert.equal(trackEl.readyState, HTMLTrackElement.LOADED);
+    assert.equal(track.cues.length, 0);
+  });
+
+  it('should revoke caption track URL on unmount', () => {
+    const revokeObjectURL = sinon.spy(URL, 'revokeObjectURL');
+    try {
+      const wrapper = createPlayer({
+        videoURL: 'test-video.mp4',
+        transcript: { segments: [{ start: 1, duration: 3, text: 'One' }] },
+      });
+      const vttURL = wrapper.find('track').getDOMNode().src;
+
+      wrapper.unmount();
+
+      assert.calledWith(revokeObjectURL, vttURL);
+    } finally {
+      revokeObjectURL.restore();
+    }
   });
 
   [true, false].forEach(allowDownload => {
