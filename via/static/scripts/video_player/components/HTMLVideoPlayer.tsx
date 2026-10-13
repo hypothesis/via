@@ -96,13 +96,8 @@ export default function HTMLVideoPlayer({
     video.currentTime = time;
   }, [time]);
 
-  // Caption track for the video, as a WebVTT blob URL.
-  //
-  // Chrome's native controls decide whether to show the captions toggle when
-  // the `<video>` initializes, and hide it if a track fails to load. They
-  // don't revisit that decision when a track loads later or is added later.
-  // So the track must exist from the first render, and always have a `src`
-  // that loads: an empty WebVTT document until the transcript is available.
+  // Caption track as a WebVTT blob URL. It must have a loadable `src` from
+  // the first render, or Chrome's native controls hide the captions toggle.
   const captionsURL = useMemo(() => {
     const vtt = transcript ? transcriptToVTT(transcript) : 'WEBVTT\n';
     return URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
