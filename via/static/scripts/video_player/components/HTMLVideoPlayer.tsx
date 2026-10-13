@@ -1,5 +1,5 @@
 import { AspectRatio } from '@hypothesis/frontend-shared';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useMemo, useRef } from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
 import { transcriptToVTT } from '../utils/transcript';
@@ -96,27 +96,20 @@ export default function HTMLVideoPlayer({
     video.currentTime = time;
   }, [time]);
 
-  // Populate caption track for the video.
+  // Caption track for the video, as a WebVTT blob URL.
   //
-  // The transcript is loaded through the track's `src` rather than added as
-  // cues with `addCue`. A `<track>` with no `src` fails to load, and the
-  // browser's native controls then hide the captions toggle.
-  const trackRef = useRef<HTMLTrackElement>(null);
-  useEffect(() => {
-    const trackEl = trackRef.current;
-    if (!trackEl || !transcript) {
-      return () => {};
-    }
-
-    const vtt = new Blob([transcriptToVTT(transcript)], { type: 'text/vtt' });
-    const vttURL = URL.createObjectURL(vtt);
-    trackEl.src = vttURL;
-
-    return () => {
-      trackEl.removeAttribute('src');
-      URL.revokeObjectURL(vttURL);
-    };
+  // Chrome's native controls decide whether to show the captions toggle when
+  // the `<video>` initializes, and hide it if a track fails to load. They
+  // don't revisit that decision when a track loads later or is added later.
+  // So the track must exist from the first render, and always have a `src`
+  // that loads: an empty WebVTT document until the transcript is available.
+  const captionsURL = useMemo(() => {
+    const vtt = transcript ? transcriptToVTT(transcript) : 'WEBVTT\n';
+    return URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
   }, [transcript]);
+  useEffect(() => {
+    return () => URL.revokeObjectURL(captionsURL);
+  }, [captionsURL]);
 
   const controlsList = !allowDownload ? 'nodownload' : undefined;
 
@@ -142,7 +135,7 @@ export default function HTMLVideoPlayer({
         onPlay={() => onPlayingChanged?.(true)}
         onPause={() => onPlayingChanged?.(false)}
       >
-        <track default kind="captions" label="Captions" ref={trackRef} />
+        <track default kind="captions" label="Captions" src={captionsURL} />
       </video>
     </AspectRatio>
   );

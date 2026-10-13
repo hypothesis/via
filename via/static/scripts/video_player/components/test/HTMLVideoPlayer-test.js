@@ -111,10 +111,11 @@ describe('HTMLVideoPlayer', () => {
     const video = wrapper.find('video').getDOMNode();
     assert.equal(video.textTracks.length, 1);
 
-    // The captions are loaded via `src` so that the track counts as a real,
-    // toggleable caption track in the browser's native controls.
+    // The track is rendered with a loadable `src` from the start. Chrome only
+    // shows the captions toggle for tracks that exist when the video
+    // initializes and never fail to load.
     const trackEl = wrapper.find('track').getDOMNode();
-    assert.match(trackEl.src, /^blob:/);
+    assert.match(trackEl.getAttribute('src'), /^blob:/);
 
     const track = video.textTracks[0];
 
@@ -131,19 +132,31 @@ describe('HTMLVideoPlayer', () => {
     );
   });
 
-  it('should remove caption track source on unmount', () => {
+  it('should render an empty caption track without a transcript', async () => {
+    const wrapper = createPlayer({ videoURL: 'test-video.mp4' });
+    const video = wrapper.find('video').getDOMNode();
+    const trackEl = wrapper.find('track').getDOMNode();
+    assert.match(trackEl.getAttribute('src'), /^blob:/);
+
+    const track = video.textTracks[0];
+    track.mode = 'showing';
+
+    await waitForTrackLoad(trackEl);
+    assert.equal(trackEl.readyState, HTMLTrackElement.LOADED);
+    assert.equal(track.cues.length, 0);
+  });
+
+  it('should revoke caption track URL on unmount', () => {
     const revokeObjectURL = sinon.spy(URL, 'revokeObjectURL');
     try {
       const wrapper = createPlayer({
         videoURL: 'test-video.mp4',
         transcript: { segments: [{ start: 1, duration: 3, text: 'One' }] },
       });
-      const trackEl = wrapper.find('track').getDOMNode();
-      const vttURL = trackEl.src;
+      const vttURL = wrapper.find('track').getDOMNode().src;
 
       wrapper.unmount();
 
-      assert.isFalse(trackEl.hasAttribute('src'));
       assert.calledWith(revokeObjectURL, vttURL);
     } finally {
       revokeObjectURL.restore();
