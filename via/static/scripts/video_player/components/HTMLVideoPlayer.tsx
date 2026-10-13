@@ -98,6 +98,8 @@ export default function HTMLVideoPlayer({
 
   // Caption track as a WebVTT blob URL. It must have a loadable `src` from
   // the first render, or Chrome's native controls hide the captions toggle.
+  // Hence the URL is created in the memo rather than an effect, and revoked
+  // in the cleanup below.
   const captionsURL = useMemo(() => {
     const vtt = transcript ? transcriptToVTT(transcript) : 'WEBVTT\n';
     return URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
