@@ -43,13 +43,14 @@ function formatVTTTimestamp(time: number): string {
 }
 
 /**
- * Escape segment text for use as a WebVTT cue payload.
+ * Prepare segment text for use as a WebVTT cue payload.
  *
- * `&`, `<` and `>` are markup in cue text, and a blank line ends the cue.
+ * The text comes from a WebVTT or SRT file, so `&` already appears as a
+ * WebVTT character reference where needed and must not be escaped again.
+ * `<` and `>` would start a cue tag, and a blank line ends the cue.
  */
 function escapeVTTText(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .split(/\r?\n/)

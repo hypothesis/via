@@ -148,9 +148,9 @@ describe('transcriptToVTT', () => {
     );
   });
 
-  it('escapes markup and blank lines in cue text', () => {
+  it('escapes tag markup and blank lines in cue text', () => {
     const segments = [
-      { start: 0, duration: 1, text: 'A & B <c> -->\n\n  second line  \n' },
+      { start: 0, duration: 1, text: 'A <c> -->\n\n  second line  \n' },
     ];
 
     const vtt = transcriptToVTT({ segments });
@@ -161,11 +161,19 @@ describe('transcriptToVTT', () => {
         'WEBVTT',
         '',
         '00:00:00.000 --> 00:00:01.000',
-        'A &amp; B &lt;c&gt; --&gt;',
+        'A &lt;c&gt; --&gt;',
         'second line',
         '',
       ].join('\n'),
     );
+  });
+
+  it('does not escape ampersands, which caption files already encode', () => {
+    const segments = [{ start: 0, duration: 1, text: 'Tom &amp; Jerry & co' }];
+
+    const vtt = transcriptToVTT({ segments });
+
+    assert.include(vtt, '\nTom &amp; Jerry & co\n');
   });
 
   it('returns a header-only document for an empty transcript', () => {

@@ -101,7 +101,7 @@ export default function HTMLVideoPlayer({
   // Hence the URL is created in the memo rather than an effect, and revoked
   // in the cleanup below.
   const captionsURL = useMemo(() => {
-    const vtt = transcript ? transcriptToVTT(transcript) : 'WEBVTT\n';
+    const vtt = transcriptToVTT(transcript ?? { segments: [] });
     return URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
   }, [transcript]);
   useEffect(() => {
