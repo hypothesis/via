@@ -1,8 +1,8 @@
 import { AspectRatio } from '@hypothesis/frontend-shared';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useMemo, useRef } from 'preact/hooks';
 
 import type { TranscriptData } from '../utils/transcript';
-import { transcriptToCues } from '../utils/transcript';
+import { transcriptToVTT } from '../utils/transcript';
 
 /**
  * Common props for different video player components.
@@ -96,25 +96,17 @@ export default function HTMLVideoPlayer({
     video.currentTime = time;
   }, [time]);
 
-  // Populate caption track for the video.
-  const trackRef = useRef<HTMLTrackElement>(null);
-  useEffect(() => {
-    const trackEl = trackRef.current;
-    if (!trackEl || !transcript) {
-      return () => {};
-    }
-
-    const cues = transcriptToCues(transcript);
-    for (const cue of cues) {
-      trackEl.track.addCue(cue);
-    }
-
-    return () => {
-      for (const cue of cues) {
-        trackEl.track.removeCue(cue);
-      }
-    };
+  // Caption track as a WebVTT blob URL. It must have a loadable `src` from
+  // the first render, or Chrome's native controls hide the captions toggle.
+  // Hence the URL is created in the memo rather than an effect, and revoked
+  // in the cleanup below.
+  const captionsURL = useMemo(() => {
+    const vtt = transcriptToVTT(transcript ?? { segments: [] });
+    return URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
   }, [transcript]);
+  useEffect(() => {
+    return () => URL.revokeObjectURL(captionsURL);
+  }, [captionsURL]);
 
   const controlsList = !allowDownload ? 'nodownload' : undefined;
 
@@ -140,7 +132,7 @@ export default function HTMLVideoPlayer({
         onPlay={() => onPlayingChanged?.(true)}
         onPause={() => onPlayingChanged?.(false)}
       >
-        <track default kind="captions" ref={trackRef} />
+        <track default kind="captions" label="Captions" src={captionsURL} />
       </video>
     </AspectRatio>
   );

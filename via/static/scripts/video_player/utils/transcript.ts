@@ -28,15 +28,49 @@ export type TranscriptData = {
   segments: Segment[];
 };
 
+function pad(value: number, width = 2): string {
+  return value.toString().padStart(width, '0');
+}
+
+/** Format a time in seconds as a WebVTT timestamp (`hh:mm:ss.ttt`). */
+function formatVTTTimestamp(time: number): string {
+  const totalMs = Math.round(time * 1000);
+  const hours = Math.floor(totalMs / 3_600_000);
+  const mins = Math.floor(totalMs / 60_000) % 60;
+  const secs = Math.floor(totalMs / 1000) % 60;
+  const ms = totalMs % 1000;
+  return `${pad(hours)}:${pad(mins)}:${pad(secs)}.${pad(ms, 3)}`;
+}
+
 /**
- * Generate a {@link VTTCue} list from a transcript.
+ * Prepare segment text for use as a WebVTT cue payload.
  *
- * This can be used to create cues for use with an HTML media element.
+ * The text comes from a WebVTT or SRT file, so `&` already appears as a
+ * WebVTT character reference where needed and must not be escaped again.
+ * `<` and `>` would start a cue tag, and a blank line ends the cue.
  */
-export function transcriptToCues(transcript: TranscriptData): VTTCue[] {
-  return transcript.segments.map(
-    seg => new VTTCue(seg.start, seg.start + seg.duration, seg.text),
-  );
+function escapeVTTText(text: string): string {
+  return text
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .join('\n');
+}
+
+/**
+ * Generate a WebVTT document from a transcript.
+ *
+ * This can be loaded as the `src` of a `<track>` element to caption a video.
+ */
+export function transcriptToVTT(transcript: TranscriptData): string {
+  const cues = transcript.segments.map(seg => {
+    const start = formatVTTTimestamp(seg.start);
+    const end = formatVTTTimestamp(seg.start + seg.duration);
+    return `${start} --> ${end}\n${escapeVTTText(seg.text)}`;
+  });
+  return ['WEBVTT', ...cues].join('\n\n') + '\n';
 }
 
 /**

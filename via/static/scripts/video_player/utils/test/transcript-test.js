@@ -4,7 +4,7 @@ import {
   filterTranscript,
   formatTranscript,
   mergeSegments,
-  transcriptToCues,
+  transcriptToVTT,
 } from '../transcript';
 
 describe('filterTranscript', () => {
@@ -120,32 +120,63 @@ describe('mergeSegments', () => {
   });
 });
 
-describe('transcriptToCues', () => {
-  it('returns list of VTTCue objects', () => {
+describe('transcriptToVTT', () => {
+  it('returns a WebVTT document with a cue per segment', () => {
     const segments = [
-      {
-        start: 1,
-        duration: 3,
-        text: 'One',
-      },
-      {
-        start: 4,
-        duration: 2,
-        text: 'Two',
-      },
-      {
-        start: 7,
-        duration: 5,
-        text: 'Three',
-      },
+      { start: 1, duration: 3, text: 'One' },
+      { start: 4.5, duration: 2.25, text: 'Two' },
+      { start: 3_661.123, duration: 5, text: 'Three' },
     ];
 
-    const cues = transcriptToCues({ segments });
+    const vtt = transcriptToVTT({ segments });
 
-    sinon.assert.match(cues, [
-      sinon.match({ startTime: 1, endTime: 4, text: 'One' }),
-      sinon.match({ startTime: 4, endTime: 6, text: 'Two' }),
-      sinon.match({ startTime: 7, endTime: 12, text: 'Three' }),
-    ]);
+    assert.equal(
+      vtt,
+      [
+        'WEBVTT',
+        '',
+        '00:00:01.000 --> 00:00:04.000',
+        'One',
+        '',
+        '00:00:04.500 --> 00:00:06.750',
+        'Two',
+        '',
+        '01:01:01.123 --> 01:01:06.123',
+        'Three',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('escapes tag markup and blank lines in cue text', () => {
+    const segments = [
+      { start: 0, duration: 1, text: 'A <c> -->\n\n  second line  \n' },
+    ];
+
+    const vtt = transcriptToVTT({ segments });
+
+    assert.equal(
+      vtt,
+      [
+        'WEBVTT',
+        '',
+        '00:00:00.000 --> 00:00:01.000',
+        'A &lt;c&gt; --&gt;',
+        'second line',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('does not escape ampersands, which caption files already encode', () => {
+    const segments = [{ start: 0, duration: 1, text: 'Tom &amp; Jerry & co' }];
+
+    const vtt = transcriptToVTT({ segments });
+
+    assert.include(vtt, '\nTom &amp; Jerry & co\n');
+  });
+
+  it('returns a header-only document for an empty transcript', () => {
+    assert.equal(transcriptToVTT({ segments: [] }), 'WEBVTT\n');
   });
 });
