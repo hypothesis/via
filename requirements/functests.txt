@@ -36,7 +36,7 @@ checkmatelib==1.0.18
     # via -r prod.txt
 click==8.1.7
     # via pip-tools
-cryptography==46.0.7
+cryptography==50.0.0
     # via
     #   -r prod.txt
     #   joserfc
