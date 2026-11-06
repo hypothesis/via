@@ -38,7 +38,7 @@
     "@hypothesis/frontend-testing": "^1.8.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/youtube": "^0.1.2",
-    "@vitest/browser": "^4.1.9",
+    "@vitest/browser": "^4.1.10",
     "@vitest/browser-playwright": "^4.1.9",
     "@vitest/coverage-istanbul": "^4.1.9",
     "@vitest/eslint-plugin": "^1.6.18",
